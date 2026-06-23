@@ -1,0 +1,36 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursor/
+.windsurf/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Python scripts (cleanup scripts from pruning)
+*.py
+
+# Error logs from pruning
+*_errors*.txt
+full_errors.txt
+
+# Temp test files
+_ae_test.txt
+test_agent.txt
+agent_test.txt
+lock_test.txt
+lock_test.txt.ae_lock
+test_lock.txt
+test_lock.txt.ae_lock

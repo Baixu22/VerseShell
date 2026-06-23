@@ -1,0 +1,237 @@
+use anyhow::{Context, Result};
+use std::fs;
+use std::io::{self, Read, Write};
+
+use verseshell::{env::Env, eval, modules, parser, runtime, server, transpile};
+use clap::Parser;
+
+fn create_env_with_modules() -> Env {
+    let mut env = Env::new();
+    for (name, module) in modules::all_modules() {
+        env.register_module(name, module);
+    }
+    env
+}
+
+#[derive(Parser)]
+#[command(name = "ae")]
+#[command(about = "VerseShell — Production-grade typed functional shell runtime for AI agents (v3 kernel)")]
+#[command(version = env!("CARGO_PKG_VERSION"))]
+struct Cli {
+    /// Bash compatibility mode (transpile bash to aeshell)
+    #[arg(long, short = 'b')]
+    bash: bool,
+
+    /// Execute a command string
+    #[arg(long, short = 'c')]
+    command: Option<String>,
+
+    /// Token budget for output: results over N estimated tokens are paged/truncated
+    #[arg(long, value_name = "N")]
+    budget: Option<usize>,
+
+    /// Agent mode: default-deny dangerous effect classes (gate behind approval)
+    #[arg(long)]
+    agent: bool,
+
+    /// Workspace root that confines destructive/write operations (the jail)
+    #[arg(long, value_name = "DIR")]
+    workspace: Option<String>,
+
+    /// Safety policy: "strict" (default) or "permissive" (allow-all in agent mode)
+    #[arg(long, value_name = "POLICY")]
+    policy: Option<String>,
+
+    /// Deterministic output: render results as canonical, byte-stable JSON
+    #[arg(long)]
+    deterministic: bool,
+
+    /// Output as JSON (alias for --deterministic)
+    #[arg(long)]
+    json: bool,
+
+    /// Timeout in seconds for operations (http, shell exec, etc.)
+    #[arg(long, value_name = "SECS")]
+    timeout: Option<u64>,
+
+    /// Start JSON-RPC server mode (reads stdin, writes stdout)
+    #[arg(long)]
+    serve: bool,
+
+    /// Max concurrent agent sessions in server mode
+    #[arg(long, default_value = "4")]
+    max_concurrency: usize,
+
+    /// Transport for server mode (default: stdio)
+    #[arg(long, default_value = "stdio")]
+    transport: String,
+
+    /// Cache TTL in milliseconds for server mode
+    #[arg(long, default_value = "5000")]
+    cache_ttl_ms: u64,
+
+    /// Per-agent rate limit in requests/second (0 = unlimited)
+    #[arg(long, default_value = "0")]
+    rate_limit: u32,
+
+    /// Capability grants (comma-separated): file.read,file.write,net.http.get,all
+    #[arg(long, value_name = "CAPS")]
+    cap: Option<String>,
+
+    /// Enable work-stealing scheduler (v2.1)
+    #[arg(long)]
+    scheduler: bool,
+
+    /// Number of scheduler worker threads
+    #[arg(long, default_value = "4")]
+    scheduler_workers: usize,
+
+    /// CPU budget per agent (max concurrent ops)
+    #[arg(long, default_value = "8")]
+    cpu_budget: usize,
+
+    /// Script file to execute
+    #[arg(value_name = "FILE")]
+    file: Option<String>,
+}
+
+fn main() -> Result<()> {
+    let cli = Cli::parse();
+
+    // Common env setup
+    if let Some(n) = cli.budget {
+        std::env::set_var("AE_TOKEN_BUDGET", n.to_string());
+    }
+    if cli.agent {
+        std::env::set_var("AETHER_MODE", "agent");
+    }
+    if let Some(ws) = &cli.workspace {
+        std::env::set_var("AETHER_WORKSPACE", ws);
+    }
+    if let Some(p) = &cli.policy {
+        std::env::set_var("AETHER_POLICY", p);
+    }
+    if cli.deterministic || cli.json {
+        std::env::set_var("AE_DETERMINISTIC", "1");
+    }
+    if let Some(t) = cli.timeout {
+        std::env::set_var("AE_TIMEOUT", t.to_string());
+    }
+    verseshell::safety::init_rbac_from_env();
+
+    // Init V2 capability system
+    if let Some(ref caps) = cli.cap {
+        std::env::set_var("AETHER_CAPS", caps);
+    }
+    verseshell::capability::init_caps(cli.cap.as_deref());
+
+    // ── Server mode ──────────────────────────────────────────
+    if cli.serve {
+        let workspace = cli.workspace.map(|w| std::path::PathBuf::from(w));
+        let transport = match cli.transport.as_str() {
+            "stdio" => server::Transport::Stdio,
+            other => {
+                eprintln!("unsupported transport: {} (use 'stdio')", other);
+                std::process::exit(1);
+            }
+        };
+        let rt_config = runtime::RuntimeConfig {
+            workspace,
+            max_concurrency: cli.max_concurrency,
+            agent_mode: cli.agent,
+            cache_ttl_ms: cli.cache_ttl_ms,
+            rate_limit: cli.rate_limit,
+            ..Default::default()
+        };
+        let srv_config = server::ServerConfig {
+            transport,
+            runtime_config: rt_config,
+            num_workers: cli.scheduler_workers,
+            cpu_budget_per_agent: cli.cpu_budget,
+            mem_budget_per_agent: 64 * 1024 * 1024, // 64MB default
+            enable_scheduler: cli.scheduler,
+        };
+        return server::run_server(srv_config);
+    }
+
+    // ── Bash stdin mode ─────────────────────────────────────
+    if cli.bash && cli.file.is_none() && cli.command.is_none() {
+        let mut buf = String::new();
+        io::stdin().read_to_string(&mut buf)?;
+        let code =
+            transpile::bash::transpile_bash_to_ae(&buf).context("bash→ae transpile failed")?;
+        return run_code(&code);
+    }
+
+    // ── -c/--command flag ──────────────────────────────────
+    if let Some(cmd) = cli.command {
+        let code = if cli.bash {
+            transpile::bash::transpile_bash_to_ae(&cmd).context("bash→ae transpile failed")?
+        } else {
+            cmd
+        };
+        return run_code(&code);
+    }
+
+    // ── File execution or REPL ─────────────────────────────
+    match cli.file {
+        Some(file) => run_file(&file, cli.bash)?,
+        None => repl_shell()?,
+    }
+
+    Ok(())
+}
+
+fn run_file(path: &str, bash_mode: bool) -> Result<()> {
+    let mut code =
+        fs::read_to_string(path).with_context(|| format!("failed to read {}", path))?;
+
+    let is_bash = bash_mode || path.to_lowercase().ends_with(".sh");
+
+    if is_bash {
+        code = transpile::bash::transpile_bash_to_ae(&code)
+            .with_context(|| format!("bash→ae transpile failed for {}", path))?;
+    }
+
+    run_code(&code)
+}
+
+fn run_code(code: &str) -> Result<()> {
+    let mut env = create_env_with_modules();
+    let exit_code = verseshell::repl::run_one(&mut env, code)?;
+    if exit_code != 0 {
+        std::process::exit(exit_code);
+    }
+    Ok(())
+}
+
+fn repl_shell() -> Result<()> {
+    let mut env = create_env_with_modules();
+    let mut line = String::new();
+
+    println!("ae REPL — type 'exit', 'quit', or Ctrl-D to exit");
+    loop {
+        line.clear();
+        print!("ae> ");
+        io::stdout().flush().ok();
+        if io::stdin().read_line(&mut line)? == 0 {
+            println!();
+            break;
+        }
+        let src = line.trim();
+        if src.is_empty() {
+            continue;
+        }
+        if src == "exit" || src == "quit" {
+            break;
+        }
+        match parser::parse_program(src) {
+            Ok(stmts) => match eval::eval_program(&stmts, &mut env) {
+                Ok(val) => println!("{:?}", val),
+                Err(e) => eprintln!("eval error: {e}"),
+            },
+            Err(e) => eprintln!("parse error: {e}"),
+        }
+    }
+    Ok(())
+}
