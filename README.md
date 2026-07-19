@@ -48,6 +48,7 @@ Agent-mode `exec.run` / `test.run_target` require approval (`E_NEEDS_APPROVAL` +
 - [Bash Transpiler](#bash-transpiler)
 - [Architecture](#architecture)
 - [Performance](#performance)
+- [Roadmap](#roadmap)
 - [Building & Testing](#building--testing)
 - [Changelog](CHANGELOG.md)
 - [1.0 ACI Surface](docs/1.0-aci.md)
@@ -66,8 +67,9 @@ ae -c "sys.hostname()"
 # JSON output (agent-friendly)
 ae --json -c "{cpu: sys.cpu_info().cores, mem: sys.mem_info().total}"
 
-# Safety sandbox: confine writes to /tmp, deny destructive ops
-ae --agent --workspace /tmp -c 'file.write("out.txt", "hello")'
+# Safety sandbox: confine writes to a workspace, deny destructive ops
+ae --agent --workspace /tmp -c 'file.write("out.txt", "hello")'          # Unix
+ae --agent --workspace "%TEMP%\verseshell" -c 'file.write("out.txt", "hello")'  # Windows
 
 # Bash transpilation: write bash, get VerseShell
 ae -b -c "echo hello && echo world"
@@ -115,9 +117,11 @@ ae --serve --agent --workspace /safe --max-concurrency 8
 ```
 
 ```
-→ {"id":"r1","agent":"planner","cmd":"sys.cpu_info()","timeout_ms":5000}
-← {"type":"done","id":"r1","ok":true,"value":{...},"meta":{...}}
+→ {"id":"r1","agent":"planner","op":"ops.list","args":{}}
+← {"schema":"verseshell.observation/v1","ok":true,"op":"ops.list","data":{...},...}
 ```
+
+Legacy `cmd` (secondary): `{"id":"r1","agent":"planner","cmd":"sys.cpu_info()","timeout_ms":5000}` still works for 1.x.
 
 ### Functional Pipelines
 
@@ -269,7 +273,7 @@ try {
 ```
 [1,2,3] | map fn(x) => x * 2           → [2, 4, 6]
 [1,2,3,4,5] | where fn(x) => x > 3     → [4, 5]
-[3,1,4,1,5] | sort | reverse | take(3)  → [5, 4, 4]
+[3,1,4,1,5] | sort | reverse | take(3)  → [5, 4, 3]
 [1,2,3,4] | reduce fn(acc,x)=>acc+x 0  → 10
 [1,2,3] | any fn(x) => x > 2           → true
 ```
@@ -278,10 +282,30 @@ try {
 
 ## Agent Quick Reference
 
-Full typed-op catalog: [docs/1.0-aci.md](docs/1.0-aci.md). MCP tool names replace `.` with `_` (e.g. `file_view`).
+Primary Agent surface: **typed operations** over JSON-RPC (`op`) or MCP (`.` → `_`).
+Full catalog: [docs/1.0-aci.md](docs/1.0-aci.md).
 
-The ~50 most-used builtins for AI agent tasks. Use `ae --core` to print
-this list at the CLI, or `list_commands(core=true)` via MCP.
+### Coder Agent ops (primary)
+
+| Task | Op |
+|------|-----|
+| Run command | `exec.run` |
+| Inspect large logs | `result.query` |
+| Read code window | `file.view` / `file.read_range` |
+| Exact edit | `file.replace_exact` / `file.edit_range` / `file.apply_patch` |
+| Search repo | `repo.search` |
+| Changed files | `repo.changed_files` |
+| Safe delete | `file.remove` → `tx.restore` |
+| Transaction | `tx.begin` / `tx.commit` / `tx.rollback` / `tx.status` |
+| Tests | `test.discover` / `test.run_target` / `test.summarize_last` |
+| List ops | `ops.list` |
+
+Agent-mode `exec.run` / `test.run_target` require approval (`E_NEEDS_APPROVAL` + `error.hint`). For local CI use `AETHER_APPROVE_ALL=1`.
+
+### Language builtins (secondary / scripting)
+
+The ~50 most-used language builtins for orchestration scripts and the legacy `cmd` path.
+Use `ae --core` at the CLI, or `list_commands(core=true)` via MCP.
 
 ### System
 
@@ -405,7 +429,10 @@ this list at the CLI, or `list_commands(core=true)` via MCP.
 | `win.service_status(name)` | Service status |
 | `win.env_path()` | PATH entries as array |
 | `win.env_get(name)` | Environment variable |
+| `win.env_set(name, val)` | Set environment variable |
 | `win.is_admin()` | Check admin privileges |
+| `win.shortcut_resolve(path)` | Resolve `.lnk` shortcut target |
+| `win.process_kill(pid)` | Terminate process by PID |
 
 ### Crypto
 
@@ -511,12 +538,12 @@ this list at the CLI, or `list_commands(core=true)` via MCP.
 `net.connections()` `net.ports()` `net.traceroute(host)`
 `net.ip()` `net.resolve(hostname)`
 
-### win — Windows-Native (9 methods)
+### win — Windows-Native (10 methods)
 
-`win.snapshot()` `win.registry_get(key, val)` `win.registry_set(key, val)`
-`win.service_list()` `win.service_status(name)` `win.env_path()`
-`win.env_get(name)` `win.env_set(name, val)` `win.is_admin()`
-`win.shortcut_resolve(path)` `win.process_kill(pid)`
+`win.snapshot()` `win.registry_get(key, val)` `win.service_list()`
+`win.service_status(name)` `win.env_path()` `win.env_get(name)`
+`win.env_set(name, val)` `win.is_admin()` `win.shortcut_resolve(path)`
+`win.process_kill(pid)`
 
 ### proc — Process Management (10+ methods)
 
@@ -529,10 +556,13 @@ this list at the CLI, or `list_commands(core=true)` via MCP.
 
 ## JSON-RPC Server
 
-Start a long-running server for multi-agent workloads:
+Start a long-running server for multi-agent workloads. **Prefer typed `op` requests**; legacy `cmd` remains for 1.x compatibility.
 
 ```bash
 ae --serve --agent --workspace /safe --max-concurrency 8
+
+# Windows sandbox example
+ae --serve --agent --workspace "%TEMP%\verseshell" --max-concurrency 8
 
 # With scheduler (high-throughput)
 ae --serve --scheduler --scheduler-workers 8 --cpu-budget 4 --cap file.read,net.http.get
@@ -546,10 +576,12 @@ ae --serve --format compact
 Requests are one JSON object per line on stdin. Responses are one JSON object
 per line on stdout.
 
-The server accepts both the legacy `cmd` protocol and the v0.6 typed operation
-protocol. Existing clients remain compatible; new clients should use `op`.
+| Path | When to use |
+|------|-------------|
+| **Typed `op` (primary)** | All new Agent integrations; returns `verseshell.observation/v1` |
+| **Legacy `cmd` (secondary)** | VerseShell language / builtins; returns streaming `done`/`error` |
 
-**Typed operation request:**
+**Typed operation request (primary):**
 
 ```json
 {
@@ -567,27 +599,31 @@ protocol. Existing clients remain compatible; new clients should use `op`.
 }
 ```
 
-The response uses `verseshell.observation/v1` (v0.6.1 observation quality):
+The response uses `verseshell.observation/v1` (Observation Budget, 0.6.1):
 
 - **Success silence** for noisy profiles (`npm_install`, `cargo`, `python_install`,
   `pytest`, `msbuild`): model-visible stream has `status: "reduced"`, a short
   `summary` (<=120 tokens / <=4 lines), and **no full log text**. Progress noise is dropped.
 - **Failure focus**: non-zero exits surface an error window (not a uniform head/tail of
-  the whole log). Structured `diagnostics` and `suggested_next` -> `result.query` grep.
-- **ANSI stripped** before reduce/truncate; omitted content is always explicit.
+  the whole log).
+- **ANSI strip** + blank-run collapse on the observation path before reducers.
 - **git** is auto-detected; large status/diff/log output is reduced or truncated rather
   than dumped into context.
+- Explicit **truncation** markers (`truncated`, omitted bytes) when content exceeds budget.
 - Full raw output is always recoverable via `stdout.artifact` / `stderr.artifact` with
   `result.query` (`meta`, `head`, `tail`, `slice`, `grep`, or bounded `raw`).
 
-**Legacy request:**
+Token efficiency is therefore **two layers**: (1) `--format compact` encoding (50–70% vs JSON), and (2) Observation Budget reducing *what* is shown.
 
-**Request:**
+**Windows process contract (exec path):** Agent process runs use Windows **Job Objects** (Unix: process groups) so timeout kills the full tree; stdin is null; stdout/stderr are pipes with `CREATE_NO_WINDOW` (not ConPTY). Paths are resolved through the workspace jail / safety layer.
+
+**Legacy request (secondary):**
+
 ```json
 {"id": "req-1", "agent": "planner", "cmd": "sys.cpu_info()", "timeout_ms": 5000}
 ```
 
-**Response (success):**
+**Legacy response (success):**
 ```json
 {
   "type": "done",
@@ -603,7 +639,7 @@ The response uses `verseshell.observation/v1` (v0.6.1 observation quality):
 }
 ```
 
-**Response (error):**
+**Legacy response (error):**
 ```json
 {
   "type": "error",
@@ -629,13 +665,18 @@ The response uses `verseshell.observation/v1` (v0.6.1 observation quality):
 | `E_TIMEOUT` | Operation exceeded deadline | Increase `timeout_ms` |
 | `E_RATE_LIMIT` | Rate exceeded | Slow down request frequency |
 | `E_CAPABILITY_DENY` | Missing capability grant | Add required cap to `--cap` |
+| `E_NEEDS_APPROVAL` | Agent-mode gated action | Follow `error.hint` / approval token |
 | `E_INTERNAL` | Unexpected crash | Retry; report if persistent |
 
 ### Batch Requests
 
+Prefer typed ops:
+
 ```bash
-echo '[{"id":"1","agent":"b","cmd":"sys.hostname()"},{"id":"2","agent":"b","cmd":"sys.os()"}]' | ae --serve
+echo '[{"id":"1","agent":"b","op":"ops.list","args":{}},{"id":"2","agent":"b","op":"repo.summary","args":{}}]' | ae --serve --agent
 ```
+
+Legacy batch still accepted: `{"id":"...","agent":"...","cmd":"sys.hostname()"}`.
 
 ### Server Control
 
@@ -650,8 +691,9 @@ echo '[{"id":"1","agent":"b","cmd":"sys.hostname()"},{"id":"2","agent":"b","cmd"
 
 - **Session pool**: Same `agent` ID reuses the session context (variables, modules)
 - **AST cache**: 1024-entry global cache, identical commands skip re-parsing
+- **Compiled IR + ExecutionPlan cache**: identical programs reuse optimized IR and their preflight plan
 - **Snapshot cache**: `sys.*` results cached with configurable TTL (default 5s)
-- **Lock-free**: Per-session `Mutex<Env>`; N agents execute concurrently
+- **Concurrency**: low-contention session lookup (`RwLock<HashMap>`) + per-session serialized mutation (`Mutex<Env>`); N agents execute concurrently
 - **Panic recovery**: `catch_unwind` per request; a crash in one never affects others
 
 ---
@@ -660,7 +702,7 @@ echo '[{"id":"1","agent":"b","cmd":"sys.hostname()"},{"id":"2","agent":"b","cmd"
 
 ### Capability-Based Security (27 caps)
 
-Fine-grained access control enforced at builtin dispatch:
+Fine-grained access control enforced at builtin/op dispatch:
 
 ```bash
 # Grant specific capabilities
@@ -689,33 +731,70 @@ Safe functions (math, strings, arrays, json) are always allowed.
 Default-deny posture:
 
 ```bash
+# Unix
 ae --agent --workspace /tmp -c 'file.write("out.txt", "data")'
+
+# Windows
+ae --agent --workspace "%TEMP%\verseshell" -c 'file.write("out.txt", "data")'
+# or: ae --agent --workspace C:\safe -c '...'
 ```
 
 - Destructive operations (process kill, file delete, shell exec) denied by default
 - File writes confined to `--workspace`
+- Agent-mode `exec.run` / hard deletes require approval (`E_NEEDS_APPROVAL`) unless `AETHER_APPROVE_ALL=1` / per-action token
 - All operations audited to `.ae/audit.log`
+
+### Transactions & trash
+
+User-visible recovery surface for Agent edits (see [docs/1.0-aci.md](docs/1.0-aci.md)):
+
+| Capability | Detail |
+|------------|--------|
+| Ops | `tx.begin` / `tx.commit` / `tx.rollback` / `tx.status` / `tx.restore` |
+| Journal | Pre-images under `<workspace>/.ae/tx/<id>/`; durable only after **outermost** commit |
+| Nesting | Nested `begin` folds into parent on child commit; child rollback restores pre-inner state only |
+| Trash | Agent-mode `file.remove` moves to trash and returns a `restore_token` (`trash://…`) recoverable via `tx.restore` (including across server restarts) |
+| Audit | Decisions and targets recorded in `.ae/audit.log` |
+
+This is a primary differentiator from a plain shell: Agents can attempt, inspect, and roll back file-effecting batches.
 
 ---
 
 ## MCP Integration
 
-VerseShell ships `ae-mcp` — a Model Context Protocol binary exposing 11 tools
-for Claude Code, Codex, and other MCP clients.
+VerseShell ships `ae-mcp` — a Model Context Protocol binary for Claude Code, Codex,
+and other MCP clients. Tools are **legacy helpers + auto-registered ACI surface**
+from `OperationRegistry` (not a fixed “11 tools” list).
 
-### MCP Tools
+### ACI tools (primary, auto-registered)
+
+MCP names replace `.` with `_`. Examples:
+
+| MCP tool | Op | Purpose |
+|----------|-----|---------|
+| `exec_run` | `exec.run` | Argv process + observation budget |
+| `result_query` | `result.query` | Artifact head/tail/grep/raw |
+| `ops_list` | `ops.list` | Enumerate registered ops |
+| `file_view` / `file_read_range` | file window reads | Bounded source view |
+| `file_replace_exact` / `file_apply_patch` / `file_edit_range` | safe edits | Hash-aware edits |
+| `file_remove` | trash delete | Restore via `tx_restore` |
+| `tx_begin` / `tx_commit` / `tx_rollback` / `tx_status` / `tx_restore` | transactions | Journal + trash restore |
+| `repo_search` / `repo_changed_files` / `repo_summary` | repo | Search & status |
+| `test_discover` / `test_run_target` / `test_summarize_last` | tests | Discover & run |
+
+Full list: [docs/1.0-aci.md](docs/1.0-aci.md) or call `ops_list`.
+
+### Helper / legacy tools
 
 | Tool | Purpose |
 |------|---------|
 | `health` | Server version check |
-| `list_commands` | List all module.fn → builtin mappings (filter: `"core": true` for agent surface) |
-| `eval` / `exec` | Execute VerseShell source |
-| `exec_run` | Preferred typed argv execution returning an Observation |
-| `result_query` | Query `result://` artifacts without replaying full logs |
+| `list_commands` | List module.fn → builtin mappings (`"core": true` for agent surface) |
+| `eval` / `exec` | Execute VerseShell **source** (legacy; prefer typed ops) |
 | `system_snapshot` | One-shot CPU/mem/processes/disk/load snapshot |
 | `process_inspect` | Query processes with filter/sort/limit |
 | `process_terminate` | Kill process by PID with optional name confirmation |
-| `transpile_bash` | Convert bash → VerseShell source (optionally explain as MCP tool calls) |
+| `transpile_bash` | Convert bash → VerseShell (optionally explain as MCP tool calls) |
 | `describe_capabilities` | Report granted capabilities |
 
 ```bash
@@ -746,9 +825,11 @@ in v0.6.0:
 | Stderr redirect | `cmd 2>/dev/null` | Strip `2>/dev/null` (AE captures stderr separately) |
 | Variable expansion | `echo $HOME` | `echo(HOME)` |
 | Single/double quotes | `'no expand'` / `"expand $VAR"` | Preserved |
+Unsupported constructs fall back to the `sh` builtin (alias of `shell` /
+`shell.exec` maps to the same builtin). Prefer `shell.exec([...])` in agent-facing
+code; the transpiler may emit:
 
-Fallback: unsupported constructs (`<`, `>`, `if/for/while`, here-docs) emit
-`sh(["bash","-lc","original line"])`.
+`sh(["bash","-lc","original line"])`  (equivalent to `shell.exec(["bash","-lc","original line"])`)
 
 ```bash
 # Transpile and execute
@@ -785,7 +866,6 @@ Typed Agent request
 
 ```
 src/
-├── ops/              # 1.0 ACI ops (file, tx, repo, test) + common helpers
 ├── main.rs           # CLI entry point (run/serve modes, --core flag)
 ├── lib.rs            # Module declarations
 ├── bin/ae-mcp.rs     # MCP server binary
@@ -810,11 +890,17 @@ src/
 ├── runtime.rs        # AgentRuntime: session pool, dispatch, stats, error classification
 ├── server.rs         # JSON-RPC stdio server (tokio async)
 ├── operation.rs      # Versioned exec.run/result.query registry + observations
+├── ops/              # Typed ACI ops (file, repo, test, tx, trash)
+│   ├── file.rs       # file.view / read_range / apply_patch / remove …
+│   ├── repo.rs       # repo.search / changed_files / summary
+│   ├── test_ops.rs   # test.discover / run_target / summarize_last
+│   ├── tx_ops.rs     # tx.begin/commit/rollback/restore + ops.list
+│   └── trash.rs      # trash restore helpers
 ├── process_runner.rs # Bounded process execution and process-tree termination
 ├── artifact.rs       # TTL-managed content-addressed result store
 ├── plan.rs           # Shared static ExecutionPlan types
 ├── scheduler.rs      # Work-stealing scheduler with priority queues + per-agent quotas
-├── cache.rs          # GlobalCache: AST (never expires), SystemSnapshot (5s TTL)
+├── cache.rs          # GlobalCache: AST, Compiled IR + ExecutionPlan, SystemSnapshot
 ├── config.rs         # Configuration management (TOML)
 ├── tx.rs             # Transaction engine (begin/commit/rollback)
 │
@@ -824,7 +910,7 @@ src/
 ├── mcp/              # MCP protocol implementation
 │   ├── mod.rs        # Module re-exports
 │   ├── server.rs     # Stdio MCP server
-│   ├── tools.rs      # 11 MCP tools, including exec_run/result_query
+│   ├── tools.rs      # Legacy helpers + auto-registered ACI tools from OperationRegistry
 │   ├── registry.rs   # Tool registry
 │   └── protocol.rs   # JSON-RPC 2.0 types
 │
@@ -841,10 +927,10 @@ src/
 - **Unified IR execution** (v3): All code paths (REPL, one-shot, server, MCP) go through `IREvaluator::eval_raw` — a single 28-arm match statement. No divergent execution paths.
 - **Operation-first Agent API** (v0.6): MCP and JSON-RPC share the same typed operation and observation implementation without source-code generation or reparsing.
 - **Raw output is an artifact**: model-visible output is bounded; omitted raw bytes are stored under `.ae/results` with a 24-hour TTL and explicit handles.
-- **Process-tree safety**: Windows Job Objects and Unix process groups terminate descendants on timeout and prevent orphaned Agent workloads.
+- **Process-tree safety**: Windows Job Objects and Unix process groups terminate descendants on timeout; non-interactive pipes + `CREATE_NO_WINDOW` (not ConPTY); workspace path jail via safety layer.
 - **Effect-aware compilation**: Every builtin node carries an `IREffect` at compile time. Capability checks happen once at dispatch, not on every argument.
 - **Pipeline fusion** (v2): `map + map` → `FusedMapMap`, `map + filter` → `FusedMapFilter` — single-pass iteration, no intermediate allocations.
-- **Lock-free concurrency**: `RwLock<HashMap>` for session lookup, per-session `Mutex<Env>`. N agents execute in parallel.
+- **Session concurrency**: low-contention session lookup (`RwLock<HashMap>`) + per-session serialized mutation (`Mutex<Env>`). N agents execute in parallel.
 - **Arc-shared modules**: Session creation is O(1) — no deep clone of 26 modules.
 
 ---
@@ -862,7 +948,7 @@ Built-in optimizations for both throughput and latency:
 | `par_map` | Multi-threaded array processing (Rayon, auto thread count) |
 | Work-stealing scheduler | Priority queues, per-agent CPU/memory budgets |
 | Compact protocol | 50-70% token savings vs JSON for agent communication |
-| Observation Budget (0.6.1) | Success silence, failure windows, ANSI strip, git profile, explicit truncation, recoverable artifacts |
+| Observation Budget (0.6.1) | Content reducers: success silence, failure windows, ANSI strip, git profile, `truncated`/omitted markers, recoverable artifacts (complements compact encoding) |
 | Arc-shared modules | O(1) session creation, no deep clone overhead |
 | Panic recovery | `catch_unwind` per request — crash isolation |
 
@@ -882,6 +968,18 @@ cargo bench -- --quick            # Quick mode (fewer samples)
 | Pipeline 1K | **67ms** | 256ms | 426ms | **3.8x faster** |
 
 \* 20-iteration total; includes process spawn overhead for bash/pwsh
+
+---
+
+## Roadmap
+
+Deferred items (not in v1.0 surface; no promises on schedule):
+
+- **Deeper ACI**: `repo.symbols` / `repo.references` (LSP-class indexing; out of v1)
+- **Named `run_and_summarize`**: today use `exec.run` profiles + `test.summarize_last`
+- **ConPTY vs pipe separation**: current exec path uses pipes + `CREATE_NO_WINDOW` only
+- **Richer public path-normalization policy**: beyond workspace jail / resolve helpers
+- **Further plan-cache / agent-workload tuning** beyond current Compiled IR + ExecutionPlan cache
 
 ---
 
