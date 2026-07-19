@@ -4,7 +4,7 @@
 // Stub helpers used by builtin implementations
 fn validate_http_url(url: &str) -> Result<String> { Ok(url.to_string()) }
 fn create_secure_http_client() -> Result<reqwest::blocking::Client> {
-    let timeout_secs = get_timeout_secs();
+    let timeout_secs = current_timeout_secs();
     Ok(reqwest::blocking::Client::builder()
         .timeout(std::time::Duration::from_secs(timeout_secs))
         .build()
@@ -14,11 +14,71 @@ fn validate_read_path(p: &str) -> Result<std::path::PathBuf> { let path = std::p
 fn check_file_size_limit(_size: u64) -> Result<()> { Ok(()) }
 fn validate_sh_allowed() -> Result<()> { Ok(()) }
 
-fn get_timeout_secs() -> u64 {
-    std::env::var("AE_TIMEOUT")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(30) // default 30s
+// ── Phase 4: deadline-aware timeout ─────────────────────────────────
+//
+// Replaces the old `AE_TIMEOUT` env var with a thread-local deadline
+// that mirrors `env.deadline` (set by `AgentRuntime::execute` from
+// `AgentRequest.timeout_ms`, or by CLI `--timeout` via `run_code`).
+//
+// `call_with_input` sets the thread-local at entry and clears it on exit
+// via a guard. Builtins that need timeouts (http, sh) call
+// `current_timeout_secs()` which returns:
+//   - remaining seconds until deadline (if set)
+//   - 30s default (if no deadline — REPL, tests, non-agent paths)
+
+thread_local! {
+    static CURRENT_DEADLINE: std::cell::Cell<Option<std::time::Instant>> =
+        const { std::cell::Cell::new(None) };
+}
+
+/// Set the current thread's deadline. Called by `call_with_input` before
+/// dispatching to builtins. Pass `None` to clear.
+pub fn set_current_deadline(dl: Option<std::time::Instant>) {
+    CURRENT_DEADLINE.with(|c| c.set(dl));
+}
+
+/// RAII guard that restores the previous deadline on drop.
+/// Used by `call_with_input` to ensure the deadline is cleared even
+/// if a builtin panics.
+pub struct DeadlineGuard {
+    prev: Option<std::time::Instant>,
+}
+
+impl DeadlineGuard {
+    /// Enter a new deadline scope. Saves the previous value for restore.
+    pub fn enter(new: Option<std::time::Instant>) -> Self {
+        let prev = CURRENT_DEADLINE.with(|c| c.replace(new));
+        Self { prev }
+    }
+}
+
+impl Drop for DeadlineGuard {
+    fn drop(&mut self) {
+        CURRENT_DEADLINE.with(|c| c.set(self.prev));
+    }
+}
+
+/// Compute remaining timeout in seconds from the current thread-local
+/// deadline. Returns 30 (default) if no deadline is set. Returns 1
+/// (minimum) if deadline is already passed — this lets the builtin
+/// attempt the operation and fail fast rather than blocking forever.
+fn current_timeout_secs() -> u64 {
+    CURRENT_DEADLINE
+        .with(|c| c.get())
+        .map(|dl| {
+            let now = std::time::Instant::now();
+            if dl <= now {
+                1 // deadline passed — let the builtin fail fast
+            } else {
+                let remaining = (dl - now).as_secs();
+                if remaining == 0 {
+                    1 // sub-second remaining — round up to 1s
+                } else {
+                    remaining
+                }
+            }
+        })
+        .unwrap_or(30) // no deadline — default 30s
 }
 
 
@@ -1579,6 +1639,9 @@ lazy_static::lazy_static! {
     // resource governors (§7.6)
     map.insert("governor_status", 1137);
     map.insert("governor_reset", 1138);
+    // AI tool environment detection
+    map.insert("env_starship", 1139);
+    map.insert("env_claude", 1140);
         map
     };
 
@@ -3743,6 +3806,9 @@ static BUILTIN_DISPATCH: &[fn(Vec<Value>, Option<Value>, &mut Env) -> Result<Val
     // resource governors (§7.6)
     |args, input, _| bi_governor_status(args, input), // 1137
     |args, input, _| bi_governor_reset(args, input),  // 1138
+    // AI tool environment detection
+    |args, input, _| bi_env_starship(args, input),    // 1139
+    |args, input, _| bi_env_claude(args, input),      // 1140
 ];
 
 fn fast_builtin_lookup(
@@ -3774,6 +3840,11 @@ pub fn call_with_input(
     input: Option<Value>,
     env: &mut Env,
 ) -> Result<Value> {
+    // Phase 4: set thread-local deadline so http/sh builtins can compute
+    // remaining timeout from env.deadline. Guard restores previous value
+    // on return (including panic).
+    let _dl_guard = DeadlineGuard::enter(env.deadline);
+
     // V2: Capability check (only if capabilities are configured)
     match crate::capability::check_capability(name) {
         crate::capability::CapabilityResult::Deny(reason) => {
@@ -6673,13 +6744,13 @@ fn bi_ls(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 
     let entries = fs::read_dir(&validated_path)
         .with_context(|| format!("ls: failed to read directory: {:?}", validated_path))?;
-    let mut files = Vec::new();
+    // Estimate count for pre-allocation
+    let (lower, _) = entries.size_hint();
+    let capacity = std::cmp::max(lower, 64);
+    let mut files = Vec::with_capacity(capacity);
 
     for entry in entries {
         let entry = entry.with_context(|| "ls: failed to read directory entry")?;
-        let metadata = entry
-            .metadata()
-            .with_context(|| "ls: failed to read file metadata")?;
         let path = entry.path();
         let name = path
             .file_name()
@@ -6687,11 +6758,10 @@ fn bi_ls(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
             .to_string_lossy()
             .to_string();
 
-        // Extract file extension
-        let ext = path
-            .extension()
-            .map(|e| format!(".{}", e.to_string_lossy()))
-            .unwrap_or_default();
+        // is_dir from read_dir file_type (free on most OSes, no extra syscall)
+        let is_dir = entry.file_type()
+            .map(|ft| ft.is_dir())
+            .unwrap_or(false);
 
         let mut record = BTreeMap::new();
         record.insert("name".to_string(), Value::Str(name));
@@ -6699,18 +6769,12 @@ fn bi_ls(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
             "path".to_string(),
             Value::Str(path.to_string_lossy().to_string()),
         );
-        record.insert("ext".to_string(), Value::Str(ext));
-        record.insert("is_dir".to_string(), Value::Bool(metadata.is_dir()));
-        record.insert("size".to_string(), Value::Int(metadata.len() as i64));
+        record.insert("is_dir".to_string(), Value::Bool(is_dir));
 
-        if let Ok(modified) = metadata.modified() {
-            if let Ok(duration) = modified.duration_since(std::time::UNIX_EPOCH) {
-                record.insert(
-                    "modified".to_string(),
-                    Value::Int(duration.as_secs() as i64),
-                );
-            }
-        }
+        // Lazy metadata: size, ext, modified are fetched only via file.stat().
+        // This cuts per-entry syscall count from 3 (metadata, modified, extension)
+        // to 1 (file_type from read_dir, which is cached in the direntry on Linux/macOS).
+        // On Windows, read_dir already includes file_type as FILE_ATTRIBUTE_DIRECTORY.
 
         files.push(Value::Record(record));
     }
@@ -14283,7 +14347,7 @@ fn bi_sh(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
         fs_paths: false,
     })?;
 
-    let timeout_secs = get_timeout_secs();
+    let timeout_secs = current_timeout_secs();
     let mut child = Command::new(&program)
         .args(&cmd_args)
         .stdout(std::process::Stdio::piped())
@@ -18396,7 +18460,10 @@ fn bi_fs_stat(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
         _ => return Ok(Value::Null),
     };
 
-    if let Ok(meta) = std::fs::metadata(&path) {
+    // SECURITY: Validate path
+    let validated_path = validate_read_path(&path)?;
+
+    if let Ok(meta) = std::fs::metadata(&validated_path) {
         let mut rec = std::collections::BTreeMap::new();
         rec.insert("size".to_string(), Value::Int(meta.len() as i64));
         rec.insert("is_file".to_string(), Value::Bool(meta.is_file()));
@@ -18409,6 +18476,13 @@ fn bi_fs_stat(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
             "readonly".to_string(),
             Value::Bool(meta.permissions().readonly()),
         );
+
+        // File extension from path
+        let ext = validated_path
+            .extension()
+            .map(|e| format!(".{}", e.to_string_lossy()))
+            .unwrap_or_default();
+        rec.insert("ext".to_string(), Value::Str(ext));
 
         #[cfg(unix)]
         {
@@ -18455,7 +18529,10 @@ fn bi_fs_lstat(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
         _ => return Ok(Value::Null),
     };
 
-    if let Ok(meta) = std::fs::symlink_metadata(&path) {
+    // SECURITY: Validate path
+    let validated_path = validate_read_path(&path)?;
+
+    if let Ok(meta) = std::fs::symlink_metadata(&validated_path) {
         let mut rec = std::collections::BTreeMap::new();
         rec.insert("size".to_string(), Value::Int(meta.len() as i64));
         rec.insert("is_file".to_string(), Value::Bool(meta.is_file()));
@@ -22533,36 +22610,34 @@ fn bi_hw_disk(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 fn bi_hw_gpu(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     #[cfg(target_os = "windows")]
     {
-        let output = std::process::Command::new("powershell")
-            .args(["-Command", "Get-CimInstance Win32_VideoController | Select-Object Name,AdapterRAM,DriverVersion | ConvertTo-Json"])
-            .output()?;
-        if output.status.success() {
-            let json_str = String::from_utf8_lossy(&output.stdout);
-            if let Ok(json) = serde_json::from_str::<serde_json::Value>(&json_str) {
-                let items = match &json {
-                    serde_json::Value::Array(arr) => arr.clone(),
-                    obj @ serde_json::Value::Object(_) => vec![obj.clone()],
-                    _ => vec![],
-                };
-                let gpus: Vec<Value> = items
-                    .iter()
-                    .filter_map(|obj| {
-                        let o = obj.as_object()?;
-                        let mut rec = std::collections::BTreeMap::new();
-                        if let Some(v) = o.get("Name") {
-                            rec.insert("name".to_string(), json_to_value(v.clone()));
-                        }
-                        if let Some(v) = o.get("AdapterRAM") {
-                            rec.insert("vram".to_string(), json_to_value(v.clone()));
-                        }
-                        if let Some(v) = o.get("DriverVersion") {
-                            rec.insert("driver".to_string(), json_to_value(v.clone()));
-                        }
-                        Some(Value::Record(rec))
-                    })
-                    .collect();
-                return Ok(Value::Array(gpus));
+        // Use wmic (native C++, faster than PowerShell) — returns GPU name, VRAM, driver
+        if let Ok(output) = std::process::Command::new("wmic")
+            .args(["path", "Win32_VideoController", "get", "Name,AdapterRAM,DriverVersion", "/format:csv"])
+            .output()
+        {
+            let text = String::from_utf8_lossy(&output.stdout);
+            let mut gpus: Vec<Value> = Vec::new();
+            for line in text.lines().skip(2) {
+                let line = line.trim();
+                if line.is_empty() { continue; }
+                let parts: Vec<&str> = line.split(',').collect();
+                if parts.len() >= 4 {
+                    let mut rec = std::collections::BTreeMap::new();
+                    let name = parts[1].trim();
+                    if !name.is_empty() {
+                        rec.insert("name".to_string(), Value::Str(name.to_string()));
+                    }
+                    if let Ok(vram) = parts[2].trim().parse::<i64>() {
+                        rec.insert("vram".to_string(), Value::Int(vram));
+                    }
+                    let driver = parts[3].trim();
+                    if !driver.is_empty() {
+                        rec.insert("driver".to_string(), Value::Str(driver.to_string()));
+                    }
+                    if !rec.is_empty() { gpus.push(Value::Record(rec)); }
+                }
             }
+            if !gpus.is_empty() { return Ok(Value::Array(gpus)); }
         }
     }
     #[cfg(target_os = "linux")]
@@ -22883,30 +22958,29 @@ fn bi_hw_battery(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     // Returns consistent Record {capacity: Int (%), status: String}
     #[cfg(target_os = "windows")]
     {
-        let output = std::process::Command::new("powershell")
-            .args(["-Command", "Get-CimInstance Win32_Battery | Select-Object EstimatedChargeRemaining,BatteryStatus | ConvertTo-Json"])
-            .output()?;
-        if output.status.success() {
-            let json_str = String::from_utf8_lossy(&output.stdout);
-            if let Ok(json) = serde_json::from_str::<serde_json::Value>(&json_str) {
-                let obj = match &json {
-                    serde_json::Value::Object(o) => Some(o),
-                    serde_json::Value::Array(arr) => arr.first().and_then(|v| v.as_object()),
-                    _ => None,
-                };
-                if let Some(obj) = obj {
+        // Use wmic (native C++, faster than PowerShell)
+        if let Ok(output) = std::process::Command::new("wmic")
+            .args(["path", "Win32_Battery", "get", "EstimatedChargeRemaining,BatteryStatus", "/format:csv"])
+            .output()
+        {
+            let text = String::from_utf8_lossy(&output.stdout);
+            for line in text.lines().skip(2) {
+                let line = line.trim();
+                if line.is_empty() { continue; }
+                let parts: Vec<&str> = line.split(',').collect();
+                if parts.len() >= 3 {
                     let mut rec = std::collections::BTreeMap::new();
-                    if let Some(v) = obj.get("EstimatedChargeRemaining").and_then(|v| v.as_i64()) {
-                        rec.insert("capacity".to_string(), Value::Int(v));
+                    if let Ok(cap) = parts[1].trim().parse::<i64>() {
+                        rec.insert("capacity".to_string(), Value::Int(cap));
                     }
-                    let status = match obj.get("BatteryStatus").and_then(|v| v.as_i64()) {
-                        Some(1) => "discharging",
-                        Some(2) => "charging",
-                        Some(3) => "full",
+                    let status = match parts[2].trim() {
+                        "1" => "discharging",
+                        "2" => "charging",
+                        "3" => "full",
                         _ => "unknown",
                     };
                     rec.insert("status".to_string(), Value::Str(status.to_string()));
-                    return Ok(Value::Record(rec));
+                    if !rec.is_empty() { return Ok(Value::Record(rec)); }
                 }
             }
         }
@@ -29987,6 +30061,58 @@ fn bi_env_activate(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     Ok(Value::Str(format!("source {}", activate)))
 }
 
+fn bi_env_starship(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    let mut info = std::collections::BTreeMap::new();
+    info.insert("config_path".to_string(), Value::Str(
+        std::env::var("STARSHIP_CONFIG").unwrap_or_else(|_| {
+            dirs::home_dir()
+                .map(|h| h.join(".config").join("starship.toml").to_string_lossy().to_string())
+                .unwrap_or_default()
+        })
+    ));
+    info.insert("cache_path".to_string(), Value::Str(
+        std::env::var("STARSHIP_CACHE").unwrap_or_default()
+    ));
+    info.insert("session".to_string(), Value::Str(
+        std::env::var("STARSHIP_SESSION_KEY").unwrap_or_default()
+    ));
+    info.insert("shell".to_string(), Value::Str(
+        std::env::var("STARSHIP_SHELL").unwrap_or_default()
+    ));
+    info.insert("terminal_width".to_string(), Value::Str(
+        std::env::var("STARSHIP_TERMINAL_WIDTH").unwrap_or_default()
+    ));
+    info.insert("version".to_string(), Value::Str(
+        get_tool_version("starship").unwrap_or_default()
+    ));
+    Ok(Value::Record(info))
+}
+
+fn bi_env_claude(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    let mut info = std::collections::BTreeMap::new();
+    info.insert("api_key".to_string(), gate_env_secret("ANTHROPIC_API_KEY",
+        std::env::var("ANTHROPIC_API_KEY").unwrap_or_default()
+    ));
+    info.insert("claude_api_key".to_string(), gate_env_secret("CLAUDE_API_KEY",
+        std::env::var("CLAUDE_API_KEY").unwrap_or_default()
+    ));
+    info.insert("base_url".to_string(), Value::Str(
+        std::env::var("ANTHROPIC_BASE_URL").unwrap_or_default()
+    ));
+    info.insert("model".to_string(), Value::Str(
+        std::env::var("CLAUDE_MODEL").unwrap_or_else(|_| {
+            std::env::var("ANTHROPIC_MODEL").unwrap_or_default()
+        })
+    ));
+    info.insert("max_tokens".to_string(), Value::Str(
+        std::env::var("CLAUDE_MAX_TOKENS").unwrap_or_default()
+    ));
+    info.insert("version".to_string(), Value::Str(
+        get_tool_version("claude").unwrap_or_default()
+    ));
+    Ok(Value::Record(info))
+}
+
 // ============================================================================
 // Platform Versioning Module - Cross-platform determinism for AI agents
 // ============================================================================
@@ -30642,6 +30768,22 @@ fn bi_platform_tool_versions(_args: Vec<Value>, _input: Option<Value>) -> Result
         }
     }
 
+    // Shell & Terminal Tools
+    let shell_tools = ["starship", "oh-my-posh", "zsh", "bash", "fish", "powershell", "nu", "elvish"];
+    for tool in shell_tools {
+        if let Some(ver) = get_tool_version(tool) {
+            versions.insert(format!("shell.{}", tool), Value::Str(ver));
+        }
+    }
+
+    // AI Assistants & Coding Tools
+    let ai_tools = ["claude", "copilot", "aider", "continue", "cursor"];
+    for tool in ai_tools {
+        if let Some(ver) = get_tool_version(tool) {
+            versions.insert(format!("ai.{}", tool), Value::Str(ver));
+        }
+    }
+
     Ok(Value::Record(versions))
 }
 
@@ -30696,6 +30838,8 @@ fn bi_platform_detect_tools(_args: Vec<Value>, _input: Option<Value>) -> Result<
         "mysql",
         "mongod",
         "redis-cli",
+        "starship",
+        "claude",
     ];
 
     let available: Vec<Value> = tools
@@ -31921,107 +32065,16 @@ fn bi_platform_cuda_version(_args: Vec<Value>, _input: Option<Value>) -> Result<
 
 fn bi_platform_cpu(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     let mut info = std::collections::BTreeMap::new();
+    let sys = sysinfo::System::new_all();
+    let cpus = sys.cpus();
 
-    #[cfg(target_os = "windows")]
-    {
-        // Get CPU info from PowerShell (more reliable than WMIC which may not be available)
-        if let Ok(out) = std::process::Command::new("powershell")
-            .args(["-Command", "Get-CimInstance Win32_Processor | Select-Object Name,NumberOfCores,NumberOfLogicalProcessors,MaxClockSpeed | ConvertTo-Json"])
-            .output()
-        {
-            if out.status.success() {
-                let json_str = String::from_utf8_lossy(&out.stdout);
-                if let Ok(json) = serde_json::from_str::<serde_json::Value>(&json_str) {
-                    if let Some(name) = json.get("Name").and_then(|v| v.as_str()) {
-                        info.insert("name".to_string(), Value::Str(name.to_string()));
-                    }
-                    if let Some(cores) = json.get("NumberOfCores").and_then(|v| v.as_i64()) {
-                        info.insert("cores".to_string(), Value::Int(cores));
-                    }
-                    if let Some(lp) = json.get("NumberOfLogicalProcessors").and_then(|v| v.as_i64()) {
-                        info.insert("logical_processors".to_string(), Value::Int(lp));
-                    }
-                    if let Some(mhz) = json.get("MaxClockSpeed").and_then(|v| v.as_i64()) {
-                        info.insert("max_clock_mhz".to_string(), Value::Int(mhz));
-                    }
-                }
-            }
-        }
-        // Also get architecture
-        if let Ok(arch) = std::env::var("PROCESSOR_ARCHITECTURE") {
-            info.insert("arch".to_string(), Value::Str(arch));
-        }
+    if let Some(cpu) = cpus.first() {
+        info.insert("name".to_string(), Value::Str(cpu.brand().to_string()));
+        info.insert("mhz".to_string(), Value::Float(cpu.frequency() as f64));
     }
-
-    #[cfg(target_os = "linux")]
-    {
-        if let Ok(cpuinfo) = std::fs::read_to_string("/proc/cpuinfo") {
-            for line in cpuinfo.lines() {
-                if let Some((key, val)) = line.split_once(':') {
-                    let key = key.trim();
-                    let val = val.trim();
-                    match key {
-                        "model name" => {
-                            info.insert("name".to_string(), Value::Str(val.to_string()));
-                        }
-                        "cpu cores" => {
-                            if let Ok(n) = val.parse::<i64>() {
-                                info.insert("cores".to_string(), Value::Int(n));
-                            }
-                        }
-                        "siblings" => {
-                            if let Ok(n) = val.parse::<i64>() {
-                                info.insert("logical_processors".to_string(), Value::Int(n));
-                            }
-                        }
-                        "cpu MHz" => {
-                            if let Ok(f) = val.parse::<f64>() {
-                                info.insert("current_mhz".to_string(), Value::Float(f));
-                            }
-                        }
-                        _ => {}
-                    }
-                }
-            }
-        }
-        info.insert(
-            "arch".to_string(),
-            Value::Str(std::env::consts::ARCH.to_string()),
-        );
-    }
-
-    #[cfg(target_os = "macos")]
-    {
-        if let Ok(out) = std::process::Command::new("sysctl")
-            .args(["-n", "machdep.cpu.brand_string"])
-            .output()
-        {
-            info.insert(
-                "name".to_string(),
-                Value::Str(String::from_utf8_lossy(&out.stdout).trim().to_string()),
-            );
-        }
-        if let Ok(out) = std::process::Command::new("sysctl")
-            .args(["-n", "hw.physicalcpu"])
-            .output()
-        {
-            if let Ok(n) = String::from_utf8_lossy(&out.stdout).trim().parse::<i64>() {
-                info.insert("cores".to_string(), Value::Int(n));
-            }
-        }
-        if let Ok(out) = std::process::Command::new("sysctl")
-            .args(["-n", "hw.logicalcpu"])
-            .output()
-        {
-            if let Ok(n) = String::from_utf8_lossy(&out.stdout).trim().parse::<i64>() {
-                info.insert("logical_processors".to_string(), Value::Int(n));
-            }
-        }
-        info.insert(
-            "arch".to_string(),
-            Value::Str(std::env::consts::ARCH.to_string()),
-        );
-    }
+    info.insert("cores".to_string(), Value::Int(sys.physical_core_count().unwrap_or(1) as i64));
+    info.insert("logical_processors".to_string(), Value::Int(cpus.len() as i64));
+    info.insert("arch".to_string(), Value::Str(std::env::consts::ARCH.to_string()));
 
     Ok(Value::Record(info))
 }
@@ -32036,46 +32089,11 @@ fn bi_platform_cpu_count(_args: Vec<Value>, _input: Option<Value>) -> Result<Val
 }
 
 fn bi_platform_cpu_freq(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
-    #[cfg(target_os = "windows")]
-    {
-        // Use PowerShell instead of WMIC (more reliable)
-        if let Ok(out) = std::process::Command::new("powershell")
-            .args([
-                "-Command",
-                "(Get-CimInstance Win32_Processor).MaxClockSpeed",
-            ])
-            .output()
-        {
-            if out.status.success() {
-                if let Ok(n) = String::from_utf8_lossy(&out.stdout).trim().parse::<i64>() {
-                    return Ok(Value::Int(n));
-                }
-            }
-        }
-    }
-    #[cfg(target_os = "linux")]
-    {
-        if let Ok(cpuinfo) = std::fs::read_to_string("/proc/cpuinfo") {
-            for line in cpuinfo.lines() {
-                if line.starts_with("cpu MHz") {
-                    if let Some((_, val)) = line.split_once(':') {
-                        if let Ok(f) = val.trim().parse::<f64>() {
-                            return Ok(Value::Float(f));
-                        }
-                    }
-                }
-            }
-        }
-    }
-    #[cfg(target_os = "macos")]
-    {
-        if let Ok(out) = std::process::Command::new("sysctl")
-            .args(["-n", "hw.cpufrequency"])
-            .output()
-        {
-            if let Ok(n) = String::from_utf8_lossy(&out.stdout).trim().parse::<i64>() {
-                return Ok(Value::Int(n / 1_000_000)); // Convert Hz to MHz
-            }
+    let sys = sysinfo::System::new_all();
+    if let Some(cpu) = sys.cpus().first() {
+        let freq = cpu.frequency() as f64;
+        if freq > 0.0 {
+            return Ok(Value::Float(freq));
         }
     }
     Ok(Value::Null)
@@ -32083,29 +32101,16 @@ fn bi_platform_cpu_freq(_args: Vec<Value>, _input: Option<Value>) -> Result<Valu
 
 fn bi_platform_memory(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     let mut info = std::collections::BTreeMap::new();
+    let sys = sysinfo::System::new_all();
+    let total = sys.total_memory() as i64;
+    let free = sys.free_memory() as i64;
+    let available = sys.available_memory() as i64;
 
-    #[cfg(target_os = "windows")]
-    {
-        // Use PowerShell instead of WMIC
-        if let Ok(out) = std::process::Command::new("powershell")
-            .args(["-Command", "Get-CimInstance Win32_OperatingSystem | Select-Object TotalVisibleMemorySize,FreePhysicalMemory | ConvertTo-Json"])
-            .output()
-        {
-            if out.status.success() {
-                let json_str = String::from_utf8_lossy(&out.stdout);
-                if let Ok(json) = serde_json::from_str::<serde_json::Value>(&json_str) {
-                    if let Some(total) = json.get("TotalVisibleMemorySize").and_then(|v| v.as_i64()) {
-                        info.insert("total_kb".to_string(), Value::Int(total));
-                        info.insert("total_gb".to_string(), Value::Float(total as f64 / 1024.0 / 1024.0));
-                    }
-                    if let Some(free) = json.get("FreePhysicalMemory").and_then(|v| v.as_i64()) {
-                        info.insert("free_kb".to_string(), Value::Int(free));
-                        info.insert("free_gb".to_string(), Value::Float(free as f64 / 1024.0 / 1024.0));
-                    }
-                }
-            }
-        }
-    }
+    info.insert("total_bytes".to_string(), Value::Int(total));
+    info.insert("total_gb".to_string(), Value::Float(total as f64 / 1024.0 / 1024.0 / 1024.0));
+    info.insert("free_bytes".to_string(), Value::Int(free));
+    info.insert("available_bytes".to_string(), Value::Int(available));
+    info.insert("used_bytes".to_string(), Value::Int(total - available));
 
     #[cfg(target_os = "linux")]
     {
@@ -32116,55 +32121,14 @@ fn bi_platform_memory(_args: Vec<Value>, _input: Option<Value>) -> Result<Value>
                     let val = val.trim().replace(" kB", "");
                     if let Ok(kb) = val.parse::<i64>() {
                         match key {
-                            "MemTotal" => {
-                                info.insert("total_kb".to_string(), Value::Int(kb));
-                                info.insert(
-                                    "total_gb".to_string(),
-                                    Value::Float(kb as f64 / 1024.0 / 1024.0),
-                                );
-                            }
-                            "MemFree" => {
-                                info.insert("free_kb".to_string(), Value::Int(kb));
-                            }
-                            "MemAvailable" => {
-                                info.insert("available_kb".to_string(), Value::Int(kb));
-                                info.insert(
-                                    "available_gb".to_string(),
-                                    Value::Float(kb as f64 / 1024.0 / 1024.0),
-                                );
-                            }
-                            "Buffers" => {
-                                info.insert("buffers_kb".to_string(), Value::Int(kb));
-                            }
-                            "Cached" => {
-                                info.insert("cached_kb".to_string(), Value::Int(kb));
-                            }
-                            "SwapTotal" => {
-                                info.insert("swap_total_kb".to_string(), Value::Int(kb));
-                            }
-                            "SwapFree" => {
-                                info.insert("swap_free_kb".to_string(), Value::Int(kb));
-                            }
+                            "Buffers" => { info.insert("buffers_kb".to_string(), Value::Int(kb)); }
+                            "Cached" => { info.insert("cached_kb".to_string(), Value::Int(kb)); }
+                            "SwapTotal" => { info.insert("swap_total_kb".to_string(), Value::Int(kb)); }
+                            "SwapFree" => { info.insert("swap_free_kb".to_string(), Value::Int(kb)); }
                             _ => {}
                         }
                     }
                 }
-            }
-        }
-    }
-
-    #[cfg(target_os = "macos")]
-    {
-        if let Ok(out) = std::process::Command::new("sysctl")
-            .args(["-n", "hw.memsize"])
-            .output()
-        {
-            if let Ok(bytes) = String::from_utf8_lossy(&out.stdout).trim().parse::<i64>() {
-                info.insert("total_bytes".to_string(), Value::Int(bytes));
-                info.insert(
-                    "total_gb".to_string(),
-                    Value::Float(bytes as f64 / 1024.0 / 1024.0 / 1024.0),
-                );
             }
         }
     }
@@ -32173,313 +32137,59 @@ fn bi_platform_memory(_args: Vec<Value>, _input: Option<Value>) -> Result<Value>
 }
 
 fn bi_platform_memory_total(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
-    #[cfg(target_os = "windows")]
-    {
-        // Use PowerShell instead of WMIC
-        if let Ok(out) = std::process::Command::new("powershell")
-            .args([
-                "-Command",
-                "(Get-CimInstance Win32_OperatingSystem).TotalVisibleMemorySize",
-            ])
-            .output()
-        {
-            if out.status.success() {
-                if let Ok(kb) = String::from_utf8_lossy(&out.stdout).trim().parse::<i64>() {
-                    return Ok(Value::Int(kb * 1024)); // Return bytes
-                }
-            }
-        }
-    }
-    #[cfg(target_os = "linux")]
-    {
-        if let Ok(meminfo) = std::fs::read_to_string("/proc/meminfo") {
-            for line in meminfo.lines() {
-                if line.starts_with("MemTotal:") {
-                    let val = line.replace("MemTotal:", "").replace(" kB", "");
-                    if let Ok(kb) = val.trim().parse::<i64>() {
-                        return Ok(Value::Int(kb * 1024));
-                    }
-                }
-            }
-        }
-    }
-    #[cfg(target_os = "macos")]
-    {
-        if let Ok(out) = std::process::Command::new("sysctl")
-            .args(["-n", "hw.memsize"])
-            .output()
-        {
-            if let Ok(bytes) = String::from_utf8_lossy(&out.stdout).trim().parse::<i64>() {
-                return Ok(Value::Int(bytes));
-            }
-        }
-    }
-    Ok(Value::Null)
+    let sys = sysinfo::System::new_all();
+    Ok(Value::Int(sys.total_memory() as i64))
 }
 
 fn bi_platform_memory_free(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
-    #[cfg(target_os = "windows")]
-    {
-        // Use PowerShell instead of WMIC
-        if let Ok(out) = std::process::Command::new("powershell")
-            .args([
-                "-Command",
-                "(Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory",
-            ])
-            .output()
-        {
-            if out.status.success() {
-                if let Ok(kb) = String::from_utf8_lossy(&out.stdout).trim().parse::<i64>() {
-                    return Ok(Value::Int(kb * 1024)); // Return bytes
-                }
-            }
-        }
-    }
-    #[cfg(target_os = "linux")]
-    {
-        if let Ok(meminfo) = std::fs::read_to_string("/proc/meminfo") {
-            for line in meminfo.lines() {
-                if line.starts_with("MemAvailable:") {
-                    let val = line.replace("MemAvailable:", "").replace(" kB", "");
-                    if let Ok(kb) = val.trim().parse::<i64>() {
-                        return Ok(Value::Int(kb * 1024));
-                    }
-                }
-            }
-        }
-    }
-    #[cfg(target_os = "macos")]
-    {
-        // macOS doesn't have a simple free memory sysctl, use vm_stat
-        if let Ok(out) = std::process::Command::new("vm_stat").output() {
-            let output = String::from_utf8_lossy(&out.stdout);
-            let mut free_pages: i64 = 0;
-            let page_size: i64 = 4096;
-            for line in output.lines() {
-                if line.starts_with("Pages free:") {
-                    let val = line.replace("Pages free:", "").replace(".", "");
-                    if let Ok(n) = val.trim().parse::<i64>() {
-                        free_pages = n;
-                    }
-                }
-            }
-            return Ok(Value::Int(free_pages * page_size));
-        }
-    }
-    Ok(Value::Null)
+    let sys = sysinfo::System::new_all();
+    Ok(Value::Int(sys.free_memory() as i64))
 }
 
 fn bi_platform_disks(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     let mut disks = Vec::new();
+    let sys_disks = sysinfo::Disks::new_with_refreshed_list();
 
-    #[cfg(target_os = "windows")]
-    {
-        // Use PowerShell instead of WMIC
-        if let Ok(out) = std::process::Command::new("powershell")
-            .args(["-Command", "Get-CimInstance Win32_LogicalDisk | Select-Object DeviceID,Size,FreeSpace,FileSystem,VolumeName | ConvertTo-Json"])
-            .output()
-        {
-            if out.status.success() {
-                let json_str = String::from_utf8_lossy(&out.stdout);
-                // Handle both single object and array
-                if let Ok(json) = serde_json::from_str::<serde_json::Value>(&json_str) {
-                    let items = if json.is_array() {
-                        json.as_array().unwrap().clone()
-                    } else {
-                        vec![json]
-                    };
-                    for item in items {
-                        let mut disk = std::collections::BTreeMap::new();
-                        if let Some(id) = item.get("DeviceID").and_then(|v| v.as_str()) {
-                            disk.insert("mount".to_string(), Value::Str(id.to_string()));
-                        }
-                        if let Some(size) = item.get("Size").and_then(|v| v.as_i64()) {
-                            disk.insert("size_bytes".to_string(), Value::Int(size));
-                            disk.insert("size_gb".to_string(), Value::Float(size as f64 / 1024.0 / 1024.0 / 1024.0));
-                        }
-                        if let Some(free) = item.get("FreeSpace").and_then(|v| v.as_i64()) {
-                            disk.insert("free_bytes".to_string(), Value::Int(free));
-                            disk.insert("free_gb".to_string(), Value::Float(free as f64 / 1024.0 / 1024.0 / 1024.0));
-                        }
-                        if let Some(fs) = item.get("FileSystem").and_then(|v| v.as_str()) {
-                            disk.insert("filesystem".to_string(), Value::Str(fs.to_string()));
-                        }
-                        if let Some(label) = item.get("VolumeName").and_then(|v| v.as_str()) {
-                            disk.insert("label".to_string(), Value::Str(label.to_string()));
-                        }
-                        if !disk.is_empty() {
-                            disks.push(Value::Record(disk));
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    #[cfg(target_os = "linux")]
-    {
-        if let Ok(out) = std::process::Command::new("df")
-            .args(["-B1", "--output=source,target,fstype,size,avail"])
-            .output()
-        {
-            let output = String::from_utf8_lossy(&out.stdout);
-            for line in output.lines().skip(1) {
-                let parts: Vec<&str> = line.split_whitespace().collect();
-                if parts.len() >= 5
-                    && !parts[0].starts_with("tmpfs")
-                    && !parts[0].starts_with("devtmpfs")
-                {
-                    let mut disk = std::collections::BTreeMap::new();
-                    disk.insert("device".to_string(), Value::Str(parts[0].to_string()));
-                    disk.insert("mount".to_string(), Value::Str(parts[1].to_string()));
-                    disk.insert("filesystem".to_string(), Value::Str(parts[2].to_string()));
-                    if let Ok(n) = parts[3].parse::<i64>() {
-                        disk.insert("size_bytes".to_string(), Value::Int(n));
-                        disk.insert(
-                            "size_gb".to_string(),
-                            Value::Float(n as f64 / 1024.0 / 1024.0 / 1024.0),
-                        );
-                    }
-                    if let Ok(n) = parts[4].parse::<i64>() {
-                        disk.insert("free_bytes".to_string(), Value::Int(n));
-                        disk.insert(
-                            "free_gb".to_string(),
-                            Value::Float(n as f64 / 1024.0 / 1024.0 / 1024.0),
-                        );
-                    }
-                    disks.push(Value::Record(disk));
-                }
-            }
-        }
-    }
-
-    #[cfg(target_os = "macos")]
-    {
-        if let Ok(out) = std::process::Command::new("df").args(["-b"]).output() {
-            let output = String::from_utf8_lossy(&out.stdout);
-            for line in output.lines().skip(1) {
-                let parts: Vec<&str> = line.split_whitespace().collect();
-                if parts.len() >= 9 && parts[0].starts_with("/dev/") {
-                    let mut disk = std::collections::BTreeMap::new();
-                    disk.insert("device".to_string(), Value::Str(parts[0].to_string()));
-                    disk.insert("mount".to_string(), Value::Str(parts[8].to_string()));
-                    if let Ok(n) = parts[1].parse::<i64>() {
-                        let bytes = n * 512;
-                        disk.insert("size_bytes".to_string(), Value::Int(bytes));
-                        disk.insert(
-                            "size_gb".to_string(),
-                            Value::Float(bytes as f64 / 1024.0 / 1024.0 / 1024.0),
-                        );
-                    }
-                    if let Ok(n) = parts[3].parse::<i64>() {
-                        let bytes = n * 512;
-                        disk.insert("free_bytes".to_string(), Value::Int(bytes));
-                        disk.insert(
-                            "free_gb".to_string(),
-                            Value::Float(bytes as f64 / 1024.0 / 1024.0 / 1024.0),
-                        );
-                    }
-                    disks.push(Value::Record(disk));
-                }
-            }
-        }
+    for disk in sys_disks.list() {
+        let mut d = std::collections::BTreeMap::new();
+        let total = disk.total_space();
+        let avail = disk.available_space();
+        d.insert("mount".to_string(), Value::Str(disk.mount_point().to_str().unwrap_or("?").to_string()));
+        d.insert("size_bytes".to_string(), Value::Int(total as i64));
+        d.insert("size_gb".to_string(), Value::Float(total as f64 / 1024.0 / 1024.0 / 1024.0));
+        d.insert("free_bytes".to_string(), Value::Int(avail as i64));
+        d.insert("free_gb".to_string(), Value::Float(avail as f64 / 1024.0 / 1024.0 / 1024.0));
+        d.insert("filesystem".to_string(), Value::Str(disk.file_system().to_str().unwrap_or("?").to_string()));
+        d.insert("used_bytes".to_string(), Value::Int(total.saturating_sub(avail) as i64));
+        disks.push(Value::Record(d));
     }
 
     Ok(Value::Array(disks))
 }
 
 fn bi_platform_disk_usage(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
-    let path = args.first().and_then(|v| v.as_str().ok()).unwrap_or(".");
+    let target = args.first().and_then(|v| v.as_str().ok()).unwrap_or(".");
 
-    #[cfg(target_os = "windows")]
-    {
-        // Get drive letter from path
-        let drive = if path.len() >= 2 && path.chars().nth(1) == Some(':') {
-            &path[0..2]
-        } else {
-            "C:"
-        };
-        // Use PowerShell Get-CimInstance instead of WMIC
-        let ps_cmd = format!(
-            "$disk = Get-CimInstance Win32_LogicalDisk | Where-Object {{ $_.DeviceID -eq '{}' }};              if ($disk) {{                $disk | Select-Object @{{N='Size';E={{$_.Size}}}}, @{{N='FreeSpace';E={{$_.FreeSpace}}}} |                ForEach-Object {{ 'Size=' + $_.Size; 'FreeSpace=' + $_.FreeSpace }}              }}",
-            drive
-        );
-        if let Ok(out) = std::process::Command::new("powershell")
-            .args(["-NoProfile", "-Command", &ps_cmd])
-            .output()
+    let sys_disks = sysinfo::Disks::new_with_refreshed_list();
+    for disk in sys_disks.list() {
+        let mount = disk.mount_point().to_str().unwrap_or("");
+        // Match exact mount or target starts with mount prefix
+        let mount_normalized = mount.trim_end_matches('/').trim_end_matches('\\');
+        if target == mount || target == mount_normalized
+            || target.starts_with(&format!("{}/", mount_normalized))
+            || target.starts_with(&format!("{}\\", mount_normalized))
         {
+            let total = disk.total_space();
+            let avail = disk.available_space();
+            let used = total.saturating_sub(avail);
             let mut info = std::collections::BTreeMap::new();
-            let output = String::from_utf8_lossy(&out.stdout);
-            for line in output.lines() {
-                if let Some((key, val)) = line.split_once('=') {
-                    let key = key.trim().to_lowercase();
-                    if let Ok(n) = val.trim().parse::<i64>() {
-                        match key.as_str() {
-                            "size" => {
-                                info.insert("total_bytes".to_string(), Value::Int(n));
-                            }
-                            "freespace" => {
-                                info.insert("free_bytes".to_string(), Value::Int(n));
-                            }
-                            _ => {}
-                        }
-                    }
-                }
-            }
-            let tot = info.get("total_bytes").and_then(|v| {
-                if let Value::Int(n) = v {
-                    Some(*n)
-                } else {
-                    None
-                }
-            });
-            let fre = info.get("free_bytes").and_then(|v| {
-                if let Value::Int(n) = v {
-                    Some(*n)
-                } else {
-                    None
-                }
-            });
-            if let (Some(total), Some(free)) = (tot, fre) {
-                info.insert("used_bytes".to_string(), Value::Int(total - free));
-                info.insert(
-                    "usage_percent".to_string(),
-                    Value::Float(((total - free) as f64 / total as f64) * 100.0),
-                );
-            }
+            info.insert("total_bytes".to_string(), Value::Int(total as i64));
+            info.insert("free_bytes".to_string(), Value::Int(avail as i64));
+            info.insert("used_bytes".to_string(), Value::Int(used as i64));
+            info.insert("usage_percent".to_string(), Value::Float(
+                if total > 0 { (used as f64 / total as f64) * 100.0 } else { 0.0 }
+            ));
             return Ok(Value::Record(info));
-        }
-    }
-
-    #[cfg(any(target_os = "linux", target_os = "macos"))]
-    {
-        if let Ok(out) = std::process::Command::new("df")
-            .args(["-B1", path])
-            .output()
-        {
-            let output = String::from_utf8_lossy(&out.stdout);
-            if let Some(line) = output.lines().nth(1) {
-                let parts: Vec<&str> = line.split_whitespace().collect();
-                if parts.len() >= 4 {
-                    let mut info = std::collections::BTreeMap::new();
-                    if let Ok(total) = parts[1].parse::<i64>() {
-                        info.insert("total_bytes".to_string(), Value::Int(total));
-                    }
-                    if let Ok(used) = parts[2].parse::<i64>() {
-                        info.insert("used_bytes".to_string(), Value::Int(used));
-                    }
-                    if let Ok(free) = parts[3].parse::<i64>() {
-                        info.insert("free_bytes".to_string(), Value::Int(free));
-                    }
-                    if parts.len() >= 5 {
-                        let pct = parts[4].replace('%', "");
-                        if let Ok(p) = pct.parse::<f64>() {
-                            info.insert("usage_percent".to_string(), Value::Float(p));
-                        }
-                    }
-                    return Ok(Value::Record(info));
-                }
-            }
         }
     }
 
@@ -48328,3 +48038,67 @@ fn bi_win_env_set(args: Vec<Value>) -> Result<Value> {
     std::env::set_var(name, value);
     Ok(Value::Bool(true))
 }
+
+// ── Phase 4: deadline-aware timeout tests ───────────────────────────
+
+#[cfg(test)]
+mod phase4_tests {
+    use super::*;
+    use std::time::{Duration, Instant};
+
+    #[test]
+    fn no_deadline_returns_default_30s() {
+        // Clear any leftover deadline from previous tests
+        set_current_deadline(None);
+        assert_eq!(current_timeout_secs(), 30);
+    }
+
+    #[test]
+    fn future_deadline_returns_remaining_secs() {
+        set_current_deadline(None);
+        // Set deadline 10 seconds in the future
+        let dl = Instant::now() + Duration::from_secs(10);
+        let _g = DeadlineGuard::enter(Some(dl));
+        let secs = current_timeout_secs();
+        // Should be 9 or 10 (depending on timing); allow slight drift
+        assert!(secs == 9 || secs == 10, "expected ~10s, got {}", secs);
+    }
+
+    #[test]
+    fn expired_deadline_returns_minimum_1s() {
+        set_current_deadline(None);
+        // Set deadline in the past
+        let dl = Instant::now() - Duration::from_secs(5);
+        let _g = DeadlineGuard::enter(Some(dl));
+        assert_eq!(current_timeout_secs(), 1);
+    }
+
+    #[test]
+    fn sub_second_remaining_rounds_up_to_1s() {
+        set_current_deadline(None);
+        // Set deadline 100ms in the future
+        let dl = Instant::now() + Duration::from_millis(100);
+        let _g = DeadlineGuard::enter(Some(dl));
+        assert_eq!(current_timeout_secs(), 1);
+    }
+
+    #[test]
+    fn deadline_guard_restores_previous_value() {
+        set_current_deadline(None);
+        // Set an outer deadline
+        let outer = Instant::now() + Duration::from_secs(60);
+        let _outer_g = DeadlineGuard::enter(Some(outer));
+        // Enter inner scope with different deadline
+        {
+            let inner = Instant::now() + Duration::from_secs(5);
+            let _inner_g = DeadlineGuard::enter(Some(inner));
+            let inner_secs = current_timeout_secs();
+            assert!(inner_secs == 4 || inner_secs == 5, "expected ~5s, got {}", inner_secs);
+        }
+        // After inner guard drops, outer should be restored.
+        // Allow drift for elapsed time during the inner scope.
+        let restored = current_timeout_secs();
+        assert!(restored >= 58 && restored <= 60, "expected ~60s, got {}", restored);
+    }
+}
+

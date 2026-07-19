@@ -3,7 +3,7 @@ members = ["."]
 
 [package]
 name = "verseshell"
-version = "0.3.0"
+version = "0.5.0"
 edition = "2021"
 authors = ["VerseShell Contributors"]
 description = "A production-grade typed functional shell runtime for AI agents (v3 kernel)"
@@ -33,6 +33,10 @@ path = "src/lib.rs"
 [[bin]]
 name = "ae"
 path = "src/main.rs"
+
+[[bin]]
+name = "ae-mcp"
+path = "src/bin/ae-mcp.rs"
 
 [dependencies]
 anyhow = "1"
@@ -104,3 +108,4 @@ harness = false
 [[bench]]
 name = "pipeline_performance"
 harness = false
+

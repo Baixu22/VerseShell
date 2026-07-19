@@ -2,8 +2,8 @@ use anyhow::{Context, Result};
 use std::fs;
 use std::io::{self, Read, Write};
 
-use verseshell::{env::Env, eval, modules, parser, runtime, server, transpile};
 use clap::Parser;
+use verseshell::{env::Env, eval, modules, parser, runtime, server, transpile};
 
 fn create_env_with_modules() -> Env {
     let mut env = Env::new();
@@ -15,7 +15,9 @@ fn create_env_with_modules() -> Env {
 
 #[derive(Parser)]
 #[command(name = "ae")]
-#[command(about = "VerseShell — Production-grade typed functional shell runtime for AI agents (v3 kernel)")]
+#[command(
+    about = "VerseShell — Production-grade typed functional shell runtime for AI agents (v3 kernel)"
+)]
 #[command(version = env!("CARGO_PKG_VERSION"))]
 struct Cli {
     /// Bash compatibility mode (transpile bash to aeshell)
@@ -90,6 +92,14 @@ struct Cli {
     #[arg(long, default_value = "8")]
     cpu_budget: usize,
 
+    /// Output format: json, compact (token-efficient), human (default)
+    #[arg(long, default_value = "human")]
+    format: String,
+
+    /// Compact output alias (same as --format compact)
+    #[arg(long)]
+    compact: bool,
+
     /// Script file to execute
     #[arg(value_name = "FILE")]
     file: Option<String>,
@@ -111,12 +121,14 @@ fn main() -> Result<()> {
     if let Some(p) = &cli.policy {
         std::env::set_var("AETHER_POLICY", p);
     }
-    if cli.deterministic || cli.json {
+    if cli.deterministic || cli.json || cli.format == "json" {
         std::env::set_var("AE_DETERMINISTIC", "1");
     }
-    if let Some(t) = cli.timeout {
-        std::env::set_var("AE_TIMEOUT", t.to_string());
+    if cli.compact || cli.format == "compact" {
+        std::env::set_var("AE_FORMAT", "compact");
     }
+    // Phase 4: --timeout is now plumbed through env.deadline (see run_code)
+    // instead of the AE_TIMEOUT env var. AE_TIMEOUT is no longer read.
     verseshell::safety::init_rbac_from_env();
 
     // Init V2 capability system
@@ -160,7 +172,7 @@ fn main() -> Result<()> {
         io::stdin().read_to_string(&mut buf)?;
         let code =
             transpile::bash::transpile_bash_to_ae(&buf).context("bash→ae transpile failed")?;
-        return run_code(&code);
+        return run_code(&code, cli.timeout);
     }
 
     // ── -c/--command flag ──────────────────────────────────
@@ -170,21 +182,20 @@ fn main() -> Result<()> {
         } else {
             cmd
         };
-        return run_code(&code);
+        return run_code(&code, cli.timeout);
     }
 
     // ── File execution or REPL ─────────────────────────────
     match cli.file {
-        Some(file) => run_file(&file, cli.bash)?,
-        None => repl_shell()?,
+        Some(file) => run_file(&file, cli.bash, cli.timeout)?,
+        None => repl_shell(cli.timeout)?,
     }
 
     Ok(())
 }
 
-fn run_file(path: &str, bash_mode: bool) -> Result<()> {
-    let mut code =
-        fs::read_to_string(path).with_context(|| format!("failed to read {}", path))?;
+fn run_file(path: &str, bash_mode: bool, timeout: Option<u64>) -> Result<()> {
+    let mut code = fs::read_to_string(path).with_context(|| format!("failed to read {}", path))?;
 
     let is_bash = bash_mode || path.to_lowercase().ends_with(".sh");
 
@@ -193,11 +204,15 @@ fn run_file(path: &str, bash_mode: bool) -> Result<()> {
             .with_context(|| format!("bash→ae transpile failed for {}", path))?;
     }
 
-    run_code(&code)
+    run_code(&code, timeout)
 }
 
-fn run_code(code: &str) -> Result<()> {
+fn run_code(code: &str, timeout: Option<u64>) -> Result<()> {
     let mut env = create_env_with_modules();
+    // Phase 4: plumb --timeout into env.deadline (replaces AE_TIMEOUT env var)
+    if let Some(secs) = timeout {
+        env.deadline = Some(std::time::Instant::now() + std::time::Duration::from_secs(secs));
+    }
     let exit_code = verseshell::repl::run_one(&mut env, code)?;
     if exit_code != 0 {
         std::process::exit(exit_code);
@@ -205,8 +220,12 @@ fn run_code(code: &str) -> Result<()> {
     Ok(())
 }
 
-fn repl_shell() -> Result<()> {
+fn repl_shell(timeout: Option<u64>) -> Result<()> {
     let mut env = create_env_with_modules();
+    // Phase 4: plumb --timeout into env.deadline (replaces AE_TIMEOUT env var)
+    if let Some(secs) = timeout {
+        env.deadline = Some(std::time::Instant::now() + std::time::Duration::from_secs(secs));
+    }
     let mut line = String::new();
 
     println!("ae REPL — type 'exit', 'quit', or Ctrl-D to exit");
