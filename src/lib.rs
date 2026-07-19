@@ -16,14 +16,14 @@
 //! - [`server`] — JSON-RPC stdio server for agents
 
 pub mod ast;
+pub mod capability;
 pub mod env;
+pub mod ir;
 pub mod parser;
-pub mod types;
-pub mod value;
 pub mod shell_features;
 pub mod typecheck;
-pub mod ir;
-pub mod capability;
+pub mod types;
+pub mod value;
 
 #[cfg(feature = "native")]
 pub mod auth;
@@ -31,6 +31,8 @@ pub mod auth;
 pub mod builtins;
 #[cfg(feature = "native")]
 pub mod cache;
+#[cfg(feature = "native")]
+pub mod compact;
 #[cfg(feature = "native")]
 pub mod config;
 #[cfg(feature = "native")]
@@ -48,6 +50,8 @@ pub mod repl;
 #[cfg(feature = "native")]
 pub mod runtime;
 #[cfg(feature = "native")]
+pub mod rule;
+#[cfg(feature = "native")]
 pub mod safety;
 #[cfg(feature = "native")]
 pub mod scheduler;
@@ -58,6 +62,6 @@ pub mod server;
 #[cfg(feature = "native")]
 pub mod syntax_kb;
 #[cfg(feature = "native")]
-pub mod tx;
-#[cfg(feature = "native")]
 pub mod transpile;
+#[cfg(feature = "native")]
+pub mod tx;
