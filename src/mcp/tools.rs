@@ -17,6 +17,30 @@ use crate::modules;
 use crate::runtime::{AgentRequest, AgentResponse, SharedRuntime};
 use crate::value::Value as VmValue;
 
+// v0.5.1: agent core surface — the ~70 most-used builtins for agent tasks.
+const CORE_BUILTINS: &[&str] = &[
+    "sys_hostname", "sys_os", "sys_arch", "sys_cpu_info", "sys_mem_info",
+    "sys_disk_info", "sys_load_avg", "sys_process_info", "sys_uptime",
+    "sys_env_all", "sys_describe",
+    "proc_list", "proc_kill", "proc_info", "proc_grep", "proc_spawn",
+    "file_ls", "file_read", "file_write", "file_stat", "file_find",
+    "file_mkdir", "file_copy", "file_move", "file_remove", "file_exists",
+    "file_head", "file_tail", "file_grep", "file_wc",
+    "http_get", "http_post",
+    "net_ping", "net_interfaces", "net_dns_lookup",
+    "shell_exec",
+    "str_upper", "str_lower", "str_trim", "str_split", "str_join",
+    "str_replace", "str_contains", "str_length", "str_grep",
+    "arr_sort", "arr_filter", "arr_map", "arr_reduce",
+    "arr_first", "arr_last", "arr_take", "arr_any", "arr_all",
+    "arr_unique", "arr_flatten", "arr_range", "arr_keys",
+    "math_abs", "math_min", "math_max", "math_sum", "math_mean",
+    "json_parse", "json_stringify",
+    "win_snapshot", "win_registry_get", "win_env_get",
+    "crypto_hash", "crypto_uuid",
+    "sort", "where", "map", "reduce", "take", "reverse", "first", "last", "any", "all",
+];
+
 /// Box an async closure into the `ToolHandler` signature.
 macro_rules! handler {
     ($f:expr) => {{
@@ -210,12 +234,15 @@ fn list_commands_tool() -> Tool {
             description:
                 "List available VerseShell commands and their builtin aliases (module.fn -> builtin_name)."
                     .into(),
-            input_schema: json!({"type": "object", "properties": {}}),
+            input_schema: json!({"type": "object", "properties": {
+                "core": {"type": "boolean", "default": false, "description": "If true, list only the ~70 most-used agent builtins."}
+            }}),
         },
         handler: handler!({
-            move |_args: Value, _runtime: Arc<SharedRuntime>| {
+            move |args: Value, _runtime: Arc<SharedRuntime>| {
                 Box::pin(async move {
-                    Ok(CallToolResult::text(build_list_commands_text()))
+                    let core_only = args.get("core").and_then(|v| v.as_bool()).unwrap_or(false);
+                    Ok(CallToolResult::text(build_list_commands_text(core_only)))
                 })
             }
         }),
@@ -224,13 +251,19 @@ fn list_commands_tool() -> Tool {
 
 /// Build the `list_commands` output by walking the module registry.
 /// Format: one mapping per line, `module.fn_name -> builtin_name`.
-fn build_list_commands_text() -> String {
+fn build_list_commands_text(core_only: bool) -> String {
+    let core_set: std::collections::HashSet<&str> = CORE_BUILTINS.iter().copied().collect();
     let mut lines = Vec::new();
     for (module_name, module_value) in modules::all_modules() {
         if let VmValue::Record(map) = module_value {
             for (fn_name, val) in map.iter() {
                 if let VmValue::Builtin(b) = val {
-                    lines.push(format!("{}.{} -> {}", module_name, fn_name, b.name));
+                    let is_core = core_set.contains(b.name.as_str());
+                    if core_only && !is_core {
+                        continue;
+                    }
+                    let tag = if is_core { " [core]" } else { "" };
+                    lines.push(format!("{}.{} -> {}{}", module_name, fn_name, b.name, tag));
                 }
             }
         }

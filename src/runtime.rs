@@ -764,17 +764,25 @@ impl AgentRuntime {
 // ── Error Classification + Hint Generation ──────────────────────────
 
 fn classify_error_with_hint(msg: &str) -> (String, bool) {
+    // Order matters: check most specific patterns first.
+    // "unknown builtin" must be checked before "not found" because
+    // "field 'X' not found; did you mean..." contains "not found"
+    // but is really E_UNKNOWN_BUILTIN.
+    if msg.contains("unknown builtin") {
+        return ("E_UNKNOWN_BUILTIN".into(), true);
+    }
     if msg.contains("parse error") || msg.contains("expected") || msg.contains("unexpected token") {
         return ("E_PARSE".into(), true);
     }
-    if msg.contains("BAD_ARG") || msg.contains("type") {
+    if msg.contains("BAD_ARG") || msg.contains(" type ") {
         return ("E_TYPE".into(), true);
+    }
+    if msg.contains("field '") && msg.contains("not found") {
+        // Module method typo: "field 'X' not found in module 'Y'; did you mean 'Z'?"
+        return ("E_UNKNOWN_BUILTIN".into(), true);
     }
     if msg.contains("file") || msg.contains("path") || msg.contains("not found") {
         return ("E_IO".into(), true);
-    }
-    if msg.contains("unknown builtin") {
-        return ("E_UNKNOWN_BUILTIN".into(), true);
     }
     if msg.contains("timeout") || msg.contains("timed out") {
         return ("E_TIMEOUT".into(), true);
@@ -789,9 +797,13 @@ fn classify_error_with_hint(msg: &str) -> (String, bool) {
 fn error_hint(msg: &str, code: &str) -> Option<String> {
     match code {
         "E_UNKNOWN_BUILTIN" => {
-            // Extract the builtin name from the message: "unknown builtin: mat_abs"
             if let Some(name) = msg.strip_prefix("unknown builtin: ") {
-                return Some(nearest_builtin(name));
+                return Some(crate::builtins::nearest_builtin_hint(name));
+            }
+            // Module method typo: "field 'X' not found in module 'Y'; did you mean 'Z'?"
+            // or just "field 'X' not found in module 'Y'"
+            if msg.starts_with("field '") && msg.contains("not found in module") {
+                return None; // Hint already embedded in the message
             }
             None
         }

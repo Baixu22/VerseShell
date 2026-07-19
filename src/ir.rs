@@ -520,8 +520,10 @@ impl IRCompiler {
                         }
                         IRNode::Builtin(name.clone(), args_ir, IREffect::for_builtin(name))
                     } else {
-                        // Variable call
-                        IRNode::Call(Box::new(IRNode::Var(name.clone())), args_ir)
+                        // Unknown name: route through Builtin so call_with_input
+                        // produces "unknown builtin: X", which triggers the
+                        // nearest_builtin Levenshtein hint machinery.
+                        IRNode::Builtin(name.clone(), args_ir, IREffect::Pure)
                     }
                 } else if let Expr::MemberAccess { object, field } = callee.as_ref() {
                     // Module-access call: `module.method(args)` (e.g., `sys.cpu_info()`)
@@ -538,6 +540,18 @@ impl IRCompiler {
                                 args_ir,
                                 IREffect::for_builtin(builtin_name),
                             );
+                        }
+                        // Known module, unknown method — produce a hint
+                        if crate::modules::is_module_name(mod_name) {
+                            let methods: Vec<String> =
+                                crate::modules::module_method_names(mod_name)
+                                    .iter()
+                                    .map(|s| s.to_string())
+                                    .collect();
+                            let hint = crate::builtins::nearest_method_hint(
+                                &methods, field, mod_name,
+                            );
+                            return IRNode::Error("E_UNKNOWN_BUILTIN".into(), Some(hint));
                         }
                     }
                     // Unknown module/method — fall through to generic Call form

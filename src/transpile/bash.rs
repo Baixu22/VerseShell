@@ -77,6 +77,34 @@ pub fn transpile_bash_to_ae(src: &str) -> Result<String> {
             continue;
         }
 
+        // Try logical chaining (&&, ||) first — these are common in agent
+        // output and should not trigger the fallback path. Also expand $(...)
+        // command substitutions before checking for redirects.
+        let expanded_line = expand_command_substitutions(line);
+        let line_ref: &str = if expanded_line != line { &expanded_line } else { line };
+
+        if let Some(logical) = parse_logical_chain(line_ref) {
+            if !line_ref.chars().any(|c| c == '<') {
+                out.push_str(&logical);
+                out.push('\n');
+                continue;
+            }
+        }
+
+        // Strip 2>/dev/null noise (common in agent output, meaningless in AE)
+        let cleaned = strip_stderr_redirect(line);
+        if cleaned != line && !contains_redirection_or_complex(&cleaned) {
+            match parse_pipeline(&cleaned) {
+                Ok(cmds) if !cmds.is_empty() => {
+                    let aether_line = render_pipeline(&cmds);
+                    out.push_str(&aether_line);
+                    out.push('\n');
+                    continue;
+                }
+                _ => {}
+            }
+        }
+
         // Quick detect: if there are redirections or unsupported operators,
         // fall back to `bash -lc`.
         if contains_redirection_or_complex(line) {
@@ -145,8 +173,6 @@ Top-level quick checks and simple forms
 ============================================================================= */
 
 fn contains_redirection_or_complex(s: &str) -> bool {
-    // quick n' dirty: redirect operators or process-substitution or background
-    // If you want to support these, map them to Aether I/O or fallback to `bash -lc`.
     let suspicious = ['>', '<', '&'];
     s.chars().any(|c| suspicious.contains(&c))
         || s.contains("2>")
@@ -155,8 +181,133 @@ fn contains_redirection_or_complex(s: &str) -> bool {
         || s.contains("|&")
         || s.contains("<<<")
         || s.contains(">|")
-        || s.contains("$(")  // command substitution: not supported yet, fallback
-        || s.contains("`") // backticks: not supported yet, fallback
+        || s.contains("$(")
+        || s.contains("`")
+}
+
+/// Expand `$(cmd)` command substitutions into `shell.exec(...).stdout` expressions.
+fn expand_command_substitutions(s: &str) -> String {
+    if !s.contains("$(") {
+        return s.to_string();
+    }
+    let result = s.to_string();
+    let mut out = String::with_capacity(result.len());
+    let chars: Vec<char> = result.chars().collect();
+    let mut i = 0;
+    let mut dq = false;
+    let mut sq = false;
+    while i < chars.len() {
+        let ch = chars[i];
+        match ch {
+            '\'' if !dq => { sq = !sq; out.push(ch); }
+            '"' if !sq => { dq = !dq; out.push(ch); }
+            '$' if !sq && i + 1 < chars.len() && chars[i + 1] == '(' => {
+                let start = i + 2;
+                let mut depth = 1;
+                let mut j = start;
+                let mut inner_dq = false;
+                let mut inner_sq = false;
+                while j < chars.len() && depth > 0 {
+                    match chars[j] {
+                        '"' if !inner_sq => inner_dq = !inner_dq,
+                        '\'' if !inner_dq => inner_sq = !inner_sq,
+                        '(' if !inner_sq && !inner_dq => depth += 1,
+                        ')' if !inner_sq && !inner_dq => depth -= 1,
+                        _ => {}
+                    }
+                    j += 1;
+                }
+                if depth == 0 {
+                    let inner_cmd: String = chars[start..j - 1].iter().collect();
+                    // Transpile the inner command and wrap as shell.exec
+                    let ae_inner = format!("shell.exec([\"bash\",\"-lc\",\"{}\"]).stdout",
+                        inner_cmd.replace('\\', "\\\\").replace('"', "\\\""));
+                    out.push_str(&ae_inner);
+                    i = j;
+                } else {
+                    out.push_str("$(");
+                    i += 1;
+                }
+                continue;
+            }
+            _ => out.push(ch),
+        }
+        i += 1;
+    }
+    out
+}
+
+fn strip_stderr_redirect(s: &str) -> String {
+    let mut result = s.to_string();
+    while let Some(pos) = result.find("2>/dev/null") {
+        result.replace_range(pos..pos + 11, "");
+    }
+    while let Some(pos) = result.find(">/dev/null 2>&1") {
+        result.replace_range(pos..pos + 15, "");
+    }
+    while let Some(pos) = result.find("2>&1") {
+        result.replace_range(pos..pos + 4, "");
+    }
+    result.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+/// Parse `cmd1 && cmd2` and `cmd1 || cmd2` into logical chains.
+fn parse_logical_chain(line: &str) -> Option<String> {
+    let mut parts: Vec<(String, Option<&str>)> = Vec::new();
+    let mut cur = String::new();
+    let mut dq = false;
+    let mut sq = false;
+    let chars: Vec<char> = line.chars().collect();
+    let mut i = 0;
+    while i < chars.len() {
+        let ch = chars[i];
+        match ch {
+            '\'' if !dq => { sq = !sq; cur.push(ch); }
+            '"' if !sq => { dq = !dq; cur.push(ch); }
+            '&' if !sq && !dq && i + 1 < chars.len() && chars[i + 1] == '&' => {
+                if !cur.trim().is_empty() {
+                    parts.push((cur.trim().to_string(), Some("&&")));
+                    cur.clear();
+                }
+                i += 1;
+            }
+            '|' if !sq && !dq && i + 1 < chars.len() && chars[i + 1] == '|' => {
+                if !cur.trim().is_empty() {
+                    parts.push((cur.trim().to_string(), Some("||")));
+                    cur.clear();
+                }
+                i += 1;
+            }
+            _ => cur.push(ch),
+        }
+        i += 1;
+    }
+    if !cur.trim().is_empty() {
+        parts.push((cur.trim().to_string(), None));
+    }
+    if parts.len() <= 1 {
+        return None;
+    }
+    // Emit sequential sh() calls separated by &&/|| — the AE runtime
+    // will execute each sub-command via shell.exec and the agent
+    // reads the structured output. For transpile-only mode (no
+    // execution), the log is informative.
+    let mut ae = String::from("// &&/|| logical chain\n");
+    for (j, (sub_cmd, op)) in parts.iter().enumerate() {
+        if j > 0 {
+            ae.push_str(&format!("// {}\n", op.unwrap_or(";")));
+        }
+        match parse_pipeline(sub_cmd) {
+            Ok(cmds) if !cmds.is_empty() => {
+                ae.push_str(&render_pipeline(&cmds));
+            }
+            _ => {
+                ae.push_str(&render_fallback_bash(sub_cmd));
+            }
+        }
+        ae.push_str(";\n");
+    }
+    Some(ae)
 }
 
 /* =============================================================================
@@ -205,22 +356,23 @@ fn render_fallback_bash(line: &str) -> String {
 }
 
 fn parse_simple_assignment(line: &str) -> Option<String> {
-    // Accept NAME=VALUE (no spaces around '='). Ignore export/readonly for now.
-    // Examples:
-    //   FOO=bar           -> let FOO = "bar";
-    //   X=$HOME           -> let X = HOME;
-    //   N=123             -> let N = 123;
-    // We avoid compound assignments like PATH="$HOME:${PATH}" -> fallback (too complex).
-    if line.starts_with("export ") || line.starts_with("readonly ") {
-        return None; // skip here so that fallback or command path handles it
+    let is_export = line.starts_with("export ");
+    let is_readonly = line.starts_with("readonly ");
+    let assign_line = if is_export || is_readonly {
+        line[line.find(' ').unwrap_or(0)..].trim().to_string()
+    } else {
+        line.to_string()
+    };
+    if is_readonly {
+        return None; // readonly not supported, fallback
     }
 
     // No spaces allowed on either side for this "simple" matcher.
-    if line.split_whitespace().count() != 1 {
+    if assign_line.split_whitespace().count() != 1 {
         return None;
     }
-    if let Some(eq) = line.find('=') {
-        let (lhs, rhs) = line.split_at(eq);
+    if let Some(eq) = assign_line.find('=') {
+        let (lhs, rhs) = assign_line.split_at(eq);
         let lhs = lhs.trim();
         if lhs.is_empty() {
             return None;
@@ -240,23 +392,47 @@ fn parse_simple_assignment(line: &str) -> Option<String> {
             // Strip quotes and render appropriately.
             if let Ok(tok) = parse_single_token(rhs) {
                 let expr = render_arg_expr(&tok);
-                return Some(format!("let {} = {};", lhs, expr));
+                let stmt = if is_export {
+                    format!("set_env(\"{}\", {})", lhs, expr)
+                } else {
+                    format!("let {} = {};", lhs, expr)
+                };
+                return Some(stmt);
             } else {
                 return None;
             }
         } else if rhs.starts_with('$') {
             if let Some(var) = parse_var_ref(rhs) {
-                return Some(format!("let {} = {};", lhs, var));
+                let stmt = if is_export {
+                    format!("set_env(\"{}\", {})", lhs, var)
+                } else {
+                    format!("let {} = {};", lhs, var)
+                };
+                return Some(stmt);
             } else {
                 return None;
             }
         } else if is_int_literal(rhs) {
-            return Some(format!("let {} = {};", lhs, rhs));
+            let stmt = if is_export {
+                format!("set_env(\"{}\", {})", lhs, rhs)
+            } else {
+                format!("let {} = {};", lhs, rhs)
+            };
+            return Some(stmt);
         } else if is_float_literal(rhs) {
-            return Some(format!("let {} = {};", lhs, rhs));
+            let stmt = if is_export {
+                format!("set_env(\"{}\", {})", lhs, rhs)
+            } else {
+                format!("let {} = {};", lhs, rhs)
+            };
+            return Some(stmt);
         } else {
-            // treat as plain string
-            return Some(format!("let {} = {};", lhs, single_quote_literal(rhs)));
+            let stmt = if is_export {
+                format!("set_env(\"{}\", {})", lhs, single_quote_literal(rhs))
+            } else {
+                format!("let {} = {};", lhs, single_quote_literal(rhs))
+            };
+            return Some(stmt);
         }
     }
     None

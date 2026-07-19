@@ -3,7 +3,7 @@ members = ["."]
 
 [package]
 name = "verseshell"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 authors = ["VerseShell Contributors"]
 description = "A production-grade typed functional shell runtime for AI agents (v3 kernel)"

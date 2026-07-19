@@ -3968,6 +3968,67 @@ pub fn call_with_input(
     }
 }
 
+// ── Levenshtein builtin hints ────────────────────────────────────────
+// Called from ir.rs when an unknown identifier might be a typo for a
+// known builtin, and from modules.rs when a module method is not found.
+
+fn levenshtein(a: &str, b: &str) -> usize {
+    let a_chars: Vec<char> = a.chars().collect();
+    let b_chars: Vec<char> = b.chars().collect();
+    let m = a_chars.len();
+    let n = b_chars.len();
+    if m == 0 { return n; }
+    if n == 0 { return m; }
+    let mut prev: Vec<usize> = (0..=n).collect();
+    let mut curr = vec![0usize; n + 1];
+    for i in 1..=m {
+        curr[0] = i;
+        for j in 1..=n {
+            let cost = if a_chars[i - 1] == b_chars[j - 1] { 0 } else { 1 };
+            curr[j] = (prev[j] + 1).min(curr[j - 1] + 1).min(prev[j - 1] + cost);
+        }
+        std::mem::swap(&mut prev, &mut curr);
+    }
+    prev[n]
+}
+
+/// Suggest the closest builtin name by Levenshtein distance (≤3 → "did you mean").
+pub(crate) fn nearest_builtin_hint(input: &str) -> String {
+    let names: Vec<&str> = BUILTIN_LOOKUP.keys().copied().collect();
+    if names.is_empty() { return format!("unknown builtin: {}", input); }
+    let input_lower = input.to_lowercase();
+    let mut best: Option<(&str, usize)> = None;
+    for name in &names {
+        let dist = levenshtein(&input_lower, &name.to_lowercase());
+        if dist <= 5 && (best.is_none() || dist < best.unwrap().1) {
+            best = Some((name, dist));
+        }
+    }
+    match best {
+        Some((name, dist)) if dist <= 3 => format!("unknown builtin: '{}'; did you mean '{}'?", input, name),
+        Some((name, _)) => format!("unknown builtin: '{}'; closest match: '{}'", input, name),
+        None => format!("unknown builtin: '{}'", input),
+    }
+}
+
+/// Suggest the closest method name on a module record by Levenshtein distance.
+pub(crate) fn nearest_method_hint(methods: &[String], field: &str, module: &str) -> String {
+    if methods.is_empty() { return format!("field '{}' not found in module '{}'", field, module); }
+    let input_lower = field.to_lowercase();
+    let mut best: Option<(&str, usize)> = None;
+    for m in methods {
+        let dist = levenshtein(&input_lower, &m.to_lowercase());
+        if dist <= 5 && (best.is_none() || dist < best.unwrap().1) {
+            best = Some((m, dist));
+        }
+    }
+    match best {
+        Some((name, dist)) if dist <= 3 => format!("field '{}' not found in module '{}'; did you mean '{}'?", field, module, name),
+        Some((name, _)) => format!("field '{}' not found in module '{}'; closest: '{}'", field, module, name),
+        None => format!("field '{}' not found in module '{}'", field, module),
+    }
+}
+
 // --------------- Helpers: type extraction ---------------
 
 fn expect_array<'a>(name: &str, v: &'a Value) -> Result<&'a [Value]> {

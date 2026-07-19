@@ -40,11 +40,24 @@ pub fn explain_as_tools(bash_src: &str) -> anyhow::Result<Vec<ToolCall>> {
         ("sys.process_info", "system_snapshot"),
         ("sys.disk_info", "system_snapshot"),
         ("sys.load_avg", "system_snapshot"),
+        ("sys.info", "system_snapshot"),
+        ("sys.hostname", "system_snapshot"),
+        ("sys.os", "system_snapshot"),
+        ("sys.arch", "system_snapshot"),
+        ("sys.uptime", "system_snapshot"),
+        ("sys.uname", "system_snapshot"),
+        ("sys.whoami", "system_snapshot"),
+        ("sys.disk_usage", "system_snapshot"),
+        ("sys.env", "system_snapshot"),
         // Process listing builtins → process_inspect
         ("proc.list", "process_inspect"),
         ("proc.info", "process_inspect"),
+        ("proc.grep", "process_inspect"),
+        ("proc.children", "process_inspect"),
         // Process kill → process_terminate
         ("proc.kill", "process_terminate"),
+        ("proc.killall", "process_terminate"),
+        ("proc.pkill", "process_terminate"),
     ];
 
     let matched_tool: Option<&str> = mappings

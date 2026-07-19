@@ -460,6 +460,22 @@ echo '[{"id":"1","agent":"b","cmd":"1+1"},{"id":"2","agent":"b","cmd":"sys.os()"
 - **input** — Read line, char, password from stdin
 - **clip** — Clipboard read/write
 
+## Agent Quick Reference (v0.5.1)
+
+Use `ae --core` or `list_commands(core=true)` for the ~70 most-used builtins.
+
+| Category | Builtins |
+|----------|----------|
+| **System** | `sys.cpu_info()` `sys.mem_info()` `sys.disk_info()` `sys.hostname()` `sys.os()` `sys.arch()` `sys.load_avg()` `sys.process_info()` `sys.uptime()` `sys.env_all()` `sys.describe()` |
+| **Process** | `proc.list()` `proc.kill(PID)` `proc.info(PID)` `proc.grep(NAME)` `proc.spawn([CMD,ARGS])` |
+| **File** | `file.ls()` `file.read()` `file.write()` `file.stat()` `file.find()` `file.mkdir()` `file.copy()` `file.move()` `file.remove()` `file.exists()` `file.head()` `file.tail()` `file.grep()` `file.wc()` |
+| **Network** | `http.get(URL)` `http.post(URL,BDY)` `net.ping(HOST)` `net.interfaces()` `net.dns_lookup(HOST)` |
+| **Shell** | `shell.exec([CMD,ARGS])` |
+| **Data** | `str.join()` `str.split()` `str.replace()` `str.grep()` `json.parse()` `json.stringify()` `sort` `map` `where` `reduce` `take` `first` `last` `any` `all` `unique` `flatten` `range` |
+| **Math** | `math.abs()` `math.min()` `math.max()` `math.sum()` `math.mean()` |
+| **Windows** | `win.snapshot()` `win.registry_get()` `win.env_get()` |
+| **Crypto** | `crypto.hash()` `crypto.uuid()` |
+
 ## Agent Usage
 
 ### One-Shot Commands

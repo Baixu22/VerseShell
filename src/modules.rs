@@ -356,6 +356,71 @@ pub fn resolve_module_builtin(module: &str, method: &str) -> Option<&'static str
         .find_map(|(m, b)| if *m == method { Some(*b) } else { None })
 }
 
+/// Check whether `name` is a known module (26 total).
+pub fn is_module_name(name: &str) -> bool {
+    matches!(
+        name,
+        "sys"
+            | "proc"
+            | "fs"
+            | "file"
+            | "net"
+            | "http"
+            | "crypto"
+            | "db"
+            | "svc"
+            | "cron"
+            | "archive"
+            | "user"
+            | "perm"
+            | "pkg"
+            | "hw"
+            | "clip"
+            | "input"
+            | "math"
+            | "str"
+            | "arr"
+            | "json"
+            | "shell"
+            | "git"
+            | "platform"
+            | "win"
+    )
+}
+
+/// Return method names for a known module.
+pub fn module_method_names(module: &str) -> Vec<&'static str> {
+    let table: &[(&str, &str)] = match module {
+        "sys" => SYS_MODULE,
+        "proc" => PROC_MODULE,
+        "fs" => FS_MODULE,
+        "file" => FILE_MODULE,
+        "net" => NET_MODULE,
+        "http" => HTTP_MODULE,
+        "crypto" => CRYPTO_MODULE,
+        "db" => DB_MODULE,
+        "svc" => SVC_MODULE,
+        "cron" => CRON_MODULE,
+        "archive" => ARCHIVE_MODULE,
+        "user" => USER_MODULE,
+        "perm" => PERM_MODULE,
+        "pkg" => PKG_MODULE,
+        "hw" => HW_MODULE,
+        "clip" => CLIP_MODULE,
+        "input" => INPUT_MODULE,
+        "math" => MATH_MODULE,
+        "str" => STR_MODULE,
+        "arr" => ARR_MODULE,
+        "json" => JSON_MODULE,
+        "shell" => SHELL_MODULE,
+        "git" => GIT_MODULE,
+        "platform" => PLATFORM_MODULE,
+        "win" => WIN_MODULE,
+        _ => return Vec::new(),
+    };
+    table.iter().map(|(m, _)| *m).collect()
+}
+
 // ── Core Shell Modules ──────────────────────────────────────────────
 
 pub fn sys_module() -> Value {
