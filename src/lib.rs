@@ -1,4 +1,4 @@
-//! # VerseShell — Production-grade typed functional shell runtime for AI agents (v3 kernel)
+//! # VerseShell — Agent Action / Observation Runtime
 //!
 //! ## Core (always available)
 //! - [`ast`] — Abstract syntax tree
@@ -20,6 +20,7 @@ pub mod capability;
 pub mod env;
 pub mod ir;
 pub mod parser;
+pub mod plan;
 pub mod shell_features;
 pub mod typecheck;
 pub mod types;
@@ -27,6 +28,8 @@ pub mod value;
 
 #[cfg(feature = "native")]
 pub mod auth;
+#[cfg(feature = "native")]
+pub mod artifact;
 #[cfg(feature = "native")]
 pub mod builtins;
 #[cfg(feature = "native")]
@@ -44,7 +47,13 @@ pub mod modules;
 #[cfg(feature = "native")]
 pub mod os_tools;
 #[cfg(feature = "native")]
+pub mod operation;
+#[cfg(feature = "native")]
+pub mod ops;
+#[cfg(feature = "native")]
 pub mod packages;
+#[cfg(feature = "native")]
+pub mod process_runner;
 #[cfg(feature = "native")]
 pub mod repl;
 #[cfg(feature = "native")]

@@ -12,6 +12,7 @@
 use crate::cache::{GlobalCache, SystemSnapshot};
 use crate::env::Env;
 use crate::ir::{IRCompiler, IREffect, IREvaluator, IRNode};
+pub use crate::plan::{ExecutionPlan, RiskLevel};
 use crate::modules;
 use crate::rule::{self, RuleDecision};
 use crate::value::Value;
@@ -125,39 +126,6 @@ pub struct ResponseMeta {
 //
 // dry_run mode returns a plan without executing, letting agents confirm
 // safety before side-effecting operations.
-
-/// Risk level estimated from the IR's effect taxonomy.
-/// Ordered by severity: Pure < ReadOnly < Mutating < Destructive.
-#[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
-#[serde(rename_all = "snake_case")]
-pub enum RiskLevel {
-    /// Pure computation, no side effects.
-    Pure,
-    /// Read-only side effects (file read, sys info, proc list).
-    ReadOnly,
-    /// Mutating side effects (file write, http post).
-    Mutating,
-    /// Destructive/irreversible (file delete, proc kill).
-    Destructive,
-}
-
-/// Preflight analysis result. Returned by `dry_run` or attached to normal
-/// responses as part of `AgentResponse.plan`.
-#[derive(Debug, Clone, Serialize)]
-pub struct ExecutionPlan {
-    /// Builtin names that will be called (static, ordered by first occurrence).
-    pub builtins_called: Vec<String>,
-    /// Capability tokens required (deduplicated).
-    pub capabilities_required: Vec<String>,
-    /// Effect classes touched.
-    pub effects: Vec<String>,
-    /// Aggregate risk level (highest among effects).
-    pub risk_level: RiskLevel,
-    /// Estimated side-effect categories.
-    pub side_effects: Vec<String>,
-    /// Number of IR nodes (rough cost proxy).
-    pub node_count: usize,
-}
 
 /// A single execution event for tracing. Re-exported from `env.rs` (defined
 /// there to avoid a circular dependency, since `ir.rs` needs to push events).
@@ -337,6 +305,14 @@ impl AgentRuntime {
         let cached_ast = self.cache.get_ast(&req.cmd);
         let cache_hit = cached_ast.is_some();
 
+        // ── Compiled IR cache (v0.6.0) — if we have a cached AST,
+        //     check whether the IR + plan is also cached ────────
+        let cached_ir = if cache_hit {
+            self.cache.get_compiled(&req.cmd)
+        } else {
+            None
+        };
+
         let stmts_to_run = match cached_ast {
             Some(stmts) => Some(stmts),
             None => match crate::parser::parse_program(&req.cmd) {
@@ -374,13 +350,19 @@ impl AgentRuntime {
         };
 
         // ── Phase 1: Compile IR + preflight analysis ───────
-        // Compile AST → IR once, then reuse for both preflight and execution.
-        // The preflight produces an ExecutionPlan (builtins, capabilities,
-        // effects, risk level) without side effects.
-        let ir_plan = if let Some(ref stmts) = stmts_to_run {
+        // v0.6.0: skip compile/optimize/preflight on IR cache hit.
+        let ir_plan: Option<(Arc<[IRNode]>, ExecutionPlan)> = if let Some(cu) = &cached_ir {
+            Some((Arc::clone(&cu.ir), (*cu.plan).clone()))
+        } else if let Some(ref stmts) = stmts_to_run {
             let compiler = IRCompiler::new(true);
             let ir = compiler.compile_program(stmts);
             let plan = build_execution_plan(&ir);
+            let ir: Arc<[IRNode]> = Arc::from(ir);
+            let cu = crate::cache::CompiledUnit {
+                ir: Arc::clone(&ir),
+                plan: Arc::new(plan.clone()),
+            };
+            self.cache.put_compiled(req.cmd.clone(), cu);
             Some((ir, plan))
         } else {
             None
@@ -492,7 +474,7 @@ impl AgentRuntime {
         // collector is a Vec that ir.rs::eval pushes ExecutionEvents into.
         env.trace = if req.trace { Some(Vec::new()) } else { None };
         let result = if let Some((ir, _)) = &ir_plan {
-            IREvaluator::eval_program(ir, &mut env)
+            IREvaluator::eval_program(ir.as_ref(), &mut env)
         } else {
             Err(anyhow::anyhow!("internal: no statements to execute"))
         };
@@ -508,21 +490,24 @@ impl AgentRuntime {
         let plan_data = ir_plan.as_ref().map(|(_, p)| p.clone());
 
         match result {
-            Ok(val) => AgentResponse {
-                id: req.id,
-                ok: true,
-                value: Some(val.to_json()),
-                error: None,
-                meta: ResponseMeta {
-                    elapsed_ms,
-                    agent: agent_id,
-                    cache_hit: Some(cache_hit),
-                    budget_used: None,
-                    session_age_ms,
-                },
-                plan: plan_data,
-                trace: trace_data,
-                rule_decision: None,
+            Ok(val) => {
+                let (value, budget_used) = response_value_with_budget(val, req.budget);
+                AgentResponse {
+                    id: req.id,
+                    ok: true,
+                    value: Some(value),
+                    error: None,
+                    meta: ResponseMeta {
+                        elapsed_ms,
+                        agent: agent_id,
+                        cache_hit: Some(cache_hit),
+                        budget_used,
+                        session_age_ms,
+                    },
+                    plan: plan_data,
+                    trace: trace_data,
+                    rule_decision: None,
+                }
             },
             Err(e) => {
                 let msg = e.to_string();
@@ -592,16 +577,17 @@ impl AgentRuntime {
                 "sys.info()" => snap.sys_info.clone(),
                 _ => return None,
             };
+            let (value, budget_used) = response_value_with_budget(val, req.budget);
             Some(AgentResponse {
                 id: req.id.clone(),
                 ok: true,
-                value: Some(val.to_json()),
+                value: Some(value),
                 error: None,
                 meta: ResponseMeta {
                     elapsed_ms: 0,
                     agent: agent_id.to_string(),
                     cache_hit: Some(true),
-                    budget_used: None,
+                    budget_used,
                     session_age_ms: 0,
                 },
                 plan: None,
@@ -724,7 +710,7 @@ impl AgentRuntime {
             return Arc::clone(s);
         }
         if sessions.len() >= self.config.max_sessions {
-            if let Some(oldest) = sessions.iter().min_by_key(|(_, s)| s.idle_ms()) {
+            if let Some(oldest) = sessions.iter().max_by_key(|(_, s)| s.idle_ms()) {
                 let id = oldest.0.clone();
                 sessions.remove(&id);
             }
@@ -743,21 +729,35 @@ impl AgentRuntime {
     }
 
     pub fn full_stats(&self) -> RuntimeStats {
-        let cs = self.cache.stats.read().unwrap();
+        let snap = self.cache.snapshot_stats();
         RuntimeStats {
             sessions: self.sessions.read().unwrap().len(),
             total_requests: self.total_requests.load(Ordering::Relaxed),
-            ast_hits: cs.ast_hits,
-            ast_misses: cs.ast_misses,
-            sys_hits: cs.sys_hits,
-            sys_misses: cs.sys_misses,
-            ast_cache_size: self.cache.ast.read().unwrap().entries.len(),
+            ast_hits: snap.ast_hits,
+            ast_misses: snap.ast_misses,
+            sys_hits: snap.sys_hits,
+            sys_misses: snap.sys_misses,
+            ast_cache_size: snap.ast_cache_size,
             uptime_ms: self.started_at.elapsed().as_millis() as u64,
         }
     }
 
     pub fn session_count(&self) -> usize {
         self.sessions.read().unwrap().len()
+    }
+}
+
+fn response_value_with_budget(value: Value, budget: Option<usize>) -> (serde_json::Value, Option<usize>) {
+    match budget.filter(|budget| *budget > 0) {
+        Some(max_tokens) => {
+            let budgeted = crate::builtins::budget_value(&value, max_tokens, 0);
+            let json = budgeted.to_json();
+            let used = serde_json::to_string(&json)
+                .ok()
+                .map(|text| crate::builtins::est_token_count(&text));
+            (json, used)
+        }
+        None => (value.to_json(), None),
     }
 }
 
@@ -1333,5 +1333,19 @@ mod tests {
         assert!(resp.ok);
         assert!(resp.plan.is_some(), "plan should be attached to normal responses");
         assert!(resp.trace.is_none(), "trace should be None when trace=false");
+    }
+
+    #[test]
+    fn compiled_cache_hit_preserves_value_and_plan() {
+        let rt = AgentRuntime::new(RuntimeConfig::default());
+        let first = rt.execute(exec_req("1 + 2", false, false));
+        let second = rt.execute(exec_req("1 + 2", false, false));
+        assert_eq!(first.value, second.value);
+        assert_eq!(second.meta.cache_hit, Some(true));
+        let first_plan = first.plan.unwrap();
+        let second_plan = second.plan.unwrap();
+        assert_eq!(first_plan.node_count, second_plan.node_count);
+        assert_eq!(first_plan.risk_level, second_plan.risk_level);
+        assert_eq!(first_plan.effects, second_plan.effects);
     }
 }

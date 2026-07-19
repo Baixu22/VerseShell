@@ -158,7 +158,8 @@ impl JobScheduler {
         scheduler
     }
 
-    /// Submit a job for execution. Returns false if the agent's CPU quota is exhausted.
+    /// Submit a job for execution. CPU quota limits concurrently running work;
+    /// queued work is accepted so brief bursts are not dropped.
     pub fn submit(
         &self,
         agent_id: &str,
@@ -170,11 +171,9 @@ impl JobScheduler {
             return false;
         }
 
-        // Check agent quota
+        // Ensure quota/accounting exists. The slot is acquired by a worker
+        // immediately before execution, not while the job is merely queued.
         let quota = self.get_or_create_quota(agent_id);
-        if !quota.try_acquire() {
-            return false; // CPU budget exhausted
-        }
         quota.total_submitted.fetch_add(1, Ordering::Relaxed);
 
         let scheduled = ScheduledJob {
@@ -335,6 +334,10 @@ fn worker_loop(worker: Arc<Worker>, scheduler: Arc<JobScheduler>) {
 }
 
 fn execute_job(worker: &Worker, scheduler: &JobScheduler, job: ScheduledJob) {
+    let quota = scheduler.get_or_create_quota(&job.agent_id);
+    while !quota.try_acquire() {
+        thread::sleep(Duration::from_millis(1));
+    }
     let start = Instant::now();
     (job.job)();
     let elapsed_us = start.elapsed().as_micros() as u64;
@@ -393,7 +396,7 @@ mod tests {
         let s = JobScheduler::new(2, 4, 1024 * 1024);
         let counter = Arc::new(AtomicU64::new(0));
 
-        for i in 0..10 {
+        for _ in 0..10 {
             let c = Arc::clone(&counter);
             assert!(s.submit("agent-a", Priority::Normal, Box::new(move || {
                 c.fetch_add(1, Ordering::Relaxed);
@@ -411,24 +414,22 @@ mod tests {
     #[test]
     fn test_quota_enforcement() {
         let s = JobScheduler::new(2, 1, 1024 * 1024); // cpu_budget=1 per agent
-        let counter = Arc::new(AtomicU64::new(0));
-
-        // Submit faster than workers can process — only 1 should be accepted per agent at a time
-        let mut accepted = 0;
+        let running = Arc::new(AtomicU64::new(0));
+        let max_running = Arc::new(AtomicU64::new(0));
         for _ in 0..5 {
-            let c = Arc::clone(&counter);
-            if s.submit("agent-a", Priority::Normal, Box::new(move || {
+            let running_now = Arc::clone(&running);
+            let maximum = Arc::clone(&max_running);
+            assert!(s.submit("agent-a", Priority::Normal, Box::new(move || {
+                let active = running_now.fetch_add(1, Ordering::SeqCst) + 1;
+                maximum.fetch_max(active, Ordering::SeqCst);
                 thread::sleep(Duration::from_millis(5));
-                c.fetch_add(1, Ordering::Relaxed);
-            }), 5000) {
-                accepted += 1;
-            }
+                running_now.fetch_sub(1, Ordering::SeqCst);
+            }), 5000));
         }
-        assert!(accepted >= 1, "at least one job should be accepted");
 
         thread::sleep(Duration::from_millis(100));
         s.shutdown();
-        assert!(counter.load(Ordering::Relaxed) > 0);
+        assert_eq!(max_running.load(Ordering::SeqCst), 1);
     }
 
     #[test]
@@ -436,20 +437,26 @@ mod tests {
         let s = JobScheduler::new(1, 4, 1024 * 1024);
         let order = Arc::new(Mutex::new(Vec::new()));
 
+        // Occupy the only worker so low/high are both queued before selection.
+        let (release_tx, release_rx) = std::sync::mpsc::channel();
+        s.submit("blocker", Priority::Normal, Box::new(move || {
+            let _ = release_rx.recv();
+        }), 1000);
+        thread::sleep(Duration::from_millis(5));
+
         // Submit low priority first, then high
         let o1 = Arc::clone(&order);
         s.submit("a", Priority::Low, Box::new(move || {
             o1.lock().unwrap().push("low");
         }), 1000);
 
-        thread::sleep(Duration::from_millis(2));
-
         let o2 = Arc::clone(&order);
         s.submit("a", Priority::High, Box::new(move || {
             o2.lock().unwrap().push("high");
         }), 1000);
 
-        thread::sleep(Duration::from_millis(20));
+        release_tx.send(()).unwrap();
+        thread::sleep(Duration::from_millis(30));
         s.shutdown();
 
         let ord = order.lock().unwrap();

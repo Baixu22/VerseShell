@@ -1,12 +1,12 @@
-[workspace]
+﻿[workspace]
 members = ["."]
 
 [package]
 name = "verseshell"
-version = "0.5.1"
+version = "1.0.0"
 edition = "2021"
 authors = ["VerseShell Contributors"]
-description = "A production-grade typed functional shell runtime for AI agents (v3 kernel)"
+description = "Agent-Computer Interface runtime: typed ops, bounded observations, safe local execution"
 license = "AGPL-3.0-or-later"
 repository = "https://github.com/nervosys/verseshell"
 keywords = ["shell", "functional", "typed", "agent", "runtime", "ir"]
@@ -63,6 +63,7 @@ dirs = "5.0"
 hex = "0.4"
 sysinfo = "0.33"
 regex = "1.10"
+encoding_rs = "0.8"
 md5 = "0.7"
 secrecy = { version = "0.8", features = ["serde"] }
 zeroize = "1.7"
@@ -90,6 +91,15 @@ reqwest = { version = "0.12", features = [
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
 
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_Globalization",
+    "Win32_Security",
+    "Win32_System_JobObjects",
+    "Win32_System_Threading",
+] }
+
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 
@@ -108,4 +118,9 @@ harness = false
 [[bench]]
 name = "pipeline_performance"
 harness = false
+
+[[bench]]
+name = "observation_performance"
+harness = false
+
 

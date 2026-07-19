@@ -14349,8 +14349,6 @@ fn parse_rlm_config(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 ///
 /// SECURITY: Gated behind AETHER_ALLOW_SH=true environment variable.
 fn bi_sh(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
-    use std::process::Command;
-
     // Security gate: require explicit opt-in
     validate_sh_allowed()?;
 
@@ -14409,36 +14407,23 @@ fn bi_sh(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     })?;
 
     let timeout_secs = current_timeout_secs();
-    let mut child = Command::new(&program)
-        .args(&cmd_args)
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
-        .spawn()
-        .with_context(|| format!("sh: failed to execute '{}'", program))?;
+    let mut argv = Vec::with_capacity(cmd_args.len() + 1);
+    argv.push(program.clone());
+    argv.extend(cmd_args.clone());
+    let cwd = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
+    let output = crate::process_runner::run(
+        &argv,
+        &cwd,
+        &crate::process_runner::ExecLimits {
+            timeout_ms: timeout_secs.saturating_mul(1000),
+            ..Default::default()
+        },
+    )
+    .with_context(|| format!("sh: failed to execute '{}'", program))?;
 
-    // Start a killer thread that terminates the process after timeout
-    let pid = child.id();
-    let timeout_secs_copy = timeout_secs;
-    let _killer = std::thread::spawn(move || {
-        std::thread::sleep(std::time::Duration::from_secs(timeout_secs_copy));
-        #[cfg(windows)]
-        { let _ = std::process::Command::new("taskkill").args(["/F", "/PID", &pid.to_string()]).stdout(std::process::Stdio::null()).stderr(std::process::Stdio::null()).output(); }
-        #[cfg(unix)]
-        unsafe { libc::kill(pid as i32, libc::SIGTERM); }
-    });
-
-    let status = child.wait()
-        .with_context(|| format!("sh: failed to execute '{}'", program))?;
-    let mut stdout_buf = Vec::new();
-    let mut stderr_buf = Vec::new();
-    use std::io::Read;
-    child.stdout.as_mut().map(|out| out.read_to_end(&mut stdout_buf));
-    child.stderr.as_mut().map(|out| out.read_to_end(&mut stderr_buf));
-
-    if !status.success() && status.code() == None {
+    if output.timed_out {
         return Err(anyhow!("sh: command '{}' timed out after {}s", program, timeout_secs));
     }
-    let output = std::process::Output { status, stdout: stdout_buf, stderr: stderr_buf };
 
     // Audit log the execution
     eprintln!(
@@ -14446,19 +14431,17 @@ fn bi_sh(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
         program, cmd_args
     );
 
+    let stdout_display = output.stdout.text.clone().unwrap_or_else(|| String::from_utf8_lossy(&output.stdout.bytes).into_owned());
+    let stderr_display = output.stderr.text.clone().unwrap_or_else(|| String::from_utf8_lossy(&output.stderr.bytes).into_owned());
+    let success = output.exit_code == 0;
+
     let mut record = BTreeMap::new();
-    record.insert(
-        "stdout".to_string(),
-        Value::Str(String::from_utf8_lossy(&output.stdout).to_string()),
-    );
-    record.insert(
-        "stderr".to_string(),
-        Value::Str(String::from_utf8_lossy(&output.stderr).to_string()),
-    );
-    record.insert("success".to_string(), Value::Bool(output.status.success()));
+    record.insert("stdout".to_string(), Value::Str(stdout_display));
+    record.insert("stderr".to_string(), Value::Str(stderr_display));
+    record.insert("success".to_string(), Value::Bool(success));
     record.insert(
         "exit_code".to_string(),
-        Value::Int(output.status.code().unwrap_or(-1) as i64),
+        Value::Int(output.exit_code as i64),
     );
 
     Ok(Value::Record(record))

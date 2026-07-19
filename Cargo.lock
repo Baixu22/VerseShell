@@ -3139,7 +3139,7 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "verseshell"
-version = "0.5.0"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "base64 0.21.7",
@@ -3149,6 +3149,7 @@ dependencies = [
  "crossterm",
  "csv",
  "dirs",
+ "encoding_rs",
  "flate2",
  "futures",
  "getrandom 0.2.17",
@@ -3178,6 +3179,7 @@ dependencies = [
  "uuid",
  "walkdir",
  "which",
+ "windows-sys 0.59.0",
  "zeroize",
 ]
 

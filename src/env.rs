@@ -4,54 +4,53 @@ use std::path::{Path, PathBuf};
 use crate::value::Value;
 
 /// A single execution event for tracing. One per IR node evaluated.
-/// Defined here (not in runtime.rs) to avoid a circular dependency:
-/// ir.rs depends on env.rs, and ir.rs needs to push trace events.
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct ExecutionEvent {
-    /// IR node variant name (e.g. "Builtin", "If", "Pipeline").
     pub node_type: String,
-    /// For Builtin nodes: the builtin name. None otherwise.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub builtin_name: Option<String>,
-    /// Elapsed time for this node in microseconds.
     pub elapsed_us: u64,
-    /// Whether this node's evaluation succeeded.
     pub ok: bool,
-    /// Short result summary (truncated to 200 chars).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub result_summary: Option<String>,
 }
 
-/// Process/runtime environment for the Aether evaluator & builtins.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn with_frame_restores_bindings_after_error() {
+        let mut env = Env::new();
+        env.set_var_unchecked("x", Value::Int(1));
+        let result: Result<(), &'static str> = env.with_frame(&[("x", Value::Int(2))], |env| {
+            assert_eq!(env.get_var("x"), Some(&Value::Int(2)));
+            Err("stop")
+        });
+        assert!(result.is_err());
+        assert_eq!(env.get_var("x"), Some(&Value::Int(1)));
+    }
+}
+
+/// Runtime environment for the evaluator & builtins.
 ///
-/// - Stores variables (including the pipeline slot `__pipe_input__`)
-/// - Tracks mutability: variables are immutable by default
-/// - Tracks visibility: variables are private by default, `pub` makes them exportable
-/// - Optionally tracks a current working directory (cwd)
+/// v0.6.0: Added frame stack for scoped variable bindings — pipeline stages
+/// push/pop frames instead of cloning the entire environment.
 #[derive(Debug, Default, Clone)]
 pub struct Env {
     vars: BTreeMap<String, Value>,
-    /// Track which variables are mutable (created with `let mut`)
     mutable_vars: BTreeMap<String, bool>,
-    /// Track which variables are public (can be imported by other modules)
     public_vars: HashSet<String>,
-    /// Explicitly exported names (from `export { ... }` statements)
     exported_names: HashSet<String>,
     cwd: Option<PathBuf>,
     pipe_input: Option<Value>,
-    /// Per-request deadline. When `Some(t)`, IR evaluation checks `t` at each
-    /// node and returns `Err("timeout: deadline exceeded")` if exceeded.
-    /// Injected by `AgentRuntime::execute` from `AgentRequest.timeout_ms`.
-    /// `None` means no deadline (used by REPL, tests, non-agent paths).
     pub deadline: Option<std::time::Instant>,
-    /// Per-request trace collector. When `Some(v)`, IR evaluation pushes an
-    /// `ExecutionEvent` for each node evaluated. Injected by
-    /// `AgentRuntime::execute` when `AgentRequest.trace == true`.
     pub trace: Option<Vec<ExecutionEvent>>,
+    /// v0.6.0: scoped variable frame stack
+    frames: Vec<BTreeMap<String, Value>>,
 }
 
 impl Env {
-    /// Create a fresh environment.
     pub fn new() -> Self {
         Self {
             vars: BTreeMap::new(),
@@ -62,15 +61,64 @@ impl Env {
             pipe_input: None,
             deadline: None,
             trace: None,
+            frames: Vec::new(),
         }
     }
 
-    /// Register a module as an immutable global variable.
-    /// Used by the module system to provide namespaced access to builtins.
+    // ── v0.6.0: Scoped frame push/pop ──────────────────────────────────
+
+    pub fn push_frame(&mut self, bindings: &[(&str, Value)]) {
+        let mut frame = BTreeMap::new();
+        for (name, val) in bindings {
+            frame.insert(name.to_string(), val.clone());
+        }
+        self.frames.push(frame);
+    }
+
+    pub fn pop_frame(&mut self) {
+        self.frames.pop();
+    }
+
+    /// Evaluate a closure with temporary lexical bindings. The frame is always
+    /// removed when the closure returns, including `Result::Err` and early `?`.
+    pub fn with_frame<T>(
+        &mut self,
+        bindings: &[(&str, Value)],
+        f: impl FnOnce(&mut Self) -> T,
+    ) -> T {
+        self.push_frame(bindings);
+        let result = f(self);
+        self.pop_frame();
+        result
+    }
+
+    /// Lookup scans frames (innermost first), then base `vars`.
+    pub fn get_var(&self, name: &str) -> Option<&Value> {
+        for frame in self.frames.iter().rev() {
+            if let Some(v) = frame.get(name) {
+                return Some(v);
+            }
+        }
+        self.vars.get(name)
+    }
+
+    /// Unchecked set — writes into the innermost frame, or base vars.
+    pub fn set_var_unchecked(&mut self, name: &str, value: Value) {
+        if let Some(frame) = self.frames.last_mut() {
+            frame.insert(name.to_string(), value);
+        } else {
+            self.vars.insert(name.to_string(), value);
+        }
+    }
+
+    // ── Module registration ────────────────────────────────────────────
+
     pub fn register_module(&mut self, name: &str, module: Value) {
         self.vars.insert(name.to_string(), module);
         self.mutable_vars.insert(name.to_string(), false);
     }
+
+    // ── Pipeline input ─────────────────────────────────────────────────
 
     pub fn input(&self) -> Option<&Value> {
         self.pipe_input.as_ref()
@@ -81,28 +129,15 @@ impl Env {
     pub fn take_input(&mut self) -> Option<Value> {
         self.pipe_input.take()
     }
-    /// Clears the current pipeline input value
     pub fn clear_input(&mut self) {
         self.pipe_input = None;
     }
 
-    // -------------------------
-    // Variable accessors
-    // -------------------------
+    // ── Variable accessors ─────────────────────────────────────────────
 
-    /// Immutable lookup. Works on `&Env` (what your error needed).
-    pub fn get_var(&self, name: &str) -> Option<&Value> {
-        self.vars.get(name)
-    }
-
-    /// Set a new variable or reassign if mutable.
-    /// Returns error if trying to reassign an immutable variable.
     pub fn set_var<S: Into<String>>(&mut self, name: S, value: Value) -> Result<(), String> {
         let name_str = name.into();
-
-        // Check if variable already exists
         if self.vars.contains_key(&name_str) {
-            // Check mutability
             if !self.is_mutable(&name_str) {
                 return Err(format!(
                     "Cannot reassign immutable variable '{}'. Use 'let mut {}' to make it mutable.",
@@ -110,13 +145,10 @@ impl Env {
                 ));
             }
         }
-
         self.vars.insert(name_str, value);
         Ok(())
     }
 
-    /// Declare a new variable with specified mutability.
-    /// This is used for initial `let` or `let mut` declarations.
     pub fn declare_var<S: Into<String>>(
         &mut self,
         name: S,
@@ -124,112 +156,94 @@ impl Env {
         is_mut: bool,
     ) -> Result<(), String> {
         let name_str = name.into();
-
-        // Check if variable already exists
         if self.vars.contains_key(&name_str) {
-            // If existing variable is immutable, prevent shadowing/reassignment
             if !self.is_mutable(&name_str) {
                 return Err(format!(
                     "Cannot reassign immutable variable '{}'. Use 'let mut {}' to make it mutable.",
                     name_str, name_str
                 ));
             }
-            // If mutable, allow update but preserve mutability
             self.vars.insert(name_str, value);
             return Ok(());
         }
-
-        // New variable - set value and mutability
         self.vars.insert(name_str.clone(), value);
         self.mutable_vars.insert(name_str, is_mut);
         Ok(())
     }
 
-    /// Internal use only: Set a variable without mutability checks.
-    /// Used for pattern matching, lambda params, builtins, etc.
-    pub(crate) fn set_var_unchecked<S: Into<String>>(&mut self, name: S, value: Value) {
+    pub(crate) fn set_var_unchecked_compat<S: Into<String>>(&mut self, name: S, value: Value) {
         let name_str = name.into();
         self.vars.insert(name_str.clone(), value);
-        // Mark as mutable for internal bindings
         self.mutable_vars.insert(name_str, true);
     }
 
-    /// Check if a variable is mutable
-    pub fn is_mutable(&self, name: &str) -> bool {
-        self.mutable_vars.get(name).copied().unwrap_or(false)
-    }
-
-    /// Check if a variable is public (can be imported)
-    pub fn is_public(&self, name: &str) -> bool {
-        self.public_vars.contains(name)
-    }
-
-    /// Check if a variable is exported (either pub or explicitly exported)
-    pub fn is_exported(&self, name: &str) -> bool {
-        self.public_vars.contains(name) || self.exported_names.contains(name)
-    }
-
-    /// Mark a variable as public
-    pub fn set_public(&mut self, name: &str) {
-        self.public_vars.insert(name.to_string());
-    }
-
-    /// Add an explicit export
     pub fn add_export(&mut self, name: &str) {
         self.exported_names.insert(name.to_string());
     }
 
-    /// Get all exported variable names (pub vars + explicit exports)
-    pub fn exports(&self) -> impl Iterator<Item = &String> {
-        self.public_vars.iter().chain(self.exported_names.iter())
-    }
-
-    /// Get exported variables as a map (for import "path" as mod)
-    pub fn exported_vars(&self) -> BTreeMap<String, Value> {
-        let mut exports = BTreeMap::new();
-        for name in self.exports() {
-            if let Some(value) = self.vars.get(name) {
-                exports.insert(name.clone(), value.clone());
-            }
-        }
-        exports
-    }
-
-    /// Delete a variable if present.
     pub fn del_var(&mut self, name: &str) {
         self.vars.remove(name);
+        self.mutable_vars.remove(name);
+        self.public_vars.remove(name);
+        // Also remove from frames
+        for frame in self.frames.iter_mut().rev() {
+            frame.remove(name);
+        }
     }
 
-    /// Mutable lookup (if you ever need to mutate a stored value in place).
-    pub fn get_var_mut(&mut self, name: &str) -> Option<&mut Value> {
-        self.vars.get_mut(name)
+    pub fn is_mutable(&self, name: &str) -> bool {
+        self.mutable_vars.get(name).copied().unwrap_or(false)
     }
 
-    /// Take (remove and return) a variable. Handy for temporary slots.
+    pub fn is_public(&self, name: &str) -> bool {
+        self.public_vars.contains(name)
+    }
+
+    pub fn set_public(&mut self, name: &str, is_public: bool) {
+        if is_public {
+            self.public_vars.insert(name.to_string());
+        } else {
+            self.public_vars.remove(name);
+        }
+    }
+
+    pub fn export(&mut self, name: &str) {
+        self.exported_names.insert(name.to_string());
+    }
+
+    pub fn is_exported(&self, name: &str) -> bool {
+        self.exported_names.contains(name)
+    }
+
+    pub fn exported_names(&self) -> &HashSet<String> {
+        &self.exported_names
+    }
+
+    pub fn remove_var(&mut self, name: &str) {
+        self.vars.remove(name);
+        self.mutable_vars.remove(name);
+        self.public_vars.remove(name);
+        self.exported_names.remove(name);
+    }
+
     pub fn take_var(&mut self, name: &str) -> Option<Value> {
         self.vars.remove(name)
     }
 
-    /// Expose the whole map if some builtin needs to iterate (read-only).
     pub fn vars(&self) -> &BTreeMap<String, Value> {
         &self.vars
     }
 
-    /// Expose mutable map (use sparingly).
     pub fn vars_mut(&mut self) -> &mut BTreeMap<String, Value> {
         &mut self.vars
     }
 
-    // -------------------------
-    // Working directory helpers
-    // -------------------------
+    // ── Working directory ──────────────────────────────────────────────
 
-    /// Get current working directory tracked by the shell (if any).
     pub fn cwd(&self) -> Option<&Path> {
         self.cwd.as_deref()
     }
 
-    /// Set current working directory tracked by the shell.
     pub fn set_cwd<P: Into<PathBuf>>(&mut self, p: P) {
         self.cwd = Some(p.into());
     }

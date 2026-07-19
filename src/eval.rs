@@ -193,7 +193,7 @@ pub fn eval_stmt(stmt: &Stmt, env: &mut Env) -> Result<Value> {
 
             // Mark as public if visibility is Pub
             if *visibility == Visibility::Pub {
-                env.set_public(name);
+                env.set_public(name, true);
             }
 
             Ok(v)
@@ -964,7 +964,7 @@ fn binop(op: &BinOp, a: Value, b: Value) -> Result<Value> {
 }
 
 /// Interpolate ${expr} patterns in a string
-fn interpolate_string(s: &str, env: &mut Env) -> Result<Value> {
+pub(crate) fn interpolate_string(s: &str, env: &mut Env) -> Result<Value> {
     let mut result = String::new();
     let mut chars = s.chars().peekable();
 

@@ -118,6 +118,27 @@ fn content_length_framing_supports_initialize_and_tools_list() {
     assert!(tool_names.contains(&"health"));
     assert!(tool_names.contains(&"exec"));
     assert!(tool_names.contains(&"list_commands"));
+    assert!(tool_names.contains(&"exec_run"));
+    assert!(tool_names.contains(&"result_query"));
+}
+
+#[test]
+fn exec_run_returns_observation_structured_content() {
+    #[cfg(windows)]
+    let argv = serde_json::json!(["cmd", "/C", "echo hello"]);
+    #[cfg(not(windows))]
+    let argv = serde_json::json!(["sh", "-c", "echo hello"]);
+    let body = serde_json::json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {"name": "exec_run", "arguments": {"argv": argv, "cwd": "."}}
+    });
+    let responses = parse_json_lines(&run_mcp(&(body.to_string() + "\n")));
+    let result = &responses[0]["result"];
+    assert_eq!(result["isError"], false);
+    assert_eq!(result["structuredContent"]["schema"], "verseshell.observation/v1");
+    assert_eq!(result["structuredContent"]["data"]["exit_code"], 0);
 }
 
 #[test]

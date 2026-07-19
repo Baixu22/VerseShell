@@ -1,12 +1,32 @@
-# VerseShell v0.5.1 — Typed Functional Shell Runtime for AI Agents
+# VerseShell v1.0 — Agent-Computer Interface Runtime
 
-A production-grade, deterministic shell runtime with a typed functional
-pipeline language and unified IR-native execution engine. Built in Rust
-for AI agents to interact with systems safely and reliably.
+A local-systems runtime designed around the information an AI agent actually
+needs: typed actions, bounded structured observations, explicit failures,
+recoverable raw-output artifacts, and safe process-tree execution.
 
-VerseShell is **not** a bash-compatible text shell. Its `|` passes typed
-values between functions — not OS pipes. Process execution is explicit
-via `shell.exec([...])`.
+The primary Agent contract is the versioned **typed operation** API
+(`op` + `verseshell.observation/v1`). `exec.run` / `result.query` remain the
+process I/O spine; File / Tx / Repo / Test ops complete the 1.0 ACI surface.
+The VerseShell language remains a typed orchestration DSL and compatibility
+layer; it is **not** a bash-compatible text shell.
+
+### Coder Agent op checklist
+
+| Task | Op |
+|------|-----|
+| Run command | `exec.run` |
+| Inspect large logs | `result.query` |
+| Read code window | `file.view` / `file.read_range` |
+| Exact edit | `file.replace_exact` / `file.edit_range` |
+| Search repo | `repo.search` |
+| Changed files | `repo.changed_files` |
+| Safe delete | `file.remove` → `tx.restore` |
+| Transaction | `tx.begin` / `tx.commit` / `tx.rollback` |
+| Tests | `test.discover` / `test.run_target` |
+| List ops | `ops.list` |
+
+Legacy `cmd` / `eval` / language builtins remain available as a secondary path.
+Agent-mode `exec.run` / `test.run_target` require approval (`E_NEEDS_APPROVAL` + `error.hint`). For local CI use `AETHER_APPROVE_ALL=1`; see [docs/1.0-aci.md](docs/1.0-aci.md). Closed-loop gate: `tests/aci_1_0_closed_loop_acceptance.rs`.
 
 ---
 
@@ -29,6 +49,9 @@ via `shell.exec([...])`.
 - [Architecture](#architecture)
 - [Performance](#performance)
 - [Building & Testing](#building--testing)
+- [Changelog](CHANGELOG.md)
+- [1.0 ACI Surface](docs/1.0-aci.md)
+- [0.6 Migration](docs/0.6-migration.md)
 
 ---
 
@@ -48,6 +71,22 @@ ae --agent --workspace /tmp -c 'file.write("out.txt", "hello")'
 
 # Bash transpilation: write bash, get VerseShell
 ae -b -c "echo hello && echo world"
+
+# Preferred Agent API: typed ops + Observation (approve exec in agent mode for CI)
+AETHER_APPROVE_ALL=1 AETHER_MODE=agent AETHER_WORKSPACE=. \
+  ae --serve --agent <<'EOF'
+{"id":"1","agent":"coder","op":"file.view","args":{"path":"README.md","cursor":1,"window":40}}
+{"id":"2","agent":"coder","op":"exec.run","args":{"argv":["cargo","check"]}}
+EOF
+```
+
+Windows (cmd, UTF-8 no BOM):
+
+```bat
+set AETHER_APPROVE_ALL=1
+set AETHER_MODE=agent
+set AETHER_WORKSPACE=.
+echo {"id":"1","agent":"coder","op":"ops.list","args":{}}| ae --serve --agent
 ```
 
 ---
@@ -122,7 +161,9 @@ Use `arr.keys(module)` to list method names.
 
 ### Process Execution
 
-VerseShell does NOT auto-spawn child processes. External commands are explicit:
+For new Agent integrations, use typed `exec.run`: it drains stdout/stderr
+concurrently, applies an observation budget, and returns artifact handles for
+reduced output. `shell.exec` remains available as the legacy DSL escape hatch:
 
 ```bash
 # Preferred: argv array form (safe, no shell parsing)
@@ -135,7 +176,7 @@ ae -c 'shell.exec("rg --files .")'
 ae -c 'shell.exec(["bash", "-lc", "rg --files | rg README"])'
 ```
 
-The argv form is always preferred for agents — it avoids quoting bugs and
+The argv form is always preferred — it avoids quoting bugs and
 shell injection risks. The string shorthand supports simple `cmd arg arg`
 only; it does NOT handle pipes, `$()`, `&&`, redirections, or glob expansion.
 
@@ -236,6 +277,8 @@ try {
 ---
 
 ## Agent Quick Reference
+
+Full typed-op catalog: [docs/1.0-aci.md](docs/1.0-aci.md). MCP tool names replace `.` with `_` (e.g. `file_view`).
 
 The ~50 most-used builtins for AI agent tasks. Use `ae --core` to print
 this list at the CLI, or `list_commands(core=true)` via MCP.
@@ -503,6 +546,42 @@ ae --serve --format compact
 Requests are one JSON object per line on stdin. Responses are one JSON object
 per line on stdout.
 
+The server accepts both the legacy `cmd` protocol and the v0.6 typed operation
+protocol. Existing clients remain compatible; new clients should use `op`.
+
+**Typed operation request:**
+
+```json
+{
+  "id": "req-1",
+  "agent": "coder",
+  "op": "exec.run",
+  "args": {
+    "argv": ["npm", "install"],
+    "cwd": ".",
+    "profile": "auto",
+    "artifact": "auto"
+  },
+  "timeout_ms": 30000,
+  "budget": {"max_tokens": 4000}
+}
+```
+
+The response uses `verseshell.observation/v1` (v0.6.1 observation quality):
+
+- **Success silence** for noisy profiles (`npm_install`, `cargo`, `python_install`,
+  `pytest`, `msbuild`): model-visible stream has `status: "reduced"`, a short
+  `summary` (<=120 tokens / <=4 lines), and **no full log text**. Progress noise is dropped.
+- **Failure focus**: non-zero exits surface an error window (not a uniform head/tail of
+  the whole log). Structured `diagnostics` and `suggested_next` -> `result.query` grep.
+- **ANSI stripped** before reduce/truncate; omitted content is always explicit.
+- **git** is auto-detected; large status/diff/log output is reduced or truncated rather
+  than dumped into context.
+- Full raw output is always recoverable via `stdout.artifact` / `stderr.artifact` with
+  `result.query` (`meta`, `head`, `tail`, `slice`, `grep`, or bounded `raw`).
+
+**Legacy request:**
+
 **Request:**
 ```json
 {"id": "req-1", "agent": "planner", "cmd": "sys.cpu_info()", "timeout_ms": 5000}
@@ -621,7 +700,7 @@ ae --agent --workspace /tmp -c 'file.write("out.txt", "data")'
 
 ## MCP Integration
 
-VerseShell ships `ae-mcp` — a Model Context Protocol binary exposing 9 tools
+VerseShell ships `ae-mcp` — a Model Context Protocol binary exposing 11 tools
 for Claude Code, Codex, and other MCP clients.
 
 ### MCP Tools
@@ -631,6 +710,8 @@ for Claude Code, Codex, and other MCP clients.
 | `health` | Server version check |
 | `list_commands` | List all module.fn → builtin mappings (filter: `"core": true` for agent surface) |
 | `eval` / `exec` | Execute VerseShell source |
+| `exec_run` | Preferred typed argv execution returning an Observation |
+| `result_query` | Query `result://` artifacts without replaying full logs |
 | `system_snapshot` | One-shot CPU/mem/processes/disk/load snapshot |
 | `process_inspect` | Query processes with filter/sort/limit |
 | `process_terminate` | Kill process by PID with optional name confirmation |
@@ -651,7 +732,7 @@ ae-mcp
 ## Bash Transpiler
 
 `ae -b` transpiles bash to VerseShell before execution. Supported patterns
-in v0.5.1:
+in v0.6.0:
 
 | Pattern | Example | Transpiled To |
 |---------|---------|---------------|
@@ -692,12 +773,19 @@ Source text
         → IROptimizer (constant folding, pipeline fusion, map+filter fusion)
           → IREvaluator (ir.rs: single 28-arm match, unified v3 executor)
             → Value (value.rs: 15 runtime value variants)
+
+Typed Agent request
+  → OperationRegistry (exec / file / tx / repo / test / ops.list)
+    → src/ops/* handlers + ProcessRunner for exec.run
+      → Observation budget / trash / workspace jail
+        → verseshell.observation/v1 (+ artifacts when large)
 ```
 
 ### Source Layout
 
 ```
 src/
+├── ops/              # 1.0 ACI ops (file, tx, repo, test) + common helpers
 ├── main.rs           # CLI entry point (run/serve modes, --core flag)
 ├── lib.rs            # Module declarations
 ├── bin/ae-mcp.rs     # MCP server binary
@@ -707,7 +795,7 @@ src/
 ├── ir.rs             # V3 IR: IREvaluator, IREffect (22 types), IRCompiler, IROptimizer
 ├── eval.rs           # Legacy AST evaluator (backward compat)
 │
-├── builtins.rs       # 650+ builtin function implementations + Levenshtein hints
+├── builtins.rs       # Legacy/DSL builtin compatibility surface
 ├── modules.rs        # 26 namespaced module → builtin mappings + introspection
 ├── value.rs          # Runtime value system (Null, Bool, Int, Float, Str, Record, Array, ...)
 ├── env.rs            # Variable scope, module registry, deadline, trace
@@ -721,6 +809,10 @@ src/
 │
 ├── runtime.rs        # AgentRuntime: session pool, dispatch, stats, error classification
 ├── server.rs         # JSON-RPC stdio server (tokio async)
+├── operation.rs      # Versioned exec.run/result.query registry + observations
+├── process_runner.rs # Bounded process execution and process-tree termination
+├── artifact.rs       # TTL-managed content-addressed result store
+├── plan.rs           # Shared static ExecutionPlan types
 ├── scheduler.rs      # Work-stealing scheduler with priority queues + per-agent quotas
 ├── cache.rs          # GlobalCache: AST (never expires), SystemSnapshot (5s TTL)
 ├── config.rs         # Configuration management (TOML)
@@ -732,7 +824,7 @@ src/
 ├── mcp/              # MCP protocol implementation
 │   ├── mod.rs        # Module re-exports
 │   ├── server.rs     # Stdio MCP server
-│   ├── tools.rs      # 9 MCP tool implementations + CORE_BUILTINS filter
+│   ├── tools.rs      # 11 MCP tools, including exec_run/result_query
 │   ├── registry.rs   # Tool registry
 │   └── protocol.rs   # JSON-RPC 2.0 types
 │
@@ -747,6 +839,9 @@ src/
 ### Key Design Decisions
 
 - **Unified IR execution** (v3): All code paths (REPL, one-shot, server, MCP) go through `IREvaluator::eval_raw` — a single 28-arm match statement. No divergent execution paths.
+- **Operation-first Agent API** (v0.6): MCP and JSON-RPC share the same typed operation and observation implementation without source-code generation or reparsing.
+- **Raw output is an artifact**: model-visible output is bounded; omitted raw bytes are stored under `.ae/results` with a 24-hour TTL and explicit handles.
+- **Process-tree safety**: Windows Job Objects and Unix process groups terminate descendants on timeout and prevent orphaned Agent workloads.
 - **Effect-aware compilation**: Every builtin node carries an `IREffect` at compile time. Capability checks happen once at dispatch, not on every argument.
 - **Pipeline fusion** (v2): `map + map` → `FusedMapMap`, `map + filter` → `FusedMapFilter` — single-pass iteration, no intermediate allocations.
 - **Lock-free concurrency**: `RwLock<HashMap>` for session lookup, per-session `Mutex<Env>`. N agents execute in parallel.
@@ -762,10 +857,12 @@ Built-in optimizations for both throughput and latency:
 |-------------|--------|
 | IR optimizer | Constant folding (`1+2` → `3`), pipeline fusion (map+map → single pass) |
 | AST cache | 1024-entry global cache — identical commands skip re-parsing |
+| Compiled IR cache | Identical programs reuse real optimized IR and their complete preflight plan |
 | Snapshot cache | `sys.*` cached with configurable TTL (default 5s) |
 | `par_map` | Multi-threaded array processing (Rayon, auto thread count) |
 | Work-stealing scheduler | Priority queues, per-agent CPU/memory budgets |
 | Compact protocol | 50-70% token savings vs JSON for agent communication |
+| Observation Budget (0.6.1) | Success silence, failure windows, ANSI strip, git profile, explicit truncation, recoverable artifacts |
 | Arc-shared modules | O(1) session creation, no deep clone overhead |
 | Panic recovery | `catch_unwind` per request — crash isolation |
 
@@ -793,15 +890,33 @@ cargo bench -- --quick            # Quick mode (fewer samples)
 Requirements: Rust 1.75+
 
 ```bash
-cargo build --release                    # Release build (~13 MB)
-cargo test                                # Unit tests (116+)
-cargo test --test integration_tests       # 50 integration tests
-cargo test --test concurrent_performance_tests -- --nocapture
-cargo bench                               # 4 criterion benchmarks
-cargo doc --open                          # API documentation
+cargo build --release
+cargo test
 ```
 
----
+### 1.0 ACI acceptance gates
+
+```bash
+# Full Coder Agent closed loop (file/tx/repo/exec/test/trash)
+cargo test --test aci_1_0_closed_loop_acceptance -- --nocapture
+
+# Op surface slices + observation quality regression
+cargo test --test aci_1_0_ops_tests -- --nocapture
+cargo test --test operation_protocol_tests -- --nocapture
+```
+
+Agent-mode process ops need approval. For local/CI functional tests:
+
+```bash
+# Windows PowerShell
+$env:AETHER_APPROVE_ALL="1"
+# Unix
+export AETHER_APPROVE_ALL=1
+```
+
+JSON-RPC clients must send **UTF-8 without BOM** (line-delimited). Prefer raw byte stdin over PowerShell `Get-Content | ae`.
+
+See [docs/1.0-aci.md](docs/1.0-aci.md) for the full op surface and [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## License
 

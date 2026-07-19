@@ -1,14 +1,31 @@
-//! Global cache for AST, types, and system snapshots.
+//! Global cache for AST, compiled IR, and system snapshots.
 //!
 //! Thread-safe via `Arc<RwLock<>>` — designed for multi-agent concurrent access.
+//! v0.6.0: HashMap + VecDeque LRU (O(1) lookup), AtomicU64 stats, compiled IR cache.
 
 use crate::ast::Stmt;
+use crate::ir::IRNode;
+use crate::plan::ExecutionPlan;
+use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, RwLock};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 
-/// LRU-like bounded cache with TTL-based expiry.
+// ── Cached unit: pre-computed compiled IR + plan ─────────────────────
+
+/// A complete compiled program. Cache hits must be semantically identical to
+/// freshly compiled execution, including preflight metadata.
+#[derive(Clone)]
+pub struct CompiledUnit {
+    pub ir: Arc<[IRNode]>,
+    pub plan: Arc<ExecutionPlan>,
+}
+
+// ── LRU cache (v0.6.0: HashMap + VecDeque eviction order) ───────────
+
 pub struct TieredCache<V: Clone> {
-    pub entries: Vec<(String, CacheEntry<V>)>,
+    map: HashMap<String, CacheEntry<V>>,
+    order: VecDeque<String>, // front = most-recent, back = oldest
     max_entries: usize,
     ttl: Duration,
 }
@@ -21,15 +38,21 @@ pub struct CacheEntry<V> {
 impl<V: Clone> TieredCache<V> {
     pub fn new(max_entries: usize, ttl_ms: u64) -> Self {
         Self {
-            entries: Vec::with_capacity(max_entries),
+            map: HashMap::with_capacity(max_entries.min(256)),
+            order: VecDeque::with_capacity(max_entries.min(256)),
             max_entries,
             ttl: Duration::from_millis(ttl_ms),
         }
     }
 
-    pub fn get(&self, key: &str) -> Option<V> {
-        for (k, entry) in &self.entries {
-            if k == key && entry.inserted_at.elapsed() < self.ttl {
+    pub fn get(&mut self, key: &str) -> Option<V> {
+        if let Some(entry) = self.map.get(key) {
+            if entry.inserted_at.elapsed() < self.ttl {
+                // Promote to front (LRU touch)
+                if let Some(pos) = self.order.iter().position(|k| k == key) {
+                    self.order.remove(pos);
+                }
+                self.order.push_front(key.to_string());
                 return Some(entry.value.clone());
             }
         }
@@ -37,27 +60,31 @@ impl<V: Clone> TieredCache<V> {
     }
 
     pub fn insert(&mut self, key: String, value: V) {
-        // Remove existing entry if present
-        self.entries.retain(|(k, _)| k != &key);
-        // Insert at front (most recent)
-        self.entries.insert(
-            0,
-            (
-                key,
-                CacheEntry {
-                    value,
-                    inserted_at: Instant::now(),
-                },
-            ),
-        );
+        // Remove old entry
+        self.map.remove(&key);
+        self.order.retain(|k| k != &key);
+
+        self.map.insert(key.clone(), CacheEntry {
+            value,
+            inserted_at: Instant::now(),
+        });
+        self.order.push_front(key);
+
         // Evict oldest if over capacity
-        if self.entries.len() > self.max_entries {
-            self.entries.truncate(self.max_entries);
+        while self.order.len() > self.max_entries {
+            if let Some(oldest) = self.order.pop_back() {
+                self.map.remove(&oldest);
+            }
         }
+    }
+
+    pub fn len(&self) -> usize {
+        self.map.len()
     }
 }
 
-/// System information snapshot with TTL.
+// ── System snapshot (unchanged) ──────────────────────────────────────
+
 #[derive(Clone)]
 pub struct SystemSnapshot {
     pub cpu_info: crate::value::Value,
@@ -95,86 +122,141 @@ impl Default for SystemSnapshot {
     }
 }
 
-/// The global shared cache for agent runtime.
+// ── Global cache (v0.6.0: atomic stats, compiled IR tier) ────────────
+
 pub struct GlobalCache {
     /// AST cache: source code → parsed statements (never expires)
     pub ast: RwLock<TieredCache<Arc<Vec<Stmt>>>>,
+    /// Compiled IR cache: source → compiled IR + plan + caps (never expires)
+    pub compiled: RwLock<TieredCache<Arc<CompiledUnit>>>,
     /// System snapshot: cached sys_info results (TTL-based)
     pub sys: RwLock<SystemSnapshot>,
-    /// Stats counters
-    pub stats: RwLock<CacheStats>,
+    /// Stats counters (atomic — no write lock needed for increment)
+    pub stats: CacheStats,
 }
 
-#[derive(Default, Clone)]
 pub struct CacheStats {
-    pub ast_hits: u64,
-    pub ast_misses: u64,
-    pub sys_hits: u64,
-    pub sys_misses: u64,
-    pub total_requests: u64,
+    pub ast_hits: AtomicU64,
+    pub ast_misses: AtomicU64,
+    pub ir_hits: AtomicU64,
+    pub ir_misses: AtomicU64,
+    pub sys_hits: AtomicU64,
+    pub sys_misses: AtomicU64,
+    pub total_requests: AtomicU64,
 }
 
 impl GlobalCache {
-    pub fn new(max_ast_entries: usize, sys_ttl_ms: u64) -> Arc<Self> {
+    pub fn new(max_entries: usize, sys_ttl_ms: u64) -> Arc<Self> {
         Arc::new(Self {
-            ast: RwLock::new(TieredCache::new(max_ast_entries, u64::MAX)), // AST never expires
+            ast: RwLock::new(TieredCache::new(max_entries, u64::MAX)),
+            compiled: RwLock::new(TieredCache::new(max_entries, u64::MAX)),
             sys: RwLock::new(SystemSnapshot {
                 ttl: Duration::from_millis(sys_ttl_ms),
                 ..Default::default()
             }),
-            stats: RwLock::new(CacheStats::default()),
+            stats: CacheStats {
+                ast_hits: AtomicU64::new(0),
+                ast_misses: AtomicU64::new(0),
+                ir_hits: AtomicU64::new(0),
+                ir_misses: AtomicU64::new(0),
+                sys_hits: AtomicU64::new(0),
+                sys_misses: AtomicU64::new(0),
+                total_requests: AtomicU64::new(0),
+            },
         })
     }
 
-    /// Try to get parsed AST from cache.
+    // ── AST cache ──────────────────────────────────────────────────
+
     pub fn get_ast(&self, source: &str) -> Option<Arc<Vec<Stmt>>> {
-        let cache = self.ast.read().unwrap();
+        let mut cache = self.ast.write().unwrap();
         let result = cache.get(source);
-        let mut stats = self.stats.write().unwrap();
         if result.is_some() {
-            stats.ast_hits += 1;
+            self.stats.ast_hits.fetch_add(1, Ordering::Relaxed);
         } else {
-            stats.ast_misses += 1;
+            self.stats.ast_misses.fetch_add(1, Ordering::Relaxed);
         }
         result
     }
 
-    /// Store parsed AST in cache.
     pub fn put_ast(&self, source: String, stmts: Vec<Stmt>) {
         self.ast.write().unwrap().insert(source, Arc::new(stmts));
     }
 
-    /// Get cached system snapshot, or None if expired/empty.
+    // ── Compiled IR cache (v0.6.0) ─────────────────────────────────
+
+    pub fn get_compiled(&self, source: &str) -> Option<Arc<CompiledUnit>> {
+        let mut cache = self.compiled.write().unwrap();
+        let result = cache.get(source);
+        if result.is_some() {
+            self.stats.ir_hits.fetch_add(1, Ordering::Relaxed);
+        } else {
+            self.stats.ir_misses.fetch_add(1, Ordering::Relaxed);
+        }
+        result
+    }
+
+    pub fn put_compiled(&self, source: String, unit: CompiledUnit) {
+        self.compiled.write().unwrap().insert(source, Arc::new(unit));
+    }
+
+    // ── System snapshot ────────────────────────────────────────────
+
     pub fn get_sys_snapshot(&self) -> Option<SystemSnapshot> {
         let snap = self.sys.read().unwrap().clone();
-        let mut stats = self.stats.write().unwrap();
         if snap.cpu_info != crate::value::Value::Null && !snap.expired() {
-            stats.sys_hits += 1;
+            self.stats.sys_hits.fetch_add(1, Ordering::Relaxed);
             Some(snap)
         } else {
-            stats.sys_misses += 1;
+            self.stats.sys_misses.fetch_add(1, Ordering::Relaxed);
             None
         }
     }
 
-    /// Store a fresh system snapshot.
     pub fn put_sys_snapshot(&self, snap: SystemSnapshot) {
         *self.sys.write().unwrap() = snap;
     }
 
     pub fn inc_requests(&self) {
-        self.stats.write().unwrap().total_requests += 1;
+        self.stats.total_requests.fetch_add(1, Ordering::Relaxed);
     }
 
-    /// File index cache: directory path → (mtime, file listing).
-    /// Invalidated when the directory's mtime changes.
+    // ── Snapshot stats (for STATS command) ─────────────────────────
+
+    pub fn snapshot_stats(&self) -> CacheStatsSnapshot {
+        CacheStatsSnapshot {
+            ast_hits: self.stats.ast_hits.load(Ordering::Relaxed),
+            ast_misses: self.stats.ast_misses.load(Ordering::Relaxed),
+            ir_hits: self.stats.ir_hits.load(Ordering::Relaxed),
+            ir_misses: self.stats.ir_misses.load(Ordering::Relaxed),
+            sys_hits: self.stats.sys_hits.load(Ordering::Relaxed),
+            sys_misses: self.stats.sys_misses.load(Ordering::Relaxed),
+            total_requests: self.stats.total_requests.load(Ordering::Relaxed),
+            ast_cache_size: self.ast.read().unwrap().len(),
+            ir_cache_size: self.compiled.read().unwrap().len(),
+        }
+    }
+
+    // ── File index cache ───────────────────────────────────────────
+
     pub fn get_file_index(&self, dir: &std::path::Path) -> Option<Arc<Vec<Stmt>>> {
-        // For now, reuse AST cache keyed by "file.ls:PATH" for simplicity.
-        // In a full implementation, this would be a separate cache with mtime invalidation.
         self.get_ast(&format!("__file_ls:{}", dir.display()))
     }
 
     pub fn put_file_index(&self, dir: &std::path::Path, stmts: Vec<Stmt>) {
         self.put_ast(format!("__file_ls:{}", dir.display()), stmts);
     }
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct CacheStatsSnapshot {
+    pub ast_hits: u64,
+    pub ast_misses: u64,
+    pub ir_hits: u64,
+    pub ir_misses: u64,
+    pub sys_hits: u64,
+    pub sys_misses: u64,
+    pub total_requests: u64,
+    pub ast_cache_size: usize,
+    pub ir_cache_size: usize,
 }

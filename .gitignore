@@ -34,3 +34,13 @@ lock_test.txt
 lock_test.txt.ae_lock
 test_lock.txt
 test_lock.txt.ae_lock
+
+# Agent observation artifacts (content-addressed, TTL-managed)
+.ae/results/
+
+# Local audit journal (do not commit)
+.ae/audit.log
+.ae/trash/
+
+# Editor planning notes
+.trae/

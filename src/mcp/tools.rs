@@ -17,7 +17,7 @@ use crate::modules;
 use crate::runtime::{AgentRequest, AgentResponse, SharedRuntime};
 use crate::value::Value as VmValue;
 
-// v0.5.1: agent core surface — the ~70 most-used builtins for agent tasks.
+// Legacy DSL core surface — the ~70 most-used builtins for agent tasks.
 const CORE_BUILTINS: &[&str] = &[
     "sys_hostname", "sys_os", "sys_arch", "sys_cpu_info", "sys_mem_info",
     "sys_disk_info", "sys_load_avg", "sys_process_info", "sys_uptime",
@@ -50,10 +50,9 @@ macro_rules! handler {
 
 /// Return all tools that should be registered in the MCP server.
 ///
-/// T3 extends the three legacy tools with six task-oriented ACI tools,
-/// bringing the total to nine. The tools are sorted by name when listed.
+/// Includes legacy tools plus the 1.0 OperationRegistry (file/tx/repo/test/exec/result).
 pub fn default_tools() -> Vec<Tool> {
-    vec![
+    let mut tools = vec![
         // ── Legacy (T1/T2) ──
         health_tool(),
         list_commands_tool(),
@@ -65,7 +64,144 @@ pub fn default_tools() -> Vec<Tool> {
         transpile_bash_tool(),
         eval_tool(),
         describe_capabilities_tool(),
-    ]
+    ];
+    // ── Typed operations from OperationRegistry (1.0) ──
+    // exec_run / result_query keep specialized handlers; all other ops auto-bind.
+    tools.push(exec_run_tool());
+    tools.push(result_query_tool());
+    for spec in crate::operation::OperationRegistry::new().list() {
+        if matches!(spec.name, "exec.run" | "result.query") {
+            continue;
+        }
+        tools.push(registry_op_tool(spec));
+    }
+    tools
+}
+
+fn registry_op_tool(spec: &crate::operation::OperationSpec) -> Tool {
+    let op_name = spec.name.to_string();
+    let mcp_name = spec.mcp_name.to_string();
+    let description = spec.description.to_string();
+    let input_schema = (spec.input_schema)();
+    Tool {
+        schema: ToolSchema {
+            name: mcp_name,
+            description,
+            input_schema,
+        },
+        handler: handler!({
+            move |args: Value, _runtime: Arc<SharedRuntime>| {
+                let op_name = op_name.clone();
+                Box::pin(async move {
+                    let timeout_ms = args
+                        .get("timeout_ms")
+                        .and_then(Value::as_u64)
+                        .unwrap_or(30_000);
+                    let max_tokens = args
+                        .get("max_tokens")
+                        .and_then(Value::as_u64)
+                        .unwrap_or(4_000) as usize;
+                    let request = crate::operation::OperationRequest {
+                        id: format!("mcp-{}", uuid::Uuid::new_v4()),
+                        agent: format!("mcp-{}", op_name.replace('.', "-")),
+                        op: op_name,
+                        args,
+                        timeout_ms,
+                        budget: crate::operation::ObservationBudget { max_tokens },
+                    };
+                    let observation = tokio::task::spawn_blocking(move || {
+                        crate::operation::OperationRegistry::new().execute(request)
+                    })
+                    .await
+                    .map_err(|error| {
+                        RpcError::new(-1, format!("operation worker failed: {error}"))
+                    })?;
+                    Ok(observation_tool_result(observation))
+                })
+            }
+        }),
+    }
+}
+
+fn observation_tool_result(observation: crate::operation::Observation) -> CallToolResult {
+    let value = serde_json::to_value(&observation).unwrap_or(Value::Null);
+    let text = observation
+        .data
+        .as_ref()
+        .and_then(|data| data.get("stdout"))
+        .and_then(|stdout| stdout.get("summary").or_else(|| stdout.get("text")))
+        .and_then(Value::as_str)
+        .or_else(|| observation.error.as_ref().map(|error| error.message.as_str()))
+        .unwrap_or(if observation.ok { "operation completed" } else { "operation failed" })
+        .to_string();
+    CallToolResult {
+        content: vec![Content::Text { text }],
+        structured_content: Some(value),
+        is_error: !observation.ok,
+    }
+}
+
+fn exec_run_tool() -> Tool {
+    Tool {
+        schema: ToolSchema {
+            name: "exec_run".into(),
+            description: "Preferred 1.0 execution interface. Runs an argv command and returns a bounded structured observation with result artifact handles.".into(),
+            input_schema: crate::operation::exec_input_schema(),
+        },
+        handler: handler!({
+            move |args: Value, _runtime: Arc<SharedRuntime>| {
+                Box::pin(async move {
+                    let timeout_ms = args.get("timeout_ms").and_then(Value::as_u64).unwrap_or(30_000);
+                    let max_tokens = args.get("max_tokens").and_then(Value::as_u64).unwrap_or(4_000) as usize;
+                    let request = crate::operation::OperationRequest {
+                        id: format!("mcp-{}", uuid::Uuid::new_v4()),
+                        agent: "mcp-exec-run".into(),
+                        op: "exec.run".into(),
+                        args,
+                        timeout_ms,
+                        budget: crate::operation::ObservationBudget { max_tokens },
+                    };
+                    let observation = tokio::task::spawn_blocking(move || {
+                        crate::operation::OperationRegistry::new().execute(request)
+                    })
+                    .await
+                    .map_err(|error| RpcError::new(-1, format!("operation worker failed: {error}")))?;
+                    Ok(observation_tool_result(observation))
+                })
+            }
+        }),
+    }
+}
+
+fn result_query_tool() -> Tool {
+    Tool {
+        schema: ToolSchema {
+            name: "result_query".into(),
+            description: "Query a result:// artifact by metadata, head, tail, slice, grep, or explicitly bounded raw bytes.".into(),
+            input_schema: crate::operation::result_input_schema(),
+        },
+        handler: handler!({
+            move |args: Value, _runtime: Arc<SharedRuntime>| {
+                Box::pin(async move {
+                    let max_tokens = args.get("max_tokens").and_then(Value::as_u64).unwrap_or(4_000) as usize;
+                    let request = crate::operation::OperationRequest {
+                        id: format!("mcp-{}", uuid::Uuid::new_v4()),
+                        agent: "mcp-result-query".into(),
+                        op: "result.query".into(),
+                        args,
+                        timeout_ms: 30_000,
+                        budget: crate::operation::ObservationBudget { max_tokens },
+                    };
+                    let observation = tokio::task::spawn_blocking(move || {
+                        crate::operation::OperationRegistry::new().execute(request)
+                    })
+                    .await
+                    .map_err(|error| RpcError::new(-1, format!("operation worker failed: {error}")))?;
+                    Ok(observation_tool_result(observation))
+                })
+            }
+        }),
+    }
 }
 
 // ── Shared execution helper (T3) ─────────────────────────────────────
@@ -776,9 +912,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn default_tools_returns_nine_tools() {
+    fn default_tools_returns_expected_tools() {
         let tools = default_tools();
-        assert_eq!(tools.len(), 9, "T3 should expose 3 legacy + 6 ACI tools");
         let names: Vec<&str> = tools.iter().map(|t| t.schema.name.as_str()).collect();
         assert!(names.contains(&"system_snapshot"));
         assert!(names.contains(&"process_inspect"));
@@ -786,6 +921,16 @@ mod tests {
         assert!(names.contains(&"transpile_bash"));
         assert!(names.contains(&"eval"));
         assert!(names.contains(&"describe_capabilities"));
+        assert!(names.contains(&"exec_run"));
+        assert!(names.contains(&"result_query"));
+        // 1.0 ACI surface auto-registered from OperationRegistry
+        assert!(names.contains(&"file_view"));
+        assert!(names.contains(&"file_replace_exact"));
+        assert!(names.contains(&"tx_begin"));
+        assert!(names.contains(&"repo_search"));
+        assert!(names.contains(&"test_discover"));
+        assert!(names.contains(&"ops_list"));
+        assert!(tools.len() >= 20, "expected legacy + full 1.0 op surface, got {}", tools.len());
     }
 
     #[test]

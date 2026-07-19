@@ -22,6 +22,7 @@
 //! control commands) is unchanged — existing clients and tests are unaffected.
 
 use crate::runtime::{AgentRequest, RuntimeConfig, SharedRuntime};
+use crate::operation::{Observation, OperationRegistry, OperationRequest};
 use crate::scheduler;
 use anyhow::Result;
 use serde::Serialize;
@@ -99,6 +100,51 @@ fn encode_response(resp: &crate::runtime::AgentResponse) -> String {
     }
 }
 
+fn encode_observation(observation: &Observation) -> String {
+    let use_compact = std::env::var("AE_FORMAT")
+        .map(|f| f == "compact")
+        .unwrap_or(false);
+    if use_compact {
+        let json = serde_json::to_value(observation).unwrap_or_default();
+        format!("O {}", crate::compact::encode_value(&crate::value::Value::from_json(&json)))
+    } else {
+        serde_json::to_string(observation).unwrap_or_default()
+    }
+}
+
+enum ServerRequest {
+    Legacy(AgentRequest),
+    Operation(OperationRequest),
+}
+
+impl ServerRequest {
+    fn agent(&self) -> &str {
+        match self {
+            Self::Legacy(req) => &req.agent,
+            Self::Operation(req) => &req.agent,
+        }
+    }
+}
+
+fn parse_request(value: serde_json::Value) -> Result<ServerRequest, serde_json::Error> {
+    if value.get("op").is_some() {
+        serde_json::from_value(value).map(ServerRequest::Operation)
+    } else {
+        serde_json::from_value(value).map(ServerRequest::Legacy)
+    }
+}
+
+fn execute_server_request(
+    request: ServerRequest,
+    runtime: &SharedRuntime,
+    operations: &OperationRegistry,
+) -> String {
+    match request {
+        ServerRequest::Legacy(req) => encode_response(&runtime.execute(req)),
+        ServerRequest::Operation(req) => encode_observation(&operations.execute(req)),
+    }
+}
+
 /// Write a line to stdout under the lock. Called from both async tasks and
 /// sync scheduler callbacks. Blocking lock is fine here — stdout writes are
 /// fast and contention is low.
@@ -114,6 +160,7 @@ async fn serve_stdio(runtime: SharedRuntime, use_scheduler: bool) -> Result<()> 
     let stdin = tokio::io::stdin();
     let reader = BufReader::new(stdin);
     let out: Arc<Mutex<std::io::Stdout>> = Arc::new(Mutex::new(std::io::stdout()));
+    let operations = OperationRegistry::new();
 
     eprintln!(
         "[ae-serve] JSON-RPC v2.2 ready (scheduler={}, runtime=tokio)",
@@ -184,8 +231,10 @@ async fn serve_stdio(runtime: SharedRuntime, use_scheduler: bool) -> Result<()> 
         }
 
         // ── Parse request (single or batch) ─────────────────────────
-        let requests: Vec<AgentRequest> = if t.starts_with('[') {
-            match serde_json::from_str::<Vec<AgentRequest>>(t) {
+        let requests: Vec<ServerRequest> = if t.starts_with('[') {
+            match serde_json::from_str::<Vec<serde_json::Value>>(t)
+                .and_then(|values| values.into_iter().map(parse_request).collect())
+            {
                 Ok(r) => r,
                 Err(e) => {
                     let out_str = serde_json::json!({
@@ -204,7 +253,7 @@ async fn serve_stdio(runtime: SharedRuntime, use_scheduler: bool) -> Result<()> 
                 }
             }
         } else {
-            match serde_json::from_str::<AgentRequest>(t) {
+            match serde_json::from_str::<serde_json::Value>(t).and_then(parse_request) {
                 Ok(r) => vec![r],
                 Err(e) => {
                     let out_str = serde_json::json!({
@@ -231,20 +280,20 @@ async fn serve_stdio(runtime: SharedRuntime, use_scheduler: bool) -> Result<()> 
         if requests.len() == 1 {
             let req = requests.into_iter().next().unwrap();
             if use_scheduler {
-                let agent = req.agent.clone();
+                let agent = req.agent().to_string();
                 let out_clone = Arc::clone(&out);
                 let rt_clone = runtime.clone_ref();
+                let operations_clone = operations.clone();
                 scheduler::dispatch(&agent, scheduler::Priority::Normal, 1000, move || {
-                    let r = rt_clone.execute(req);
-                    let out_str = encode_response(&r);
+                    let out_str = execute_server_request(req, &rt_clone, &operations_clone);
                     write_line(&out_clone, &out_str);
                 });
             } else {
                 let rt_clone = runtime.clone_ref();
-                let resp = tokio::task::spawn_blocking(move || rt_clone.execute(req))
+                let operations_clone = operations.clone();
+                let out_str = tokio::task::spawn_blocking(move || execute_server_request(req, &rt_clone, &operations_clone))
                     .await
                     .map_err(|e| anyhow::anyhow!("worker task panicked: {}", e))?;
-                let out_str = encode_response(&resp);
                 write_line(&out, &out_str);
             }
         } else {
@@ -253,11 +302,11 @@ async fn serve_stdio(runtime: SharedRuntime, use_scheduler: bool) -> Result<()> 
             for req in requests {
                 let rt_clone = runtime.clone_ref();
                 let out_clone = Arc::clone(&out);
+                let operations_clone = operations.clone();
                 let handle = tokio::spawn(async move {
-                    let resp = tokio::task::spawn_blocking(move || rt_clone.execute(req))
+                    let out_str = tokio::task::spawn_blocking(move || execute_server_request(req, &rt_clone, &operations_clone))
                         .await
                         .map_err(|e| anyhow::anyhow!("worker task panicked: {}", e))?;
-                    let out_str = encode_response(&resp);
                     write_line(&out_clone, &out_str);
                     Ok::<(), anyhow::Error>(())
                 });

@@ -16,7 +16,7 @@ fn create_env_with_modules() -> Env {
 #[derive(Parser)]
 #[command(name = "ae")]
 #[command(
-    about = "VerseShell — Production-grade typed functional shell runtime for AI agents (v3 kernel)"
+    about = "VerseShell — Agent Action / Observation Runtime for local systems"
 )]
 #[command(version = env!("CARGO_PKG_VERSION"))]
 struct Cli {

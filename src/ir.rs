@@ -520,10 +520,10 @@ impl IRCompiler {
                         }
                         IRNode::Builtin(name.clone(), args_ir, IREffect::for_builtin(name))
                     } else {
-                        // Unknown name: route through Builtin so call_with_input
-                        // produces "unknown builtin: X", which triggers the
-                        // nearest_builtin Levenshtein hint machinery.
-                        IRNode::Builtin(name.clone(), args_ir, IREffect::Pure)
+                        // User-defined functions live in Env. At evaluation time,
+                        // an unresolved variable call falls back to builtin
+                        // dispatch so typo hints remain available.
+                        IRNode::Call(Box::new(IRNode::Var(name.clone())), args_ir)
                     }
                 } else if let Expr::MemberAccess { object, field } = callee.as_ref() {
                     // Module-access call: `module.method(args)` (e.g., `sys.cpu_info()`)
@@ -568,6 +568,23 @@ impl IRCompiler {
                 if let Expr::Ident(name) = right.as_ref() {
                     if let Some(stage_ir) = self.try_lower_builtin(name, &[], Some(left_ir.clone())) {
                         return stage_ir;
+                    }
+                    if crate::builtins::BUILTIN_LOOKUP.contains_key(name.as_str())
+                        || is_fallback_builtin(name)
+                    {
+                        return IRNode::Pipeline(vec![
+                            left_ir,
+                            IRNode::Builtin(name.clone(), vec![], IREffect::for_builtin(name)),
+                        ]);
+                    }
+                }
+                // Pipeline call with arguments, e.g. `items | take 3`.
+                if let Expr::Call { callee, args, named: _ } = right.as_ref() {
+                    if let Expr::Ident(name) = callee.as_ref() {
+                        let args_ir: Vec<IRNode> = args.iter().map(|arg| self.compile_expr(arg)).collect();
+                        if let Some(stage_ir) = self.try_lower_builtin(name, &args_ir, Some(left_ir.clone())) {
+                            return stage_ir;
+                        }
                     }
                 }
                 // Generic pipeline
@@ -653,6 +670,14 @@ impl IRCompiler {
                     .unwrap_or(IRNode::Int(10));
                 return Some(IRNode::Pipeline(vec![source.clone(), IRNode::Take(Box::new(n))]));
             }
+            "reverse" => {
+                // Lower to Call(Var("arr.reverse"), [source]) which routes
+                // through the builtin dispatch and uses the pipeline input.
+                return Some(IRNode::Call(
+                    Box::new(IRNode::Var("arr.reverse".to_string())),
+                    vec![source.clone()],
+                ));
+            }
         _ => None,
     }
 }
@@ -725,7 +750,13 @@ impl IREvaluator {
             IRNode::Bool(b) => Ok(Value::Bool(*b)),
             IRNode::Int(n) => Ok(Value::Int(*n)),
             IRNode::Float(f) => Ok(Value::Float(*f)),
-            IRNode::Str(s) => Ok(Value::Str(s.clone())),
+            IRNode::Str(s) => {
+                if s.contains("${") {
+                    crate::eval::interpolate_string(s, env)
+                } else {
+                    Ok(Value::Str(s.clone()))
+                }
+            },
 
             IRNode::Array(items) => {
                 let vals: Result<Vec<Value>> = items.iter().map(|i| Self::eval(i, env)).collect();
@@ -766,21 +797,26 @@ impl IREvaluator {
                 Ok(Value::Lambda(crate::value::Lambda { params: params.clone(), body: body.clone() }))
             }
             IRNode::Call(callee, args) => {
-                let f = Self::eval(callee, env)?;
                 let vals: Result<Vec<Value>> = args.iter().map(|a| Self::eval(a, env)).collect();
                 let pin = env.input().cloned();
+                if let IRNode::Var(name) = callee.as_ref() {
+                    if env.get_var(name).is_none() {
+                        return crate::builtins::call_with_input(name, vals?, pin, env);
+                    }
+                }
+                let f = Self::eval(callee, env)?;
                 match f {
                     Value::Builtin(ref b) => {
                         crate::builtins::call_with_input(&b.name, vals?, pin, env)
                     }
                     Value::Lambda(ref lam) => {
-                        // Evaluate lambda by binding params and running body through AST eval
-                        let mut local = env.clone();
                         let vs = vals?;
+                        let mut bindings: Vec<(String, Value)> = Vec::with_capacity(lam.params.len());
                         for (i, p) in lam.params.iter().enumerate() {
-                            local.set_var_unchecked(p, vs.get(i).cloned().unwrap_or(Value::Null));
+                            bindings.push((p.clone(), vs.get(i).cloned().unwrap_or(Value::Null)));
                         }
-                        crate::eval::eval_expr(&lam.body, &mut local)
+                        let bindings_refs: Vec<(&str, Value)> = bindings.iter().map(|(k, v)| (k.as_str(), v.clone())).collect();
+                        env.with_frame(&bindings_refs, |env| crate::eval::eval_expr(&lam.body, env))
                     }
                     _ => Err(anyhow!("IR Call: cannot call non-function value")),
                 }
@@ -803,15 +839,15 @@ impl IREvaluator {
                     (IRNode::Map(mparams, mbody), IRNode::Filter(fparams, fbody)) => {
                         let mut out = Vec::new();
                         for (i, v) in arr.iter().enumerate() {
-                            let mut local = env.clone();
-                            local.set_input(None);
-                            local.set_var_unchecked(&mparams[0], v.clone());
-                            if mparams.len() > 1 { local.set_var_unchecked(&mparams[1], Value::Int(i as i64)); }
-                            let mapped = crate::eval::eval_expr(mbody, &mut local)?;
-                            // Now test the mapped value
-                            let mut fl = env.clone();
-                            fl.set_var_unchecked(&fparams[0], mapped.clone());
-                            if is_truthy_v(&crate::eval::eval_expr(fbody, &mut fl).unwrap_or(Value::Bool(false))) {
+                            let mut bindings = vec![(mparams[0].as_str(), v.clone())];
+                            if let Some(index_param) = mparams.get(1) {
+                                bindings.push((index_param.as_str(), Value::Int(i as i64)));
+                            }
+                            let mapped = env.with_frame(&bindings, |env| crate::eval::eval_expr(mbody, env))?;
+                            let keep = env.with_frame(&[(fparams[0].as_str(), mapped.clone())], |env| {
+                                is_truthy_v(&crate::eval::eval_expr(fbody, env).unwrap_or(Value::Bool(false)))
+                            });
+                            if keep {
                                 out.push(mapped);
                             }
                         }
@@ -835,18 +871,15 @@ impl IREvaluator {
                     (IRNode::Filter(fparams, fbody), IRNode::Map(mparams, mbody)) => {
                         let mut out = Vec::new();
                         for (i, v) in arr.iter().enumerate() {
-                            // First test
-                            let mut fl = env.clone();
-                            fl.set_var_unchecked(&fparams[0], v.clone());
-                            if !is_truthy_v(&crate::eval::eval_expr(fbody, &mut fl).unwrap_or(Value::Bool(false))) {
-                                continue;
+                            let passes = env.with_frame(&[(fparams[0].as_str(), v.clone())], |env| {
+                                is_truthy_v(&crate::eval::eval_expr(fbody, env).unwrap_or(Value::Bool(false)))
+                            });
+                            if !passes { continue; }
+                            let mut bindings = vec![(mparams[0].as_str(), v.clone())];
+                            if let Some(index_param) = mparams.get(1) {
+                                bindings.push((index_param.as_str(), Value::Int(i as i64)));
                             }
-                            // Then transform
-                            let mut local = env.clone();
-                            local.set_input(None);
-                            local.set_var_unchecked(&mparams[0], v.clone());
-                            if mparams.len() > 1 { local.set_var_unchecked(&mparams[1], Value::Int(i as i64)); }
-                            out.push(crate::eval::eval_expr(mbody, &mut local)?);
+                            out.push(env.with_frame(&bindings, |env| crate::eval::eval_expr(mbody, env))?);
                         }
                         Ok(Value::Array(out))
                     }
@@ -867,16 +900,16 @@ impl IREvaluator {
                     (IRNode::Map(ap, ab), IRNode::Map(bp, bb)) => {
                         let mut out = Vec::with_capacity(arr.len());
                         for (i, v) in arr.iter().enumerate() {
-                            let mut local = env.clone();
-                            local.set_input(None);
-                            local.set_var_unchecked(&ap[0], v.clone());
-                            if ap.len() > 1 { local.set_var_unchecked(&ap[1], Value::Int(i as i64)); }
-                            let mid = crate::eval::eval_expr(ab, &mut local)?;
-                            let mut local2 = env.clone();
-                            local2.set_input(None);
-                            local2.set_var_unchecked(&bp[0], mid);
-                            if bp.len() > 1 { local2.set_var_unchecked(&bp[1], Value::Int(i as i64)); }
-                            out.push(crate::eval::eval_expr(bb, &mut local2)?);
+                            let mut first = vec![(ap[0].as_str(), v.clone())];
+                            if let Some(index_param) = ap.get(1) {
+                                first.push((index_param.as_str(), Value::Int(i as i64)));
+                            }
+                            let mid = env.with_frame(&first, |env| crate::eval::eval_expr(ab, env))?;
+                            let mut second = vec![(bp[0].as_str(), mid)];
+                            if let Some(index_param) = bp.get(1) {
+                                second.push((index_param.as_str(), Value::Int(i as i64)));
+                            }
+                            out.push(env.with_frame(&second, |env| crate::eval::eval_expr(bb, env))?);
                         }
                         Ok(Value::Array(out))
                     }
@@ -896,11 +929,11 @@ impl IREvaluator {
                 let arr = expect_array(&input)?;
                 let mut out = Vec::with_capacity(arr.len());
                 for (i, v) in arr.iter().enumerate() {
-                    let mut local = env.clone();
-                    local.set_input(None);
-                    local.set_var_unchecked(&params[0], v.clone());
-                    if params.len() > 1 { local.set_var_unchecked(&params[1], Value::Int(i as i64)); }
-                    out.push(crate::eval::eval_expr(body, &mut local)?);
+                    let mut bindings = vec![(params[0].as_str(), v.clone())];
+                    if let Some(index_param) = params.get(1) {
+                        bindings.push((index_param.as_str(), Value::Int(i as i64)));
+                    }
+                    out.push(env.with_frame(&bindings, |env| crate::eval::eval_expr(body, env))?);
                 }
                 Ok(Value::Array(out))
             }
@@ -909,11 +942,13 @@ impl IREvaluator {
                 let arr = expect_array(&input)?;
                 let mut out = Vec::new();
                 for v in arr {
-                    let mut local = env.clone();
-                    local.set_var_unchecked(&params[0], v.clone());
-                    if let Ok(r) = crate::eval::eval_expr(body, &mut local) {
-                        if is_truthy_v(&r) { out.push(v.clone()); }
-                    }
+                    let passes = env.with_frame(&[(params[0].as_str(), v.clone())], |env| {
+                        match crate::eval::eval_expr(body, env) {
+                            Ok(r) => is_truthy_v(&r),
+                            Err(_) => false,
+                        }
+                    });
+                    if passes { out.push(v.clone()); }
                 }
                 Ok(Value::Array(out))
             }
@@ -921,13 +956,16 @@ impl IREvaluator {
                 let input = env.input().cloned().unwrap_or(Value::Null);
                 let mut arr = expect_array(&input)?.clone();
                 if let Some((ref kparams, ref kbody)) = key {
-                    arr.sort_by(|a, b| {
-                        let mut la = env.clone(); la.set_var_unchecked(&kparams[0], a.clone());
-                        let mut lb = env.clone(); lb.set_var_unchecked(&kparams[0], b.clone());
-                        let ka = crate::eval::eval_expr(kbody, &mut la).unwrap_or(Value::Null);
-                        let kb = crate::eval::eval_expr(kbody, &mut lb).unwrap_or(Value::Null);
-                        compare_values(&ka, &kb)
-                    });
+                    // Decorate-sort-undecorate: eval key once per element
+                    let mut decorated: Vec<(Value, Value)> = Vec::with_capacity(arr.len());
+                    for v in arr {
+                        let k = env.with_frame(&[(kparams[0].as_str(), v.clone())], |env| {
+                            crate::eval::eval_expr(kbody, env).unwrap_or(Value::Null)
+                        });
+                        decorated.push((k, v));
+                    }
+                    decorated.sort_by(|a, b| compare_values(&a.0, &b.0));
+                    arr = decorated.into_iter().map(|(_, v)| v).collect();
                 } else {
                     arr.sort_by(|a, b| compare_values(a, b));
                 }
@@ -938,11 +976,14 @@ impl IREvaluator {
                 let arr = expect_array(&input)?;
                 let mut acc = Self::eval(init, env)?;
                 for (i, v) in arr.iter().enumerate() {
-                    let mut local = env.clone();
-                    local.set_var_unchecked(&params[0], acc);
-                    local.set_var_unchecked(&params[1], v.clone());
-                    if params.len() > 2 { local.set_var_unchecked(&params[2], Value::Int(i as i64)); }
-                    acc = crate::eval::eval_expr(body, &mut local)?;
+                    let mut bindings = vec![
+                        (params[0].as_str(), acc),
+                        (params[1].as_str(), v.clone()),
+                    ];
+                    if let Some(index_param) = params.get(2) {
+                        bindings.push((index_param.as_str(), Value::Int(i as i64)));
+                    }
+                    acc = env.with_frame(&bindings, |env| crate::eval::eval_expr(body, env))?;
                 }
                 Ok(acc)
             }
@@ -950,10 +991,14 @@ impl IREvaluator {
                 let input = env.input().cloned().unwrap_or(Value::Null);
                 let count = match Self::eval(n, env)? {
                     Value::Int(c) => c.max(0) as usize,
+                    Value::Float(f) => (f as i64).max(0) as usize,
                     _ => 10,
                 };
-                let arr = expect_array(&input)?;
-                Ok(Value::Array(arr.iter().take(count).cloned().collect()))
+                if let Value::Array(ref arr_data) = input {
+                    Ok(Value::Array(arr_data.iter().take(count).cloned().collect()))
+                } else {
+                    Err(anyhow!("expected array, got {}", input.type_name()))
+                }
             }
             // Builtin dispatch
             IRNode::Builtin(name, args, effect) => {

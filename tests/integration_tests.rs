@@ -5,19 +5,7 @@
 use std::process::Command;
 
 fn ae_path() -> String {
-    // Try release first, then debug
-    let paths = [
-        "target/release/ae.exe",
-        "target/debug/ae.exe",
-        "target/release/ae",
-        "target/debug/ae",
-    ];
-    for p in &paths {
-        if std::path::Path::new(p).exists() {
-            return p.to_string();
-        }
-    }
-    panic!("ae binary not found. Build with: cargo build --release");
+    env!("CARGO_BIN_EXE_ae").to_string()
 }
 
 fn run(cmd: &str) -> String {
