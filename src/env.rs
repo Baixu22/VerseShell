@@ -3,6 +3,25 @@ use std::path::{Path, PathBuf};
 
 use crate::value::Value;
 
+/// A single execution event for tracing. One per IR node evaluated.
+/// Defined here (not in runtime.rs) to avoid a circular dependency:
+/// ir.rs depends on env.rs, and ir.rs needs to push trace events.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct ExecutionEvent {
+    /// IR node variant name (e.g. "Builtin", "If", "Pipeline").
+    pub node_type: String,
+    /// For Builtin nodes: the builtin name. None otherwise.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub builtin_name: Option<String>,
+    /// Elapsed time for this node in microseconds.
+    pub elapsed_us: u64,
+    /// Whether this node's evaluation succeeded.
+    pub ok: bool,
+    /// Short result summary (truncated to 200 chars).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub result_summary: Option<String>,
+}
+
 /// Process/runtime environment for the Aether evaluator & builtins.
 ///
 /// - Stores variables (including the pipeline slot `__pipe_input__`)
@@ -20,6 +39,15 @@ pub struct Env {
     exported_names: HashSet<String>,
     cwd: Option<PathBuf>,
     pipe_input: Option<Value>,
+    /// Per-request deadline. When `Some(t)`, IR evaluation checks `t` at each
+    /// node and returns `Err("timeout: deadline exceeded")` if exceeded.
+    /// Injected by `AgentRuntime::execute` from `AgentRequest.timeout_ms`.
+    /// `None` means no deadline (used by REPL, tests, non-agent paths).
+    pub deadline: Option<std::time::Instant>,
+    /// Per-request trace collector. When `Some(v)`, IR evaluation pushes an
+    /// `ExecutionEvent` for each node evaluated. Injected by
+    /// `AgentRuntime::execute` when `AgentRequest.trace == true`.
+    pub trace: Option<Vec<ExecutionEvent>>,
 }
 
 impl Env {
@@ -32,6 +60,8 @@ impl Env {
             exported_names: HashSet::new(),
             cwd: None,
             pipe_input: None,
+            deadline: None,
+            trace: None,
         }
     }
 

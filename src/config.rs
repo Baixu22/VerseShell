@@ -34,8 +34,6 @@ pub struct ShellConfig {
     pub colors: ColorConfig,
     #[serde(default)]
     pub prompt: PromptConfig,
-    #[serde(default)]
-    pub ai: AiConfig,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -102,32 +100,6 @@ impl Default for PromptConfig {
             show_git: true,
             show_time: false,
             time_threshold_ms: 2000,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(default)]
-pub struct AiConfig {
-    pub default_provider: String,
-    pub default_model: String,
-    pub suggestions: bool,
-    pub max_tokens: i64,
-    pub temperature: f64,
-    pub streaming: bool,
-    pub max_agent_steps: i64,
-}
-
-impl Default for AiConfig {
-    fn default() -> Self {
-        Self {
-            default_provider: "openai".to_string(),
-            default_model: "gpt-4".to_string(),
-            suggestions: false,
-            max_tokens: 4096,
-            temperature: 0.7,
-            streaming: true,
-            max_agent_steps: 50,
         }
     }
 }

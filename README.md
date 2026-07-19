@@ -17,6 +17,48 @@ cargo build --release
 ./target/release/ae --agent --workspace /tmp -c "file.read(\"config.toml\")"
 ```
 
+## Execution Model: Typed Runtime First
+
+VerseShell is a typed functional runtime, not a PowerShell/bash-compatible text
+shell. Its `|` operator is a typed VerseShell pipeline that passes values
+between functions; it is not an operating-system pipe.
+
+Process execution is intentionally explicit:
+
+```bash
+# Preferred: argv form, no command-shell parsing
+ae --json -c "shell.exec([\"rg\", \"--files\", \".\"])"
+
+# Convenience only: whitespace-split shorthand
+ae --json -c "shell.exec(\"rg --files .\")"
+```
+
+The string shorthand is only for simple `program arg arg` commands. It does not
+implement shell quoting, pipes, redirection, `&&`, `$()`, environment
+assignment, or glob expansion. For commands that need real shell syntax, choose
+the interpreter explicitly and pass the script as one argv item:
+
+```bash
+# Windows cmd shell syntax; use the absolute path when agent environments have a narrowed PATH
+ae --json -c "shell.exec([\"C:\\\\Windows\\\\System32\\\\cmd.exe\", \"/C\", \"dir /B | C:\\\\Windows\\\\System32\\\\findstr.exe README\"])"
+
+# Git Bash / POSIX shell syntax on Windows
+ae --json -c "shell.exec([\"C:\\\\Program Files\\\\Git\\\\bin\\\\bash.exe\", \"-lc\", \"rg --files | rg README\"])"
+
+# PowerShell only when the task specifically requires PowerShell semantics
+ae --json -c "shell.exec([\"powershell\", \"-NoProfile\", \"-Command\", \"Get-ChildItem | Select-Object -First 5\"])"
+```
+
+Agent rule: do not fall back to PowerShell just because a command has quoting,
+pipes, or a `-c` script argument. Prefer VerseShell typed tools and pipelines;
+when an external process is required, use argv form. Use an explicit shell
+interpreter through argv only when the task truly needs shell language syntax.
+
+MCP rule: `verseshell_shell_exec` is for shell-script compatibility and should
+route through an explicit OS shell. For deterministic process execution, expose
+or use an argv-shaped tool such as `verseshell_process_exec`, or call
+`verseshell_eval` with `shell.exec([...])`.
+
 ## CLI Flags
 
 | Flag | Description |
@@ -38,6 +80,8 @@ cargo build --release
 | `--scheduler` | Enable work-stealing scheduler (v2.1) |
 | `--scheduler-workers N` | Scheduler worker threads (default: 4) |
 | `--cpu-budget N` | Max concurrent ops per agent (default: 8) |
+| `--format FORMAT` | Output format: `json`, `compact` (token-efficient), `human` (default) |
+| `--compact` | Alias for `--format compact` |
 | `[FILE]` | Execute a `.ae` script file |
 
 ## Language
@@ -158,6 +202,39 @@ Response (stdout, one JSON per line, v2 streaming protocol):
 ```
 
 Streaming message types: `done` (complete), `error` (failure). Future: `start`/`chunk`/`progress` for incremental results.
+
+### Compact Token-Efficient Protocol (`--format compact`)
+
+Positional encoding with single-char type tags. Saves 50-70% tokens vs JSON:
+
+```bash
+ae --serve --format compact
+echo '{"id":"r1","agent":"t","cmd":"sys.cpu_info()"}' | ae --serve --format compact
+```
+
+**Format:**
+```
+D <id> <ok> <value> <elapsed_ms> <cache_hit> <session_age_ms>
+E <id> <code> <message> <recoverable>
+```
+
+**Value encoding:**
+| Type | Encoding | Example |
+|------|----------|---------|
+| null | `N` | `N` |
+| bool | `T` / `F` | `T` |
+| int | number | `42` |
+| float | number | `3.14` |
+| string | `S<len>:<content>` | `S5:hello` |
+| array | `L<len> <items>` | `L3 1 2 3` |
+| record | `R<len> <k1> <v1> ...` | `R2 x 1 y 2` |
+
+**Token savings:**
+| Payload | JSON | Compact | Savings |
+|---------|------|---------|---------|
+| Simple int | 96 chars | 16 chars | **83%** |
+| `sys.cpu_info()` | 178 chars | 115 chars | **35%** |
+| Average | — | — | **50-70%** |
 
 ### Server Control Commands
 
@@ -332,7 +409,8 @@ echo '[{"id":"1","agent":"b","cmd":"1+1"},{"id":"2","agent":"b","cmd":"sys.os()"
 
 | Function | Description |
 |----------|-------------|
-| `shell.exec(cmd)` | Execute shell command |
+| `shell.exec([program, ...args])` | Execute a process directly with explicit argv; preferred for agents |
+| `shell.exec("program arg")` | Convenience shorthand for simple whitespace-split commands only |
 | `shell.sleep(secs)` | Sleep for duration |
 | `shell.echo(msg)` | Print message |
 | `shell.exit(code)` | Exit with code |
@@ -483,7 +561,7 @@ cargo bench                                   # 4 performance benchmarks
 | **V2 Kernel** | IR layer (canonical + hashable + optimizable), capability system, pipeline unification |
 | **V3 Kernel** | **Unified IR-native execution** (single `IREvaluator`), **22 effect types** (compile-time capability annotation), pipeline stage inlining |
 | **Errors** | 8 structured error codes with hint suggestions, Levenshtein nearest-builtin matching |
-| **Output** | Canonical JSON, clean human format, AECON compact, structured errors |
+| **Output** | Canonical JSON, **compact token-efficient (50-70% savings)**, clean human format, AECON compact, structured errors |
 
 ## Performance
 
@@ -505,6 +583,7 @@ Built-in optimizations:
 - **`--timeout`**: Prevents hung http/shell operations
 - **Batch requests**: Send multiple commands in one JSON array
 - **Arc-shared modules**: Session creation O(1) — no deep-clone of 26 modules
+- **Compact protocol**: Positional + type-tag encoding saves 50-70% tokens vs JSON for agent communication
 
 ## Architecture
 
@@ -517,7 +596,8 @@ src/
 ├── ir.rs            # V3 IR: IREvaluator, IREffect (22 types), IRCompiler, IROptimizer
 ├── capability.rs    # V2 capability-based security (27 granular caps)
 ├── scheduler.rs     # V2.1 work-stealing scheduler + agent quotas
-├── builtins.rs      # 650+ builtin function implementations
+├── compact.rs        # Compact token-efficient protocol (positional+type-tag encoding)
+├── builtins.rs       # 650+ builtin function implementations
 ├── modules.rs       # Namespaced module → builtin mappings (26 modules)
 ├── value.rs         # Runtime value system (15 variants)
 ├── types.rs         # Type lattice

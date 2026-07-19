@@ -66,6 +66,8 @@ pub struct SystemSnapshot {
     pub load_avg: crate::value::Value,
     pub hostname: String,
     pub os: String,
+    pub process_list: crate::value::Value,
+    pub sys_info: crate::value::Value,
     pub taken_at: Instant,
     pub ttl: Duration,
 }
@@ -85,6 +87,8 @@ impl Default for SystemSnapshot {
             load_avg: crate::value::Value::Null,
             hostname: String::new(),
             os: String::new(),
+            process_list: crate::value::Value::Null,
+            sys_info: crate::value::Value::Null,
             taken_at: Instant::now() - Duration::from_secs(3600),
             ttl: Duration::from_secs(5),
         }

@@ -41,6 +41,8 @@ fn run_bench(rt: &SharedRuntime, concurrency: usize, requests: usize, cmd: &str)
                     cmd: c.clone(),
                     timeout_ms: 0,
                     budget: None,
+                    dry_run: false,
+                    trace: false,
                 });
                 let mut r = rec.lock().unwrap();
                 r.push(LatencyRecord {
@@ -51,7 +53,8 @@ fn run_bench(rt: &SharedRuntime, concurrency: usize, requests: usize, cmd: &str)
         }));
     }
     for h in handles { h.join().unwrap(); }
-    records.lock().unwrap().clone()
+    let guard = records.lock().unwrap();
+    guard.clone()
 }
 
 #[test]
@@ -164,6 +167,8 @@ fn test_mixed_workload_concurrent() {
                     cmd: cmd.to_string(),
                     timeout_ms: 0,
                     budget: None,
+                    dry_run: false,
+                    trace: false,
                 });
                 rec.lock().unwrap().push(LatencyRecord {
                     usec: s.elapsed().as_micros() as u64,
@@ -197,8 +202,9 @@ fn test_session_reuse_benefit() {
     let shared = SharedRuntime::new(RuntimeConfig::default());
     let s = Instant::now();
     for _ in 0..50 {
-        shared.inner.lock().unwrap().execute(AgentRequest {
+        shared.execute(AgentRequest {
             id: "s".into(), agent: "a".into(), cmd: "1+2".into(), timeout_ms: 0, budget: None,
+            dry_run: false, trace: false,
         });
     }
     let shared_ms = s.elapsed().as_micros();
@@ -207,8 +213,9 @@ fn test_session_reuse_benefit() {
     let f = Instant::now();
     for _ in 0..50 {
         let fresh = SharedRuntime::new(RuntimeConfig::default());
-        fresh.inner.lock().unwrap().execute(AgentRequest {
+        fresh.execute(AgentRequest {
             id: "f".into(), agent: "b".into(), cmd: "1+2".into(), timeout_ms: 0, budget: None,
+            dry_run: false, trace: false,
         });
     }
     let fresh_ms = f.elapsed().as_micros();

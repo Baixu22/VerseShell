@@ -73,6 +73,14 @@ pub enum IRNode {
     /// Take first N: count IRNode
     Take(Box<IRNode>),
 
+    // ── Fused Pipeline Stages ──
+    /// map + map fused: single-pass double transform
+    FusedMapMap(Box<IRNode>, Box<IRNode>),
+    /// map + filter fused: transform then test in one pass
+    FusedMapFilter(Box<IRNode>, Box<IRNode>),
+    /// filter + map fused: test then transform in one pass
+    FusedFilterMap(Box<IRNode>, Box<IRNode>),
+
     // ── Builtin (v3: carries IREffect for capability enforcement) ──
     Builtin(String, Vec<IRNode>, IREffect),
 
@@ -240,6 +248,9 @@ fn hash_node<H: Hasher>(node: &IRNode, h: &mut H) {
         Sort(key) => { 20u8.hash(h); if let Some((_, k)) = key { format!("{:?}", k).hash(h); } }
         Reduce(params, body, init) => { 21u8.hash(h); params.hash(h); format!("{:?}", body).hash(h); hash_node(init, h); }
         Take(n) => { 22u8.hash(h); hash_node(n, h); }
+        FusedMapMap(a, b) => { 27u8.hash(h); hash_node(a, h); hash_node(b, h); }
+        FusedMapFilter(a, b) => { 28u8.hash(h); hash_node(a, h); hash_node(b, h); }
+        FusedFilterMap(a, b) => { 29u8.hash(h); hash_node(a, h); hash_node(b, h); }
         Builtin(name, args, _eff) => { 23u8.hash(h); name.hash(h); for a in args { hash_node(a, h); } }
         MemberAccess(obj, field) => { 24u8.hash(h); hash_node(obj, h); field.hash(h); }
         Error(code, msg) => { 25u8.hash(h); code.hash(h); msg.hash(h); }
@@ -378,9 +389,17 @@ impl IROptimizer {
 
     fn try_fuse(&self, a: IRNode, b: IRNode) -> IRNode {
         match (&a, &b) {
-            (IRNode::Map(ap, ab), IRNode::Map(_, bb)) => {
-                // map + map → fused (compose lambdas — for now identity)
-                IRNode::Pipeline(vec![a, b])
+            (IRNode::Map(_, _), IRNode::Map(_, _)) => {
+                // map + map → fused single map (compose lambdas)
+                IRNode::FusedMapMap(Box::new(a), Box::new(b))
+            }
+            (IRNode::Map(_, _), IRNode::Filter(_, _)) => {
+                // map + filter → fused: apply map then test filter in one pass
+                IRNode::FusedMapFilter(Box::new(a), Box::new(b))
+            }
+            (IRNode::Filter(_, _), IRNode::Map(_, _)) => {
+                // filter + map → fused: test filter then apply map in one pass
+                IRNode::FusedFilterMap(Box::new(a), Box::new(b))
             }
             _ => IRNode::Pipeline(vec![a, b]),
         }
@@ -489,7 +508,6 @@ impl IRCompiler {
             }
             Expr::Throw(inner) => IRNode::Throw(Box::new(self.compile_expr(inner))),
             Expr::Call { callee, args, named: _ } => {
-                let callee_ir = self.compile_expr(callee);
                 let args_ir: Vec<IRNode> = args.iter().map(|a| self.compile_expr(a)).collect();
 
                 // If callee is a simple identifier, keep as Builtin for dispatch
@@ -505,7 +523,28 @@ impl IRCompiler {
                         // Variable call
                         IRNode::Call(Box::new(IRNode::Var(name.clone())), args_ir)
                     }
+                } else if let Expr::MemberAccess { object, field } = callee.as_ref() {
+                    // Module-access call: `module.method(args)` (e.g., `sys.cpu_info()`)
+                    // Lower to `IRNode::Builtin` so that:
+                    //   1. Capability checks apply (security)
+                    //   2. dry_run preflight analysis detects effects
+                    //   3. Execution traces label these as Builtin nodes
+                    if let Expr::Ident(mod_name) = object.as_ref() {
+                        if let Some(builtin_name) =
+                            crate::modules::resolve_module_builtin(mod_name, field)
+                        {
+                            return IRNode::Builtin(
+                                builtin_name.to_string(),
+                                args_ir,
+                                IREffect::for_builtin(builtin_name),
+                            );
+                        }
+                    }
+                    // Unknown module/method — fall through to generic Call form
+                    let callee_ir = self.compile_expr(callee);
+                    IRNode::Call(Box::new(callee_ir), args_ir)
                 } else {
+                    let callee_ir = self.compile_expr(callee);
                     IRNode::Call(Box::new(callee_ir), args_ir)
                 }
             }
@@ -627,7 +666,46 @@ impl IREvaluator {
     }
 
     /// Evaluate a single IR node.
+    ///
+    /// This is the public entry point. When `env.trace` is `Some`, it wraps
+    /// `eval_raw` to collect per-node `ExecutionEvent`s for observability
+    /// (Line B Phase 1, InterCode-inspired structured feedback).
     pub fn eval(node: &IRNode, env: &mut Env) -> Result<Value> {
+        // Fast path: no trace collection — delegate directly to eval_raw.
+        if env.trace.is_none() {
+            return Self::eval_raw(node, env);
+        }
+
+        let start = std::time::Instant::now();
+        let result = Self::eval_raw(node, env);
+        if let Some(trace) = env.trace.as_mut() {
+            let (ok, result_summary) = match &result {
+                Ok(v) => (true, Some(summarize_value(v))),
+                Err(e) => (false, Some(e.to_string())),
+            };
+            trace.push(crate::env::ExecutionEvent {
+                node_type: node_type_name(node).to_string(),
+                builtin_name: builtin_name_of(node).map(String::from),
+                elapsed_us: start.elapsed().as_micros() as u64,
+                ok,
+                result_summary: result_summary.map(|s| s.chars().take(200).collect()),
+            });
+        }
+        result
+    }
+
+    /// Inner evaluation without trace collection. Called by `eval` or directly
+    /// when trace is not needed (REPL, tests, recursive inner calls that
+    /// `eval` already wraps).
+    fn eval_raw(node: &IRNode, env: &mut Env) -> Result<Value> {
+        // T5: per-request deadline check. Cheap (just a load + compare) so
+        // safe to run on every node. `env.deadline` is `None` by default,
+        // which makes this a no-op for REPL/tests/non-agent paths.
+        if let Some(dl) = env.deadline {
+            if std::time::Instant::now() >= dl {
+                return Err(anyhow!("timeout: deadline exceeded"));
+            }
+        }
         match node {
             IRNode::Unit => Ok(Value::Null),
             IRNode::Bool(b) => Ok(Value::Bool(*b)),
@@ -700,6 +778,103 @@ impl IREvaluator {
                     val = Self::eval(stage, env)?;
                 }
                 Ok(val)
+            }
+            // ── Fused pipeline stages ──
+            // These fuse two stages into a single iteration, reducing allocations
+            // and cache misses. FusedMapFilter: transform, then test → one pass.
+            IRNode::FusedMapFilter(map_node, filter_node) => {
+                let input = env.input().cloned().unwrap_or(Value::Null);
+                let arr = expect_array(&input)?;
+                match (map_node.as_ref(), filter_node.as_ref()) {
+                    (IRNode::Map(mparams, mbody), IRNode::Filter(fparams, fbody)) => {
+                        let mut out = Vec::new();
+                        for (i, v) in arr.iter().enumerate() {
+                            let mut local = env.clone();
+                            local.set_input(None);
+                            local.set_var_unchecked(&mparams[0], v.clone());
+                            if mparams.len() > 1 { local.set_var_unchecked(&mparams[1], Value::Int(i as i64)); }
+                            let mapped = crate::eval::eval_expr(mbody, &mut local)?;
+                            // Now test the mapped value
+                            let mut fl = env.clone();
+                            fl.set_var_unchecked(&fparams[0], mapped.clone());
+                            if is_truthy_v(&crate::eval::eval_expr(fbody, &mut fl).unwrap_or(Value::Bool(false))) {
+                                out.push(mapped);
+                            }
+                        }
+                        Ok(Value::Array(out))
+                    }
+                    _ => {
+                        // Fallback: evaluate as pipeline
+                        let mut val = Value::Array(arr.clone());
+                        for stage in [map_node.as_ref(), filter_node.as_ref()] {
+                            env.set_input(Some(val));
+                            val = Self::eval(stage, env)?;
+                        }
+                        Ok(val)
+                    }
+                }
+            }
+            IRNode::FusedFilterMap(filter_node, map_node) => {
+                let input = env.input().cloned().unwrap_or(Value::Null);
+                let arr = expect_array(&input)?;
+                match (filter_node.as_ref(), map_node.as_ref()) {
+                    (IRNode::Filter(fparams, fbody), IRNode::Map(mparams, mbody)) => {
+                        let mut out = Vec::new();
+                        for (i, v) in arr.iter().enumerate() {
+                            // First test
+                            let mut fl = env.clone();
+                            fl.set_var_unchecked(&fparams[0], v.clone());
+                            if !is_truthy_v(&crate::eval::eval_expr(fbody, &mut fl).unwrap_or(Value::Bool(false))) {
+                                continue;
+                            }
+                            // Then transform
+                            let mut local = env.clone();
+                            local.set_input(None);
+                            local.set_var_unchecked(&mparams[0], v.clone());
+                            if mparams.len() > 1 { local.set_var_unchecked(&mparams[1], Value::Int(i as i64)); }
+                            out.push(crate::eval::eval_expr(mbody, &mut local)?);
+                        }
+                        Ok(Value::Array(out))
+                    }
+                    _ => {
+                        let mut val = Value::Array(arr.clone());
+                        for stage in [filter_node.as_ref(), map_node.as_ref()] {
+                            env.set_input(Some(val));
+                            val = Self::eval(stage, env)?;
+                        }
+                        Ok(val)
+                    }
+                }
+            }
+            IRNode::FusedMapMap(a, b) => {
+                let input = env.input().cloned().unwrap_or(Value::Null);
+                let arr = expect_array(&input)?;
+                match (a.as_ref(), b.as_ref()) {
+                    (IRNode::Map(ap, ab), IRNode::Map(bp, bb)) => {
+                        let mut out = Vec::with_capacity(arr.len());
+                        for (i, v) in arr.iter().enumerate() {
+                            let mut local = env.clone();
+                            local.set_input(None);
+                            local.set_var_unchecked(&ap[0], v.clone());
+                            if ap.len() > 1 { local.set_var_unchecked(&ap[1], Value::Int(i as i64)); }
+                            let mid = crate::eval::eval_expr(ab, &mut local)?;
+                            let mut local2 = env.clone();
+                            local2.set_input(None);
+                            local2.set_var_unchecked(&bp[0], mid);
+                            if bp.len() > 1 { local2.set_var_unchecked(&bp[1], Value::Int(i as i64)); }
+                            out.push(crate::eval::eval_expr(bb, &mut local2)?);
+                        }
+                        Ok(Value::Array(out))
+                    }
+                    _ => {
+                        let mut val = Value::Array(arr.clone());
+                        for stage in [a.as_ref(), b.as_ref()] {
+                            env.set_input(Some(val));
+                            val = Self::eval(stage, env)?;
+                        }
+                        Ok(val)
+                    }
+                }
             }
             // Pipeline stages — IR-native evaluation (v3: params+Expr bodies)
             IRNode::Map(params, body) => {
@@ -804,9 +979,40 @@ impl IREvaluator {
                 Err(anyhow!("{}", v))
             }
             IRNode::Error(code, msg) => Err(anyhow!("[{}] {}", code, msg.as_deref().unwrap_or("unknown"))),
-            IRNode::If(_, _, _) | IRNode::Match(_, _) => {
-                // Control flow not yet implemented in IR evaluator — fall through to AST path
-                Err(anyhow!("IR evaluator: {node:?} not yet implemented"))
+            IRNode::If(cond, then_branch, else_branch) => {
+                // Control flow: eval cond, branch on truthiness (matches eval.rs semantics
+                // via is_truthy_v: Null / false / 0 / 0.0 / "" are falsy, everything else truthy)
+                let c = Self::eval(cond, env)?;
+                if is_truthy_v(&c) {
+                    Self::eval(then_branch, env)
+                } else {
+                    Self::eval(else_branch, env)
+                }
+            }
+            IRNode::Match(scrutinee, arms) => {
+                // Pattern matching: eval scrutinee, try each arm's pattern; on match,
+                // check optional guard (in a scope that sees the pattern bindings),
+                // then commit bindings to env and eval body. Mirrors eval.rs::Expr::Match.
+                let value = Self::eval(scrutinee, env)?;
+                for arm in arms {
+                    if let Some(bindings) = match_pattern_ir(&arm.pattern, &value) {
+                        if let Some(guard) = &arm.guard {
+                            let mut guard_env = env.clone();
+                            for (name, val) in &bindings {
+                                guard_env.set_var_unchecked(name, val.clone());
+                            }
+                            let guard_val = Self::eval(guard, &mut guard_env)?;
+                            if !is_truthy_v(&guard_val) {
+                                continue;
+                            }
+                        }
+                        for (name, val) in bindings {
+                            env.set_var_unchecked(&name, val);
+                        }
+                        return Self::eval(&arm.body, env);
+                    }
+                }
+                Err(anyhow!("match: no arm matched the value"))
             }
             IRNode::Annotate(_, _, inner) => Self::eval(inner, env),
         }
@@ -814,6 +1020,79 @@ impl IREvaluator {
 
     fn eval_lambda(_node: &IRNode, _env: &mut Env) -> Result<(Vec<String>, IRNode)> {
         Err(anyhow!("eval_lambda not needed in v3"))
+    }
+}
+
+// ── Trace helpers (Line B Phase 1) ───────────────────────────────────
+
+/// Return the variant name of an IRNode for trace labeling.
+fn node_type_name(node: &IRNode) -> &'static str {
+    match node {
+        IRNode::Unit => "Unit",
+        IRNode::Bool(_) => "Bool",
+        IRNode::Int(_) => "Int",
+        IRNode::Float(_) => "Float",
+        IRNode::Str(_) => "Str",
+        IRNode::Array(_) => "Array",
+        IRNode::Record(_) => "Record",
+        IRNode::Var(_) => "Var",
+        IRNode::Let(..) => "Let",
+        IRNode::Binary(..) => "Binary",
+        IRNode::Unary(..) => "Unary",
+        IRNode::If(..) => "If",
+        IRNode::Match(..) => "Match",
+        IRNode::Try(..) => "Try",
+        IRNode::Throw(..) => "Throw",
+        IRNode::Lambda(..) => "Lambda",
+        IRNode::Call(..) => "Call",
+        IRNode::Pipeline(..) => "Pipeline",
+        IRNode::Map(..) => "Map",
+        IRNode::Filter(..) => "Filter",
+        IRNode::Sort(..) => "Sort",
+        IRNode::Reduce(..) => "Reduce",
+        IRNode::Take(..) => "Take",
+        IRNode::FusedMapMap(..) => "FusedMapMap",
+        IRNode::FusedMapFilter(..) => "FusedMapFilter",
+        IRNode::FusedFilterMap(..) => "FusedFilterMap",
+        IRNode::Builtin(..) => "Builtin",
+        IRNode::MemberAccess(..) => "MemberAccess",
+        IRNode::Error(..) => "Error",
+        IRNode::Annotate(..) => "Annotate",
+    }
+}
+
+/// If the node is a `Builtin`, return its name. Used for trace labeling.
+fn builtin_name_of(node: &IRNode) -> Option<&str> {
+    match node {
+        IRNode::Builtin(name, _, _) => Some(name.as_str()),
+        _ => None,
+    }
+}
+
+/// Produce a short summary string of a Value for trace output.
+/// Truncated to 200 chars by the caller.
+fn summarize_value(v: &Value) -> String {
+    match v {
+        Value::Null => "null".into(),
+        Value::Bool(b) => b.to_string(),
+        Value::Int(n) => n.to_string(),
+        Value::Float(f) => f.to_string(),
+        Value::Str(s) => {
+            if s.len() > 100 {
+                format!("\"{}...\" ({} chars)", &s[..50], s.len())
+            } else {
+                format!("\"{}\"", s)
+            }
+        }
+        Value::Uri(s) => format!("<uri: {}>", s),
+        Value::Array(arr) => format!("[array: {} items]", arr.len()),
+        Value::Record(map) => format!("{{record: {} fields}}", map.len()),
+        Value::Table(t) => format!("<table: {} rows>", t.rows.len()),
+        Value::Lambda(_) => "<lambda>".into(),
+        Value::AsyncLambda(_) => "<async_lambda>".into(),
+        Value::Future(_) => "<future>".into(),
+        Value::Error(e) => format!("<error: {}>", e),
+        Value::Builtin(b) => format!("<builtin: {}>", b.name),
     }
 }
 
@@ -865,6 +1144,54 @@ fn value_eq_v(a: &Value, b: &Value) -> bool {
     }
 }
 
+/// Attempt to match an IR `MatchPattern` against a `Value`.
+/// Returns `Some(bindings)` on success, `None` on failure.
+/// Bindings are accumulated in order; for `Or`, the first matching sub-pattern wins.
+fn match_pattern_ir(pattern: &MatchPattern, value: &Value) -> Option<Vec<(String, Value)>> {
+    let mut bindings = Vec::new();
+    if match_pattern_ir_impl(pattern, value, &mut bindings) {
+        Some(bindings)
+    } else {
+        None
+    }
+}
+
+fn match_pattern_ir_impl(
+    pattern: &MatchPattern,
+    value: &Value,
+    bindings: &mut Vec<(String, Value)>,
+) -> bool {
+    match pattern {
+        MatchPattern::Wildcard => true,
+        MatchPattern::Binding(name) => {
+            bindings.push((name.clone(), value.clone()));
+            true
+        }
+        MatchPattern::Literal(ir_node) => {
+            // compile_pattern emits literal patterns only for primitive constants;
+            // match by structural equality against the encoded literal.
+            match ir_node {
+                IRNode::Int(n) => matches!(value, Value::Int(v) if v == n),
+                IRNode::Float(f) => matches!(value, Value::Float(v) if v == f),
+                IRNode::Str(s) => matches!(value, Value::Str(v) if v == s),
+                IRNode::Bool(b) => matches!(value, Value::Bool(v) if v == b),
+                IRNode::Unit => matches!(value, Value::Null),
+                _ => false,
+            }
+        }
+        MatchPattern::Or(patterns) => {
+            for p in patterns {
+                let mut trial = Vec::new();
+                if match_pattern_ir_impl(p, value, &mut trial) {
+                    bindings.extend(trial);
+                    return true;
+                }
+            }
+            false
+        }
+    }
+}
+
 fn expect_array(v: &Value) -> Result<&Vec<Value>> {
     match v { Value::Array(arr) => Ok(arr), _ => Err(anyhow!("expected array")) }
 }
@@ -884,6 +1211,46 @@ fn compare_values(a: &Value, b: &Value) -> std::cmp::Ordering {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_t5_deadline_expired_returns_timeout() {
+        // T5: when env.deadline is Some(past), eval must abort immediately
+        // with a "timeout: deadline exceeded" error, regardless of the node.
+        let mut env = Env::new();
+        env.deadline = Some(std::time::Instant::now() - std::time::Duration::from_millis(1));
+        let node = IRNode::Int(42);
+        let result = IREvaluator::eval(&node, &mut env);
+        assert!(result.is_err(), "expected timeout error");
+        let msg = result.unwrap_err().to_string();
+        assert!(
+            msg.contains("timeout"),
+            "error should mention timeout, got: {msg}"
+        );
+    }
+
+    #[test]
+    fn test_t5_no_deadline_evaluates_normally() {
+        // T5: deadline=None means no timeout, normal evaluation proceeds.
+        let mut env = Env::new();
+        env.deadline = None;
+        let node = IRNode::Int(42);
+        let result = IREvaluator::eval(&node, &mut env);
+        assert_eq!(result.unwrap(), Value::Int(42));
+    }
+
+    #[test]
+    fn test_t5_future_deadline_evaluates_normally() {
+        // T5: deadline in the future should not block normal evaluation.
+        let mut env = Env::new();
+        env.deadline = Some(std::time::Instant::now() + std::time::Duration::from_secs(60));
+        let node = IRNode::Binary(
+            Box::new(IRNode::Int(1)),
+            BinOp::Add,
+            Box::new(IRNode::Int(2)),
+        );
+        let result = IREvaluator::eval(&node, &mut env);
+        assert_eq!(result.unwrap(), Value::Int(3));
+    }
 
     #[test]
     fn test_ir_hash_deterministic() {
@@ -941,5 +1308,308 @@ mod tests {
         assert_eq!(ir.len(), 1);
         // Should be constant-folded to Int(3)
         assert_eq!(ir[0], IRNode::Int(3));
+    }
+
+    // ── If / Match control-flow tests (T12) ──
+
+    fn eval_node(node: &IRNode) -> Result<Value> {
+        let mut env = Env::new();
+        IREvaluator::eval(node, &mut env)
+    }
+
+    #[test]
+    fn test_ir_if_truthy_cond() {
+        // if 1 then "yes" else "no"  → "yes"
+        let node = IRNode::If(
+            Box::new(IRNode::Int(1)),
+            Box::new(IRNode::Str("yes".into())),
+            Box::new(IRNode::Str("no".into())),
+        );
+        assert_eq!(eval_node(&node).unwrap(), Value::Str("yes".into()));
+    }
+
+    #[test]
+    fn test_ir_if_falsy_cond() {
+        // if 0 then "yes" else "no"  → "no"
+        let node = IRNode::If(
+            Box::new(IRNode::Int(0)),
+            Box::new(IRNode::Str("yes".into())),
+            Box::new(IRNode::Str("no".into())),
+        );
+        assert_eq!(eval_node(&node).unwrap(), Value::Str("no".into()));
+    }
+
+    #[test]
+    fn test_ir_if_falsy_values_all_go_else() {
+        // Verifies is_truthy_v alignment: Null / false / 0 / 0.0 / "" are all falsy
+        let falsy = vec![
+            IRNode::Unit,
+            IRNode::Bool(false),
+            IRNode::Int(0),
+            IRNode::Float(0.0),
+            IRNode::Str(String::new()),
+        ];
+        for cond in falsy {
+            let node = IRNode::If(
+                Box::new(cond),
+                Box::new(IRNode::Int(1)),
+                Box::new(IRNode::Int(2)),
+            );
+            assert_eq!(eval_node(&node).unwrap(), Value::Int(2), "expected else branch");
+        }
+    }
+
+    #[test]
+    fn test_ir_if_nested() {
+        // if 1 then (if 0 then 10 else 20) else 30  → 20
+        let inner = IRNode::If(
+            Box::new(IRNode::Int(0)),
+            Box::new(IRNode::Int(10)),
+            Box::new(IRNode::Int(20)),
+        );
+        let outer = IRNode::If(
+            Box::new(IRNode::Int(1)),
+            Box::new(inner),
+            Box::new(IRNode::Int(30)),
+        );
+        assert_eq!(eval_node(&outer).unwrap(), Value::Int(20));
+    }
+
+    #[test]
+    fn test_ir_if_evaluates_cond_expr() {
+        // if 2 > 1 then "ok" else "bad"  → "ok"
+        let cond = IRNode::Binary(
+            Box::new(IRNode::Int(2)),
+            BinOp::Gt,
+            Box::new(IRNode::Int(1)),
+        );
+        let node = IRNode::If(
+            Box::new(cond),
+            Box::new(IRNode::Str("ok".into())),
+            Box::new(IRNode::Str("bad".into())),
+        );
+        assert_eq!(eval_node(&node).unwrap(), Value::Str("ok".into()));
+    }
+
+    #[test]
+    fn test_ir_match_literal_int() {
+        // match 2 { 1 => "one", 2 => "two", _ => "other" }  → "two"
+        let node = IRNode::Match(
+            Box::new(IRNode::Int(2)),
+            vec![
+                MatchArm {
+                    pattern: MatchPattern::Literal(IRNode::Int(1)),
+                    guard: None,
+                    body: Box::new(IRNode::Str("one".into())),
+                },
+                MatchArm {
+                    pattern: MatchPattern::Literal(IRNode::Int(2)),
+                    guard: None,
+                    body: Box::new(IRNode::Str("two".into())),
+                },
+                MatchArm {
+                    pattern: MatchPattern::Wildcard,
+                    guard: None,
+                    body: Box::new(IRNode::Str("other".into())),
+                },
+            ],
+        );
+        assert_eq!(eval_node(&node).unwrap(), Value::Str("two".into()));
+    }
+
+    #[test]
+    fn test_ir_match_literal_str_and_bool() {
+        let str_arm = IRNode::Match(
+            Box::new(IRNode::Str("hi".into())),
+            vec![
+                MatchArm {
+                    pattern: MatchPattern::Literal(IRNode::Str("yo".into())),
+                    guard: None,
+                    body: Box::new(IRNode::Int(0)),
+                },
+                MatchArm {
+                    pattern: MatchPattern::Literal(IRNode::Str("hi".into())),
+                    guard: None,
+                    body: Box::new(IRNode::Int(1)),
+                },
+            ],
+        );
+        assert_eq!(eval_node(&str_arm).unwrap(), Value::Int(1));
+
+        let bool_arm = IRNode::Match(
+            Box::new(IRNode::Bool(false)),
+            vec![
+                MatchArm {
+                    pattern: MatchPattern::Literal(IRNode::Bool(true)),
+                    guard: None,
+                    body: Box::new(IRNode::Int(10)),
+                },
+                MatchArm {
+                    pattern: MatchPattern::Literal(IRNode::Bool(false)),
+                    guard: None,
+                    body: Box::new(IRNode::Int(20)),
+                },
+            ],
+        );
+        assert_eq!(eval_node(&bool_arm).unwrap(), Value::Int(20));
+    }
+
+    #[test]
+    fn test_ir_match_null_literal() {
+        // compile_pattern maps Pattern::Null → MatchPattern::Literal(IRNode::Unit)
+        let node = IRNode::Match(
+            Box::new(IRNode::Unit),
+            vec![
+                MatchArm {
+                    pattern: MatchPattern::Literal(IRNode::Unit),
+                    guard: None,
+                    body: Box::new(IRNode::Str("null".into())),
+                },
+                MatchArm {
+                    pattern: MatchPattern::Wildcard,
+                    guard: None,
+                    body: Box::new(IRNode::Str("non-null".into())),
+                },
+            ],
+        );
+        assert_eq!(eval_node(&node).unwrap(), Value::Str("null".into()));
+    }
+
+    #[test]
+    fn test_ir_match_binding() {
+        // match 42 { x => x + 1 }  → 43
+        let body = IRNode::Binary(
+            Box::new(IRNode::Var("x".into())),
+            BinOp::Add,
+            Box::new(IRNode::Int(1)),
+        );
+        let node = IRNode::Match(
+            Box::new(IRNode::Int(42)),
+            vec![MatchArm {
+                pattern: MatchPattern::Binding("x".into()),
+                guard: None,
+                body: Box::new(body),
+            }],
+        );
+        assert_eq!(eval_node(&node).unwrap(), Value::Int(43));
+    }
+
+    #[test]
+    fn test_ir_match_wildcard_default() {
+        // match "anything" { 1 => "one", _ => "default" }  → "default"
+        let node = IRNode::Match(
+            Box::new(IRNode::Str("anything".into())),
+            vec![
+                MatchArm {
+                    pattern: MatchPattern::Literal(IRNode::Int(1)),
+                    guard: None,
+                    body: Box::new(IRNode::Str("one".into())),
+                },
+                MatchArm {
+                    pattern: MatchPattern::Wildcard,
+                    guard: None,
+                    body: Box::new(IRNode::Str("default".into())),
+                },
+            ],
+        );
+        assert_eq!(eval_node(&node).unwrap(), Value::Str("default".into()));
+    }
+
+    #[test]
+    fn test_ir_match_or_pattern() {
+        // match 2 { 1 | 2 | 3 => "small", _ => "big" }  → "small"
+        let node = IRNode::Match(
+            Box::new(IRNode::Int(2)),
+            vec![
+                MatchArm {
+                    pattern: MatchPattern::Or(vec![
+                        MatchPattern::Literal(IRNode::Int(1)),
+                        MatchPattern::Literal(IRNode::Int(2)),
+                        MatchPattern::Literal(IRNode::Int(3)),
+                    ]),
+                    guard: None,
+                    body: Box::new(IRNode::Str("small".into())),
+                },
+                MatchArm {
+                    pattern: MatchPattern::Wildcard,
+                    guard: None,
+                    body: Box::new(IRNode::Str("big".into())),
+                },
+            ],
+        );
+        assert_eq!(eval_node(&node).unwrap(), Value::Str("small".into()));
+    }
+
+    #[test]
+    fn test_ir_match_guard_true() {
+        // match 5 { x if x > 3 => "big", _ => "small" }  → "big"
+        let guard = IRNode::Binary(
+            Box::new(IRNode::Var("x".into())),
+            BinOp::Gt,
+            Box::new(IRNode::Int(3)),
+        );
+        let node = IRNode::Match(
+            Box::new(IRNode::Int(5)),
+            vec![
+                MatchArm {
+                    pattern: MatchPattern::Binding("x".into()),
+                    guard: Some(Box::new(guard)),
+                    body: Box::new(IRNode::Str("big".into())),
+                },
+                MatchArm {
+                    pattern: MatchPattern::Wildcard,
+                    guard: None,
+                    body: Box::new(IRNode::Str("small".into())),
+                },
+            ],
+        );
+        assert_eq!(eval_node(&node).unwrap(), Value::Str("big".into()));
+    }
+
+    #[test]
+    fn test_ir_match_guard_false_falls_through() {
+        // match 2 { x if x > 3 => "big", _ => "small" }  → "small" (guard fails, falls through)
+        let guard = IRNode::Binary(
+            Box::new(IRNode::Var("x".into())),
+            BinOp::Gt,
+            Box::new(IRNode::Int(3)),
+        );
+        let node = IRNode::Match(
+            Box::new(IRNode::Int(2)),
+            vec![
+                MatchArm {
+                    pattern: MatchPattern::Binding("x".into()),
+                    guard: Some(Box::new(guard)),
+                    body: Box::new(IRNode::Str("big".into())),
+                },
+                MatchArm {
+                    pattern: MatchPattern::Wildcard,
+                    guard: None,
+                    body: Box::new(IRNode::Str("small".into())),
+                },
+            ],
+        );
+        assert_eq!(eval_node(&node).unwrap(), Value::Str("small".into()));
+    }
+
+    #[test]
+    fn test_ir_match_no_arm_matched_errors() {
+        // match 99 { 1 => "one", 2 => "two" }  → error
+        let node = IRNode::Match(
+            Box::new(IRNode::Int(99)),
+            vec![
+                MatchArm {
+                    pattern: MatchPattern::Literal(IRNode::Int(1)),
+                    guard: None,
+                    body: Box::new(IRNode::Str("one".into())),
+                },
+                MatchArm {
+                    pattern: MatchPattern::Literal(IRNode::Int(2)),
+                    guard: None,
+                    body: Box::new(IRNode::Str("two".into())),
+                },
+            ],
+        );
+        assert!(eval_node(&node).is_err());
     }
 }

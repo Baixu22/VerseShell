@@ -66,6 +66,12 @@ pub enum Capability {
 }
 
 impl Capability {
+    /// Human-readable name string (e.g. `"sys.read"`, `"proc.kill"`).
+    /// Used by `describe_capabilities` MCP tool to report granted caps.
+    pub fn name_str(&self) -> &'static str {
+        cap_name(self)
+    }
+
     /// Human-readable description for CLI help / error messages.
     pub fn description(&self) -> &'static str {
         match self {
@@ -311,9 +317,26 @@ impl CapabilitySet {
     }
 
     pub fn is_empty(&self) -> bool { self.granted.is_empty() && self.mode == CapabilityMode::AllowList }
+
+    /// Return the list of granted capability names as strings
+    /// (e.g. `["file.read", "proc.kill"]`), sorted alphabetically.
+    /// Used by the `describe_capabilities` MCP tool.
+    pub fn granted_caps_as_strings(&self) -> Vec<String> {
+        let mut names: Vec<String> = self.granted.iter().map(|c| c.name_str().to_string()).collect();
+        names.sort();
+        names
+    }
+
+    /// Return the current mode as a string label.
+    pub fn mode_str(&self) -> &'static str {
+        match self.mode {
+            CapabilityMode::AllowList => "allow_list",
+            CapabilityMode::DenyList => "deny_list",
+        }
+    }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum CapabilityResult {
     Allow,
     Deny(String), // reason for denial
@@ -383,6 +406,32 @@ pub fn check_capability(builtin_name: &str) -> CapabilityResult {
         return CapabilityResult::Allow; // No capability restrictions set
     }
     caps.check(builtin_name)
+}
+
+/// Return the currently granted capability names as strings
+/// (e.g. `["file.read", "proc.kill"]`), sorted alphabetically.
+///
+/// Returns an empty `Vec` if `init_caps` was never called (default state,
+/// which means "no restrictions" — all builtins allowed).
+/// Used by the `describe_capabilities` MCP tool.
+pub fn current_capabilities() -> Vec<String> {
+    let caps = GLOBAL_CAPS.read().unwrap();
+    caps.granted_caps_as_strings()
+}
+
+/// Return the current capability mode as a string label.
+/// Used by the `describe_capabilities` MCP tool.
+pub fn current_mode_str() -> &'static str {
+    let caps = GLOBAL_CAPS.read().unwrap();
+    caps.mode_str()
+}
+
+/// Return true if no capability restrictions have been set
+/// (i.e. `init_caps` was never called or was called with empty input).
+/// In this state, all builtins are allowed.
+pub fn caps_is_empty() -> bool {
+    let caps = GLOBAL_CAPS.read().unwrap();
+    caps.is_empty()
 }
 
 #[cfg(test)]
