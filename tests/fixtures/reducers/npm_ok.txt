@@ -1,0 +1,3 @@
+npm warn deprecated foo@1.0.0: use bar
+added 120, removed 2, changed 5 packages in 4.2s
+found 0 vulnerabilities

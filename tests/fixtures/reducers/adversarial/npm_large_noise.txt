@@ -1,0 +1,972 @@
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/lodash/-/lodash-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/lodash/lodash-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/lodash/lodash-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/lodash/lodash-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/lodash/lodash-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/lodash/lodash-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/lodash/lodash-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/lodash/lodash-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/lodash/lodash-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/lodash/lodash-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/lodash/lodash-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 731ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/react/-/react-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/react/react-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/react/react-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/react/react-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/react/react-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/react/react-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/react/react-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/react/react-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/react/react-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/react/react-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/react/react-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 616ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/vue/-/vue-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/vue/vue-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/vue/vue-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/vue/vue-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/vue/vue-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/vue/vue-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/vue/vue-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/vue/vue-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/vue/vue-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/vue/vue-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/vue/vue-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 699ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/angular/-/angular-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/angular/angular-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/angular/angular-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/angular/angular-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/angular/angular-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/angular/angular-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/angular/angular-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/angular/angular-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/angular/angular-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/angular/angular-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/angular/angular-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 887ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/express/-/express-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/express/express-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/express/express-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/express/express-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/express/express-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/express/express-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/express/express-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/express/express-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/express/express-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/express/express-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/express/express-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 502ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/typescript/typescript-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/typescript/typescript-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/typescript/typescript-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/typescript/typescript-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/typescript/typescript-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/typescript/typescript-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/typescript/typescript-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/typescript/typescript-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/typescript/typescript-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/typescript/typescript-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 328ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/webpack/-/webpack-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/webpack/webpack-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/webpack/webpack-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/webpack/webpack-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/webpack/webpack-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/webpack/webpack-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/webpack/webpack-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/webpack/webpack-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/webpack/webpack-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/webpack/webpack-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/webpack/webpack-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 417ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/babel/-/babel-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/babel/babel-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/babel/babel-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/babel/babel-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/babel/babel-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/babel/babel-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/babel/babel-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/babel/babel-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/babel/babel-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/babel/babel-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/babel/babel-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 1058ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/eslint/eslint-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/eslint/eslint-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/eslint/eslint-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/eslint/eslint-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/eslint/eslint-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/eslint/eslint-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/eslint/eslint-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/eslint/eslint-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/eslint/eslint-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/eslint/eslint-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 398ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/jest/-/jest-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/jest/jest-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/jest/jest-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/jest/jest-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/jest/jest-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/jest/jest-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/jest/jest-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/jest/jest-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/jest/jest-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/jest/jest-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/jest/jest-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 832ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/mocha/-/mocha-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/mocha/mocha-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mocha/mocha-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mocha/mocha-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mocha/mocha-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mocha/mocha-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mocha/mocha-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mocha/mocha-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mocha/mocha-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mocha/mocha-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mocha/mocha-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 290ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/chai/-/chai-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/chai/chai-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/chai/chai-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/chai/chai-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/chai/chai-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/chai/chai-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/chai/chai-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/chai/chai-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/chai/chai-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/chai/chai-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/chai/chai-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 680ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/sinon/-/sinon-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/sinon/sinon-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sinon/sinon-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sinon/sinon-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sinon/sinon-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sinon/sinon-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sinon/sinon-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sinon/sinon-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sinon/sinon-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sinon/sinon-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sinon/sinon-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 962ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/redux/-/redux-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/redux/redux-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/redux/redux-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/redux/redux-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/redux/redux-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/redux/redux-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/redux/redux-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/redux/redux-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/redux/redux-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/redux/redux-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/redux/redux-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 387ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/mobx/-/mobx-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/mobx/mobx-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mobx/mobx-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mobx/mobx-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mobx/mobx-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mobx/mobx-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mobx/mobx-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mobx/mobx-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mobx/mobx-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mobx/mobx-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mobx/mobx-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 789ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/axios/-/axios-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/axios/axios-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/axios/axios-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/axios/axios-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/axios/axios-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/axios/axios-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/axios/axios-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/axios/axios-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/axios/axios-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/axios/axios-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/axios/axios-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 454ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/graphql/-/graphql-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/graphql/graphql-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/graphql/graphql-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/graphql/graphql-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/graphql/graphql-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/graphql/graphql-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/graphql/graphql-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/graphql/graphql-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/graphql/graphql-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/graphql/graphql-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/graphql/graphql-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 289ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/apollo/-/apollo-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/apollo/apollo-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/apollo/apollo-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/apollo/apollo-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/apollo/apollo-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/apollo/apollo-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/apollo/apollo-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/apollo/apollo-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/apollo/apollo-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/apollo/apollo-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/apollo/apollo-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 1094ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/prisma/-/prisma-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/prisma/prisma-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/prisma/prisma-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/prisma/prisma-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/prisma/prisma-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/prisma/prisma-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/prisma/prisma-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/prisma/prisma-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/prisma/prisma-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/prisma/prisma-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/prisma/prisma-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 527ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/sequelize/-/sequelize-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/sequelize/sequelize-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sequelize/sequelize-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sequelize/sequelize-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sequelize/sequelize-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sequelize/sequelize-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sequelize/sequelize-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sequelize/sequelize-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sequelize/sequelize-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sequelize/sequelize-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/sequelize/sequelize-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 219ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/mongoose/-/mongoose-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/mongoose/mongoose-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mongoose/mongoose-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mongoose/mongoose-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mongoose/mongoose-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mongoose/mongoose-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mongoose/mongoose-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mongoose/mongoose-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mongoose/mongoose-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mongoose/mongoose-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/mongoose/mongoose-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 297ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/socket.io/-/socket.io-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/socket.io/socket.io-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/socket.io/socket.io-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/socket.io/socket.io-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/socket.io/socket.io-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/socket.io/socket.io-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/socket.io/socket.io-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/socket.io/socket.io-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/socket.io/socket.io-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/socket.io/socket.io-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/socket.io/socket.io-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 814ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/ws/-/ws-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/ws/ws-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ws/ws-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ws/ws-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ws/ws-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ws/ws-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ws/ws-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ws/ws-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ws/ws-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ws/ws-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ws/ws-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 109ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/moment/-/moment-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/moment/moment-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/moment/moment-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/moment/moment-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/moment/moment-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/moment/moment-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/moment/moment-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/moment/moment-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/moment/moment-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/moment/moment-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/moment/moment-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 539ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/luxon/-/luxon-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/luxon/luxon-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/luxon/luxon-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/luxon/luxon-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/luxon/luxon-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/luxon/luxon-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/luxon/luxon-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/luxon/luxon-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/luxon/luxon-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/luxon/luxon-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/luxon/luxon-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 812ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/dayjs/-/dayjs-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/dayjs/dayjs-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/dayjs/dayjs-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/dayjs/dayjs-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/dayjs/dayjs-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/dayjs/dayjs-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/dayjs/dayjs-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/dayjs/dayjs-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/dayjs/dayjs-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/dayjs/dayjs-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/dayjs/dayjs-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 252ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/uuid/-/uuid-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/uuid/uuid-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/uuid/uuid-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/uuid/uuid-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/uuid/uuid-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/uuid/uuid-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/uuid/uuid-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/uuid/uuid-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/uuid/uuid-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/uuid/uuid-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/uuid/uuid-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 211ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/ramda/-/ramda-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/ramda/ramda-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ramda/ramda-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ramda/ramda-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ramda/ramda-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ramda/ramda-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ramda/ramda-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ramda/ramda-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ramda/ramda-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ramda/ramda-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/ramda/ramda-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 473ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/rxjs/-/rxjs-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/rxjs/rxjs-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/rxjs/rxjs-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/rxjs/rxjs-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/rxjs/rxjs-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/rxjs/rxjs-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/rxjs/rxjs-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/rxjs/rxjs-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/rxjs/rxjs-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/rxjs/rxjs-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/rxjs/rxjs-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 123ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/immer/-/immer-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/immer/immer-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/immer/immer-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/immer/immer-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/immer/immer-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/immer/immer-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/immer/immer-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/immer/immer-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/immer/immer-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/immer/immer-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/immer/immer-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 907ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.0.tgz 200ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.1.tgz 201ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.2.tgz 202ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.3.tgz 203ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.4.tgz 204ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.5.tgz 205ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.6.tgz 206ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.7.tgz 207ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.8.tgz 208ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.9.tgz 209ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.10.tgz 210ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.11.tgz 211ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.12.tgz 212ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.13.tgz 213ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.14.tgz 214ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.15.tgz 215ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.16.tgz 216ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.17.tgz 217ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.18.tgz 218ms
+npm http fetch GET 200 https://registry.npmjs.org/zod/-/zod-1.0.19.tgz 219ms
+npm http fetch GET 304 https://registry.npmjs.org/zod/zod-1.0.0.tgz 50ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/zod/zod-1.0.1.tgz 51ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/zod/zod-1.0.2.tgz 52ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/zod/zod-1.0.3.tgz 53ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/zod/zod-1.0.4.tgz 54ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/zod/zod-1.0.5.tgz 55ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/zod/zod-1.0.6.tgz 56ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/zod/zod-1.0.7.tgz 57ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/zod/zod-1.0.8.tgz 58ms (cache hit)
+npm http fetch GET 304 https://registry.npmjs.org/zod/zod-1.0.9.tgz 59ms (cache hit)
+npm timing metadata:load:packages Completed in 116ms
+
+npm WARN deprecated request@2.88.2: request has been deprecated
+npm WARN deprecated har-validator@5.1.5: this library is no longer supported
+npm WARN deprecated uuid@3.4.0: Please upgrade to version 7 or higher
+npm WARN node-fetch incompatibility: cannot use with older node versions
+
+added 1024, removed 5, changed 50 packages in 154.2s
+
+42 packages are looking for funding
+  run `npm fund` for details
+found 0 vulnerabilities

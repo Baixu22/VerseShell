@@ -1,0 +1,23 @@
+{
+  "aggregates": [
+    {
+      "model": "mock",
+      "condition": "raw_shell",
+      "tasks": 10,
+      "success_rate": 0.0,
+      "avg_tool_calls": 10.0,
+      "avg_observation_tokens": 3820.0,
+      "avg_elapsed_ms": 2.3
+    },
+    {
+      "model": "mock",
+      "condition": "verseshell_aci",
+      "tasks": 10,
+      "success_rate": 1.0,
+      "avg_tool_calls": 5.5,
+      "avg_observation_tokens": 405.0,
+      "avg_elapsed_ms": 3.3
+    }
+  ],
+  "n_rows": 20
+}

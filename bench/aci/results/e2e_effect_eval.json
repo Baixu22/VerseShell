@@ -1,0 +1,141 @@
+{
+  "generated_at": "2026-07-19T12:00:18Z",
+  "ae_binary": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\target\\debug\\ae.exe",
+  "cwd": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell",
+  "cases": {
+    "automated_gates": {
+      "semantic_reducer_tests": {
+        "ok": true,
+        "returncode": 0
+      },
+      "operation_protocol_tests": {
+        "ok": true,
+        "returncode": 0
+      },
+      "aci_1_0_ops_tests": {
+        "ok": true,
+        "returncode": 0
+      },
+      "aci_1_0_closed_loop_acceptance": {
+        "ok": true,
+        "returncode": 0
+      },
+      "aci_bench_mock_acceptance": {
+        "ok": true,
+        "returncode": 0
+      },
+      "effect_pass": true
+    },
+    "cargo_semantic": {
+      "cargo_failed_as_expected": true,
+      "profile": "cargo",
+      "raw_log_bytes": 566,
+      "raw_tokens_est": 141,
+      "agent_payload_tokens_est": 118,
+      "observation_tokens_est": 430,
+      "token_compression": 0.1631,
+      "envelope_compression": -2.0496,
+      "diagnostics_count": 2,
+      "has_path": true,
+      "has_line": true,
+      "has_code": true,
+      "has_expected_found": true,
+      "stderr_collapsed": true,
+      "stdout_status": "empty",
+      "stderr_status": "reduced",
+      "summary": "cargo: 2 error(s), 0 warning(s); E0308: mismatched types at src/lib.rs:2",
+      "first_diagnostic": {
+        "tool": "cargo",
+        "severity": "error",
+        "message": "mismatched types",
+        "path": "src/lib.rs",
+        "line": 2,
+        "column": 5,
+        "code": "E0308",
+        "expected": "String",
+        "found": "i32"
+      },
+      "suggested_next_ops": [
+        "file.view",
+        "result.query"
+      ],
+      "meta_token_estimate": 341,
+      "effect_pass": true
+    },
+    "git_npm": {
+      "git": {
+        "profile": "git",
+        "ok": true,
+        "status": "reduced",
+        "summary": "git status on master: 1 modified, 0 added, 0 deleted, 2 untracked",
+        "stats": {
+          "added": 0,
+          "branch": "master",
+          "changed_files": 3,
+          "deleted": 0,
+          "modified": 1,
+          "untracked": 2
+        },
+        "effect_pass": true
+      },
+      "npm_install": {
+        "ok": true,
+        "status": "reduced",
+        "summary": "added 12 packages, found 0 vulnerabilities",
+        "text_is_none": true,
+        "contains_added": true,
+        "contains_noise": false,
+        "effect_pass": true
+      }
+    },
+    "ledger_file": {
+      "ops_list_ok": true,
+      "has_ledger_ops_in_list": true,
+      "file_view_ok": true,
+      "file_view_has_hash": true,
+      "replace_ok": true,
+      "file_content_updated": true,
+      "recent_ok": true,
+      "recent_count": 3,
+      "n_responses": 5,
+      "response_ids": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "effect_pass": true
+    },
+    "aci_bench": {
+      "runner_exit": 0,
+      "comparison": {
+        "model": "mock",
+        "success_rate_A": 0.0,
+        "success_rate_D": 1.0,
+        "success_advantage_D": 1.0,
+        "avg_tool_calls_A": 10.0,
+        "avg_tool_calls_D": 5.5,
+        "tool_call_ratio_D_over_A": 0.55,
+        "avg_observation_tokens_A": 3820.0,
+        "avg_observation_tokens_D": 405.0,
+        "token_ratio_D_over_A": 0.106,
+        "meets_acceptance": true
+      },
+      "effect_pass": true
+    }
+  },
+  "verdict": {
+    "automated_gates": "PASS",
+    "cargo_semantic": "PASS",
+    "git_npm": "PASS",
+    "ledger_file": "PASS",
+    "aci_bench": "PASS"
+  },
+  "summary": {
+    "pass": 5,
+    "fail": 0,
+    "fail_names": [],
+    "overall": "GOOD"
+  }
+}

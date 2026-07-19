@@ -1,0 +1,8 @@
+{
+  "name": "bench-ts-script",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node -e \"console.log('ok'); process.exit(0)\""
+  }
+}

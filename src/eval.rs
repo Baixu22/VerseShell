@@ -480,13 +480,12 @@ pub fn eval_expr(expr: &Expr, env: &mut Env) -> Result<Value> {
                 if let Some(bindings) = match_pattern(&arm.pattern, &value) {
                     // Check guard if present
                     if let Some(guard_expr) = &arm.guard {
-                        // Create temporary environment with pattern bindings
-                        let mut temp_env = env.clone();
-                        for (name, val) in bindings.iter() {
-                            temp_env.set_var_unchecked(name, val.clone());
-                        }
-
-                        let guard_result = eval_expr(guard_expr, &mut temp_env)?;
+                        // Scoped bindings only — do not clone the whole Env.
+                        let frame: Vec<(&str, Value)> = bindings
+                            .iter()
+                            .map(|(name, val)| (name.as_str(), val.clone()))
+                            .collect();
+                        let guard_result = env.with_frame(&frame, |env| eval_expr(guard_expr, env))?;
                         if !is_truthy(&guard_result) {
                             continue; // Guard failed, try next arm
                         }

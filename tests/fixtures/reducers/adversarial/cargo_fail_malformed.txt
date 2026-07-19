@@ -1,0 +1,23 @@
+error[E0308]: mismatched
+types
+
+-->
+
+src/mixed\path.rs:42
+
+:17
+|
+42 | let x: String =
+"hi";
+|
+------
+
+^^^^ expected `String`, found `&str`
+
+= help: try using `.to_string()`
+
+error: aborting due to
+1 previous error
+
+For more information about this
+error, try `rustc --explain E0308`.

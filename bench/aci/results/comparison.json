@@ -1,0 +1,17 @@
+{
+  "comparisons": [
+    {
+      "model": "mock",
+      "success_rate_A": 0.0,
+      "success_rate_D": 1.0,
+      "success_advantage_D": 1.0,
+      "avg_tool_calls_A": 10.0,
+      "avg_tool_calls_D": 5.5,
+      "tool_call_ratio_D_over_A": 0.55,
+      "avg_observation_tokens_A": 3820.0,
+      "avg_observation_tokens_D": 405.0,
+      "token_ratio_D_over_A": 0.106,
+      "meets_acceptance": true
+    }
+  ]
+}

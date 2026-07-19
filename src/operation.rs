@@ -1,6 +1,8 @@
 //! Versioned Agent operations and the unified observation envelope.
 
 use crate::artifact::{display_path, ArtifactMetadata, ArtifactStore};
+use crate::observation_ledger;
+use crate::reducers::{self, ReduceInput};
 use crate::process_runner::{self, CapturedStream, ExecLimits};
 use crate::safety::{self, Effect, GuardCtx, Mode};
 use anyhow::{anyhow, Result};
@@ -83,6 +85,32 @@ pub struct Diagnostic {
     pub line: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub column: Option<u64>,
+    /// Tool-specific error code (e.g. cargo E0308).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub expected: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub found: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub suggested_fix: Option<String>,
+}
+
+impl Diagnostic {
+    pub fn basic(tool: impl Into<String>, severity: impl Into<String>, message: impl Into<String>) -> Self {
+        Self {
+            tool: tool.into(),
+            severity: severity.into(),
+            message: message.into(),
+            path: None,
+            line: None,
+            column: None,
+            code: None,
+            expected: None,
+            found: None,
+            suggested_fix: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -96,7 +124,9 @@ pub struct ObservationMeta {
     pub elapsed_ms: u64,
     pub profile: String,
     pub token_estimate: usize,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub effects: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub capabilities_used: Vec<String>,
 }
 
@@ -110,8 +140,10 @@ pub struct Observation {
     pub data: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<OperationError>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub diagnostics: Vec<Diagnostic>,
     pub meta: ObservationMeta,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub suggested_next: Vec<SuggestedAction>,
 }
 
@@ -316,7 +348,9 @@ impl OperationRegistry {
                 )
             }
         };
-        (spec.handler)(&req)
+        let obs = (spec.handler)(&req);
+        observation_ledger::record(&req.agent, &obs);
+        obs
     }
 }
 
@@ -568,11 +602,53 @@ fn execute_run(req: &OperationRequest) -> Observation {
         output.stdout.text.as_deref().unwrap_or(""),
         output.stderr.text.as_deref().unwrap_or("")
     );
-    let diagnostics = if success {
+    let cleaned_combined = collapse_blank_lines(&strip_ansi(&combined));
+    let semantic = reducers::reduce_semantic(&ReduceInput {
+        profile: &profile,
+        text: &cleaned_combined,
+        success,
+        exit_code: output.exit_code,
+    });
+    let diagnostics = if let Some(ref sem) = semantic {
+        if !sem.diagnostics.is_empty() {
+            sem.diagnostics.clone()
+        } else if success {
+            extract_warnings(&combined, &profile)
+        } else {
+            extract_diagnostics(&combined, &profile)
+        }
+    } else if success {
         extract_warnings(&combined, &profile)
     } else {
         extract_diagnostics(&combined, &profile)
     };
+    let mut stdout = stdout;
+    let mut stderr = stderr;
+    if let Some(ref sem) = semantic {
+        let semantic_rich = sem.summary.is_some() || !sem.diagnostics.is_empty();
+        // When a specialized reducer produced structure, prefer summary/diagnostics
+        // over duplicated stream bodies. Full logs remain recoverable via artifact.
+        if semantic_rich && (is_summary_profile(&profile) || is_content_truncated_profile(&profile))
+        {
+            let clamped = sem
+                .summary
+                .as_ref()
+                .map(|s| clamp_summary(s.clone(), SUCCESS_SUMMARY_TOKENS));
+            collapse_stream_to_summary(&mut stdout, clamped.as_deref());
+            collapse_stream_to_summary(&mut stderr, clamped.as_deref());
+        } else if let Some(ref summary) = sem.summary {
+            let clamped = clamp_summary(summary.clone(), SUCCESS_SUMMARY_TOKENS);
+            if success && is_summary_profile(&profile) {
+                collapse_stream_to_summary(&mut stdout, Some(&clamped));
+            } else if !success {
+                if stdout.summary.is_none() {
+                    stdout.summary = Some(clamped);
+                }
+            } else if is_content_truncated_profile(&profile) {
+                collapse_stream_to_summary(&mut stdout, Some(&clamped));
+            }
+        }
+    }
     let _ = safety::audit(
         "exec.run",
         Effect::Exec,
@@ -586,7 +662,7 @@ fn execute_run(req: &OperationRequest) -> Observation {
             "stderr": {"handle": stderr.artifact.clone(), "raw_bytes": stderr.raw_bytes, "status": stderr.status}
         }),
     );
-    let data = json!({
+    let mut data = json!({
         "argv": args.argv,
         "cwd": display_path(&cwd),
         "exit_code": output.exit_code,
@@ -594,6 +670,14 @@ fn execute_run(req: &OperationRequest) -> Observation {
         "stdout": stdout,
         "stderr": stderr
     });
+    if let Some(ref sem) = semantic {
+        if !sem.stats.is_empty() {
+            data["stats"] = sem.stats_json();
+        }
+        if let Some(ref summary) = sem.summary {
+            data["summary"] = json!(summary);
+        }
+    }
     let serialized = serde_json::to_string(&data).unwrap_or_default();
     let token_estimate = crate::builtins::est_token_count(&serialized);
     let error = if output.timed_out {
@@ -615,6 +699,7 @@ fn execute_run(req: &OperationRequest) -> Observation {
     };
     let mut suggested_next = Vec::new();
     if !success {
+        suggested_next.extend(reducers::suggested_from_diagnostics(&profile, &diagnostics));
         let pattern = failure_grep_pattern(&profile);
         for stream in [&stdout, &stderr] {
             if let Some(handle) = &stream.artifact {
@@ -1113,6 +1198,32 @@ fn detect_profile(argv: &[String], requested: &str) -> String {
         .map(|s| s.to_ascii_lowercase())
         .unwrap_or_default();
     match program.as_str() {
+        "python" | "python.exe" | "python3" | "python3.exe" => {
+            // python -m pytest → pytest profile
+            // python -m pip install → python_install profile
+            if subcommand.as_str() == "-m" {
+                let module = argv
+                    .get(2)
+                    .map(|s| s.to_ascii_lowercase())
+                    .unwrap_or_default();
+                match module.as_str() {
+                    "pytest" => return "pytest".into(),
+                    "pip" => {
+                        let pip_cmd = argv
+                            .get(3)
+                            .map(|s| s.to_ascii_lowercase())
+                            .unwrap_or_default();
+                        if matches!(pip_cmd.as_str(), "install" | "add" | "sync") {
+                            return "python_install".into();
+                        }
+                        return "generic".into();
+                    }
+                    _ => return "generic".into(),
+                }
+            }
+            // python -c "..." or python script.py — generic
+            "generic".into()
+        }
         "npm" | "npm.cmd" | "pnpm" | "yarn" | "bun"
             if matches!(subcommand.as_str(), "install" | "i" | "add" | "ci" | "update") =>
         {
@@ -1131,6 +1242,34 @@ fn detect_profile(argv: &[String], requested: &str) -> String {
         "git" | "git.exe" => "git".into(),
         _ => "generic".into(),
     }
+}
+
+
+/// Drop stream body text when semantic summary/diagnostics carry the meaning.
+/// Keeps artifact handles so agents can still recover full logs via result.query.
+fn collapse_stream_to_summary(stream: &mut StreamObservation, summary: Option<&str>) {
+    // Leave truly empty streams alone (no raw bytes and no body).
+    if stream.raw_bytes == 0 && stream.text.is_none() && stream.status == "empty" {
+        return;
+    }
+    // Prefer semantic summary over needle/window summaries already attached.
+    if let Some(s) = summary {
+        stream.summary = Some(s.to_string());
+    }
+    if stream.raw_bytes == 0 && stream.text.is_none() {
+        if stream.summary.is_some() {
+            stream.returned_bytes = stream.summary.as_ref().map(|s| s.len() as u64).unwrap_or(0);
+        }
+        return;
+    }
+    stream.status = "reduced";
+    stream.text = None;
+    stream.returned_bytes = stream
+        .summary
+        .as_ref()
+        .map(|s| s.len() as u64)
+        .unwrap_or(0);
+    stream.omitted_bytes = stream.raw_bytes.saturating_sub(stream.returned_bytes);
 }
 
 fn is_summary_profile(profile: &str) -> bool {
@@ -1377,6 +1516,10 @@ fn extract_warnings(text: &str, profile: &str) -> Vec<Diagnostic> {
             path: None,
             line: None,
             column: None,
+                code: None,
+                expected: None,
+                found: None,
+                suggested_fix: None,
         })
         .collect()
 }
@@ -1411,6 +1554,10 @@ fn extract_diagnostics(text: &str, profile: &str) -> Vec<Diagnostic> {
                 path: caps.name("path").map(|v| v.as_str().replace('\\', "/")),
                 line: caps.name("line").and_then(|v| v.as_str().parse().ok()),
                 column: caps.name("column").and_then(|v| v.as_str().parse().ok()),
+                code: None,
+                expected: None,
+                found: None,
+                suggested_fix: None,
             });
         } else {
             diagnostics.push(Diagnostic {
@@ -1420,6 +1567,10 @@ fn extract_diagnostics(text: &str, profile: &str) -> Vec<Diagnostic> {
                 path: None,
                 line: None,
                 column: None,
+                code: None,
+                expected: None,
+                found: None,
+                suggested_fix: None,
             });
         }
         if diagnostics.len() >= 30 {

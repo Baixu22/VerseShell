@@ -1,0 +1,39 @@
+{
+  "id": "rust_add_unit_test",
+  "version": "1.0.0",
+  "lang": "rust",
+  "platform": [
+    "any"
+  ],
+  "prompt": "Add a unit test for add() in src/lib.rs and make cargo test pass.",
+  "workspace_fixture": "rust_add_unit_test",
+  "modes": [
+    "raw_shell",
+    "verseshell_aci"
+  ],
+  "timeout_sec": 300,
+  "weight": 1.0,
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "file_contains",
+        "path": "src/lib.rs",
+        "contains": "#[test]"
+      },
+      {
+        "type": "file_contains",
+        "path": "src/lib.rs",
+        "contains": "assert_eq!(add(1, 2), 3)"
+      }
+    ]
+  },
+  "optional_verify": {
+    "type": "command_exit_0",
+    "argv": [
+      "cargo",
+      "test"
+    ],
+    "timeout_sec": 180
+  }
+}

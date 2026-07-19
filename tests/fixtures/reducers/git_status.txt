@@ -1,0 +1,6 @@
+On branch main
+Changes not staged for commit:
+	modified:   src/lib.rs
+	modified:   README.md
+Untracked files:
+	tmp.txt

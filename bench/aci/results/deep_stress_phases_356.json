@@ -1,0 +1,106 @@
+{
+  "phase": "Phase-3-5-6_stress",
+  "timestamp": "2026-07-19T12:25:23Z",
+  "cases": [
+    {
+      "name": "3.1-hash-consistency",
+      "passed": true,
+      "detail": "line0\nLINE1\nline2"
+    },
+    {
+      "name": "3.2-stale-hash",
+      "passed": true,
+      "detail": "{'code': 'E_STALE_HASH', 'message': 'content hash mismatch: expected sha256:deadbeef, got sha256:c8dba68945249de9b4faed72b89e041e3df77ffff885122599e6c2f7c65a68b2', 'recoverable': True}"
+    },
+    {
+      "name": "3.3-ambiguous",
+      "passed": true,
+      "detail": "{'code': 'E_AMBIGUOUS', 'message': 'old text matches 2 times; must be unique', 'recoverable': True}"
+    },
+    {
+      "name": "3.4-outside-workspace",
+      "passed": true,
+      "detail": "E_OUTSIDE_WORKSPACE"
+    },
+    {
+      "name": "3.5-cargo-fail-suggested-next",
+      "passed": true,
+      "detail": "ok=False has_path=True file_view=True result_query=True stderr=reduced"
+    },
+    {
+      "name": "3.6-result-query",
+      "passed": true,
+      "detail": "handle=result://sha256/814df2778879292e7613cde1 recovered=True"
+    },
+    {
+      "name": "3.7-ops-list-ledger",
+      "passed": true,
+      "detail": "total=24 has_ledger=True"
+    },
+    {
+      "name": "3.8-sequential-20-ops",
+      "passed": true,
+      "detail": "successes=21 ops_ok=True"
+    },
+    {
+      "name": "3.9-multi-agent",
+      "passed": true,
+      "detail": "responses=2 agent_field_present=True"
+    },
+    {
+      "name": "5.1-timeout-recovery",
+      "passed": true,
+      "detail": "E_TIMEOUT"
+    },
+    {
+      "name": "5.2-nonzero-exit",
+      "passed": true,
+      "detail": "code=E_PROCESS_EXIT diags=True"
+    },
+    {
+      "name": "5.3-budget-truncation",
+      "passed": true,
+      "detail": "truncated=False omitted=True"
+    },
+    {
+      "name": "5.4-ansi-stripping",
+      "passed": true,
+      "detail": "has_escape=False"
+    },
+    {
+      "name": "5.5-serial-100-ops",
+      "passed": true,
+      "detail": "ok=100/100"
+    },
+    {
+      "name": "5.6-large-artifact-recovery",
+      "passed": true,
+      "detail": "handle=result://sha256/954ac9fa95a6f6184e9080d8 len=2100 contains=True"
+    },
+    {
+      "name": "5.7-permission-denial",
+      "passed": true,
+      "detail": "E_NEEDS_APPROVAL"
+    },
+    {
+      "name": "5.8-windows-paths",
+      "passed": true,
+      "detail": "fwd=True bks=True"
+    },
+    {
+      "name": "6.1-cargo-semantic-collapse",
+      "passed": true,
+      "detail": "collapsed=True diags=1 artifact=True status=reduced"
+    }
+  ],
+  "summary": {
+    "passed": 18,
+    "failed": 0,
+    "total": 18,
+    "S3_AgentLoopUtility": 1.0,
+    "S5_Robustness": 1.0,
+    "S6_Regressions": 1.0
+  },
+  "failures": [],
+  "errors": []
+}

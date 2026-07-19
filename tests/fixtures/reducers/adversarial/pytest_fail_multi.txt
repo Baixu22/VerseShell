@@ -1,0 +1,10 @@
+=========================== FAILURES ===========================
+______________________ test_parse_empty _______________________
+tests/test_parser.py:25: in test_parse_empty
+    assert parse("") == []
+E   assert ['error'] == []
+______________________ test_format_output _______________________
+tests/test_output.py:42: in test_format_output
+    assert format_output(b'\xff\xfe') == "valid"
+E   AssertionError: assert '???invalid???' == 'valid'
+======================== 2 failed, 8 passed in 0.15s ========================

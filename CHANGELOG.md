@@ -1,4 +1,17 @@
-# Changelog
+﻿# Changelog
+
+## Unreleased
+
+### Added
+- Semantic observation reducers for cargo / pytest / git / npm_install with structured diagnostics
+- Optional Diagnostic fields: code, expected, found, suggested_fix
+- Session observation ledger + ops.observation_recent / ops.observation_open_errors
+- ACI-Bench framework under bench/aci (10 tasks, GOLDEN fixtures, A/D comparison, leaderboard, REPORT)
+- Multi-model live runner stub with trajectory cache (`baselines/`) and models.json dual slots
+- docs/quickstart/aci-mcp.md and docs/v1.1-freeze.md
+
+### Fixed
+- Match-arm guards no longer clone the entire Env (scoped with_frame)
 
 ## 1.0.0 — Agent-Computer Interface surface
 

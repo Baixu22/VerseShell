@@ -1,0 +1,29 @@
+{
+  "id": "python_fix_pytest_fail",
+  "version": "1.0.0",
+  "lang": "python",
+  "platform": [
+    "any"
+  ],
+  "prompt": "Fix the failing pytest so all tests pass.",
+  "workspace_fixture": "python_fix_pytest_fail",
+  "modes": [
+    "raw_shell",
+    "verseshell_aci"
+  ],
+  "timeout_sec": 300,
+  "weight": 1.0,
+  "success": {
+    "type": "file_contains",
+    "path": "mathlib.py",
+    "contains": "return a + b"
+  },
+  "optional_verify": {
+    "type": "command_exit_0",
+    "argv": [
+      "pytest",
+      "-q"
+    ],
+    "timeout_sec": 60
+  }
+}

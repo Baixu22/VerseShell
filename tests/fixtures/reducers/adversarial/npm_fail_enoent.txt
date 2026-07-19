@@ -1,0 +1,7 @@
+npm error code ENOENT
+npm error ENOENT no such file or directory, open '/tmp/missing/package.json'
+npm error
+npm error Could not read package.json: Error: ENOENT: no such file or directory, open '/tmp/missing/package.json'
+npm error
+npm error If you need help, you may report this error at:
+npm error   <https://github.com/npm/cli/issues>

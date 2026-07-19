@@ -1,0 +1,7 @@
+thread 'main' panicked at src/engine.rs:42:9:
+assertion failed: width > 0
+stack backtrace:
+   0: std::panicking::begin_panic
+   1: engine::check_dimensions
+   2: engine::compute
+note: run with `RUST_BACKTRACE=1` for a backtrace

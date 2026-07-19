@@ -1,0 +1,6 @@
+npm error code ERESOLVE
+npm error ERESOLVE unable to resolve dependency tree
+npm error
+npm error Conflicting peer dependency: react@18.2.0
+npm error Fix the upstream dependency conflict, or retry
+npm error with --force

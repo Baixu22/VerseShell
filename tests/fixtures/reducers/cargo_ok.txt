@@ -1,0 +1,4 @@
+   Compiling demo v0.1.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.23s
+     Running unittests src/lib.rs
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s

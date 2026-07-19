@@ -1,0 +1,16 @@
+{
+  "models": [
+    {
+      "id": "primary",
+      "provider": "openai_compatible",
+      "model": "${ACI_BENCH_MODEL}",
+      "notes": "Set ACI_BENCH_MODEL + ACI_BENCH_API_KEY for live HTTP probe"
+    },
+    {
+      "id": "secondary_slot",
+      "provider": "openai_compatible",
+      "model": "${ACI_BENCH_MODEL_2}",
+      "notes": "Optional second model; empty env skips this slot"
+    }
+  ]
+}

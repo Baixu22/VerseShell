@@ -1,0 +1,3055 @@
+diff --git a/src/lib.rs b/src/lib.rs
+index abc1234..def5678 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+diff --git a/src/module_1.rs b/src/module_1.rs
+index a0000001..b0000025 100644
+--- a/src/module_1.rs
++++ b/src/module_1.rs
+@@ -20,7 +20,10 @@
+ // Module 1 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config1 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_1_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_1_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_1_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_1_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_1_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_2.rs b/src/module_2.rs
+index a0000002..b000004a 100644
+--- a/src/module_2.rs
++++ b/src/module_2.rs
+@@ -40,7 +40,10 @@
+ // Module 2 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config2 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_2_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_2_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_2_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_2_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_2_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_3.rs b/src/module_3.rs
+index a0000003..b000006f 100644
+--- a/src/module_3.rs
++++ b/src/module_3.rs
+@@ -60,7 +60,10 @@
+ // Module 3 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config3 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_3_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_3_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_3_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_3_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_3_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_4.rs b/src/module_4.rs
+index a0000004..b0000094 100644
+--- a/src/module_4.rs
++++ b/src/module_4.rs
+@@ -80,7 +80,10 @@
+ // Module 4 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config4 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_4_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_4_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_4_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_4_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_4_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_5.rs b/src/module_5.rs
+index a0000005..b00000b9 100644
+--- a/src/module_5.rs
++++ b/src/module_5.rs
+@@ -100,7 +100,10 @@
+ // Module 5 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config5 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_5_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_5_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_5_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_5_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_5_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_6.rs b/src/module_6.rs
+index a0000006..b00000de 100644
+--- a/src/module_6.rs
++++ b/src/module_6.rs
+@@ -120,7 +120,10 @@
+ // Module 6 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config6 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_6_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_6_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_6_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_6_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_6_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_7.rs b/src/module_7.rs
+index a0000007..b0000103 100644
+--- a/src/module_7.rs
++++ b/src/module_7.rs
+@@ -140,7 +140,10 @@
+ // Module 7 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config7 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_7_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_7_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_7_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_7_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_7_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_8.rs b/src/module_8.rs
+index a0000008..b0000128 100644
+--- a/src/module_8.rs
++++ b/src/module_8.rs
+@@ -160,7 +160,10 @@
+ // Module 8 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config8 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_8_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_8_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_8_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_8_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_8_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_9.rs b/src/module_9.rs
+index a0000009..b000014d 100644
+--- a/src/module_9.rs
++++ b/src/module_9.rs
+@@ -180,7 +180,10 @@
+ // Module 9 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config9 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_9_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_9_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_9_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_9_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_9_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_10.rs b/src/module_10.rs
+index a000000a..b0000172 100644
+--- a/src/module_10.rs
++++ b/src/module_10.rs
+@@ -200,7 +200,10 @@
+ // Module 10 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config10 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_10_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_10_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_10_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_10_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_10_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_11.rs b/src/module_11.rs
+index a000000b..b0000197 100644
+--- a/src/module_11.rs
++++ b/src/module_11.rs
+@@ -220,7 +220,10 @@
+ // Module 11 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config11 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_11_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_11_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_11_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_11_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_11_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_12.rs b/src/module_12.rs
+index a000000c..b00001bc 100644
+--- a/src/module_12.rs
++++ b/src/module_12.rs
+@@ -240,7 +240,10 @@
+ // Module 12 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config12 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_12_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_12_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_12_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_12_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_12_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_13.rs b/src/module_13.rs
+index a000000d..b00001e1 100644
+--- a/src/module_13.rs
++++ b/src/module_13.rs
+@@ -260,7 +260,10 @@
+ // Module 13 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config13 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_13_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_13_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_13_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_13_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_13_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_14.rs b/src/module_14.rs
+index a000000e..b0000206 100644
+--- a/src/module_14.rs
++++ b/src/module_14.rs
+@@ -280,7 +280,10 @@
+ // Module 14 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config14 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_14_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_14_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_14_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_14_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_14_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_15.rs b/src/module_15.rs
+index a000000f..b000022b 100644
+--- a/src/module_15.rs
++++ b/src/module_15.rs
+@@ -300,7 +300,10 @@
+ // Module 15 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config15 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_15_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_15_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_15_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_15_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_15_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_16.rs b/src/module_16.rs
+index a0000010..b0000250 100644
+--- a/src/module_16.rs
++++ b/src/module_16.rs
+@@ -320,7 +320,10 @@
+ // Module 16 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config16 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_16_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_16_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_16_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_16_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_16_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_17.rs b/src/module_17.rs
+index a0000011..b0000275 100644
+--- a/src/module_17.rs
++++ b/src/module_17.rs
+@@ -340,7 +340,10 @@
+ // Module 17 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config17 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_17_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_17_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_17_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_17_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_17_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_18.rs b/src/module_18.rs
+index a0000012..b000029a 100644
+--- a/src/module_18.rs
++++ b/src/module_18.rs
+@@ -360,7 +360,10 @@
+ // Module 18 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config18 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_18_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_18_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_18_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_18_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_18_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_19.rs b/src/module_19.rs
+index a0000013..b00002bf 100644
+--- a/src/module_19.rs
++++ b/src/module_19.rs
+@@ -380,7 +380,10 @@
+ // Module 19 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config19 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_19_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_19_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_19_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_19_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_19_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_20.rs b/src/module_20.rs
+index a0000014..b00002e4 100644
+--- a/src/module_20.rs
++++ b/src/module_20.rs
+@@ -400,7 +400,10 @@
+ // Module 20 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config20 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_20_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_20_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_20_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_20_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_20_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_21.rs b/src/module_21.rs
+index a0000015..b0000309 100644
+--- a/src/module_21.rs
++++ b/src/module_21.rs
+@@ -420,7 +420,10 @@
+ // Module 21 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config21 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_21_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_21_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_21_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_21_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_21_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_22.rs b/src/module_22.rs
+index a0000016..b000032e 100644
+--- a/src/module_22.rs
++++ b/src/module_22.rs
+@@ -440,7 +440,10 @@
+ // Module 22 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config22 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_22_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_22_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_22_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_22_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_22_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_23.rs b/src/module_23.rs
+index a0000017..b0000353 100644
+--- a/src/module_23.rs
++++ b/src/module_23.rs
+@@ -460,7 +460,10 @@
+ // Module 23 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config23 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_23_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_23_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_23_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_23_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_23_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_24.rs b/src/module_24.rs
+index a0000018..b0000378 100644
+--- a/src/module_24.rs
++++ b/src/module_24.rs
+@@ -480,7 +480,10 @@
+ // Module 24 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config24 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_24_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_24_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_24_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_24_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_24_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_25.rs b/src/module_25.rs
+index a0000019..b000039d 100644
+--- a/src/module_25.rs
++++ b/src/module_25.rs
+@@ -500,7 +500,10 @@
+ // Module 25 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config25 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_25_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_25_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_25_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_25_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_25_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_26.rs b/src/module_26.rs
+index a000001a..b00003c2 100644
+--- a/src/module_26.rs
++++ b/src/module_26.rs
+@@ -520,7 +520,10 @@
+ // Module 26 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config26 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_26_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_26_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_26_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_26_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_26_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_27.rs b/src/module_27.rs
+index a000001b..b00003e7 100644
+--- a/src/module_27.rs
++++ b/src/module_27.rs
+@@ -540,7 +540,10 @@
+ // Module 27 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config27 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_27_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_27_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_27_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_27_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_27_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_28.rs b/src/module_28.rs
+index a000001c..b000040c 100644
+--- a/src/module_28.rs
++++ b/src/module_28.rs
+@@ -560,7 +560,10 @@
+ // Module 28 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config28 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_28_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_28_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_28_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_28_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_28_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_29.rs b/src/module_29.rs
+index a000001d..b0000431 100644
+--- a/src/module_29.rs
++++ b/src/module_29.rs
+@@ -580,7 +580,10 @@
+ // Module 29 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config29 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_29_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_29_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_29_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_29_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_29_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_30.rs b/src/module_30.rs
+index a000001e..b0000456 100644
+--- a/src/module_30.rs
++++ b/src/module_30.rs
+@@ -600,7 +600,10 @@
+ // Module 30 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config30 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_30_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_30_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_30_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_30_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_30_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_31.rs b/src/module_31.rs
+index a000001f..b000047b 100644
+--- a/src/module_31.rs
++++ b/src/module_31.rs
+@@ -620,7 +620,10 @@
+ // Module 31 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config31 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_31_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_31_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_31_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_31_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_31_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_32.rs b/src/module_32.rs
+index a0000020..b00004a0 100644
+--- a/src/module_32.rs
++++ b/src/module_32.rs
+@@ -640,7 +640,10 @@
+ // Module 32 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config32 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_32_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_32_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_32_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_32_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_32_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_33.rs b/src/module_33.rs
+index a0000021..b00004c5 100644
+--- a/src/module_33.rs
++++ b/src/module_33.rs
+@@ -660,7 +660,10 @@
+ // Module 33 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config33 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_33_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_33_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_33_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_33_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_33_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_34.rs b/src/module_34.rs
+index a0000022..b00004ea 100644
+--- a/src/module_34.rs
++++ b/src/module_34.rs
+@@ -680,7 +680,10 @@
+ // Module 34 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config34 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_34_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_34_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_34_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_34_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_34_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_35.rs b/src/module_35.rs
+index a0000023..b000050f 100644
+--- a/src/module_35.rs
++++ b/src/module_35.rs
+@@ -700,7 +700,10 @@
+ // Module 35 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config35 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_35_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_35_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_35_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_35_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_35_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_36.rs b/src/module_36.rs
+index a0000024..b0000534 100644
+--- a/src/module_36.rs
++++ b/src/module_36.rs
+@@ -720,7 +720,10 @@
+ // Module 36 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config36 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_36_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_36_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_36_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_36_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_36_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_37.rs b/src/module_37.rs
+index a0000025..b0000559 100644
+--- a/src/module_37.rs
++++ b/src/module_37.rs
+@@ -740,7 +740,10 @@
+ // Module 37 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config37 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_37_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_37_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_37_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_37_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_37_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_38.rs b/src/module_38.rs
+index a0000026..b000057e 100644
+--- a/src/module_38.rs
++++ b/src/module_38.rs
+@@ -760,7 +760,10 @@
+ // Module 38 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config38 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_38_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_38_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_38_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_38_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_38_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_39.rs b/src/module_39.rs
+index a0000027..b00005a3 100644
+--- a/src/module_39.rs
++++ b/src/module_39.rs
+@@ -780,7 +780,10 @@
+ // Module 39 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config39 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_39_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_39_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_39_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_39_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_39_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_40.rs b/src/module_40.rs
+index a0000028..b00005c8 100644
+--- a/src/module_40.rs
++++ b/src/module_40.rs
+@@ -800,7 +800,10 @@
+ // Module 40 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config40 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_40_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_40_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_40_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_40_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_40_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_41.rs b/src/module_41.rs
+index a0000029..b00005ed 100644
+--- a/src/module_41.rs
++++ b/src/module_41.rs
+@@ -820,7 +820,10 @@
+ // Module 41 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config41 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_41_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_41_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_41_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_41_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_41_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_42.rs b/src/module_42.rs
+index a000002a..b0000612 100644
+--- a/src/module_42.rs
++++ b/src/module_42.rs
+@@ -840,7 +840,10 @@
+ // Module 42 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config42 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_42_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_42_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_42_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_42_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_42_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_43.rs b/src/module_43.rs
+index a000002b..b0000637 100644
+--- a/src/module_43.rs
++++ b/src/module_43.rs
+@@ -860,7 +860,10 @@
+ // Module 43 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config43 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_43_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_43_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_43_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_43_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_43_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_44.rs b/src/module_44.rs
+index a000002c..b000065c 100644
+--- a/src/module_44.rs
++++ b/src/module_44.rs
+@@ -880,7 +880,10 @@
+ // Module 44 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config44 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_44_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_44_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_44_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_44_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_44_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_45.rs b/src/module_45.rs
+index a000002d..b0000681 100644
+--- a/src/module_45.rs
++++ b/src/module_45.rs
+@@ -900,7 +900,10 @@
+ // Module 45 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config45 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_45_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_45_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_45_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_45_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_45_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_46.rs b/src/module_46.rs
+index a000002e..b00006a6 100644
+--- a/src/module_46.rs
++++ b/src/module_46.rs
+@@ -920,7 +920,10 @@
+ // Module 46 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config46 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_46_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_46_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_46_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_46_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_46_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_47.rs b/src/module_47.rs
+index a000002f..b00006cb 100644
+--- a/src/module_47.rs
++++ b/src/module_47.rs
+@@ -940,7 +940,10 @@
+ // Module 47 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config47 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_47_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_47_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_47_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_47_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_47_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_48.rs b/src/module_48.rs
+index a0000030..b00006f0 100644
+--- a/src/module_48.rs
++++ b/src/module_48.rs
+@@ -960,7 +960,10 @@
+ // Module 48 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config48 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_48_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_48_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_48_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_48_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_48_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_49.rs b/src/module_49.rs
+index a0000031..b0000715 100644
+--- a/src/module_49.rs
++++ b/src/module_49.rs
+@@ -980,7 +980,10 @@
+ // Module 49 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config49 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_49_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_49_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_49_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_49_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_49_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+diff --git a/src/module_50.rs b/src/module_50.rs
+index a0000032..b000073a 100644
+--- a/src/module_50.rs
++++ b/src/module_50.rs
+@@ -1000,7 +1000,10 @@
+ // Module 50 - auto-generated bindings
+-use std::collections::HashMap;
+-use std::io::Read;
++use std::collections::{HashMap, BTreeMap};
++use std::io::{Read, Write};
++use std::fs::File;
+ 
+ pub struct Config50 {
+     pub timeout_ms: u64,
+-    pub retries: u32,
++    pub retries: u32,
++    pub backoff_ms: u64,
++    pub max_connections: u16,
+ }
+ 
+ fn helper_50_1() -> bool {
+-    true
++    // check condition 1
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_50_2() -> bool {
+-    true
++    // check condition 2
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_50_3() -> bool {
+-    true
++    // check condition 3
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_50_4() -> bool {
+-    true
++    // check condition 4
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+ fn helper_50_5() -> bool {
+-    true
++    // check condition 5
++    if config.enabled {
++        return true;
++    }
++    false
+ }
+
+ 51 files changed, 750 insertions(+), 125 deletions(-)

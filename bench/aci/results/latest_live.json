@@ -1,0 +1,2195 @@
+{
+  "schema": "verseshell.aci_bench.results/v1",
+  "task_set_version": "1.1.0",
+  "seed": 42,
+  "mode": "live",
+  "generated_at": "2026-07-19T16:09:44.189836+00:00",
+  "rows": [
+    {
+      "task_id": "rust_fix_compile_error",
+      "condition": "raw_shell",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 9,
+      "observation_tokens": 362,
+      "elapsed_ms": 170645,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=15177",
+        "llm_completion_tokens=972"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir"
+          },
+          "observation_tokens": 104,
+          "condition": "raw_shell",
+          "elapsed_ms": 9
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs"
+          },
+          "observation_tokens": 15,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"\nwith open('src/lib.rs', 'w') as f:\n    f.write('pub fn add(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\n\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 55
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cargo check"
+          },
+          "observation_tokens": 151,
+          "condition": "raw_shell",
+          "elapsed_ms": 277
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs"
+          },
+          "observation_tokens": 15,
+          "condition": "raw_shell",
+          "elapsed_ms": 6
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"\nwith open('src/lib.rs', 'w', newline='\\r\\n') as f:\n    f.write('pub fn add(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\n\" && type src\\lib.rs"
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 53
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"open('src/lib.rs', 'w').write('pub fn add(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 58
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs"
+          },
+          "observation_tokens": 14,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cargo check"
+          },
+          "observation_tokens": 49,
+          "condition": "raw_shell",
+          "elapsed_ms": 91
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed compile error by changing the return type of `add` from `String` to `i32` to match the body expression `a + b`."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 15177,
+      "llm_completion_tokens": 972,
+      "turns": 10,
+      "last_error": null
+    },
+    {
+      "task_id": "rust_fix_compile_error",
+      "condition": "verseshell_aci",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 3,
+      "observation_tokens": 113,
+      "elapsed_ms": 69289,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=6744",
+        "llm_completion_tokens=430"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 63,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 332,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "src/lib.rs",
+            "old": "pub fn add(a: i32, b: i32) -> String {",
+            "new": "pub fn add(a: i32, b: i32) -> i32 {",
+            "expected_hash": "sha256:9fe8852b20a9b6770f58bb12e24d55cb8760ad35ebfeaa92e08d808bb79f7620"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 310,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "check"
+            ]
+          },
+          "observation_tokens": 17,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 472,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed return type of `add` function from `String` to `i32` in src/lib.rs to match the body expression `a + b`."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 6744,
+      "llm_completion_tokens": 430,
+      "turns": 4,
+      "last_error": null
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "condition": "raw_shell",
+      "model": "deepseek-v4-flash",
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 10,
+      "observation_tokens": 500,
+      "elapsed_ms": 156109,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=14237",
+        "llm_completion_tokens=1000"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir /B /S"
+          },
+          "observation_tokens": 82,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs"
+          },
+          "observation_tokens": 14,
+          "condition": "raw_shell",
+          "elapsed_ms": 3
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type Cargo.toml"
+          },
+          "observation_tokens": 18,
+          "condition": "raw_shell",
+          "elapsed_ms": 22
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type TASK.md"
+          },
+          "observation_tokens": 19,
+          "condition": "raw_shell",
+          "elapsed_ms": 12
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"\ncontent = '''pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_add() {\n        assert_eq!(add(2, 3), 5);\n        assert_eq!(add(-1, 1), 0);\n        assert_eq!(add(0, 0), 0);\n        assert_eq!(add(-5, -3), -8);\n    }\n}\n'''\nwith open('src/lib.rs', 'w') as f:\n    f.write(content)\n\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 48
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cargo test"
+          },
+          "observation_tokens": 132,
+          "condition": "raw_shell",
+          "elapsed_ms": 718
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs"
+          },
+          "observation_tokens": 14,
+          "condition": "raw_shell",
+          "elapsed_ms": 18
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"content = open('src/lib.rs').read() + '\\n\\n#[cfg(test)]\\nmod tests {\\n    use super::*;\\n\\n    #[test]\\n    fn test_add() {\\n        assert_eq!(add(2, 3), 5);\\n        assert_eq!(add(-1, 1), 0);\\n        assert_eq!(add(0, 0), 0);\\n        assert_eq!(add(-5, -3), -8);\\n    }\\n}'; open('src/lib.rs', 'w').write(content)\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 50
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs"
+          },
+          "observation_tokens": 70,
+          "condition": "raw_shell",
+          "elapsed_ms": 19
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cargo test"
+          },
+          "observation_tokens": 139,
+          "condition": "raw_shell",
+          "elapsed_ms": 341
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Added a unit test module to src/lib.rs with the test_add function covering positive, negative, and zero cases for the add() function. All tests pass with cargo test."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 14237,
+      "llm_completion_tokens": 1000,
+      "turns": 9,
+      "last_error": null
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "condition": "verseshell_aci",
+      "model": "deepseek-v4-flash",
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 4,
+      "observation_tokens": 187,
+      "elapsed_ms": 71403,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=7419",
+        "llm_completion_tokens=601"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 63,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 354,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "Cargo.toml"
+          },
+          "observation_tokens": 74,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 339,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "src/lib.rs",
+            "old": "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}",
+            "new": "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_add() {\n        assert_eq!(add(2, 3), 5);\n        assert_eq!(add(-1, 1), 0);\n        assert_eq!(add(0, 0), 0);\n        assert_eq!(add(-5, -3), -8);\n    }\n}",
+            "expected_hash": "sha256:821d282d75c051d9a2a445ad8ef1551004aba5b3322d7a354c8a2abcd15af1e6"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 307,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "test"
+            ]
+          },
+          "observation_tokens": 17,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 710,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Added unit test for add() in src/lib.rs with 4 assertions (positive, negative, zero, both negative) — cargo test passes (1 test, 0 failures)."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 7419,
+      "llm_completion_tokens": 601,
+      "turns": 4,
+      "last_error": null
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "condition": "raw_shell",
+      "model": "deepseek-v4-flash",
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 19,
+      "observation_tokens": 653,
+      "elapsed_ms": 258199,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=33502",
+        "llm_completion_tokens=1657"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir /s /b"
+          },
+          "observation_tokens": 84,
+          "condition": "raw_shell",
+          "elapsed_ms": 9
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type Cargo.toml"
+          },
+          "observation_tokens": 19,
+          "condition": "raw_shell",
+          "elapsed_ms": 11
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs"
+          },
+          "observation_tokens": 18,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type TASK.md"
+          },
+          "observation_tokens": 15,
+          "condition": "raw_shell",
+          "elapsed_ms": 6
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"\nimport re\nwith open('src/lib.rs', 'r') as f:\n    content = f.read()\ncontent = content.replace('// TODO(fix-me)\\n    0', 'a + b')\nwith open('src/lib.rs', 'w') as f:\n    f.write(content)\n\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 50
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs"
+          },
+          "observation_tokens": 18,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cd C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-rust_search_and_edit-mqu9gqv3 && cargo check 2>&1"
+          },
+          "observation_tokens": 188,
+          "condition": "raw_shell",
+          "elapsed_ms": 141
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"\nwith open('src/lib.rs', 'w') as f:\n    f.write('pub fn sum(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\n\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 50
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs"
+          },
+          "observation_tokens": 18,
+          "condition": "raw_shell",
+          "elapsed_ms": 6
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cd C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-rust_search_and_edit-mqu9gqv3 && cargo check 2>&1"
+          },
+          "observation_tokens": 161,
+          "condition": "raw_shell",
+          "elapsed_ms": 45
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "echo pub fn sum(a: i32, b: i32) -> i32 { a + b } > src\\lib.rs"
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs"
+          },
+          "observation_tokens": 12,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"\nwith open('src/lib.rs', 'w') as f:\n    data = 'pub fn sum(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n'\n    f.write(data)\n    print('Wrote:', repr(data))\n\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 63
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python --version"
+          },
+          "observation_tokens": 6,
+          "condition": "raw_shell",
+          "elapsed_ms": 17
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs"
+          },
+          "observation_tokens": 12,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "del src\\lib.rs && python -c \"\nwith open('src/lib.rs', 'w') as f:\n    f.write('pub fn sum(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\nprint('done')\n\" && type src\\lib.rs"
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 53
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "del src\\lib.rs"
+          },
+          "observation_tokens": 27,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"open('src/lib.rs','w').write('pub fn sum(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 61
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir src\\lib.rs"
+          },
+          "observation_tokens": 63,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": false,
+      "llm_prompt_tokens": 33502,
+      "llm_completion_tokens": 1657,
+      "turns": 15,
+      "last_error": null
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "condition": "verseshell_aci",
+      "model": "deepseek-v4-flash",
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 7,
+      "observation_tokens": 337,
+      "elapsed_ms": 105300,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=11572",
+        "llm_completion_tokens=681"
+      ],
+      "trajectory": [
+        {
+          "op": "repo.summary",
+          "args": {},
+          "observation_tokens": 14,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 360,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "dir",
+              ".",
+              "/b",
+              "/s"
+            ],
+            "cwd": ".",
+            "profile": "none"
+          },
+          "observation_tokens": 74,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 354,
+          "aci_ok": false
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "Cargo.toml"
+          },
+          "observation_tokens": 75,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 327,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 73,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 333,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "TASK.md"
+          },
+          "observation_tokens": 51,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 326,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "src/lib.rs",
+            "old": "pub fn sum(a: i32, b: i32) -> i32 {\n    // TODO(fix-me)\n    0\n}",
+            "new": "pub fn sum(a: i32, b: i32) -> i32 {\n    a + b\n}",
+            "expected_hash": "sha256:b1082c89bc558eab606eee48715717615f783b09753d9d7b138ba91d2cdbfc60"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 363,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "check"
+            ],
+            "cwd": ".",
+            "profile": "auto"
+          },
+          "observation_tokens": 17,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 471,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Implemented sum(a, b) in src/lib.rs to return a + b instead of 0."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 11572,
+      "llm_completion_tokens": 681,
+      "turns": 6,
+      "last_error": null
+    },
+    {
+      "task_id": "python_fix_pytest_fail",
+      "condition": "raw_shell",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "file_contains mathlib.py",
+      "tool_calls": 11,
+      "observation_tokens": 881,
+      "elapsed_ms": 175794,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=18157",
+        "llm_completion_tokens=977"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir"
+          },
+          "observation_tokens": 105,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type mathlib.py"
+          },
+          "observation_tokens": 10,
+          "condition": "raw_shell",
+          "elapsed_ms": 23
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type TASK.md"
+          },
+          "observation_tokens": 13,
+          "condition": "raw_shell",
+          "elapsed_ms": 10
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type tests\\test_math.py"
+          },
+          "observation_tokens": 19,
+          "condition": "raw_shell",
+          "elapsed_ms": 6
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"\nwith open('mathlib.py', 'w') as f:\n    f.write('def add(a, b):\\n    return a + b\\n')\n\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 51
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "pytest"
+          },
+          "observation_tokens": 305,
+          "condition": "raw_shell",
+          "elapsed_ms": 952
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -m pytest -v"
+          },
+          "observation_tokens": 252,
+          "condition": "raw_shell",
+          "elapsed_ms": 1033
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type mathlib.py"
+          },
+          "observation_tokens": 10,
+          "condition": "raw_shell",
+          "elapsed_ms": 10
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"open('mathlib.py', 'w').write('def add(a, b):\\n    return a + b\\n')\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 56
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type mathlib.py"
+          },
+          "observation_tokens": 10,
+          "condition": "raw_shell",
+          "elapsed_ms": 10
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -m pytest -v"
+          },
+          "observation_tokens": 145,
+          "condition": "raw_shell",
+          "elapsed_ms": 848
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed mathlib.py: changed add(a,b) return from a * b to a + b. All tests pass."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 18157,
+      "llm_completion_tokens": 977,
+      "turns": 10,
+      "last_error": null
+    },
+    {
+      "task_id": "python_fix_pytest_fail",
+      "condition": "verseshell_aci",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "file_contains mathlib.py",
+      "tool_calls": 5,
+      "observation_tokens": 349,
+      "elapsed_ms": 90422,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=9816",
+        "llm_completion_tokens=579"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "mathlib.py"
+          },
+          "observation_tokens": 53,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 325,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "tests/test_math.py"
+          },
+          "observation_tokens": 73,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 330,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "mathlib.py",
+            "old": "    return a * b",
+            "new": "    return a + b",
+            "expected_hash": "sha256:4fb46b3507c096aece05e92b88ce528ab2ee3c2c42657ba218d09dfdf5c02418"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 344,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "pytest",
+              "-q"
+            ]
+          },
+          "observation_tokens": 177,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 1301,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "python",
+              "-m",
+              "pytest",
+              "-q"
+            ],
+            "cwd": "."
+          },
+          "observation_tokens": 13,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 1165,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed mathlib.py add(a,b) to return a+b instead of a*b; verified with pytest (1 passed)."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 9816,
+      "llm_completion_tokens": 579,
+      "turns": 5,
+      "last_error": null
+    },
+    {
+      "task_id": "python_edit_and_retest",
+      "condition": "raw_shell",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "file_contains greet.py",
+      "tool_calls": 11,
+      "observation_tokens": 851,
+      "elapsed_ms": 174581,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=16382",
+        "llm_completion_tokens=832"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir /b"
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type greet.py"
+          },
+          "observation_tokens": 12,
+          "condition": "raw_shell",
+          "elapsed_ms": 16
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type tests\\test_greet.py"
+          },
+          "observation_tokens": 23,
+          "condition": "raw_shell",
+          "elapsed_ms": 25
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type TASK.md"
+          },
+          "observation_tokens": 17,
+          "condition": "raw_shell",
+          "elapsed_ms": 22
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"\nwith open('greet.py', 'w') as f:\n    f.write('def greet(name):\\n    return f\\\"Hello, {name}!\\\"\\n')\n\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 51
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cd tests && python -m pytest test_greet.py -v"
+          },
+          "observation_tokens": 331,
+          "condition": "raw_shell",
+          "elapsed_ms": 913
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -m pytest tests\\test_greet.py -v"
+          },
+          "observation_tokens": 277,
+          "condition": "raw_shell",
+          "elapsed_ms": 1000
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type greet.py"
+          },
+          "observation_tokens": 12,
+          "condition": "raw_shell",
+          "elapsed_ms": 12
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"content = 'def greet(name):\\n    return f\\\"Hello, {name}!\\\"\\n'; open('greet.py', 'w').write(content)\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 66
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type greet.py"
+          },
+          "observation_tokens": 14,
+          "condition": "raw_shell",
+          "elapsed_ms": 10
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -m pytest tests\\test_greet.py -v"
+          },
+          "observation_tokens": 145,
+          "condition": "raw_shell",
+          "elapsed_ms": 934
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Updated greet() to return 'Hello, {name}!' and all tests pass."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 16382,
+      "llm_completion_tokens": 832,
+      "turns": 10,
+      "last_error": null
+    },
+    {
+      "task_id": "python_edit_and_retest",
+      "condition": "verseshell_aci",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "file_contains greet.py",
+      "tool_calls": 7,
+      "observation_tokens": 589,
+      "elapsed_ms": 127952,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=15906",
+        "llm_completion_tokens=768"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "greet.py"
+          },
+          "observation_tokens": 55,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 313,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "tests/test_greet.py"
+          },
+          "observation_tokens": 79,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 303,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "greet.py",
+            "old": "    return f\"Hi {name}\"",
+            "new": "    return f\"Hello, {name}!\"",
+            "expected_hash": "sha256:3ab4a6cd647afe331b3f14443f8e612f820d5ac9aa50380f608306859defb964"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 342,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "pytest",
+              "-q",
+              "tests/"
+            ]
+          },
+          "observation_tokens": 176,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 1516,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "pytest",
+              "-q",
+              "--rootdir=.",
+              "tests/"
+            ],
+            "cwd": "."
+          },
+          "observation_tokens": 176,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 1375,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "python",
+              "-m",
+              "pytest",
+              "-q",
+              "tests/"
+            ],
+            "cwd": "."
+          },
+          "observation_tokens": 13,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 1348,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "greet.py"
+          },
+          "observation_tokens": 57,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 345,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Updated greet() to return 'Hello, {name}!' instead of 'Hi {name}'. Tests pass."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 15906,
+      "llm_completion_tokens": 768,
+      "turns": 7,
+      "last_error": null
+    },
+    {
+      "task_id": "python_noisy_install_summary",
+      "condition": "raw_shell",
+      "model": "deepseek-v4-flash",
+      "success": false,
+      "success_reason": "file_contains SUMMARY.txt",
+      "tool_calls": 6,
+      "observation_tokens": 244,
+      "elapsed_ms": 106171,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=6966",
+        "llm_completion_tokens=526"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir"
+          },
+          "observation_tokens": 97,
+          "condition": "raw_shell",
+          "elapsed_ms": 9
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type requirements.txt"
+          },
+          "observation_tokens": 5,
+          "condition": "raw_shell",
+          "elapsed_ms": 13
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type TASK.md"
+          },
+          "observation_tokens": 26,
+          "condition": "raw_shell",
+          "elapsed_ms": 12
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "pip install -r requirements.txt"
+          },
+          "observation_tokens": 93,
+          "condition": "raw_shell",
+          "elapsed_ms": 2582
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"with open('SUMMARY.txt', 'w') as f: f.write('1 package installed/verified: six==1.16.0\\n')\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 80
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type SUMMARY.txt"
+          },
+          "observation_tokens": 13,
+          "condition": "raw_shell",
+          "elapsed_ms": 11
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Installed requirements (1 package: six==1.16.0) and wrote one-line dependency summary to SUMMARY.txt"
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 6966,
+      "llm_completion_tokens": 526,
+      "turns": 6,
+      "last_error": null
+    },
+    {
+      "task_id": "python_noisy_install_summary",
+      "condition": "verseshell_aci",
+      "model": "deepseek-v4-flash",
+      "success": false,
+      "success_reason": "file_contains SUMMARY.txt",
+      "tool_calls": 5,
+      "observation_tokens": 164,
+      "elapsed_ms": 74318,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=6979",
+        "llm_completion_tokens=475"
+      ],
+      "trajectory": [
+        {
+          "op": "repo.summary",
+          "args": {},
+          "observation_tokens": 14,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 365,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "requirements.txt"
+          },
+          "observation_tokens": 42,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 351,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "TASK.md"
+          },
+          "observation_tokens": 63,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 365,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "pip",
+              "install",
+              "-r",
+              "requirements.txt"
+            ],
+            "profile": "npm_install"
+          },
+          "observation_tokens": 12,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 2531,
+          "aci_ok": true
+        },
+        {
+          "op": "file.write",
+          "args": {
+            "path": "SUMMARY.txt",
+            "content": "Installed 1 dependency from requirements.txt (six==1.16.0)."
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 371,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Installed 1 dependency (six==1.16.0) from requirements.txt and wrote one-line summary to SUMMARY.txt."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 6979,
+      "llm_completion_tokens": 475,
+      "turns": 4,
+      "last_error": null
+    },
+    {
+      "task_id": "ts_fix_type_error",
+      "condition": "raw_shell",
+      "model": "deepseek-v4-flash",
+      "success": false,
+      "success_reason": "file_contains src/index.ts",
+      "tool_calls": 13,
+      "observation_tokens": 721,
+      "elapsed_ms": 207209,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=25491",
+        "llm_completion_tokens=1801"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cd c:\\Users\\szhao\\cursor\\new_workspace_2 & dir /s"
+          },
+          "observation_tokens": 195,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\src\\index.ts\""
+          },
+          "observation_tokens": 25,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\tsconfig.json\""
+          },
+          "observation_tokens": 39,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\package.json\""
+          },
+          "observation_tokens": 46,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\TASK.md\""
+          },
+          "observation_tokens": 16,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cd \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && python -c \"\ncontent = '''export function add(a: number, b: number): number {\n  const x: number = a + b;\n  return x;\n}\n'''\nwith open('src/index.ts', 'w') as f:\n    f.write(content)\n\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 54
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cd \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && npx tsc --noEmit"
+          },
+          "observation_tokens": 204,
+          "condition": "raw_shell",
+          "elapsed_ms": 5232
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cd \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && npm install"
+          },
+          "observation_tokens": 86,
+          "condition": "raw_shell",
+          "elapsed_ms": 3302
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cd \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && npx tsc --noEmit"
+          },
+          "observation_tokens": 44,
+          "condition": "raw_shell",
+          "elapsed_ms": 1998
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\src\\index.ts\""
+          },
+          "observation_tokens": 25,
+          "condition": "raw_shell",
+          "elapsed_ms": 9
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cd /d \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && echo export function add(a: number, b: number): number { > src\\index.ts && echo   const x: number = a + b; >> src\\index.ts && echo   return x; >> src\\index.ts && echo } >> src\\index.ts"
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 11
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\src\\index.ts\""
+          },
+          "observation_tokens": 27,
+          "condition": "raw_shell",
+          "elapsed_ms": 24
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cd /d \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && npx tsc --noEmit"
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 1472
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed type error in src/index.ts: changed `const x: string = a + b;` to `const x: number = a + b;` since `a + b` produces a number, not a string."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 25491,
+      "llm_completion_tokens": 1801,
+      "turns": 11,
+      "last_error": null
+    },
+    {
+      "task_id": "ts_fix_type_error",
+      "condition": "verseshell_aci",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 11,
+      "observation_tokens": 633,
+      "elapsed_ms": 162919,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=23520",
+        "llm_completion_tokens=1226"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/index.ts"
+          },
+          "observation_tokens": 80,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 332,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "tsconfig.json"
+          },
+          "observation_tokens": 128,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 331,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "package.json"
+          },
+          "observation_tokens": 30,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 315,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "TASK.md"
+          },
+          "observation_tokens": 53,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 335,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "src/index.ts",
+            "old": "export function add(a: number, b: number): number {\n  const x: string = a + b;\n  return x;\n}",
+            "new": "export function add(a: number, b: number): number {\n  return a + b;\n}",
+            "expected_hash": "sha256:d99b13deba072b7fd4b5907edec8b5cab9e3e744888d8dcb1ed7573d41de55bc"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 318,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "npx",
+              "tsc",
+              "--noEmit"
+            ]
+          },
+          "observation_tokens": 26,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 312,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "tsc",
+              "--noEmit"
+            ]
+          },
+          "observation_tokens": 26,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 336,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "dir",
+              ".",
+              "/b"
+            ]
+          },
+          "observation_tokens": 65,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 360,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "npm",
+              "install"
+            ]
+          },
+          "observation_tokens": 26,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 310,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "which",
+              "tsc"
+            ]
+          },
+          "observation_tokens": 98,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 351,
+          "aci_ok": false
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/index.ts"
+          },
+          "observation_tokens": 68,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 314,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed TypeScript type error in src/index.ts by removing the incorrect string-typed variable and returning a + b directly as a number."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 23520,
+      "llm_completion_tokens": 1226,
+      "turns": 9,
+      "last_error": null
+    },
+    {
+      "task_id": "ts_package_script_fail",
+      "condition": "raw_shell",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "file_contains package.json",
+      "tool_calls": 9,
+      "observation_tokens": 261,
+      "elapsed_ms": 138938,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=10783",
+        "llm_completion_tokens=835"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir"
+          },
+          "observation_tokens": 95,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type package.json"
+          },
+          "observation_tokens": 36,
+          "condition": "raw_shell",
+          "elapsed_ms": 11
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type TASK.md"
+          },
+          "observation_tokens": 12,
+          "condition": "raw_shell",
+          "elapsed_ms": 10
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"\nimport json\nwith open('package.json', 'r') as f:\n    data = json.load(f)\ndata['scripts']['test'] = 'node -e \\\"process.exit(0)\\\"'\nwith open('package.json', 'w') as f:\n    json.dump(data, f, indent=2)\n\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 64
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type package.json"
+          },
+          "observation_tokens": 36,
+          "condition": "raw_shell",
+          "elapsed_ms": 11
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "npm test"
+          },
+          "observation_tokens": 17,
+          "condition": "raw_shell",
+          "elapsed_ms": 447
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"import json; d=json.load(open('package.json')); d['scripts']['test']='node -e \\\"process.exit(0)\\\"'; open('package.json','w').write(json.dumps(d,indent=2)+'\\n')\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 57
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type package.json"
+          },
+          "observation_tokens": 36,
+          "condition": "raw_shell",
+          "elapsed_ms": 9
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "npm test"
+          },
+          "observation_tokens": 17,
+          "condition": "raw_shell",
+          "elapsed_ms": 412
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed package.json test script: changed process.exit(1) to process.exit(0), so npm test exits with code 0."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 10783,
+      "llm_completion_tokens": 835,
+      "turns": 8,
+      "last_error": null
+    },
+    {
+      "task_id": "ts_package_script_fail",
+      "condition": "verseshell_aci",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "file_contains package.json",
+      "tool_calls": 7,
+      "observation_tokens": 322,
+      "elapsed_ms": 123770,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=14181",
+        "llm_completion_tokens=803"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "package.json"
+          },
+          "observation_tokens": 119,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 327,
+          "aci_ok": true
+        },
+        {
+          "op": "repo.summary",
+          "args": {},
+          "observation_tokens": 14,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 348,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "package.json",
+            "old": "    \"test\": \"node -e \\\"process.exit(1)\\\"\"",
+            "new": "    \"test\": \"node -e \\\"process.exit(0)\\\"\"",
+            "expected_hash": "sha256:3c340a008ea26464ad97fee11dfd8efaafb0abe9c2dc96c512b0fb524b5130a3"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 374,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "npm",
+              "test"
+            ]
+          },
+          "observation_tokens": 26,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 323,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "node",
+              "-e",
+              "console.log('ok')"
+            ]
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 405,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "node",
+              "-e",
+              "process.exit(0)"
+            ]
+          },
+          "observation_tokens": 3,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 444,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "package.json"
+          },
+          "observation_tokens": 119,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 324,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Changed test script from process.exit(1) to process.exit(0) so npm test exits with code 0"
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 14181,
+      "llm_completion_tokens": 803,
+      "turns": 7,
+      "last_error": null
+    },
+    {
+      "task_id": "windows_path_normalize_edit",
+      "condition": "raw_shell",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "file_equals out/result.txt",
+      "tool_calls": 2,
+      "observation_tokens": 13,
+      "elapsed_ms": 51397,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=2450",
+        "llm_completion_tokens=250"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"from pathlib import Path; Path('out').mkdir(parents=True, exist_ok=True); Path('out/result.txt').write_text('OK')\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 63
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type out\\result.txt"
+          },
+          "observation_tokens": 3,
+          "condition": "raw_shell",
+          "elapsed_ms": 6
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Created out/result.txt with content 'OK'"
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 2450,
+      "llm_completion_tokens": 250,
+      "turns": 3,
+      "last_error": null
+    },
+    {
+      "task_id": "windows_path_normalize_edit",
+      "condition": "verseshell_aci",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "file_equals out/result.txt",
+      "tool_calls": 2,
+      "observation_tokens": 50,
+      "elapsed_ms": 51599,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=4553",
+        "llm_completion_tokens=253"
+      ],
+      "trajectory": [
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "python",
+              "-c",
+              "from pathlib import Path; Path('out').mkdir(parents=True, exist_ok=True); Path('out/result.txt').write_text('OK')"
+            ]
+          },
+          "observation_tokens": 3,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 386,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "out/result.txt"
+          },
+          "observation_tokens": 39,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 318,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Created out/result.txt with content 'OK'"
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 4553,
+      "llm_completion_tokens": 253,
+      "turns": 3,
+      "last_error": null
+    },
+    {
+      "task_id": "windows_batch_capture_diag",
+      "condition": "raw_shell",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 3,
+      "observation_tokens": 60,
+      "elapsed_ms": 68083,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=3442",
+        "llm_completion_tokens=322"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type broken_build.log"
+          },
+          "observation_tokens": 44,
+          "condition": "raw_shell",
+          "elapsed_ms": 12
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "echo src\\main.rs:12 > ERR.txt"
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type ERR.txt"
+          },
+          "observation_tokens": 6,
+          "condition": "raw_shell",
+          "elapsed_ms": 13
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Extracted first error location src\\main.rs:12 from broken_build.log and wrote it to ERR.txt"
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 3442,
+      "llm_completion_tokens": 322,
+      "turns": 4,
+      "last_error": null
+    },
+    {
+      "task_id": "windows_batch_capture_diag",
+      "condition": "verseshell_aci",
+      "model": "deepseek-v4-flash",
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 3,
+      "observation_tokens": 193,
+      "elapsed_ms": 71015,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=7115",
+        "llm_completion_tokens=557"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "broken_build.log"
+          },
+          "observation_tokens": 117,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 348,
+          "aci_ok": true
+        },
+        {
+          "op": "file.write",
+          "args": {
+            "path": "ERR.txt",
+            "content": "src\\main.rs:12"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 353,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "ERR.txt"
+          },
+          "observation_tokens": 43,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 322,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Extracted first error location `src\\main.rs:12` from broken_build.log and wrote it to ERR.txt."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 7115,
+      "llm_completion_tokens": 557,
+      "turns": 4,
+      "last_error": null
+    }
+  ],
+  "aggregate": {
+    "aggregates": [
+      {
+        "model": "deepseek-v4-flash",
+        "condition": "raw_shell",
+        "tasks": 10,
+        "success_rate": 0.6,
+        "avg_tool_calls": 9.3,
+        "avg_observation_tokens": 454.6,
+        "avg_elapsed_ms": 150712.6
+      },
+      {
+        "model": "deepseek-v4-flash",
+        "condition": "verseshell_aci",
+        "tasks": 10,
+        "success_rate": 0.7,
+        "avg_tool_calls": 5.4,
+        "avg_observation_tokens": 293.7,
+        "avg_elapsed_ms": 94798.7
+      }
+    ],
+    "n_rows": 20
+  },
+  "comparison": {
+    "comparisons": [
+      {
+        "model": "deepseek-v4-flash",
+        "success_rate_A": 0.6,
+        "success_rate_D": 0.7,
+        "success_advantage_D": 0.1,
+        "avg_tool_calls_A": 9.3,
+        "avg_tool_calls_D": 5.4,
+        "tool_call_ratio_D_over_A": 0.5806,
+        "avg_observation_tokens_A": 454.6,
+        "avg_observation_tokens_D": 293.7,
+        "token_ratio_D_over_A": 0.6461,
+        "meets_acceptance": true
+      }
+    ]
+  }
+}

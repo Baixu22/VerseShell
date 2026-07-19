@@ -1,0 +1,40 @@
+{
+  "id": "ts_fix_type_error",
+  "version": "1.0.0",
+  "lang": "ts",
+  "platform": [
+    "any"
+  ],
+  "prompt": "Fix the TypeScript type error so tsc --noEmit succeeds.",
+  "workspace_fixture": "ts_fix_type_error",
+  "modes": [
+    "raw_shell",
+    "verseshell_aci"
+  ],
+  "timeout_sec": 300,
+  "weight": 1.0,
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "file_contains",
+        "path": "src/index.ts",
+        "contains": "return a + b"
+      },
+      {
+        "type": "file_not_contains",
+        "path": "src/index.ts",
+        "contains": "const x: string"
+      }
+    ]
+  },
+  "optional_verify": {
+    "type": "command_exit_0",
+    "argv": [
+      "npx",
+      "tsc",
+      "--noEmit"
+    ],
+    "timeout_sec": 120
+  }
+}

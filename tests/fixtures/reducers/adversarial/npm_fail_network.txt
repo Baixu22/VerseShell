@@ -1,0 +1,5 @@
+npm error! errno ETIMEDOUT
+npm error! registry error parsing json
+npm error! 503 Service Unavailable: GET https://registry.npmjs.org/lodash
+npm error! A complete log of this run can be found in:
+npm error!     /home/user/.npm/_logs/2026-07-19T12_34_56_789Z-debug-0.log

@@ -1,0 +1,17 @@
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   src/feature_a.rs
+	modified:   src/lib.rs
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+	modified:   Cargo.toml
+	deleted:    src/deprecated.rs
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	tmp/debug.log
+	notes.txt

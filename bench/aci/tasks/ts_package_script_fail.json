@@ -1,0 +1,29 @@
+{
+  "id": "ts_package_script_fail",
+  "version": "1.0.0",
+  "lang": "ts",
+  "platform": [
+    "any"
+  ],
+  "prompt": "Fix package scripts so npm test exits 0.",
+  "workspace_fixture": "ts_package_script_fail",
+  "modes": [
+    "raw_shell",
+    "verseshell_aci"
+  ],
+  "timeout_sec": 300,
+  "weight": 1.0,
+  "success": {
+    "type": "file_contains",
+    "path": "package.json",
+    "contains": "process.exit(0)"
+  },
+  "optional_verify": {
+    "type": "command_exit_0",
+    "argv": [
+      "npm",
+      "test"
+    ],
+    "timeout_sec": 60
+  }
+}

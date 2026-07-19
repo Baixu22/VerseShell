@@ -1,0 +1,60 @@
+{
+  "schema": "verseshell.aci_bench.trajectory/v1",
+  "task_id": "rust_fix_compile_error",
+  "condition": "verseshell_aci",
+  "model": "sample_primary",
+  "success": true,
+  "tool_calls": 4,
+  "observation_tokens": 320,
+  "trajectory": [
+    {
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs",
+        "cursor": 1,
+        "window": 40
+      }
+    },
+    {
+      "op": "exec.run",
+      "args": {
+        "argv": [
+          "cargo",
+          "check"
+        ]
+      },
+      "observation": {
+        "summary": "cargo: 1 error(s); E0308 at src/lib.rs:1",
+        "diagnostics": [
+          {
+            "code": "E0308",
+            "path": "src/lib.rs",
+            "line": 1,
+            "message": "mismatched types"
+          }
+        ]
+      }
+    },
+    {
+      "op": "file.replace_exact",
+      "args": {
+        "path": "src/lib.rs",
+        "old": "-> String",
+        "new": "-> i32"
+      }
+    },
+    {
+      "op": "exec.run",
+      "args": {
+        "argv": [
+          "cargo",
+          "check"
+        ]
+      },
+      "ok": true
+    }
+  ],
+  "notes": [
+    "cached golden sample for multi-model slot"
+  ]
+}

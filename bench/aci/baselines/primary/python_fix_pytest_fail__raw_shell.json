@@ -1,0 +1,97 @@
+{
+  "task_id": "python_fix_pytest_fail",
+  "condition": "raw_shell",
+  "model": "primary",
+  "success": false,
+  "success_reason": "file_contains mathlib.py",
+  "tool_calls": 10,
+  "observation_tokens": 3820,
+  "elapsed_ms": 4,
+  "notes": [
+    "live_http_probed_or_skipped"
+  ],
+  "trajectory": [
+    {
+      "op": "shell",
+      "args": {
+        "cmd": "ls -la"
+      },
+      "observation_tokens": 150,
+      "condition": "raw_shell"
+    },
+    {
+      "op": "shell",
+      "args": {
+        "cmd": "cat file"
+      },
+      "observation_tokens": 200,
+      "condition": "raw_shell"
+    },
+    {
+      "op": "shell",
+      "args": {
+        "cmd": "grep -R TODO ."
+      },
+      "observation_tokens": 180,
+      "condition": "raw_shell"
+    },
+    {
+      "op": "shell",
+      "args": {
+        "cmd": "build (full log)"
+      },
+      "observation_tokens": 900,
+      "condition": "raw_shell"
+    },
+    {
+      "op": "shell",
+      "args": {
+        "cmd": "edit attempt 1"
+      },
+      "observation_tokens": 120,
+      "condition": "raw_shell"
+    },
+    {
+      "op": "shell",
+      "args": {
+        "cmd": "build (full log again)"
+      },
+      "observation_tokens": 900,
+      "condition": "raw_shell"
+    },
+    {
+      "op": "shell",
+      "args": {
+        "cmd": "edit attempt 2"
+      },
+      "observation_tokens": 120,
+      "condition": "raw_shell"
+    },
+    {
+      "op": "shell",
+      "args": {
+        "cmd": "build (full log again)"
+      },
+      "observation_tokens": 900,
+      "condition": "raw_shell"
+    },
+    {
+      "op": "shell",
+      "args": {
+        "cmd": "git status"
+      },
+      "observation_tokens": 100,
+      "condition": "raw_shell"
+    },
+    {
+      "op": "shell",
+      "args": {
+        "cmd": "git diff"
+      },
+      "observation_tokens": 250,
+      "condition": "raw_shell"
+    }
+  ],
+  "optional_verify": null,
+  "weight": 1.0
+}

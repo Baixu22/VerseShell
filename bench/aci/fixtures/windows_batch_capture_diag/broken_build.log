@@ -1,0 +1,7 @@
+Compiling demo...
+error[E0308]: mismatched types
+  --> src\main.rs:12:5
+   |
+12 |     foo();
+   |     ^^^^^ expected `()`, found `i32`
+error: could not compile `demo`

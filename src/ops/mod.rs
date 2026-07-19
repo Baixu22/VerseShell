@@ -7,6 +7,7 @@ mod file;
 mod repo;
 mod test_ops;
 mod trash;
+mod meta;
 mod tx_ops;
 
 use crate::operation::OperationSpec;
@@ -16,6 +17,7 @@ pub fn all_specs() -> Vec<OperationSpec> {
     let mut specs = Vec::new();
     specs.extend(file::specs());
     specs.extend(tx_ops::specs());
+    specs.extend(meta::specs());
     specs.extend(repo::specs());
     specs.extend(test_ops::specs());
     specs

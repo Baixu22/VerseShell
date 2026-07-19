@@ -1,0 +1,58 @@
+{
+  "task_id": "windows_path_normalize_edit",
+  "condition": "verseshell_aci",
+  "model": "primary",
+  "success": true,
+  "success_reason": "file_equals out/result.txt",
+  "tool_calls": 4,
+  "observation_tokens": 290,
+  "elapsed_ms": 12,
+  "notes": [
+    "golden_applied",
+    "ae_available",
+    "live_http_probed_or_skipped"
+  ],
+  "trajectory": [
+    {
+      "op": "file.view",
+      "args": {
+        "path": "(entry)"
+      },
+      "observation_tokens": 100,
+      "condition": "verseshell_aci"
+    },
+    {
+      "op": "exec.run",
+      "args": {
+        "profile": "auto",
+        "note": "semantic diagnostics"
+      },
+      "observation_tokens": 85,
+      "condition": "verseshell_aci"
+    },
+    {
+      "op": "file.replace_exact",
+      "args": {
+        "path": "(target)"
+      },
+      "observation_tokens": 55,
+      "condition": "verseshell_aci"
+    },
+    {
+      "op": "ops.observation_open_errors",
+      "args": {},
+      "observation_tokens": 40,
+      "condition": "verseshell_aci"
+    },
+    {
+      "op": "golden.apply",
+      "args": {
+        "fixture": "windows_path_normalize_edit"
+      },
+      "observation_tokens": 10,
+      "condition": "verseshell_aci"
+    }
+  ],
+  "optional_verify": null,
+  "weight": 1.0
+}

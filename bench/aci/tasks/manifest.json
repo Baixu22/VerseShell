@@ -1,0 +1,17 @@
+{
+  "task_set_version": "1.1.0",
+  "seed": 42,
+  "description": "VerseShell ACI-Bench v1.1 ? prove Observation + typed ops reduce steps/tokens vs raw shell",
+  "tasks": [
+    "rust_fix_compile_error",
+    "rust_add_unit_test",
+    "rust_search_and_edit",
+    "python_fix_pytest_fail",
+    "python_edit_and_retest",
+    "python_noisy_install_summary",
+    "ts_fix_type_error",
+    "ts_package_script_fail",
+    "windows_path_normalize_edit",
+    "windows_batch_capture_diag"
+  ]
+}

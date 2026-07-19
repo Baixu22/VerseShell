@@ -1,4 +1,4 @@
-//! # VerseShell — Agent Action / Observation Runtime
+﻿//! # VerseShell — Agent Action / Observation Runtime
 //!
 //! ## Core (always available)
 //! - [`ast`] — Abstract syntax tree
@@ -45,15 +45,19 @@ pub mod mcp;
 #[cfg(feature = "native")]
 pub mod modules;
 #[cfg(feature = "native")]
-pub mod os_tools;
+pub mod observation_ledger;
 #[cfg(feature = "native")]
 pub mod operation;
 #[cfg(feature = "native")]
 pub mod ops;
 #[cfg(feature = "native")]
+pub mod os_tools;
+#[cfg(feature = "native")]
 pub mod packages;
 #[cfg(feature = "native")]
 pub mod process_runner;
+#[cfg(feature = "native")]
+pub mod reducers;
 #[cfg(feature = "native")]
 pub mod repl;
 #[cfg(feature = "native")]

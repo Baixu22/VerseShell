@@ -1,0 +1,4 @@
+FAILED test_strings.py::test_empty_string - ZeroDivisionError: division by zero
+FAILED test_math.py::test_divide_by_zero - expected failure
+FAILED test_api.py::test_get_user - ConnectionError: timeout after 5s
+======================== 3 failed, 20 passed in 1.23s ========================

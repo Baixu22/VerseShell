@@ -1,0 +1,1719 @@
+{
+  "schema": "verseshell.aci_bench.results/v1",
+  "task_set_version": "1.1.0",
+  "seed": 42,
+  "mode": "mock",
+  "generated_at": "2026-07-19T15:15:17.859518+00:00",
+  "rows": [
+    {
+      "task_id": "rust_fix_compile_error",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 3,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "rust_fix_compile_error",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 7,
+      "observation_tokens": 520,
+      "elapsed_ms": 3,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "ops.list",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 120,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "repo.search",
+          "args": {
+            "query": "TODO|error|assert"
+          },
+          "observation_tokens": 80,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "check"
+            ],
+            "note": "semantic reduced"
+          },
+          "observation_tokens": 90,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 60,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "verify"
+            ],
+            "note": "reduced ok"
+          },
+          "observation_tokens": 70,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_recent",
+          "args": {
+            "limit": 4
+          },
+          "observation_tokens": 50,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "rust_fix_compile_error"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 3,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 7,
+      "observation_tokens": 520,
+      "elapsed_ms": 4,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "ops.list",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 120,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "repo.search",
+          "args": {
+            "query": "TODO|error|assert"
+          },
+          "observation_tokens": 80,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "check"
+            ],
+            "note": "semantic reduced"
+          },
+          "observation_tokens": 90,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 60,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "verify"
+            ],
+            "note": "reduced ok"
+          },
+          "observation_tokens": 70,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_recent",
+          "args": {
+            "limit": 4
+          },
+          "observation_tokens": 50,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "rust_add_unit_test"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 4,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 7,
+      "observation_tokens": 520,
+      "elapsed_ms": 3,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "ops.list",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 120,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "repo.search",
+          "args": {
+            "query": "TODO|error|assert"
+          },
+          "observation_tokens": 80,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "check"
+            ],
+            "note": "semantic reduced"
+          },
+          "observation_tokens": 90,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 60,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "verify"
+            ],
+            "note": "reduced ok"
+          },
+          "observation_tokens": 70,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_recent",
+          "args": {
+            "limit": 4
+          },
+          "observation_tokens": 50,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "rust_search_and_edit"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "python_fix_pytest_fail",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "file_contains mathlib.py",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 2,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "python_fix_pytest_fail",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "file_contains mathlib.py",
+      "tool_calls": 4,
+      "observation_tokens": 290,
+      "elapsed_ms": 3,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "(entry)"
+          },
+          "observation_tokens": 100,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "profile": "auto",
+            "note": "semantic diagnostics"
+          },
+          "observation_tokens": 85,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 55,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_open_errors",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "python_fix_pytest_fail"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "python_edit_and_retest",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "file_contains greet.py",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 4,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "python_edit_and_retest",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "file_contains greet.py",
+      "tool_calls": 4,
+      "observation_tokens": 290,
+      "elapsed_ms": 4,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "(entry)"
+          },
+          "observation_tokens": 100,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "profile": "auto",
+            "note": "semantic diagnostics"
+          },
+          "observation_tokens": 85,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 55,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_open_errors",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "python_edit_and_retest"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "python_noisy_install_summary",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "missing SUMMARY.txt",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 2,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "python_noisy_install_summary",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "file_contains SUMMARY.txt",
+      "tool_calls": 4,
+      "observation_tokens": 290,
+      "elapsed_ms": 3,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "(entry)"
+          },
+          "observation_tokens": 100,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "profile": "auto",
+            "note": "semantic diagnostics"
+          },
+          "observation_tokens": 85,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 55,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_open_errors",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "python_noisy_install_summary"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "ts_fix_type_error",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "file_contains src/index.ts",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 2,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "ts_fix_type_error",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 7,
+      "observation_tokens": 520,
+      "elapsed_ms": 6,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "ops.list",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 120,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "repo.search",
+          "args": {
+            "query": "TODO|error|assert"
+          },
+          "observation_tokens": 80,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "check"
+            ],
+            "note": "semantic reduced"
+          },
+          "observation_tokens": 90,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 60,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "verify"
+            ],
+            "note": "reduced ok"
+          },
+          "observation_tokens": 70,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_recent",
+          "args": {
+            "limit": 4
+          },
+          "observation_tokens": 50,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "ts_fix_type_error"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "ts_package_script_fail",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "file_contains package.json",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 1,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "ts_package_script_fail",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "file_contains package.json",
+      "tool_calls": 7,
+      "observation_tokens": 520,
+      "elapsed_ms": 2,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "ops.list",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 120,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "repo.search",
+          "args": {
+            "query": "TODO|error|assert"
+          },
+          "observation_tokens": 80,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "check"
+            ],
+            "note": "semantic reduced"
+          },
+          "observation_tokens": 90,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 60,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "verify"
+            ],
+            "note": "reduced ok"
+          },
+          "observation_tokens": 70,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_recent",
+          "args": {
+            "limit": 4
+          },
+          "observation_tokens": 50,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "ts_package_script_fail"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "windows_path_normalize_edit",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "missing out/result.txt",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 1,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "windows_path_normalize_edit",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "file_equals out/result.txt",
+      "tool_calls": 4,
+      "observation_tokens": 290,
+      "elapsed_ms": 3,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "(entry)"
+          },
+          "observation_tokens": 100,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "profile": "auto",
+            "note": "semantic diagnostics"
+          },
+          "observation_tokens": 85,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 55,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_open_errors",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "windows_path_normalize_edit"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "windows_batch_capture_diag",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "missing ERR.txt",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 1,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "windows_batch_capture_diag",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 4,
+      "observation_tokens": 290,
+      "elapsed_ms": 2,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "(entry)"
+          },
+          "observation_tokens": 100,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "profile": "auto",
+            "note": "semantic diagnostics"
+          },
+          "observation_tokens": 85,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 55,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_open_errors",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "windows_batch_capture_diag"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    }
+  ],
+  "aggregate": {
+    "aggregates": [
+      {
+        "model": "mock",
+        "condition": "raw_shell",
+        "tasks": 10,
+        "success_rate": 0.0,
+        "avg_tool_calls": 10.0,
+        "avg_observation_tokens": 3820.0,
+        "avg_elapsed_ms": 2.3
+      },
+      {
+        "model": "mock",
+        "condition": "verseshell_aci",
+        "tasks": 10,
+        "success_rate": 1.0,
+        "avg_tool_calls": 5.5,
+        "avg_observation_tokens": 405.0,
+        "avg_elapsed_ms": 3.3
+      }
+    ],
+    "n_rows": 20
+  },
+  "comparison": {
+    "comparisons": [
+      {
+        "model": "mock",
+        "success_rate_A": 0.0,
+        "success_rate_D": 1.0,
+        "success_advantage_D": 1.0,
+        "avg_tool_calls_A": 10.0,
+        "avg_tool_calls_D": 5.5,
+        "tool_call_ratio_D_over_A": 0.55,
+        "avg_observation_tokens_A": 3820.0,
+        "avg_observation_tokens_D": 405.0,
+        "token_ratio_D_over_A": 0.106,
+        "meets_acceptance": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "windows_path_normalize_edit",
+  "version": "1.0.0",
+  "lang": "windows",
+  "platform": [
+    "windows",
+    "any"
+  ],
+  "prompt": "Create out/result.txt with contents OK using mixed path separators safely.",
+  "workspace_fixture": "windows_path_normalize_edit",
+  "modes": [
+    "raw_shell",
+    "verseshell_aci"
+  ],
+  "timeout_sec": 300,
+  "weight": 1.0,
+  "success": {
+    "type": "file_equals",
+    "path": "out/result.txt",
+    "equals": "OK"
+  }
+}

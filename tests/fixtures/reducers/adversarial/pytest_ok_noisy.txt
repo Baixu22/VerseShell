@@ -1,0 +1,10 @@
+
+test_session.py::TestSession::test_connect [32mPASSED[0m
+test_session.py::TestSession::test_timeout [32mPASSED[0m
+test_upload.py::TestUpload::test_large_file [33mSKIPPED[0m (requires network)
+
+=======================  [32m..12 passed..[0m, [33m..1 skipped..[0m  ========================
+tests/test_session.py:15
+  /path/to/session/test_session.py:15: PytestDeprecationWarning: fixture ...
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

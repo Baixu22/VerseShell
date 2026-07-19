@@ -1,4 +1,4 @@
-﻿use serde_json::{json, Value};
+use serde_json::{json, Value};
 use std::io::Write;
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -147,24 +147,36 @@ fn failure_window_prefers_error_lines_over_noise() {
     let response = run_server(&(request.to_string() + "\n"), &workspace).remove(0);
     assert_eq!(response["ok"], false);
     assert_eq!(response["error"]["code"], "E_PROCESS_EXIT");
-    let text = response["data"]["stdout"]["text"]
+    // Semantic npm_install reducer collapses stream bodies; meaning lives in
+    // summary/diagnostics, with full log recoverable via artifact.
+    let summary = response["data"]["summary"]
         .as_str()
-        .or_else(|| response["data"]["stderr"]["text"].as_str())
+        .or_else(|| response["data"]["stdout"]["summary"].as_str())
+        .or_else(|| response["data"]["stderr"]["summary"].as_str())
         .unwrap_or("");
-    let combined = format!(
-        "{}{}",
-        response["data"]["stdout"]["text"].as_str().unwrap_or(""),
-        response["data"]["stderr"]["text"].as_str().unwrap_or("")
+    let diag_blob = response["diagnostics"].to_string();
+    let blob = format!("{summary}{diag_blob}").to_ascii_lowercase();
+    assert!(
+        blob.contains("npm error")
+            || blob.contains("e404")
+            || blob.contains("404")
+            || blob.contains("not found")
+            || blob.contains("failed"),
+        "failure semantics should surface error signal, got summary={summary} diags={diag_blob}"
     );
     assert!(
-        combined.to_ascii_lowercase().contains("npm error")
-            || combined.contains("E404")
-            || text.to_ascii_lowercase().contains("npm error"),
-        "failure text should focus on errors, got: {combined}"
+        !blob.contains("downloading"),
+        "progress noise must not leak into semantic summary/diagnostics: {blob}"
     );
-    // Progress noise should not dominate when error lines exist.
-    let noise_hits = combined.matches("downloading").count();
-    assert!(noise_hits <= 3);
+    let stdout_text = response["data"]["stdout"]["text"].as_str();
+    let stderr_text = response["data"]["stderr"]["text"].as_str();
+    assert!(
+        stdout_text.is_none() && stderr_text.is_none(),
+        "npm_install failure should collapse stream text; stdout={stdout_text:?} stderr={stderr_text:?}"
+    );
+    let has_artifact = response["data"]["stdout"]["artifact"].as_str().is_some()
+        || response["data"]["stderr"]["artifact"].as_str().is_some();
+    assert!(has_artifact, "full log must remain recoverable via artifact");
     let _ = std::fs::remove_dir_all(workspace);
 }
 

@@ -1,0 +1,45 @@
+{
+  "id": "rust_fix_compile_error",
+  "version": "1.0.0",
+  "lang": "rust",
+  "platform": [
+    "any"
+  ],
+  "prompt": "Fix the compile error in src/lib.rs so cargo check succeeds.",
+  "workspace_fixture": "rust_fix_compile_error",
+  "modes": [
+    "raw_shell",
+    "verseshell_aci"
+  ],
+  "timeout_sec": 300,
+  "weight": 1.0,
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "file_contains",
+        "path": "src/lib.rs",
+        "contains": "-> i32"
+      },
+      {
+        "type": "file_not_contains",
+        "path": "src/lib.rs",
+        "contains": "-> String"
+      }
+    ]
+  },
+  "optional_verify": {
+    "type": "command_exit_0",
+    "argv": [
+      "cargo",
+      "check"
+    ],
+    "timeout_sec": 120
+  },
+  "aci_trajectory_hint": [
+    "file.view",
+    "exec.run(cargo check)",
+    "file.replace_exact",
+    "exec.run(cargo check)"
+  ]
+}

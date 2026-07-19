@@ -1,0 +1,43 @@
+[1m[32m   Compiling[0m demo v0.1.0
+[1m   Compiling[0m serde v1.0.210
+warning: field is never read
+ --> src/old.rs:5:9
+  |
+5 |     dead_field: i32,
+  |     ^^^^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` on by default
+
+[1mwarning: [0m[1mfunction is never used[0m
+[1m  --> [0msrc/old.rs:12:8
+  |
+12 |     fn dead_fn() {
+  |        ^^^^^^^
+
+    [1m[32m   Compiling[0m tokio v1.42.0
+    [1m[32m   Compiling[0m hyper v1.5.0
+    [1m[32m   Compiling[0m axum v0.8.0
+    [1m[32m   Compiling[0m tower v0.5.0
+    [1m[32m   Compiling[0m tracing v0.2.0
+
+    Building [=======================> ] 38/42: tokio, hyper, axum, to...
+
+warning: unused variable in generated binding
+  --> generated/bindings.rs:442:9
+   |
+   | let _generated_temp = compute();
+   |     ^^^^^^^^^^^^^^^
+
+warning: 3 warnings emitted
+
+error[E0599]: no method named `render` found for struct `Response` in the current scope
+  --> src/server.rs:100:28
+   |
+100 |     let html = response.render("index.html");
+   |                            ^^^^^^ method not found in `Response`
+   |
+   = note: did you mean `send`?
+
+error: aborting due to 1 previous error; 5 warnings emitted
+
+For more information about this error, try `rustc --explain E0599`.

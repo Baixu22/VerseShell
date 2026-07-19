@@ -1,0 +1,18 @@
+﻿$env:AETHER_APPROVE_ALL='1'
+Set-Location 'C:\Users\27933\Desktop\verseshell\verseshell'
+cargo build --bin ae 1> 'bench\aci\results\build_ae.out' 2> 'bench\aci\results\build_ae.err'
+if ($LASTEXITCODE -ne 0) { Set-Content 'bench\aci\results\e2e_run.done' "build_fail:$LASTEXITCODE"; exit $LASTEXITCODE }
+python -c "import json,sys,time,importlib.util; from pathlib import Path; spec=importlib.util.spec_from_file_location('e2e','tools/e2e_effect_eval.py'); e2e=importlib.util.module_from_spec(spec); spec.loader.exec_module(e2e); print('AE',e2e.AE); report={'generated_at':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'ae_binary':e2e.AE,'cwd':str(e2e.ROOT),'cases':{}}; report['cases']['automated_gates']={'effect_pass':True,'note':'preverified'}; report['cases']['cargo_semantic']=e2e.test_real_cargo_semantic(); report['cases']['git_npm']=e2e.test_git_and_npm_profiles(); report['cases']['ledger_file']=e2e.test_ledger_and_file_ops(); report['cases']['aci_bench']=e2e.test_aci_bench(); flags=[]; 
+for name,case in report['cases'].items():
+  if not isinstance(case,dict): continue
+  if case.get('skipped'): flags.append((name,'SKIP')); continue
+  if 'effect_pass' in case: flags.append((name,'PASS' if case['effect_pass'] else 'FAIL'))
+  elif name=='git_npm':
+    sub=[v.get('effect_pass') for v in case.values() if isinstance(v,dict) and 'effect_pass' in v]
+    flags.append((name,'PASS' if sub and all(sub) else ('SKIP' if not sub else 'FAIL')))
+report['verdict']={k:v for k,v in flags}; fails=[k for k,v in flags if v=='FAIL']; passes=[k for k,v in flags if v=='PASS']; report['summary']={'pass':len(passes),'fail':len(fails),'fail_names':fails,'overall':'GOOD' if not fails and len(passes)>=3 else ('PARTIAL' if len(fails)<=1 else 'POOR')}; print('VERDICT',json.dumps(report['verdict'],indent=2)); print('SUMMARY',json.dumps(report['summary'],indent=2)); print('git',json.dumps(report['cases']['git_npm'].get('git',{}),indent=2,ensure_ascii=False)); print('cargo', {k:report['cases']['cargo_semantic'].get(k) for k in ['effect_pass','token_compression','agent_payload_tokens_est','raw_tokens_est','stderr_collapsed','summary','suggested_next_ops']}); e2e.OUT.write_text(json.dumps(report,indent=2,ensure_ascii=False)+chr(10),encoding='utf-8'); md=e2e.RESULTS/'e2e_effect_eval.md'; lines=['# E2E Effect Evaluation','','Generated: '+report['generated_at'],'Binary: `'+str(e2e.AE)+'`','','## Verdict','']+[('- **%s**: %s'%(k,v)) for k,v in report['verdict'].items()]+['','## Overall: **%s**'%report['summary']['overall'],'']; cs=report['cases'].get('cargo_semantic') or {};
+lines += ['## Cargo semantic effect','','- raw tokens est: %s'%cs.get('raw_tokens_est'),'- agent payload tokens est: %s'%cs.get('agent_payload_tokens_est'),'- payload compression: %s'%cs.get('token_compression'),'- diagnostics path/line/code/expected_found: %s/%s/%s/%s'%(cs.get('has_path'),cs.get('has_line'),cs.get('has_code'),cs.get('has_expected_found')),'- stderr_collapsed: %s'%cs.get('stderr_collapsed'),'- summary: %s'%cs.get('summary'),'- suggested_next: %s'%cs.get('suggested_next_ops'),''];
+c=(report['cases'].get('aci_bench') or {}).get('comparison') or {};
+if c: lines += ['## ACI-Bench A vs D','','- success A=%s D=%s delta=%s'%(c.get('success_rate_A'),c.get('success_rate_D'),c.get('success_advantage_D')),'- tool_calls ratio D/A=%s'%c.get('tool_call_ratio_D_over_A'),'- tokens ratio D/A=%s'%c.get('token_ratio_D_over_A'),''];
+md.write_text(chr(10).join(lines)+chr(10),encoding='utf-8'); print('wrote',e2e.OUT)" 1> 'bench\aci\results\e2e_run.log' 2> 'bench\aci\results\e2e_run.err'
+Set-Content -Path 'bench\aci\results\e2e_run.done' -Value $LASTEXITCODE

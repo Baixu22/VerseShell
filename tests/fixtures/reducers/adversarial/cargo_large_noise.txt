@@ -1,0 +1,2468 @@
+warning: unused variable: buf_1
+  --> src/mod1.rs:10:9
+10 |     let buf_1 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_1
+  --> src/mod1.rs:11:5
+11 |     field1: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_2
+  --> src/mod2.rs:20:9
+20 |     let buf_2 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_2
+  --> src/mod2.rs:21:5
+21 |     field2: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_3
+  --> src/mod3.rs:30:9
+30 |     let buf_3 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_3
+  --> src/mod3.rs:31:5
+31 |     field3: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_4
+  --> src/mod4.rs:40:9
+40 |     let buf_4 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_4
+  --> src/mod4.rs:41:5
+41 |     field4: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_5
+  --> src/mod5.rs:50:9
+50 |     let buf_5 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_5
+  --> src/mod5.rs:51:5
+51 |     field5: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_6
+  --> src/mod6.rs:60:9
+60 |     let buf_6 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_6
+  --> src/mod6.rs:61:5
+61 |     field6: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_7
+  --> src/mod7.rs:70:9
+70 |     let buf_7 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_7
+  --> src/mod7.rs:71:5
+71 |     field7: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_8
+  --> src/mod8.rs:80:9
+80 |     let buf_8 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_8
+  --> src/mod8.rs:81:5
+81 |     field8: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_9
+  --> src/mod9.rs:90:9
+90 |     let buf_9 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_9
+  --> src/mod9.rs:91:5
+91 |     field9: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_10
+  --> src/mod10.rs:100:9
+100 |     let buf_10 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_10
+  --> src/mod10.rs:101:5
+101 |     field10: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_11
+  --> src/mod11.rs:110:9
+110 |     let buf_11 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_11
+  --> src/mod11.rs:111:5
+111 |     field11: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_12
+  --> src/mod12.rs:120:9
+120 |     let buf_12 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_12
+  --> src/mod12.rs:121:5
+121 |     field12: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_13
+  --> src/mod13.rs:130:9
+130 |     let buf_13 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_13
+  --> src/mod13.rs:131:5
+131 |     field13: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_14
+  --> src/mod14.rs:140:9
+140 |     let buf_14 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_14
+  --> src/mod14.rs:141:5
+141 |     field14: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_15
+  --> src/mod15.rs:150:9
+150 |     let buf_15 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_15
+  --> src/mod15.rs:151:5
+151 |     field15: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_16
+  --> src/mod16.rs:160:9
+160 |     let buf_16 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_16
+  --> src/mod16.rs:161:5
+161 |     field16: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_17
+  --> src/mod17.rs:170:9
+170 |     let buf_17 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_17
+  --> src/mod17.rs:171:5
+171 |     field17: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_18
+  --> src/mod18.rs:180:9
+180 |     let buf_18 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_18
+  --> src/mod18.rs:181:5
+181 |     field18: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_19
+  --> src/mod19.rs:190:9
+190 |     let buf_19 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_19
+  --> src/mod19.rs:191:5
+191 |     field19: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_20
+  --> src/mod20.rs:200:9
+200 |     let buf_20 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_20
+  --> src/mod20.rs:201:5
+201 |     field20: i32,
+   |     ^^^^^^^^
+
+   Compiling mod20 v0.1.20
+
+warning: unused variable: buf_21
+  --> src/mod21.rs:210:9
+210 |     let buf_21 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_21
+  --> src/mod21.rs:211:5
+211 |     field21: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_22
+  --> src/mod22.rs:220:9
+220 |     let buf_22 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_22
+  --> src/mod22.rs:221:5
+221 |     field22: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_23
+  --> src/mod23.rs:230:9
+230 |     let buf_23 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_23
+  --> src/mod23.rs:231:5
+231 |     field23: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_24
+  --> src/mod24.rs:240:9
+240 |     let buf_24 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_24
+  --> src/mod24.rs:241:5
+241 |     field24: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_25
+  --> src/mod25.rs:250:9
+250 |     let buf_25 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_25
+  --> src/mod25.rs:251:5
+251 |     field25: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_26
+  --> src/mod26.rs:260:9
+260 |     let buf_26 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_26
+  --> src/mod26.rs:261:5
+261 |     field26: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_27
+  --> src/mod27.rs:270:9
+270 |     let buf_27 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_27
+  --> src/mod27.rs:271:5
+271 |     field27: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_28
+  --> src/mod28.rs:280:9
+280 |     let buf_28 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_28
+  --> src/mod28.rs:281:5
+281 |     field28: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_29
+  --> src/mod29.rs:290:9
+290 |     let buf_29 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_29
+  --> src/mod29.rs:291:5
+291 |     field29: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_30
+  --> src/mod30.rs:300:9
+300 |     let buf_30 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_30
+  --> src/mod30.rs:301:5
+301 |     field30: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_31
+  --> src/mod31.rs:310:9
+310 |     let buf_31 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_31
+  --> src/mod31.rs:311:5
+311 |     field31: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_32
+  --> src/mod32.rs:320:9
+320 |     let buf_32 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_32
+  --> src/mod32.rs:321:5
+321 |     field32: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_33
+  --> src/mod33.rs:330:9
+330 |     let buf_33 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_33
+  --> src/mod33.rs:331:5
+331 |     field33: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_34
+  --> src/mod34.rs:340:9
+340 |     let buf_34 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_34
+  --> src/mod34.rs:341:5
+341 |     field34: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_35
+  --> src/mod35.rs:350:9
+350 |     let buf_35 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_35
+  --> src/mod35.rs:351:5
+351 |     field35: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_36
+  --> src/mod36.rs:360:9
+360 |     let buf_36 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_36
+  --> src/mod36.rs:361:5
+361 |     field36: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_37
+  --> src/mod37.rs:370:9
+370 |     let buf_37 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_37
+  --> src/mod37.rs:371:5
+371 |     field37: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_38
+  --> src/mod38.rs:380:9
+380 |     let buf_38 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_38
+  --> src/mod38.rs:381:5
+381 |     field38: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_39
+  --> src/mod39.rs:390:9
+390 |     let buf_39 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_39
+  --> src/mod39.rs:391:5
+391 |     field39: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_40
+  --> src/mod40.rs:400:9
+400 |     let buf_40 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_40
+  --> src/mod40.rs:401:5
+401 |     field40: i32,
+   |     ^^^^^^^^
+
+   Compiling mod40 v0.1.40
+
+warning: unused variable: buf_41
+  --> src/mod41.rs:410:9
+410 |     let buf_41 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_41
+  --> src/mod41.rs:411:5
+411 |     field41: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_42
+  --> src/mod42.rs:420:9
+420 |     let buf_42 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_42
+  --> src/mod42.rs:421:5
+421 |     field42: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_43
+  --> src/mod43.rs:430:9
+430 |     let buf_43 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_43
+  --> src/mod43.rs:431:5
+431 |     field43: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_44
+  --> src/mod44.rs:440:9
+440 |     let buf_44 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_44
+  --> src/mod44.rs:441:5
+441 |     field44: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_45
+  --> src/mod45.rs:450:9
+450 |     let buf_45 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_45
+  --> src/mod45.rs:451:5
+451 |     field45: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_46
+  --> src/mod46.rs:460:9
+460 |     let buf_46 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_46
+  --> src/mod46.rs:461:5
+461 |     field46: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_47
+  --> src/mod47.rs:470:9
+470 |     let buf_47 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_47
+  --> src/mod47.rs:471:5
+471 |     field47: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_48
+  --> src/mod48.rs:480:9
+480 |     let buf_48 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_48
+  --> src/mod48.rs:481:5
+481 |     field48: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_49
+  --> src/mod49.rs:490:9
+490 |     let buf_49 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_49
+  --> src/mod49.rs:491:5
+491 |     field49: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_50
+  --> src/mod50.rs:500:9
+500 |     let buf_50 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_50
+  --> src/mod50.rs:501:5
+501 |     field50: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_51
+  --> src/mod51.rs:510:9
+510 |     let buf_51 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_51
+  --> src/mod51.rs:511:5
+511 |     field51: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_52
+  --> src/mod52.rs:520:9
+520 |     let buf_52 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_52
+  --> src/mod52.rs:521:5
+521 |     field52: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_53
+  --> src/mod53.rs:530:9
+530 |     let buf_53 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_53
+  --> src/mod53.rs:531:5
+531 |     field53: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_54
+  --> src/mod54.rs:540:9
+540 |     let buf_54 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_54
+  --> src/mod54.rs:541:5
+541 |     field54: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_55
+  --> src/mod55.rs:550:9
+550 |     let buf_55 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_55
+  --> src/mod55.rs:551:5
+551 |     field55: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_56
+  --> src/mod56.rs:560:9
+560 |     let buf_56 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_56
+  --> src/mod56.rs:561:5
+561 |     field56: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_57
+  --> src/mod57.rs:570:9
+570 |     let buf_57 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_57
+  --> src/mod57.rs:571:5
+571 |     field57: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_58
+  --> src/mod58.rs:580:9
+580 |     let buf_58 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_58
+  --> src/mod58.rs:581:5
+581 |     field58: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_59
+  --> src/mod59.rs:590:9
+590 |     let buf_59 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_59
+  --> src/mod59.rs:591:5
+591 |     field59: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_60
+  --> src/mod60.rs:600:9
+600 |     let buf_60 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_60
+  --> src/mod60.rs:601:5
+601 |     field60: i32,
+   |     ^^^^^^^^
+
+   Compiling mod60 v0.1.60
+
+warning: unused variable: buf_61
+  --> src/mod61.rs:610:9
+610 |     let buf_61 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_61
+  --> src/mod61.rs:611:5
+611 |     field61: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_62
+  --> src/mod62.rs:620:9
+620 |     let buf_62 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_62
+  --> src/mod62.rs:621:5
+621 |     field62: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_63
+  --> src/mod63.rs:630:9
+630 |     let buf_63 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_63
+  --> src/mod63.rs:631:5
+631 |     field63: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_64
+  --> src/mod64.rs:640:9
+640 |     let buf_64 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_64
+  --> src/mod64.rs:641:5
+641 |     field64: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_65
+  --> src/mod65.rs:650:9
+650 |     let buf_65 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_65
+  --> src/mod65.rs:651:5
+651 |     field65: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_66
+  --> src/mod66.rs:660:9
+660 |     let buf_66 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_66
+  --> src/mod66.rs:661:5
+661 |     field66: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_67
+  --> src/mod67.rs:670:9
+670 |     let buf_67 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_67
+  --> src/mod67.rs:671:5
+671 |     field67: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_68
+  --> src/mod68.rs:680:9
+680 |     let buf_68 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_68
+  --> src/mod68.rs:681:5
+681 |     field68: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_69
+  --> src/mod69.rs:690:9
+690 |     let buf_69 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_69
+  --> src/mod69.rs:691:5
+691 |     field69: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_70
+  --> src/mod70.rs:700:9
+700 |     let buf_70 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_70
+  --> src/mod70.rs:701:5
+701 |     field70: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_71
+  --> src/mod71.rs:710:9
+710 |     let buf_71 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_71
+  --> src/mod71.rs:711:5
+711 |     field71: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_72
+  --> src/mod72.rs:720:9
+720 |     let buf_72 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_72
+  --> src/mod72.rs:721:5
+721 |     field72: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_73
+  --> src/mod73.rs:730:9
+730 |     let buf_73 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_73
+  --> src/mod73.rs:731:5
+731 |     field73: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_74
+  --> src/mod74.rs:740:9
+740 |     let buf_74 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_74
+  --> src/mod74.rs:741:5
+741 |     field74: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_75
+  --> src/mod75.rs:750:9
+750 |     let buf_75 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_75
+  --> src/mod75.rs:751:5
+751 |     field75: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_76
+  --> src/mod76.rs:760:9
+760 |     let buf_76 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_76
+  --> src/mod76.rs:761:5
+761 |     field76: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_77
+  --> src/mod77.rs:770:9
+770 |     let buf_77 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_77
+  --> src/mod77.rs:771:5
+771 |     field77: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_78
+  --> src/mod78.rs:780:9
+780 |     let buf_78 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_78
+  --> src/mod78.rs:781:5
+781 |     field78: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_79
+  --> src/mod79.rs:790:9
+790 |     let buf_79 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_79
+  --> src/mod79.rs:791:5
+791 |     field79: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_80
+  --> src/mod80.rs:800:9
+800 |     let buf_80 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_80
+  --> src/mod80.rs:801:5
+801 |     field80: i32,
+   |     ^^^^^^^^
+
+   Compiling mod80 v0.1.80
+
+warning: unused variable: buf_81
+  --> src/mod81.rs:810:9
+810 |     let buf_81 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_81
+  --> src/mod81.rs:811:5
+811 |     field81: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_82
+  --> src/mod82.rs:820:9
+820 |     let buf_82 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_82
+  --> src/mod82.rs:821:5
+821 |     field82: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_83
+  --> src/mod83.rs:830:9
+830 |     let buf_83 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_83
+  --> src/mod83.rs:831:5
+831 |     field83: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_84
+  --> src/mod84.rs:840:9
+840 |     let buf_84 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_84
+  --> src/mod84.rs:841:5
+841 |     field84: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_85
+  --> src/mod85.rs:850:9
+850 |     let buf_85 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_85
+  --> src/mod85.rs:851:5
+851 |     field85: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_86
+  --> src/mod86.rs:860:9
+860 |     let buf_86 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_86
+  --> src/mod86.rs:861:5
+861 |     field86: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_87
+  --> src/mod87.rs:870:9
+870 |     let buf_87 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_87
+  --> src/mod87.rs:871:5
+871 |     field87: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_88
+  --> src/mod88.rs:880:9
+880 |     let buf_88 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_88
+  --> src/mod88.rs:881:5
+881 |     field88: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_89
+  --> src/mod89.rs:890:9
+890 |     let buf_89 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_89
+  --> src/mod89.rs:891:5
+891 |     field89: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_90
+  --> src/mod90.rs:900:9
+900 |     let buf_90 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_90
+  --> src/mod90.rs:901:5
+901 |     field90: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_91
+  --> src/mod91.rs:910:9
+910 |     let buf_91 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_91
+  --> src/mod91.rs:911:5
+911 |     field91: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_92
+  --> src/mod92.rs:920:9
+920 |     let buf_92 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_92
+  --> src/mod92.rs:921:5
+921 |     field92: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_93
+  --> src/mod93.rs:930:9
+930 |     let buf_93 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_93
+  --> src/mod93.rs:931:5
+931 |     field93: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_94
+  --> src/mod94.rs:940:9
+940 |     let buf_94 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_94
+  --> src/mod94.rs:941:5
+941 |     field94: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_95
+  --> src/mod95.rs:950:9
+950 |     let buf_95 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_95
+  --> src/mod95.rs:951:5
+951 |     field95: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_96
+  --> src/mod96.rs:960:9
+960 |     let buf_96 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_96
+  --> src/mod96.rs:961:5
+961 |     field96: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_97
+  --> src/mod97.rs:970:9
+970 |     let buf_97 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_97
+  --> src/mod97.rs:971:5
+971 |     field97: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_98
+  --> src/mod98.rs:980:9
+980 |     let buf_98 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_98
+  --> src/mod98.rs:981:5
+981 |     field98: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_99
+  --> src/mod99.rs:990:9
+990 |     let buf_99 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_99
+  --> src/mod99.rs:991:5
+991 |     field99: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_100
+  --> src/mod100.rs:1000:9
+1000 |     let buf_100 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_100
+  --> src/mod100.rs:1001:5
+1001 |     field100: i32,
+   |     ^^^^^^^^
+
+   Compiling mod100 v0.1.100
+
+   Compiling crate1 v0.1.0
+
+   Compiling crate2 v0.1.0
+
+   Compiling crate3 v0.1.0
+
+   Compiling crate4 v0.1.0
+
+   Compiling crate5 v0.1.0
+
+   Compiling crate6 v0.1.0
+
+   Compiling crate7 v0.1.0
+
+   Compiling crate8 v0.1.0
+
+   Compiling crate9 v0.1.0
+
+   Compiling crate10 v0.1.0
+
+   Compiling crate11 v0.1.0
+
+   Compiling crate12 v0.1.0
+
+   Compiling crate13 v0.1.0
+
+   Compiling crate14 v0.1.0
+
+   Compiling crate15 v0.1.0
+
+   Compiling crate16 v0.1.0
+
+   Compiling crate17 v0.1.0
+
+   Compiling crate18 v0.1.0
+
+   Compiling crate19 v0.1.0
+
+   Compiling crate20 v0.1.0
+
+   Compiling crate21 v0.1.0
+
+   Compiling crate22 v0.1.0
+
+   Compiling crate23 v0.1.0
+
+   Compiling crate24 v0.1.0
+
+   Compiling crate25 v0.1.0
+
+   Compiling serde v1.0.225
+   Compiling tokio v1.42.25
+   Compiling axum v0.8.5
+
+   Compiling crate26 v0.1.0
+
+   Compiling crate27 v0.1.0
+
+   Compiling crate28 v0.1.0
+
+   Compiling crate29 v0.1.0
+
+   Compiling crate30 v0.1.0
+
+   Compiling crate31 v0.1.0
+
+   Compiling crate32 v0.1.0
+
+   Compiling crate33 v0.1.0
+
+   Compiling crate34 v0.1.0
+
+   Compiling crate35 v0.1.0
+
+   Compiling crate36 v0.1.0
+
+   Compiling crate37 v0.1.0
+
+   Compiling crate38 v0.1.0
+
+   Compiling crate39 v0.1.0
+
+   Compiling crate40 v0.1.0
+
+   Compiling crate41 v0.1.0
+
+   Compiling crate42 v0.1.0
+
+   Compiling crate43 v0.1.0
+
+   Compiling crate44 v0.1.0
+
+   Compiling crate45 v0.1.0
+
+   Compiling crate46 v0.1.0
+
+   Compiling crate47 v0.1.0
+
+   Compiling crate48 v0.1.0
+
+   Compiling crate49 v0.1.0
+
+   Compiling crate50 v0.1.0
+
+   Compiling serde v1.0.250
+   Compiling tokio v1.42.50
+   Compiling axum v0.8.0
+
+   Compiling crate51 v0.1.0
+
+   Compiling crate52 v0.1.0
+
+   Compiling crate53 v0.1.0
+
+   Compiling crate54 v0.1.0
+
+   Compiling crate55 v0.1.0
+
+   Compiling crate56 v0.1.0
+
+   Compiling crate57 v0.1.0
+
+   Compiling crate58 v0.1.0
+
+   Compiling crate59 v0.1.0
+
+   Compiling crate60 v0.1.0
+
+   Compiling crate61 v0.1.0
+
+   Compiling crate62 v0.1.0
+
+   Compiling crate63 v0.1.0
+
+   Compiling crate64 v0.1.0
+
+   Compiling crate65 v0.1.0
+
+   Compiling crate66 v0.1.0
+
+   Compiling crate67 v0.1.0
+
+   Compiling crate68 v0.1.0
+
+   Compiling crate69 v0.1.0
+
+   Compiling crate70 v0.1.0
+
+   Compiling crate71 v0.1.0
+
+   Compiling crate72 v0.1.0
+
+   Compiling crate73 v0.1.0
+
+   Compiling crate74 v0.1.0
+
+   Compiling crate75 v0.1.0
+
+   Compiling serde v1.0.275
+   Compiling tokio v1.42.75
+   Compiling axum v0.8.5
+
+   Compiling crate76 v0.1.0
+
+   Compiling crate77 v0.1.0
+
+   Compiling crate78 v0.1.0
+
+   Compiling crate79 v0.1.0
+
+   Compiling crate80 v0.1.0
+
+   Compiling crate81 v0.1.0
+
+   Compiling crate82 v0.1.0
+
+   Compiling crate83 v0.1.0
+
+   Compiling crate84 v0.1.0
+
+   Compiling crate85 v0.1.0
+
+   Compiling crate86 v0.1.0
+
+   Compiling crate87 v0.1.0
+
+   Compiling crate88 v0.1.0
+
+   Compiling crate89 v0.1.0
+
+   Compiling crate90 v0.1.0
+
+   Compiling crate91 v0.1.0
+
+   Compiling crate92 v0.1.0
+
+   Compiling crate93 v0.1.0
+
+   Compiling crate94 v0.1.0
+
+   Compiling crate95 v0.1.0
+
+   Compiling crate96 v0.1.0
+
+   Compiling crate97 v0.1.0
+
+   Compiling crate98 v0.1.0
+
+   Compiling crate99 v0.1.0
+
+   Compiling crate100 v0.1.0
+
+   Compiling serde v1.0.300
+   Compiling tokio v1.42.100
+   Compiling axum v0.8.0
+
+warning: unused variable: buf_1
+  --> src/mod1.rs:10:9
+10 |     let buf_1 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_1
+  --> src/mod1.rs:11:5
+11 |     field1: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_2
+  --> src/mod2.rs:20:9
+20 |     let buf_2 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_2
+  --> src/mod2.rs:21:5
+21 |     field2: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_3
+  --> src/mod3.rs:30:9
+30 |     let buf_3 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_3
+  --> src/mod3.rs:31:5
+31 |     field3: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_4
+  --> src/mod4.rs:40:9
+40 |     let buf_4 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_4
+  --> src/mod4.rs:41:5
+41 |     field4: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_5
+  --> src/mod5.rs:50:9
+50 |     let buf_5 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_5
+  --> src/mod5.rs:51:5
+51 |     field5: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_6
+  --> src/mod6.rs:60:9
+60 |     let buf_6 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_6
+  --> src/mod6.rs:61:5
+61 |     field6: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_7
+  --> src/mod7.rs:70:9
+70 |     let buf_7 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_7
+  --> src/mod7.rs:71:5
+71 |     field7: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_8
+  --> src/mod8.rs:80:9
+80 |     let buf_8 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_8
+  --> src/mod8.rs:81:5
+81 |     field8: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_9
+  --> src/mod9.rs:90:9
+90 |     let buf_9 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_9
+  --> src/mod9.rs:91:5
+91 |     field9: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_10
+  --> src/mod10.rs:100:9
+100 |     let buf_10 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_10
+  --> src/mod10.rs:101:5
+101 |     field10: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_11
+  --> src/mod11.rs:110:9
+110 |     let buf_11 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_11
+  --> src/mod11.rs:111:5
+111 |     field11: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_12
+  --> src/mod12.rs:120:9
+120 |     let buf_12 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_12
+  --> src/mod12.rs:121:5
+121 |     field12: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_13
+  --> src/mod13.rs:130:9
+130 |     let buf_13 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_13
+  --> src/mod13.rs:131:5
+131 |     field13: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_14
+  --> src/mod14.rs:140:9
+140 |     let buf_14 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_14
+  --> src/mod14.rs:141:5
+141 |     field14: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_15
+  --> src/mod15.rs:150:9
+150 |     let buf_15 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_15
+  --> src/mod15.rs:151:5
+151 |     field15: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_16
+  --> src/mod16.rs:160:9
+160 |     let buf_16 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_16
+  --> src/mod16.rs:161:5
+161 |     field16: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_17
+  --> src/mod17.rs:170:9
+170 |     let buf_17 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_17
+  --> src/mod17.rs:171:5
+171 |     field17: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_18
+  --> src/mod18.rs:180:9
+180 |     let buf_18 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_18
+  --> src/mod18.rs:181:5
+181 |     field18: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_19
+  --> src/mod19.rs:190:9
+190 |     let buf_19 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_19
+  --> src/mod19.rs:191:5
+191 |     field19: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_20
+  --> src/mod20.rs:200:9
+200 |     let buf_20 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_20
+  --> src/mod20.rs:201:5
+201 |     field20: i32,
+   |     ^^^^^^^^
+
+   Compiling mod20 v0.1.20
+
+warning: unused variable: buf_21
+  --> src/mod21.rs:210:9
+210 |     let buf_21 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_21
+  --> src/mod21.rs:211:5
+211 |     field21: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_22
+  --> src/mod22.rs:220:9
+220 |     let buf_22 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_22
+  --> src/mod22.rs:221:5
+221 |     field22: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_23
+  --> src/mod23.rs:230:9
+230 |     let buf_23 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_23
+  --> src/mod23.rs:231:5
+231 |     field23: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_24
+  --> src/mod24.rs:240:9
+240 |     let buf_24 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_24
+  --> src/mod24.rs:241:5
+241 |     field24: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_25
+  --> src/mod25.rs:250:9
+250 |     let buf_25 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_25
+  --> src/mod25.rs:251:5
+251 |     field25: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_26
+  --> src/mod26.rs:260:9
+260 |     let buf_26 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_26
+  --> src/mod26.rs:261:5
+261 |     field26: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_27
+  --> src/mod27.rs:270:9
+270 |     let buf_27 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_27
+  --> src/mod27.rs:271:5
+271 |     field27: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_28
+  --> src/mod28.rs:280:9
+280 |     let buf_28 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_28
+  --> src/mod28.rs:281:5
+281 |     field28: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_29
+  --> src/mod29.rs:290:9
+290 |     let buf_29 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_29
+  --> src/mod29.rs:291:5
+291 |     field29: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_30
+  --> src/mod30.rs:300:9
+300 |     let buf_30 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_30
+  --> src/mod30.rs:301:5
+301 |     field30: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_31
+  --> src/mod31.rs:310:9
+310 |     let buf_31 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_31
+  --> src/mod31.rs:311:5
+311 |     field31: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_32
+  --> src/mod32.rs:320:9
+320 |     let buf_32 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_32
+  --> src/mod32.rs:321:5
+321 |     field32: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_33
+  --> src/mod33.rs:330:9
+330 |     let buf_33 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_33
+  --> src/mod33.rs:331:5
+331 |     field33: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_34
+  --> src/mod34.rs:340:9
+340 |     let buf_34 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_34
+  --> src/mod34.rs:341:5
+341 |     field34: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_35
+  --> src/mod35.rs:350:9
+350 |     let buf_35 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_35
+  --> src/mod35.rs:351:5
+351 |     field35: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_36
+  --> src/mod36.rs:360:9
+360 |     let buf_36 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_36
+  --> src/mod36.rs:361:5
+361 |     field36: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_37
+  --> src/mod37.rs:370:9
+370 |     let buf_37 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_37
+  --> src/mod37.rs:371:5
+371 |     field37: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_38
+  --> src/mod38.rs:380:9
+380 |     let buf_38 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_38
+  --> src/mod38.rs:381:5
+381 |     field38: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_39
+  --> src/mod39.rs:390:9
+390 |     let buf_39 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_39
+  --> src/mod39.rs:391:5
+391 |     field39: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_40
+  --> src/mod40.rs:400:9
+400 |     let buf_40 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_40
+  --> src/mod40.rs:401:5
+401 |     field40: i32,
+   |     ^^^^^^^^
+
+   Compiling mod40 v0.1.40
+
+warning: unused variable: buf_41
+  --> src/mod41.rs:410:9
+410 |     let buf_41 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_41
+  --> src/mod41.rs:411:5
+411 |     field41: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_42
+  --> src/mod42.rs:420:9
+420 |     let buf_42 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_42
+  --> src/mod42.rs:421:5
+421 |     field42: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_43
+  --> src/mod43.rs:430:9
+430 |     let buf_43 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_43
+  --> src/mod43.rs:431:5
+431 |     field43: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_44
+  --> src/mod44.rs:440:9
+440 |     let buf_44 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_44
+  --> src/mod44.rs:441:5
+441 |     field44: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_45
+  --> src/mod45.rs:450:9
+450 |     let buf_45 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_45
+  --> src/mod45.rs:451:5
+451 |     field45: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_46
+  --> src/mod46.rs:460:9
+460 |     let buf_46 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_46
+  --> src/mod46.rs:461:5
+461 |     field46: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_47
+  --> src/mod47.rs:470:9
+470 |     let buf_47 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_47
+  --> src/mod47.rs:471:5
+471 |     field47: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_48
+  --> src/mod48.rs:480:9
+480 |     let buf_48 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_48
+  --> src/mod48.rs:481:5
+481 |     field48: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_49
+  --> src/mod49.rs:490:9
+490 |     let buf_49 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_49
+  --> src/mod49.rs:491:5
+491 |     field49: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_50
+  --> src/mod50.rs:500:9
+500 |     let buf_50 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_50
+  --> src/mod50.rs:501:5
+501 |     field50: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_51
+  --> src/mod51.rs:510:9
+510 |     let buf_51 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_51
+  --> src/mod51.rs:511:5
+511 |     field51: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_52
+  --> src/mod52.rs:520:9
+520 |     let buf_52 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_52
+  --> src/mod52.rs:521:5
+521 |     field52: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_53
+  --> src/mod53.rs:530:9
+530 |     let buf_53 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_53
+  --> src/mod53.rs:531:5
+531 |     field53: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_54
+  --> src/mod54.rs:540:9
+540 |     let buf_54 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_54
+  --> src/mod54.rs:541:5
+541 |     field54: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_55
+  --> src/mod55.rs:550:9
+550 |     let buf_55 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_55
+  --> src/mod55.rs:551:5
+551 |     field55: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_56
+  --> src/mod56.rs:560:9
+560 |     let buf_56 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_56
+  --> src/mod56.rs:561:5
+561 |     field56: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_57
+  --> src/mod57.rs:570:9
+570 |     let buf_57 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_57
+  --> src/mod57.rs:571:5
+571 |     field57: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_58
+  --> src/mod58.rs:580:9
+580 |     let buf_58 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_58
+  --> src/mod58.rs:581:5
+581 |     field58: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_59
+  --> src/mod59.rs:590:9
+590 |     let buf_59 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_59
+  --> src/mod59.rs:591:5
+591 |     field59: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_60
+  --> src/mod60.rs:600:9
+600 |     let buf_60 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_60
+  --> src/mod60.rs:601:5
+601 |     field60: i32,
+   |     ^^^^^^^^
+
+   Compiling mod60 v0.1.60
+
+warning: unused variable: buf_61
+  --> src/mod61.rs:610:9
+610 |     let buf_61 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_61
+  --> src/mod61.rs:611:5
+611 |     field61: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_62
+  --> src/mod62.rs:620:9
+620 |     let buf_62 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_62
+  --> src/mod62.rs:621:5
+621 |     field62: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_63
+  --> src/mod63.rs:630:9
+630 |     let buf_63 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_63
+  --> src/mod63.rs:631:5
+631 |     field63: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_64
+  --> src/mod64.rs:640:9
+640 |     let buf_64 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_64
+  --> src/mod64.rs:641:5
+641 |     field64: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_65
+  --> src/mod65.rs:650:9
+650 |     let buf_65 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_65
+  --> src/mod65.rs:651:5
+651 |     field65: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_66
+  --> src/mod66.rs:660:9
+660 |     let buf_66 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_66
+  --> src/mod66.rs:661:5
+661 |     field66: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_67
+  --> src/mod67.rs:670:9
+670 |     let buf_67 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_67
+  --> src/mod67.rs:671:5
+671 |     field67: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_68
+  --> src/mod68.rs:680:9
+680 |     let buf_68 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_68
+  --> src/mod68.rs:681:5
+681 |     field68: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_69
+  --> src/mod69.rs:690:9
+690 |     let buf_69 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_69
+  --> src/mod69.rs:691:5
+691 |     field69: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_70
+  --> src/mod70.rs:700:9
+700 |     let buf_70 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_70
+  --> src/mod70.rs:701:5
+701 |     field70: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_71
+  --> src/mod71.rs:710:9
+710 |     let buf_71 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_71
+  --> src/mod71.rs:711:5
+711 |     field71: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_72
+  --> src/mod72.rs:720:9
+720 |     let buf_72 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_72
+  --> src/mod72.rs:721:5
+721 |     field72: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_73
+  --> src/mod73.rs:730:9
+730 |     let buf_73 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_73
+  --> src/mod73.rs:731:5
+731 |     field73: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_74
+  --> src/mod74.rs:740:9
+740 |     let buf_74 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_74
+  --> src/mod74.rs:741:5
+741 |     field74: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_75
+  --> src/mod75.rs:750:9
+750 |     let buf_75 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_75
+  --> src/mod75.rs:751:5
+751 |     field75: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_76
+  --> src/mod76.rs:760:9
+760 |     let buf_76 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_76
+  --> src/mod76.rs:761:5
+761 |     field76: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_77
+  --> src/mod77.rs:770:9
+770 |     let buf_77 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_77
+  --> src/mod77.rs:771:5
+771 |     field77: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_78
+  --> src/mod78.rs:780:9
+780 |     let buf_78 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_78
+  --> src/mod78.rs:781:5
+781 |     field78: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_79
+  --> src/mod79.rs:790:9
+790 |     let buf_79 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_79
+  --> src/mod79.rs:791:5
+791 |     field79: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_80
+  --> src/mod80.rs:800:9
+800 |     let buf_80 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_80
+  --> src/mod80.rs:801:5
+801 |     field80: i32,
+   |     ^^^^^^^^
+
+   Compiling mod80 v0.1.80
+
+warning: unused variable: buf_81
+  --> src/mod81.rs:810:9
+810 |     let buf_81 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_81
+  --> src/mod81.rs:811:5
+811 |     field81: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_82
+  --> src/mod82.rs:820:9
+820 |     let buf_82 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_82
+  --> src/mod82.rs:821:5
+821 |     field82: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_83
+  --> src/mod83.rs:830:9
+830 |     let buf_83 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_83
+  --> src/mod83.rs:831:5
+831 |     field83: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_84
+  --> src/mod84.rs:840:9
+840 |     let buf_84 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_84
+  --> src/mod84.rs:841:5
+841 |     field84: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_85
+  --> src/mod85.rs:850:9
+850 |     let buf_85 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_85
+  --> src/mod85.rs:851:5
+851 |     field85: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_86
+  --> src/mod86.rs:860:9
+860 |     let buf_86 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_86
+  --> src/mod86.rs:861:5
+861 |     field86: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_87
+  --> src/mod87.rs:870:9
+870 |     let buf_87 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_87
+  --> src/mod87.rs:871:5
+871 |     field87: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_88
+  --> src/mod88.rs:880:9
+880 |     let buf_88 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_88
+  --> src/mod88.rs:881:5
+881 |     field88: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_89
+  --> src/mod89.rs:890:9
+890 |     let buf_89 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_89
+  --> src/mod89.rs:891:5
+891 |     field89: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_90
+  --> src/mod90.rs:900:9
+900 |     let buf_90 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_90
+  --> src/mod90.rs:901:5
+901 |     field90: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_91
+  --> src/mod91.rs:910:9
+910 |     let buf_91 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_91
+  --> src/mod91.rs:911:5
+911 |     field91: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_92
+  --> src/mod92.rs:920:9
+920 |     let buf_92 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_92
+  --> src/mod92.rs:921:5
+921 |     field92: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_93
+  --> src/mod93.rs:930:9
+930 |     let buf_93 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_93
+  --> src/mod93.rs:931:5
+931 |     field93: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_94
+  --> src/mod94.rs:940:9
+940 |     let buf_94 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_94
+  --> src/mod94.rs:941:5
+941 |     field94: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_95
+  --> src/mod95.rs:950:9
+950 |     let buf_95 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_95
+  --> src/mod95.rs:951:5
+951 |     field95: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_96
+  --> src/mod96.rs:960:9
+960 |     let buf_96 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_96
+  --> src/mod96.rs:961:5
+961 |     field96: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_97
+  --> src/mod97.rs:970:9
+970 |     let buf_97 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_97
+  --> src/mod97.rs:971:5
+971 |     field97: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_98
+  --> src/mod98.rs:980:9
+980 |     let buf_98 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_98
+  --> src/mod98.rs:981:5
+981 |     field98: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_99
+  --> src/mod99.rs:990:9
+990 |     let buf_99 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_99
+  --> src/mod99.rs:991:5
+991 |     field99: i32,
+   |     ^^^^^^^^
+
+warning: unused variable: buf_100
+  --> src/mod100.rs:1000:9
+1000 |     let buf_100 = Vec::new();
+   |         ^^^^^ help: prefix with underscore
+
+warning: dead_code: field never_read_100
+  --> src/mod100.rs:1001:5
+1001 |     field100: i32,
+   |     ^^^^^^^^
+
+   Compiling mod100 v0.1.100
+
+   Compiling crate1 v0.1.0
+
+   Compiling crate2 v0.1.0
+
+   Compiling crate3 v0.1.0
+
+   Compiling crate4 v0.1.0
+
+   Compiling crate5 v0.1.0
+
+   Compiling crate6 v0.1.0
+
+   Compiling crate7 v0.1.0
+
+   Compiling crate8 v0.1.0
+
+   Compiling crate9 v0.1.0
+
+   Compiling crate10 v0.1.0
+
+   Compiling crate11 v0.1.0
+
+   Compiling crate12 v0.1.0
+
+   Compiling crate13 v0.1.0
+
+   Compiling crate14 v0.1.0
+
+   Compiling crate15 v0.1.0
+
+   Compiling crate16 v0.1.0
+
+   Compiling crate17 v0.1.0
+
+   Compiling crate18 v0.1.0
+
+   Compiling crate19 v0.1.0
+
+   Compiling crate20 v0.1.0
+
+   Compiling crate21 v0.1.0
+
+   Compiling crate22 v0.1.0
+
+   Compiling crate23 v0.1.0
+
+   Compiling crate24 v0.1.0
+
+   Compiling crate25 v0.1.0
+
+   Compiling serde v1.0.225
+   Compiling tokio v1.42.25
+   Compiling axum v0.8.5
+
+   Compiling crate26 v0.1.0
+
+   Compiling crate27 v0.1.0
+
+   Compiling crate28 v0.1.0
+
+   Compiling crate29 v0.1.0
+
+   Compiling crate30 v0.1.0
+
+   Compiling crate31 v0.1.0
+
+   Compiling crate32 v0.1.0
+
+   Compiling crate33 v0.1.0
+
+   Compiling crate34 v0.1.0
+
+   Compiling crate35 v0.1.0
+
+   Compiling crate36 v0.1.0
+
+   Compiling crate37 v0.1.0
+
+   Compiling crate38 v0.1.0
+
+   Compiling crate39 v0.1.0
+
+   Compiling crate40 v0.1.0
+
+   Compiling crate41 v0.1.0
+
+   Compiling crate42 v0.1.0
+
+   Compiling crate43 v0.1.0
+
+   Compiling crate44 v0.1.0
+
+   Compiling crate45 v0.1.0
+
+   Compiling crate46 v0.1.0
+
+   Compiling crate47 v0.1.0
+
+   Compiling crate48 v0.1.0
+
+   Compiling crate49 v0.1.0
+
+   Compiling crate50 v0.1.0
+
+   Compiling serde v1.0.250
+   Compiling tokio v1.42.50
+   Compiling axum v0.8.0
+
+   Compiling crate51 v0.1.0
+
+   Compiling crate52 v0.1.0
+
+   Compiling crate53 v0.1.0
+
+   Compiling crate54 v0.1.0
+
+   Compiling crate55 v0.1.0
+
+   Compiling crate56 v0.1.0
+
+   Compiling crate57 v0.1.0
+
+   Compiling crate58 v0.1.0
+
+   Compiling crate59 v0.1.0
+
+   Compiling crate60 v0.1.0
+
+   Compiling crate61 v0.1.0
+
+   Compiling crate62 v0.1.0
+
+   Compiling crate63 v0.1.0
+
+   Compiling crate64 v0.1.0
+
+   Compiling crate65 v0.1.0
+
+   Compiling crate66 v0.1.0
+
+   Compiling crate67 v0.1.0
+
+   Compiling crate68 v0.1.0
+
+   Compiling crate69 v0.1.0
+
+   Compiling crate70 v0.1.0
+
+   Compiling crate71 v0.1.0
+
+   Compiling crate72 v0.1.0
+
+   Compiling crate73 v0.1.0
+
+   Compiling crate74 v0.1.0
+
+   Compiling crate75 v0.1.0
+
+   Compiling serde v1.0.275
+   Compiling tokio v1.42.75
+   Compiling axum v0.8.5
+
+   Compiling crate76 v0.1.0
+
+   Compiling crate77 v0.1.0
+
+   Compiling crate78 v0.1.0
+
+   Compiling crate79 v0.1.0
+
+   Compiling crate80 v0.1.0
+
+   Compiling crate81 v0.1.0
+
+   Compiling crate82 v0.1.0
+
+   Compiling crate83 v0.1.0
+
+   Compiling crate84 v0.1.0
+
+   Compiling crate85 v0.1.0
+
+   Compiling crate86 v0.1.0
+
+   Compiling crate87 v0.1.0
+
+   Compiling crate88 v0.1.0
+
+   Compiling crate89 v0.1.0
+
+   Compiling crate90 v0.1.0
+
+   Compiling crate91 v0.1.0
+
+   Compiling crate92 v0.1.0
+
+   Compiling crate93 v0.1.0
+
+   Compiling crate94 v0.1.0
+
+   Compiling crate95 v0.1.0
+
+   Compiling crate96 v0.1.0
+
+   Compiling crate97 v0.1.0
+
+   Compiling crate98 v0.1.0
+
+   Compiling crate99 v0.1.0
+
+   Compiling crate100 v0.1.0
+
+   Compiling serde v1.0.300
+   Compiling tokio v1.42.100
+   Compiling axum v0.8.0
+
+error[E0502]: cannot borrow `state` as mutable because it is also borrowed as immutable
+   --> src/engine.rs:142:9
+    |
+141 |     let ref = &state.data;
+    |               ----------- immutable borrow occurs here
+142 |     state.update(ref);
+    |     ^^^^^^^^^^^^^^^^^ mutable borrow occurs here
+143 |     println!("{ref}");
+    |              ------- immutable borrow later used here
+    |
+    = note: immutable borrow ends here
+
+error: aborting due to 1 previous error; 200 warnings emitted
+
+For more information about this error, try `rustc --explain E0502`.
+error: could not compile `demo` (lib) due to 1 previous error

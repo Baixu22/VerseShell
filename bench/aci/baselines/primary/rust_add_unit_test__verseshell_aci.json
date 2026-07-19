@@ -1,0 +1,88 @@
+{
+  "task_id": "rust_add_unit_test",
+  "condition": "verseshell_aci",
+  "model": "primary",
+  "success": true,
+  "success_reason": "all ok",
+  "tool_calls": 7,
+  "observation_tokens": 520,
+  "elapsed_ms": 17,
+  "notes": [
+    "golden_applied",
+    "ae_available",
+    "live_http_probed_or_skipped"
+  ],
+  "trajectory": [
+    {
+      "op": "ops.list",
+      "args": {},
+      "observation_tokens": 40,
+      "condition": "verseshell_aci"
+    },
+    {
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "observation_tokens": 120,
+      "condition": "verseshell_aci"
+    },
+    {
+      "op": "repo.search",
+      "args": {
+        "query": "TODO|error|assert"
+      },
+      "observation_tokens": 80,
+      "condition": "verseshell_aci"
+    },
+    {
+      "op": "exec.run",
+      "args": {
+        "argv": [
+          "cargo",
+          "check"
+        ],
+        "note": "semantic reduced"
+      },
+      "observation_tokens": 90,
+      "condition": "verseshell_aci"
+    },
+    {
+      "op": "file.replace_exact",
+      "args": {
+        "path": "(target)"
+      },
+      "observation_tokens": 60,
+      "condition": "verseshell_aci"
+    },
+    {
+      "op": "exec.run",
+      "args": {
+        "argv": [
+          "verify"
+        ],
+        "note": "reduced ok"
+      },
+      "observation_tokens": 70,
+      "condition": "verseshell_aci"
+    },
+    {
+      "op": "ops.observation_recent",
+      "args": {
+        "limit": 4
+      },
+      "observation_tokens": 50,
+      "condition": "verseshell_aci"
+    },
+    {
+      "op": "golden.apply",
+      "args": {
+        "fixture": "rust_add_unit_test"
+      },
+      "observation_tokens": 10,
+      "condition": "verseshell_aci"
+    }
+  ],
+  "optional_verify": null,
+  "weight": 1.0
+}

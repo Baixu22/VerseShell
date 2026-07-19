@@ -1,0 +1,42 @@
+﻿cargo :    Compiling verseshell v1.0.0 (C:\Users\27933\Desktop\verseshell\verseshell)
+At line:2 char:1
++ cargo build --bin ae --tests 2>&1 | Out-File -FilePath bench/aci/resu ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (   Compiling ve...ell\verseshell):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+error: expected one of `!` or `::`, found `.`
+    --> src\operation.rs:1220:6
+     |
+1220 | esult.query the full log.
+     |      ^ expected one of `!` or `::`
+
+warning: unreachable expression
+     --> src\builtins.rs:18329:5
+      |
+18306 |         return Ok(Value::Null);
+      |         ---------------------- any code following this expression is unreachable
+...
+18329 |     Ok(Value::Null)
+      |     ^^^^^^^^^^^^^^^ unreachable expression
+      |
+      = note: `#[warn(unreachable_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: unreachable expression
+     --> src\builtins.rs:31960:5
+      |
+31958 |         return Ok(Value::Str("msvcrt".to_string()));
+      |         ------------------------------------------- any code following this expression is unreachable
+31959 |     }
+31960 |     Ok(Value::Str("unknown".to_string()))
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable expression
+
+warning: unreachable expression
+     --> src\builtins.rs:32008:5
+      |
+32006 |         return Ok(Value::Str("MSVC STL".to_string()));
+      |         --------------------------------------------- any code following this expression is unreachable
+32007 |     }
+32008 |     Ok(Value::Str("unknown".to_string()))
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable expression
+

@@ -1,0 +1,29 @@
+{
+  "id": "python_edit_and_retest",
+  "version": "1.0.0",
+  "lang": "python",
+  "platform": [
+    "any"
+  ],
+  "prompt": "Update greet() to return Hello, {name}! and re-run tests.",
+  "workspace_fixture": "python_edit_and_retest",
+  "modes": [
+    "raw_shell",
+    "verseshell_aci"
+  ],
+  "timeout_sec": 300,
+  "weight": 1.0,
+  "success": {
+    "type": "file_contains",
+    "path": "greet.py",
+    "contains": "Hello, {name}!"
+  },
+  "optional_verify": {
+    "type": "command_exit_0",
+    "argv": [
+      "pytest",
+      "-q"
+    ],
+    "timeout_sec": 60
+  }
+}

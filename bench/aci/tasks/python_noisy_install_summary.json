@@ -1,0 +1,21 @@
+{
+  "id": "python_noisy_install_summary",
+  "version": "1.0.0",
+  "lang": "python",
+  "platform": [
+    "any"
+  ],
+  "prompt": "Install requirements and report a one-line dependency summary without pasting full install logs.",
+  "workspace_fixture": "python_noisy_install_summary",
+  "modes": [
+    "raw_shell",
+    "verseshell_aci"
+  ],
+  "timeout_sec": 300,
+  "weight": 1.0,
+  "success": {
+    "type": "file_contains",
+    "path": "SUMMARY.txt",
+    "contains": "packages"
+  }
+}

@@ -322,6 +322,54 @@ fn benchmark_pipeline_any_all(c: &mut Criterion) {
     group.finish();
 }
 
+
+fn benchmark_env_size_pipeline(c: &mut Criterion) {
+    // Regression: pipeline map cost should not scale with unrelated session vars.
+    let mut group = c.benchmark_group("env_size_pipeline");
+    let array = format!(
+        "[{}]",
+        (1..=200)
+            .map(|i| i.to_string())
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
+    let code = format!("{} | map(fn(x) => x + 1)", array);
+    for env_vars in [0usize, 50, 200] {
+        group.bench_with_input(BenchmarkId::new("map_plus1", env_vars), &env_vars, |b, &n| {
+            b.iter(|| {
+                let mut env = create_test_env();
+                for i in 0..n {
+                    env.set_var_unchecked(
+                        &format!("pad{i}"),
+                        verseshell::value::Value::Int(i as i64),
+                    );
+                }
+                parse_and_eval(black_box(&code), &mut env)
+            })
+        });
+    }
+    group.finish();
+}
+
+fn benchmark_keyed_sort(c: &mut Criterion) {
+    let mut group = c.benchmark_group("keyed_sort");
+    for size in [50usize, 200] {
+        let array = format!(
+            "[{}]",
+            (1..=size)
+                .map(|i| i.to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+        let code = format!("{} | sort_by(fn(x) => 0 - x)", array);
+        group.bench_with_input(BenchmarkId::new("sort_by_desc", size), &code, |b, code| {
+            let mut env = create_test_env();
+            b.iter(|| parse_and_eval(black_box(code), &mut env))
+        });
+    }
+    group.finish();
+}
+
 criterion_group!(
     benches,
     benchmark_pipeline_map,
@@ -330,6 +378,8 @@ criterion_group!(
     benchmark_pipeline_chain,
     benchmark_pipeline_array_ops,
     benchmark_pipeline_sort,
-    benchmark_pipeline_any_all
+    benchmark_pipeline_any_all,
+    benchmark_env_size_pipeline,
+    benchmark_keyed_sort
 );
 criterion_main!(benches);

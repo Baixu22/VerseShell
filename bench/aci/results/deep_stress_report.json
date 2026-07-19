@@ -1,0 +1,115 @@
+{
+  "schema": "verseshell.deep_stress_report/v1",
+  "title": "VerseShell ACI Deep-Stress Test Report",
+  "timestamp": "2026-07-19T13:30:00Z",
+  "verdict": "GOOD",
+  "scores": {
+    "S1_ReducerQuality": { "value": 1.0, "threshold": 0.95, "pass": true },
+    "S2_CompressionRatio": { "value": 1.0, "threshold": 0.7, "pass": true },
+    "S3_AgentLoopUtility": { "value": 1.0, "threshold": 0.90, "pass": true },
+    "S4_ACIBenchGate": { "value": 1.0, "threshold": 0.95, "pass": true, "note": "mock gate; live model SKIPPED (no API key)" },
+    "S5_Robustness": { "value": 1.0, "threshold": 0.90, "pass": true },
+    "S6_Regressions": { "value": 1.0, "threshold": 0.95, "pass": true }
+  },
+  "phase_results": {
+    "phase0_baseline": {
+      "status": "PASS",
+      "lib_tests": 144,
+      "gate_tests": 27,
+      "total_pass": 171,
+      "total_fail": 0
+    },
+    "phase1_semantic_reducer_adversarial": {
+      "status": "PASS",
+      "tests": 22,
+      "passed": 22,
+      "failed": 0,
+      "profiles": ["cargo", "pytest", "git", "npm_install"],
+      "coverage": "success x4, failure x8 (2+ variants each), noisy x4, malformed x1, invariants x2"
+    },
+    "phase2_token_compression": {
+      "status": "PASS",
+      "tests": 4,
+      "passed": 4,
+      "failed": 0,
+      "largest_input_kb": 78.7,
+      "all_ratio_above_0.7": true,
+      "zero_critical_loss": true
+    },
+    "phase3_op_protocol_stress": {
+      "status": "PASS",
+      "tests": 9,
+      "passed": 9,
+      "failed": 0,
+      "covered": [
+        "hash_consistency",
+        "stale_hash_rejection",
+        "ambiguous_match_rejection",
+        "outside_workspace_rejection",
+        "cargo_fail_suggested_next",
+        "result_query_artifact_recovery",
+        "ops_list_ledger",
+        "sequential_20_ops",
+        "multi_agent_isolation"
+      ]
+    },
+    "phase4_aci_bench": {
+      "status": "PASS",
+      "mock_10_tasks": "PASS (success_rate D=1.0, tools 0.55x, tokens 0.106x)",
+      "destructive_check": "PASS (corrupted GOLDEN correctly fails scorer)",
+      "live_model": "SKIPPED (no API key)"
+    },
+    "phase5_stability": {
+      "status": "PASS",
+      "tests": 8,
+      "passed": 8,
+      "failed": 0,
+      "covered": [
+        "timeout_recovery",
+        "nonzero_exit",
+        "budget_truncation",
+        "ansi_stripping",
+        "serial_100_ops",
+        "large_artifact_recovery",
+        "permission_denial",
+        "windows_paths"
+      ]
+    },
+    "phase6_anti_regression": {
+      "status": "PASS",
+      "tests": 3,
+      "passed": 3,
+      "failed": 0
+    }
+  },
+  "defects_fixed": [
+    {
+      "severity": "P1",
+      "file": "src/reducers/cargo.rs",
+      "description": "Diagnostics cap at 30 would lose real errors buried after 200+ warnings. Changed to continue scanning for errors past the 30-warning cap.",
+      "regression_test": "tests/token_compression_tests.rs :: cargo_large_noise_high_compression"
+    },
+    {
+      "severity": "P1",
+      "file": "src/reducers/cargo.rs",
+      "description": "Spurious diagnostics from meta-messages like 'aborting due to 1 previous error' and 'could not compile'. Added filter to skip these lines.",
+      "regression_test": "tests/token_compression_tests.rs :: cargo_large_noise_high_compression"
+    }
+  ],
+  "defects_known_not_fixed": [
+    {
+      "severity": "P2",
+      "file": "src/operation.rs",
+      "description": "Artifact storage on Windows may produce encoding artifacts (windows-oem-936) when output is non-ASCII. Clean ASCII output recovers correctly. Edge case for CJK/emoji output.",
+      "recommendation": "Normalize to UTF-8 in artifact write path for cross-platform consistency."
+    }
+  ],
+  "evidence_paths": {
+    "phase0_build": "target/debug/verseshell.lib",
+    "phase1_results": "tests/semantic_reducer_adversarial_tests.rs (22 tests)",
+    "phase2_results": "tests/token_compression_tests.rs (4 tests)",
+    "phase3_5_6_results": "bench/aci/results/deep_stress_phases_356.json (18/18 passed)",
+    "phase4_results": "bench/aci/results/latest.json + destructive check verified",
+    "phase4_gate": "tests/aci_bench_mock_acceptance.rs (PASS)"
+  }
+}

@@ -78,6 +78,15 @@ pub fn specs() -> Vec<OperationSpec> {
             handler: execute_diff,
         },
         OperationSpec {
+            name: "file.write",
+            mcp_name: "file_write",
+            description: "Create or overwrite a file. Returns path and content_hash.",
+            effect: "fs.write",
+            capability: "file.write",
+            input_schema: schema_write,
+            handler: execute_write,
+        },
+        OperationSpec {
             name: "file.remove",
             mcp_name: "file_remove",
             description: "Remove a path. In agent mode moves to trash and returns restore_token.",
@@ -157,6 +166,15 @@ fn schema_diff() -> Value {
             "path":{"type":"string"},
             "new_text":{"type":"string"},
             "max_lines":{"type":"integer","default":200}
+        }
+    })
+}
+fn schema_write() -> Value {
+    json!({
+        "type":"object","required":["path","content"],
+        "properties":{
+            "path":{"type":"string"},
+            "content":{"type":"string"}
         }
     })
 }
@@ -588,6 +606,10 @@ fn lint_check(path: &Path, content: &str) -> Option<Diagnostic> {
                         path: Some(crate::artifact::display_path(path)),
                         line: None,
                         column: None,
+                                            code: None,
+                        expected: None,
+                        found: None,
+                        suggested_fix: None,
                     })
                 }
                 _ => None,
@@ -602,6 +624,10 @@ fn lint_check(path: &Path, content: &str) -> Option<Diagnostic> {
                 path: Some(crate::artifact::display_path(path)),
                 line: None,
                 column: None,
+                        code: None,
+                        expected: None,
+                        found: None,
+                        suggested_fix: None,
             }),
         },
         _ => None,
@@ -663,6 +689,43 @@ fn execute_diff(req: &OperationRequest) -> Observation {
         }),
         &["fs.read"],
         &["file.read"],
+        start,
+    )
+}
+
+fn execute_write(req: &OperationRequest) -> Observation {
+    let start = now();
+    if let Err(o) = require_capability(req, "write") { return o; }
+    let path = match arg_str(&req.args, "path") {
+        Some(p) => p,
+        None => return err(req, "file", "E_BAD_ARG", "path is required", start),
+    };
+    let content = match arg_str(&req.args, "content") {
+        Some(c) => c.to_string(),
+        None => return err(req, "file", "E_BAD_ARG", "content is required", start),
+    };
+    let resolved = match resolve_workspace_path(&path) {
+        Ok(p) => p,
+        Err(e) => return err(req, "file", "E_OUTSIDE_WORKSPACE", e, start),
+    };
+    if let Err(e) = guard_write(&resolved.to_string_lossy()) {
+        return err(req, "file", "E_POLICY", e, start);
+    }
+    if let Err(e) = write_text_file(&resolved, &content) {
+        return err(req, "file", "E_WRITE_FAILED", e, start);
+    }
+    let hash = content_hash_str(&content);
+    audit("file.write", Effect::WriteLocal, "allow", &path, json!({"bytes": content.len()}));
+    ok(
+        req,
+        "file",
+        json!({
+            "path": crate::artifact::display_path(&resolved),
+            "content_hash": hash,
+            "bytes_written": content.len()
+        }),
+        &["fs.write"],
+        &["file.write"],
         start,
     )
 }
