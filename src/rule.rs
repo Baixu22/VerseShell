@@ -93,16 +93,32 @@ pub struct RuleAction {
 
 impl RuleAction {
     pub fn allow() -> Self {
-        Self { action: ActionKind::Allow, reason: None, rate_per_minute: None }
+        Self {
+            action: ActionKind::Allow,
+            reason: None,
+            rate_per_minute: None,
+        }
     }
     pub fn deny(reason: impl Into<String>) -> Self {
-        Self { action: ActionKind::Deny, reason: Some(reason.into()), rate_per_minute: None }
+        Self {
+            action: ActionKind::Deny,
+            reason: Some(reason.into()),
+            rate_per_minute: None,
+        }
     }
     pub fn confirm(reason: impl Into<String>) -> Self {
-        Self { action: ActionKind::Confirm, reason: Some(reason.into()), rate_per_minute: None }
+        Self {
+            action: ActionKind::Confirm,
+            reason: Some(reason.into()),
+            rate_per_minute: None,
+        }
     }
     pub fn rate_limit(rate: u32, reason: impl Into<String>) -> Self {
-        Self { action: ActionKind::RateLimit, reason: Some(reason.into()), rate_per_minute: Some(rate) }
+        Self {
+            action: ActionKind::RateLimit,
+            reason: Some(reason.into()),
+            rate_per_minute: Some(rate),
+        }
     }
 }
 
@@ -349,7 +365,11 @@ impl RuleSet {
                     ActionKind::RateLimit => {
                         match &result {
                             None => result = Some(action),
-                            Some(RuleAction { action: ActionKind::RateLimit, rate_per_minute: Some(existing), .. }) => {
+                            Some(RuleAction {
+                                action: ActionKind::RateLimit,
+                                rate_per_minute: Some(existing),
+                                ..
+                            }) => {
                                 // Take the lower rate (more restrictive)
                                 if let Some(new) = action.rate_per_minute {
                                     if new < *existing {
@@ -418,7 +438,10 @@ pub enum RuleDecision {
     Deny(String),
     /// Rule rate-limits the call. Returns (rate_per_minute, reason).
     /// Caller must enforce the sliding window.
-    RateLimit { rate_per_minute: u32, reason: String },
+    RateLimit {
+        rate_per_minute: u32,
+        reason: String,
+    },
     /// Rule requires confirmation. Agent must re-request with confirm flag.
     Confirm(String),
 }
@@ -484,18 +507,28 @@ lazy_static::lazy_static! {
 /// Called once at startup from `--rules <path>` CLI flag or `AETHER_RULES` env var.
 /// If the path doesn't exist or parsing fails, logs a warning and uses empty ruleset.
 pub fn init_rules(path: Option<&std::path::Path>) {
-    let path = path
-        .map(|p| p.to_path_buf())
-        .or_else(|| std::env::var("AETHER_RULES").ok().map(std::path::PathBuf::from));
+    let path = path.map(|p| p.to_path_buf()).or_else(|| {
+        std::env::var("AETHER_RULES")
+            .ok()
+            .map(std::path::PathBuf::from)
+    });
 
     if let Some(ref p) = path {
         match RuleSet::from_file(p) {
             Ok(rs) => {
-                eprintln!("[rule] loaded {} rules from {}", rs.rules.len(), p.display());
+                eprintln!(
+                    "[rule] loaded {} rules from {}",
+                    rs.rules.len(),
+                    p.display()
+                );
                 *GLOBAL_RULES.write().unwrap() = rs;
             }
             Err(e) => {
-                eprintln!("[rule] warning: failed to load rules from {}: {}", p.display(), e);
+                eprintln!(
+                    "[rule] warning: failed to load rules from {}: {}",
+                    p.display(),
+                    e
+                );
             }
         }
     }
@@ -588,7 +621,12 @@ mod tests {
         TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner())
     }
 
-    fn mk_plan(builtins: Vec<&str>, caps: Vec<&str>, effects: Vec<&str>, risk: RiskLevel) -> ExecutionPlan {
+    fn mk_plan(
+        builtins: Vec<&str>,
+        caps: Vec<&str>,
+        effects: Vec<&str>,
+        risk: RiskLevel,
+    ) -> ExecutionPlan {
         ExecutionPlan {
             builtins_called: builtins.into_iter().map(String::from).collect(),
             capabilities_required: caps.into_iter().map(String::from).collect(),
@@ -611,9 +649,16 @@ mod tests {
             action = "deny"
             reason = "shell execution forbidden"
             "#,
-        ).unwrap();
+        )
+        .unwrap();
 
-        let decision = check_builtin("sh", None, Some(&IREffect::ShellExec), Some(&RiskLevel::Mutating), "");
+        let decision = check_builtin(
+            "sh",
+            None,
+            Some(&IREffect::ShellExec),
+            Some(&RiskLevel::Mutating),
+            "",
+        );
         match decision {
             RuleDecision::Deny(reason) => assert!(reason.contains("shell execution forbidden")),
             other => panic!("expected Deny, got {:?}", other),
@@ -631,9 +676,16 @@ mod tests {
             match = { effect = "SysRead" }
             action = "allow"
             "#,
-        ).unwrap();
+        )
+        .unwrap();
 
-        let decision = check_builtin("sys_cpu_info", Some("sys.read"), Some(&IREffect::SysRead), Some(&RiskLevel::ReadOnly), "");
+        let decision = check_builtin(
+            "sys_cpu_info",
+            Some("sys.read"),
+            Some(&IREffect::SysRead),
+            Some(&RiskLevel::ReadOnly),
+            "",
+        );
         assert_eq!(decision, RuleDecision::Allow);
     }
 
@@ -649,16 +701,35 @@ mod tests {
             action = "rate_limit"
             rate_per_minute = 2
             "#,
-        ).unwrap();
+        )
+        .unwrap();
 
         // First two calls should be allowed
-        let d1 = check_builtin("web_post", None, Some(&IREffect::NetHttpPost), Some(&RiskLevel::Mutating), "");
-        let d2 = check_builtin("web_post", None, Some(&IREffect::NetHttpPost), Some(&RiskLevel::Mutating), "");
+        let d1 = check_builtin(
+            "web_post",
+            None,
+            Some(&IREffect::NetHttpPost),
+            Some(&RiskLevel::Mutating),
+            "",
+        );
+        let d2 = check_builtin(
+            "web_post",
+            None,
+            Some(&IREffect::NetHttpPost),
+            Some(&RiskLevel::Mutating),
+            "",
+        );
         assert!(matches!(d1, RuleDecision::RateLimit { .. }));
         assert!(matches!(d2, RuleDecision::RateLimit { .. }));
 
         // Third call should be denied (rate exceeded)
-        let d3 = check_builtin("web_post", None, Some(&IREffect::NetHttpPost), Some(&RiskLevel::Mutating), "");
+        let d3 = check_builtin(
+            "web_post",
+            None,
+            Some(&IREffect::NetHttpPost),
+            Some(&RiskLevel::Mutating),
+            "",
+        );
         match d3 {
             RuleDecision::Deny(reason) => assert!(reason.contains("rate limit exceeded")),
             other => panic!("expected Deny on 3rd call, got {:?}", other),
@@ -677,9 +748,16 @@ mod tests {
             action = "confirm"
             reason = "file deletion is irreversible"
             "#,
-        ).unwrap();
+        )
+        .unwrap();
 
-        let decision = check_builtin("file_delete_lines", None, Some(&IREffect::FileDelete), Some(&RiskLevel::Destructive), "");
+        let decision = check_builtin(
+            "file_delete_lines",
+            None,
+            Some(&IREffect::FileDelete),
+            Some(&RiskLevel::Destructive),
+            "",
+        );
         match decision {
             RuleDecision::Confirm(reason) => assert!(reason.contains("irreversible")),
             other => panic!("expected Confirm, got {:?}", other),
@@ -698,9 +776,15 @@ mod tests {
             action = "deny"
             reason = "writes blocked by policy"
             "#,
-        ).unwrap();
+        )
+        .unwrap();
 
-        let plan = mk_plan(vec!["file_write"], vec!["file.write"], vec!["FileWrite"], RiskLevel::Mutating);
+        let plan = mk_plan(
+            vec!["file_write"],
+            vec!["file.write"],
+            vec!["FileWrite"],
+            RiskLevel::Mutating,
+        );
         let decision = evaluate_plan(&plan, "file.write(\"/tmp/x\", \"data\")");
         match decision {
             RuleDecision::Deny(reason) => assert!(reason.contains("writes blocked by policy")),
@@ -720,13 +804,26 @@ mod tests {
             action = "deny"
             reason = "recursive delete forbidden"
             "#,
-        ).unwrap();
+        )
+        .unwrap();
 
-        let decision = check_builtin("sh", None, Some(&IREffect::ShellExec), Some(&RiskLevel::Mutating), "rm -rf /");
+        let decision = check_builtin(
+            "sh",
+            None,
+            Some(&IREffect::ShellExec),
+            Some(&RiskLevel::Mutating),
+            "rm -rf /",
+        );
         assert!(matches!(decision, RuleDecision::Deny(_)));
 
         // Non-matching command should pass
-        let decision2 = check_builtin("sh", None, Some(&IREffect::ShellExec), Some(&RiskLevel::Mutating), "ls -la");
+        let decision2 = check_builtin(
+            "sh",
+            None,
+            Some(&IREffect::ShellExec),
+            Some(&RiskLevel::Mutating),
+            "ls -la",
+        );
         assert_eq!(decision2, RuleDecision::Pass);
     }
 
@@ -742,14 +839,27 @@ mod tests {
             action = "confirm"
             reason = "destructive op needs confirmation"
             "#,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Destructive should match
-        let d1 = check_builtin("file_delete_lines", None, Some(&IREffect::FileDelete), Some(&RiskLevel::Destructive), "");
+        let d1 = check_builtin(
+            "file_delete_lines",
+            None,
+            Some(&IREffect::FileDelete),
+            Some(&RiskLevel::Destructive),
+            "",
+        );
         assert!(matches!(d1, RuleDecision::Confirm(_)));
 
         // Mutating should NOT match (destructive > mutating, but rule targets destructive only)
-        let d2 = check_builtin("file_write", None, Some(&IREffect::FileWrite), Some(&RiskLevel::Mutating), "");
+        let d2 = check_builtin(
+            "file_write",
+            None,
+            Some(&IREffect::FileWrite),
+            Some(&RiskLevel::Mutating),
+            "",
+        );
         assert_eq!(d2, RuleDecision::Pass);
     }
 
@@ -757,7 +867,13 @@ mod tests {
     fn empty_ruleset_passes_everything() {
         let _g = lock();
         clear_rules();
-        let decision = check_builtin("file_write", Some("file.write"), Some(&IREffect::FileWrite), Some(&RiskLevel::Mutating), "");
+        let decision = check_builtin(
+            "file_write",
+            Some("file.write"),
+            Some(&IREffect::FileWrite),
+            Some(&RiskLevel::Mutating),
+            "",
+        );
         assert_eq!(decision, RuleDecision::Pass);
     }
 

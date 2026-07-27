@@ -100,12 +100,25 @@ pub enum IRNode {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum IREffect {
     Pure,
-    SysRead, FileRead, FileWrite, FileDelete,
-    NetHttpGet, NetHttpPost, NetHttpDelete,
-    ProcList, ProcKill, ProcSpawn, ShellExec,
-    WinRegistry, WinService,
-    CryptoHash, CryptoRandom,
-    DbRead, DbWrite, GitRead, GitWrite,
+    SysRead,
+    FileRead,
+    FileWrite,
+    FileDelete,
+    NetHttpGet,
+    NetHttpPost,
+    NetHttpDelete,
+    ProcList,
+    ProcKill,
+    ProcSpawn,
+    ShellExec,
+    WinRegistry,
+    WinService,
+    CryptoHash,
+    CryptoRandom,
+    DbRead,
+    DbWrite,
+    GitRead,
+    GitWrite,
     Combined(Vec<IREffect>),
 }
 
@@ -114,8 +127,14 @@ impl IREffect {
         use IREffect::*;
         match (self, other) {
             (Pure, e) | (e, Pure) => e,
-            (Combined(mut a), Combined(b)) => { a.extend(b); Combined(a) }
-            (Combined(mut a), e) | (e, Combined(mut a)) => { a.push(e); Combined(a) }
+            (Combined(mut a), Combined(b)) => {
+                a.extend(b);
+                Combined(a)
+            }
+            (Combined(mut a), e) | (e, Combined(mut a)) => {
+                a.push(e);
+                Combined(a)
+            }
             (a, b) if a == b => a,
             (a, b) => Combined(vec![a, b]),
         }
@@ -123,65 +142,109 @@ impl IREffect {
 
     pub fn for_builtin(name: &str) -> IREffect {
         match name {
-            "abs"|"min"|"max"|"floor"|"ceil"|"round"|"sqrt"|"pow"|"sum"|"mean"
-            |"upper"|"lower"|"trim"|"split"|"replace"|"contains"|"starts_with"|"ends_with"
-            |"len"|"length"|"slice"|"join"|"range"|"flatten"|"unique"|"sort"|"reverse"|"zip"
-            |"concat"|"in"|"first"|"last"|"any"|"all"|"take"|"map"|"where"|"filter"|"reduce"
-            |"each"|"keys"|"values"|"group_by"|"select"|"json_parse"|"json_stringify"|"echo"
-            |"print"|"help"|"describe"|"typeof"|"type_of"|"now"|"sleep"|"exit"|"pwd"|"clear"
-            |"par_map"|"uniq"|"which"|"call" => IREffect::Pure,
+            "abs" | "min" | "max" | "floor" | "ceil" | "round" | "sqrt" | "pow" | "sum"
+            | "mean" | "upper" | "lower" | "trim" | "split" | "replace" | "contains"
+            | "starts_with" | "ends_with" | "len" | "length" | "slice" | "join" | "range"
+            | "flatten" | "unique" | "sort" | "reverse" | "zip" | "concat" | "in" | "first"
+            | "last" | "any" | "all" | "take" | "map" | "where" | "filter" | "reduce" | "each"
+            | "keys" | "values" | "group_by" | "select" | "json_parse" | "json_stringify"
+            | "echo" | "print" | "help" | "describe" | "typeof" | "type_of" | "now" | "sleep"
+            | "exit" | "pwd" | "clear" | "par_map" | "uniq" | "which" | "call" => IREffect::Pure,
 
-            "sys_cpu_info"|"sys_mem_info"|"sys_disk_info"|"sys_load_avg"|"sys_hostname"
-            |"sys_os"|"sys_arch"|"sys_cpu_count"|"sys_swap_info"|"sys_info"|"sys_users"
-            |"sys_groups"|"sys_user_info"|"sys_boot_time"|"sys_timezone"|"sys_locale"
-            |"sys_kernel"|"sys_uptime"|"platform_arch"|"platform_os_version"|"platform_cpu"
-            |"platform_memory"|"platform_disks"|"platform_gpus"|"platform_network_interfaces"
-            |"platform_hardware_summary"|"hw_cpu"|"hw_memory"|"hw_disk"|"hw_gpu"|"hw_battery"
-            |"sys_env_all"|"win_snapshot"|"win_env_path"|"win_env_get"|"win_is_admin" => IREffect::SysRead,
+            "sys_cpu_info"
+            | "sys_mem_info"
+            | "sys_disk_info"
+            | "sys_load_avg"
+            | "sys_hostname"
+            | "sys_os"
+            | "sys_arch"
+            | "sys_cpu_count"
+            | "sys_swap_info"
+            | "sys_info"
+            | "sys_users"
+            | "sys_groups"
+            | "sys_user_info"
+            | "sys_boot_time"
+            | "sys_timezone"
+            | "sys_locale"
+            | "sys_kernel"
+            | "sys_uptime"
+            | "platform_arch"
+            | "platform_os_version"
+            | "platform_cpu"
+            | "platform_memory"
+            | "platform_disks"
+            | "platform_gpus"
+            | "platform_network_interfaces"
+            | "platform_hardware_summary"
+            | "hw_cpu"
+            | "hw_memory"
+            | "hw_disk"
+            | "hw_gpu"
+            | "hw_battery"
+            | "sys_env_all"
+            | "win_snapshot"
+            | "win_env_path"
+            | "win_env_get"
+            | "win_is_admin" => IREffect::SysRead,
 
-            "cat"|"read_text"|"head"|"tail"|"grep"|"find"|"ls"|"list"|"file_exists"
-            |"fs_stat"|"fs_walk"|"fs_tree"|"fs_readlink"|"fs_realpath"|"fs_glob"|"fs_df"
-            |"fs_du"|"fs_mounts"|"wc"|"file_type"|"file_diff" => IREffect::FileRead,
+            "cat" | "read_text" | "head" | "tail" | "grep" | "find" | "ls" | "list"
+            | "file_exists" | "fs_stat" | "fs_walk" | "fs_tree" | "fs_readlink" | "fs_realpath"
+            | "fs_glob" | "fs_df" | "fs_du" | "fs_mounts" | "wc" | "file_type" | "file_diff" => {
+                IREffect::FileRead
+            }
 
-            "file_write"|"file_append"|"file_mkdir"|"file_copy"|"file_move"|"file_rename"
-            |"file_replace"|"file_patch"|"file_insert"|"file_backup"|"file_edit"|"fs_chmod"
-            |"fs_chown"|"fs_link"|"fs_symlink"|"fs_tempfile"|"fs_tempdir"|"fs_mount"
-            |"fs_unmount" => IREffect::FileWrite,
+            "file_write" | "file_append" | "file_mkdir" | "file_copy" | "file_move"
+            | "file_rename" | "file_replace" | "file_patch" | "file_insert" | "file_backup"
+            | "file_edit" | "fs_chmod" | "fs_chown" | "fs_link" | "fs_symlink" | "fs_tempfile"
+            | "fs_tempdir" | "fs_mount" | "fs_unmount" => IREffect::FileWrite,
 
-            "file_delete_lines"|"delete_lines"|"remove_lines" => IREffect::FileDelete,
+            "file_delete_lines" | "delete_lines" | "remove_lines" => IREffect::FileDelete,
 
-            "http_get"|"web_get"|"web_fetch" => IREffect::NetHttpGet,
-            "web_post"|"web_json_post"|"http_put"|"web_form_submit"|"web_upload_file" => IREffect::NetHttpPost,
-            "http_delete"|"web_rest_api" => IREffect::NetHttpDelete,
-            "net_ping"|"net_dns_lookup"|"net_dns_reverse" => IREffect::NetHttpGet,
+            "http_get" | "web_get" | "web_fetch" => IREffect::NetHttpGet,
+            "web_post" | "web_json_post" | "http_put" | "web_form_submit" | "web_upload_file" => {
+                IREffect::NetHttpPost
+            }
+            "http_delete" | "web_rest_api" => IREffect::NetHttpDelete,
+            "net_ping" | "net_dns_lookup" | "net_dns_reverse" => IREffect::NetHttpGet,
 
-            "proc_list"|"proc_info"|"proc_exists"|"proc_children"|"proc_parent"
-            |"proc_cpu_usage"|"proc_mem_usage"|"proc_threads"|"proc_cwd"|"proc_exe"
-            |"proc_cmdline"|"proc_start_time"|"proc_env"|"proc_wait" => IREffect::ProcList,
-            "proc_kill"|"win_process_kill" => IREffect::ProcKill,
-            "proc_spawn"|"proc_resume"|"proc_suspend"|"proc_set_priority" => IREffect::ProcSpawn,
-            "sh"|"shell"|"shell_exec"|"shell_which" => IREffect::ShellExec,
+            "proc_list" | "proc_info" | "proc_exists" | "proc_children" | "proc_parent"
+            | "proc_cpu_usage" | "proc_mem_usage" | "proc_threads" | "proc_cwd" | "proc_exe"
+            | "proc_cmdline" | "proc_start_time" | "proc_env" | "proc_wait" => IREffect::ProcList,
+            "proc_kill" | "win_process_kill" => IREffect::ProcKill,
+            "proc_spawn" | "proc_resume" | "proc_suspend" | "proc_set_priority" => {
+                IREffect::ProcSpawn
+            }
+            "sh" | "shell" | "shell_exec" | "shell_which" => IREffect::ShellExec,
 
             "win_registry_get" => IREffect::WinRegistry,
-            "win_service_list"|"win_service_status" => IREffect::WinService,
-            "win_env_set"|"win_shortcut_resolve" => IREffect::SysRead,
+            "win_service_list" | "win_service_status" => IREffect::WinService,
+            "win_env_set" | "win_shortcut_resolve" => IREffect::SysRead,
 
-            "crypto_hash"|"crypto_hash_file"|"crypto_hmac"|"crypto_checksum"|"crypto_hex_encode"
-            |"crypto_hex_decode"|"sha256"|"md5" => IREffect::CryptoHash,
-            "crypto_random_bytes"|"crypto_uuid"|"crypto_random_string" => IREffect::CryptoRandom,
+            "crypto_hash" | "crypto_hash_file" | "crypto_hmac" | "crypto_checksum"
+            | "crypto_hex_encode" | "crypto_hex_decode" | "sha256" | "md5" => IREffect::CryptoHash,
+            "crypto_random_bytes" | "crypto_uuid" | "crypto_random_string" => {
+                IREffect::CryptoRandom
+            }
 
-            "db_sqlite_query"|"db_sqlite_schema"|"db_sqlite_tables"|"db_sqlite_count"
-            |"db_kv_get"|"db_kv_keys"|"db_sqlite_open"|"db_sqlite_close" => IREffect::DbRead,
-            "db_sqlite_exec"|"db_sqlite_insert"|"db_sqlite_update"|"db_sqlite_delete"
-            |"db_sqlite_create_table"|"db_sqlite_drop_table"|"db_sqlite_dump"|"db_kv_set"
-            |"db_kv_delete" => IREffect::DbWrite,
+            "db_sqlite_query" | "db_sqlite_schema" | "db_sqlite_tables" | "db_sqlite_count"
+            | "db_kv_get" | "db_kv_keys" | "db_sqlite_open" | "db_sqlite_close" => IREffect::DbRead,
+            "db_sqlite_exec"
+            | "db_sqlite_insert"
+            | "db_sqlite_update"
+            | "db_sqlite_delete"
+            | "db_sqlite_create_table"
+            | "db_sqlite_drop_table"
+            | "db_sqlite_dump"
+            | "db_kv_set"
+            | "db_kv_delete" => IREffect::DbWrite,
 
-            "git_status"|"git_log"|"git_diff"|"git_branch"|"git_branches"|"git_show"
-            |"git_tags"|"git_blame"|"git_root"|"git_rev_parse"|"git_remote"|"git_fetch"
-            |"git_diff_staged" => IREffect::GitRead,
-            "git_commit"|"git_add"|"git_checkout"|"git_merge"|"git_rebase"|"git_pull"
-            |"git_push"|"git_stash"|"git_stash_pop"|"git_reset"|"git_clean"
-            |"git_cherry_pick" => IREffect::GitWrite,
+            "git_status" | "git_log" | "git_diff" | "git_branch" | "git_branches" | "git_show"
+            | "git_tags" | "git_blame" | "git_root" | "git_rev_parse" | "git_remote"
+            | "git_fetch" | "git_diff_staged" => IREffect::GitRead,
+            "git_commit" | "git_add" | "git_checkout" | "git_merge" | "git_rebase" | "git_pull"
+            | "git_push" | "git_stash" | "git_stash_pop" | "git_reset" | "git_clean"
+            | "git_cherry_pick" => IREffect::GitWrite,
 
             _ => IREffect::Pure,
         }
@@ -223,38 +286,161 @@ fn hash_node<H: Hasher>(node: &IRNode, h: &mut H) {
     // Tag each variant for disambiguation
     match node {
         Unit => 0u8.hash(h),
-        Bool(b) => { 1u8.hash(h); b.hash(h); }
-        Int(n) => { 2u8.hash(h); n.hash(h); }
-        Float(f) => { 3u8.hash(h); f.to_bits().hash(h); }
-        Str(s) => { 4u8.hash(h); s.hash(h); }
-        Array(items) => { 5u8.hash(h); for i in items { hash_node(i, h); } }
-        Record(map) => { 6u8.hash(h); for (k, v) in map { k.hash(h); hash_node(v, h); } }
-        Var(name) => { 7u8.hash(h); name.hash(h); }
-        Let(name, val, body) => { 8u8.hash(h); name.hash(h); hash_node(val, h); hash_node(body, h); }
-        Binary(l, op, r) => { 9u8.hash(h); hash_node(l, h); format!("{:?}", op).hash(h); hash_node(r, h); }
-        Unary(op, e) => { 10u8.hash(h); format!("{:?}", op).hash(h); hash_node(e, h); }
-        If(cond, t, f) => { 11u8.hash(h); hash_node(cond, h); hash_node(t, h); hash_node(f, h); }
-        Match(scrut, arms) => {
-            12u8.hash(h); hash_node(scrut, h);
-            for arm in arms { hash_node(&arm.body, h); }
+        Bool(b) => {
+            1u8.hash(h);
+            b.hash(h);
         }
-        Try(body, var, catch) => { 13u8.hash(h); hash_node(body, h); var.hash(h); hash_node(catch, h); }
-        Throw(e) => { 14u8.hash(h); hash_node(e, h); }
-        Lambda(params, body) => { 15u8.hash(h); params.hash(h); format!("{:?}", body).hash(h); }
-        Call(callee, args) => { 16u8.hash(h); hash_node(callee, h); for a in args { hash_node(a, h); } }
-        Pipeline(stages) => { 17u8.hash(h); for s in stages { hash_node(s, h); } }
-        Map(params, body) => { 18u8.hash(h); params.hash(h); format!("{:?}", body).hash(h); }
-        Filter(params, pred) => { 19u8.hash(h); params.hash(h); format!("{:?}", pred).hash(h); }
-        Sort(key) => { 20u8.hash(h); if let Some((_, k)) = key { format!("{:?}", k).hash(h); } }
-        Reduce(params, body, init) => { 21u8.hash(h); params.hash(h); format!("{:?}", body).hash(h); hash_node(init, h); }
-        Take(n) => { 22u8.hash(h); hash_node(n, h); }
-        FusedMapMap(a, b) => { 27u8.hash(h); hash_node(a, h); hash_node(b, h); }
-        FusedMapFilter(a, b) => { 28u8.hash(h); hash_node(a, h); hash_node(b, h); }
-        FusedFilterMap(a, b) => { 29u8.hash(h); hash_node(a, h); hash_node(b, h); }
-        Builtin(name, args, _eff) => { 23u8.hash(h); name.hash(h); for a in args { hash_node(a, h); } }
-        MemberAccess(obj, field) => { 24u8.hash(h); hash_node(obj, h); field.hash(h); }
-        Error(code, msg) => { 25u8.hash(h); code.hash(h); msg.hash(h); }
-        Annotate(key, val, inner) => { 26u8.hash(h); key.hash(h); val.hash(h); hash_node(inner, h); }
+        Int(n) => {
+            2u8.hash(h);
+            n.hash(h);
+        }
+        Float(f) => {
+            3u8.hash(h);
+            f.to_bits().hash(h);
+        }
+        Str(s) => {
+            4u8.hash(h);
+            s.hash(h);
+        }
+        Array(items) => {
+            5u8.hash(h);
+            for i in items {
+                hash_node(i, h);
+            }
+        }
+        Record(map) => {
+            6u8.hash(h);
+            for (k, v) in map {
+                k.hash(h);
+                hash_node(v, h);
+            }
+        }
+        Var(name) => {
+            7u8.hash(h);
+            name.hash(h);
+        }
+        Let(name, val, body) => {
+            8u8.hash(h);
+            name.hash(h);
+            hash_node(val, h);
+            hash_node(body, h);
+        }
+        Binary(l, op, r) => {
+            9u8.hash(h);
+            hash_node(l, h);
+            format!("{:?}", op).hash(h);
+            hash_node(r, h);
+        }
+        Unary(op, e) => {
+            10u8.hash(h);
+            format!("{:?}", op).hash(h);
+            hash_node(e, h);
+        }
+        If(cond, t, f) => {
+            11u8.hash(h);
+            hash_node(cond, h);
+            hash_node(t, h);
+            hash_node(f, h);
+        }
+        Match(scrut, arms) => {
+            12u8.hash(h);
+            hash_node(scrut, h);
+            for arm in arms {
+                hash_node(&arm.body, h);
+            }
+        }
+        Try(body, var, catch) => {
+            13u8.hash(h);
+            hash_node(body, h);
+            var.hash(h);
+            hash_node(catch, h);
+        }
+        Throw(e) => {
+            14u8.hash(h);
+            hash_node(e, h);
+        }
+        Lambda(params, body) => {
+            15u8.hash(h);
+            params.hash(h);
+            format!("{:?}", body).hash(h);
+        }
+        Call(callee, args) => {
+            16u8.hash(h);
+            hash_node(callee, h);
+            for a in args {
+                hash_node(a, h);
+            }
+        }
+        Pipeline(stages) => {
+            17u8.hash(h);
+            for s in stages {
+                hash_node(s, h);
+            }
+        }
+        Map(params, body) => {
+            18u8.hash(h);
+            params.hash(h);
+            format!("{:?}", body).hash(h);
+        }
+        Filter(params, pred) => {
+            19u8.hash(h);
+            params.hash(h);
+            format!("{:?}", pred).hash(h);
+        }
+        Sort(key) => {
+            20u8.hash(h);
+            if let Some((_, k)) = key {
+                format!("{:?}", k).hash(h);
+            }
+        }
+        Reduce(params, body, init) => {
+            21u8.hash(h);
+            params.hash(h);
+            format!("{:?}", body).hash(h);
+            hash_node(init, h);
+        }
+        Take(n) => {
+            22u8.hash(h);
+            hash_node(n, h);
+        }
+        FusedMapMap(a, b) => {
+            27u8.hash(h);
+            hash_node(a, h);
+            hash_node(b, h);
+        }
+        FusedMapFilter(a, b) => {
+            28u8.hash(h);
+            hash_node(a, h);
+            hash_node(b, h);
+        }
+        FusedFilterMap(a, b) => {
+            29u8.hash(h);
+            hash_node(a, h);
+            hash_node(b, h);
+        }
+        Builtin(name, args, _eff) => {
+            23u8.hash(h);
+            name.hash(h);
+            for a in args {
+                hash_node(a, h);
+            }
+        }
+        MemberAccess(obj, field) => {
+            24u8.hash(h);
+            hash_node(obj, h);
+            field.hash(h);
+        }
+        Error(code, msg) => {
+            25u8.hash(h);
+            code.hash(h);
+            msg.hash(h);
+        }
+        Annotate(key, val, inner) => {
+            26u8.hash(h);
+            key.hash(h);
+            val.hash(h);
+            hash_node(inner, h);
+        }
     }
 }
 
@@ -315,8 +501,11 @@ impl IROptimizer {
                         BinOp::Gt => IRNode::Bool(a > b),
                         BinOp::Gte => IRNode::Bool(a >= b),
                         BinOp::Pow => {
-                            if *b >= 0 { IRNode::Int(a.pow(*b as u32)) }
-                            else { IRNode::Float((*a as f64).powf(*b as f64)) }
+                            if *b >= 0 {
+                                IRNode::Int(a.pow(*b as u32))
+                            } else {
+                                IRNode::Float((*a as f64).powf(*b as f64))
+                            }
                         }
                         _ => IRNode::Binary(Box::new(l), op, Box::new(r)),
                     },
@@ -327,8 +516,9 @@ impl IROptimizer {
                         BinOp::Div => IRNode::Float(a / b),
                         _ => IRNode::Binary(Box::new(l), op, Box::new(r)),
                     },
-                    (IRNode::Str(a), IRNode::Str(b)) if op == BinOp::Add =>
-                        IRNode::Str(format!("{}{}", a, b)),
+                    (IRNode::Str(a), IRNode::Str(b)) if op == BinOp::Add => {
+                        IRNode::Str(format!("{}{}", a, b))
+                    }
                     _ => IRNode::Binary(Box::new(l), op, Box::new(r)),
                 }
             }
@@ -341,27 +531,33 @@ impl IROptimizer {
                     _ => IRNode::Unary(op, Box::new(e)),
                 }
             }
-            IRNode::Let(name, val, body) => {
-                IRNode::Let(name, Box::new(self.constant_fold(*val)), Box::new(self.constant_fold(*body)))
-            }
+            IRNode::Let(name, val, body) => IRNode::Let(
+                name,
+                Box::new(self.constant_fold(*val)),
+                Box::new(self.constant_fold(*body)),
+            ),
             IRNode::Pipeline(stages) => {
                 IRNode::Pipeline(stages.into_iter().map(|s| self.constant_fold(s)).collect())
             }
-            IRNode::Map(_, _) | IRNode::Filter(_, _) | IRNode::Sort(_) | IRNode::Take(_) | IRNode::Reduce(_, _, _) => {
+            IRNode::Map(_, _)
+            | IRNode::Filter(_, _)
+            | IRNode::Sort(_)
+            | IRNode::Take(_)
+            | IRNode::Reduce(_, _, _) => {
                 node // Pipeline stages pass through without constant folding
             }
             IRNode::Array(items) => {
                 IRNode::Array(items.into_iter().map(|i| self.constant_fold(i)).collect())
             }
-            IRNode::Record(map) => {
-                IRNode::Record(map.into_iter().map(|(k, v)| (k, self.constant_fold(v))).collect())
-            }
-            IRNode::Call(callee, args) => {
-                IRNode::Call(
-                    Box::new(self.constant_fold(*callee)),
-                    args.into_iter().map(|a| self.constant_fold(a)).collect(),
-                )
-            }
+            IRNode::Record(map) => IRNode::Record(
+                map.into_iter()
+                    .map(|(k, v)| (k, self.constant_fold(v)))
+                    .collect(),
+            ),
+            IRNode::Call(callee, args) => IRNode::Call(
+                Box::new(self.constant_fold(*callee)),
+                args.into_iter().map(|a| self.constant_fold(a)).collect(),
+            ),
             other => other,
         }
     }
@@ -418,13 +614,43 @@ impl IROptimizer {
 
 /// Check if a name is a builtin dispatched via the fallback match statement.
 fn is_fallback_builtin(name: &str) -> bool {
-    matches!(name,
-        "Get-Files"|"get-files"|"Get-Content"|"get-content"|"select"|"select-object"
-        |"Select-Object"|"where-object"|"Where-Object"|"foreach"|"ForEach-Object"
-        |"foreach-object"|"sort-object"|"Sort-Object"|"group"|"group_by"|"Group-Object"
-        |"group-object"|"measure"|"Measure-Object"|"measure-object"|"from-json"
-        |"from_json"|"to-json"|"to_json"|"from-csv"|"from_csv"|"to-csv"|"to_csv"
-        |"from-yaml"|"from_yaml"|"to-yaml"|"to_yaml"|"columns"|"describe"
+    matches!(
+        name,
+        "Get-Files"
+            | "get-files"
+            | "Get-Content"
+            | "get-content"
+            | "select"
+            | "select-object"
+            | "Select-Object"
+            | "where-object"
+            | "Where-Object"
+            | "foreach"
+            | "ForEach-Object"
+            | "foreach-object"
+            | "sort-object"
+            | "Sort-Object"
+            | "group"
+            | "group_by"
+            | "Group-Object"
+            | "group-object"
+            | "measure"
+            | "Measure-Object"
+            | "measure-object"
+            | "from-json"
+            | "from_json"
+            | "to-json"
+            | "to_json"
+            | "from-csv"
+            | "from_csv"
+            | "to-csv"
+            | "to_csv"
+            | "from-yaml"
+            | "from_yaml"
+            | "to-yaml"
+            | "to_yaml"
+            | "columns"
+            | "describe"
     )
 }
 
@@ -465,15 +691,25 @@ impl IRCompiler {
 
     fn compile_stmt(&self, stmt: &Stmt) -> IRNode {
         match stmt {
-            Stmt::Let { name, value, is_mut: _, visibility: _ } => {
+            Stmt::Let {
+                name,
+                value,
+                is_mut: _,
+                visibility: _,
+            } => {
                 let val_ir = self.compile_expr(value);
                 // For single-let, use the Let IR node.
                 // For multi-statement programs, the final IR is the sequence.
                 IRNode::Let(name.clone(), Box::new(val_ir), Box::new(IRNode::Unit))
             }
             Stmt::Expr(expr) => self.compile_expr(expr),
-            Stmt::Import { .. } => IRNode::Error("E_IMPORT".into(), Some("import not supported in IR".into())),
-            Stmt::Export { items: _, from_source: _ } => IRNode::Unit,
+            Stmt::Import { .. } => {
+                IRNode::Error("E_IMPORT".into(), Some("import not supported in IR".into()))
+            }
+            Stmt::Export {
+                items: _,
+                from_source: _,
+            } => IRNode::Unit,
             Stmt::Cfg { condition: _, body } => self.compile_stmt(body),
         }
     }
@@ -489,32 +725,37 @@ impl IRCompiler {
             Expr::Array(items) => {
                 IRNode::Array(items.iter().map(|e| self.compile_expr(e)).collect())
             }
-            Expr::Record(kvs) => {
-                IRNode::Record(kvs.iter().map(|(k, v)| (k.clone(), self.compile_expr(v))).collect())
-            }
-            Expr::Lambda { params, body } => {
-                IRNode::Lambda(params.clone(), body.clone())
-            }
-            Expr::AsyncLambda { params, body } => {
-                IRNode::Lambda(params.clone(), body.clone())
-            }
+            Expr::Record(kvs) => IRNode::Record(
+                kvs.iter()
+                    .map(|(k, v)| (k.clone(), self.compile_expr(v)))
+                    .collect(),
+            ),
+            Expr::Lambda { params, body } => IRNode::Lambda(params.clone(), body.clone()),
+            Expr::AsyncLambda { params, body } => IRNode::Lambda(params.clone(), body.clone()),
             Expr::Await(inner) => self.compile_expr(inner),
-            Expr::TryCatch { try_expr, catch_var, catch_expr } => {
-                IRNode::Try(
-                    Box::new(self.compile_expr(try_expr)),
-                    catch_var.clone(),
-                    Box::new(self.compile_expr(catch_expr)),
-                )
-            }
+            Expr::TryCatch {
+                try_expr,
+                catch_var,
+                catch_expr,
+            } => IRNode::Try(
+                Box::new(self.compile_expr(try_expr)),
+                catch_var.clone(),
+                Box::new(self.compile_expr(catch_expr)),
+            ),
             Expr::Throw(inner) => IRNode::Throw(Box::new(self.compile_expr(inner))),
-            Expr::Call { callee, args, named: _ } => {
+            Expr::Call {
+                callee,
+                args,
+                named: _,
+            } => {
                 let args_ir: Vec<IRNode> = args.iter().map(|a| self.compile_expr(a)).collect();
 
                 // If callee is a simple identifier, keep as Builtin for dispatch
                 if let Expr::Ident(name) = callee.as_ref() {
                     // Check if it's a known builtin — if not, treat as variable call
                     if crate::builtins::BUILTIN_LOOKUP.contains_key(name.as_str())
-                        || is_fallback_builtin(name) {
+                        || is_fallback_builtin(name)
+                    {
                         if let Some(pipeline_ir) = self.try_lower_builtin(name, &args_ir, None) {
                             return pipeline_ir;
                         }
@@ -548,9 +789,8 @@ impl IRCompiler {
                                     .iter()
                                     .map(|s| s.to_string())
                                     .collect();
-                            let hint = crate::builtins::nearest_method_hint(
-                                &methods, field, mod_name,
-                            );
+                            let hint =
+                                crate::builtins::nearest_method_hint(&methods, field, mod_name);
                             return IRNode::Error("E_UNKNOWN_BUILTIN".into(), Some(hint));
                         }
                     }
@@ -566,7 +806,8 @@ impl IRCompiler {
                 let left_ir = self.compile_expr(left);
                 // If right is a builtin identifier, lower as pipeline stage
                 if let Expr::Ident(name) = right.as_ref() {
-                    if let Some(stage_ir) = self.try_lower_builtin(name, &[], Some(left_ir.clone())) {
+                    if let Some(stage_ir) = self.try_lower_builtin(name, &[], Some(left_ir.clone()))
+                    {
                         return stage_ir;
                     }
                     if crate::builtins::BUILTIN_LOOKUP.contains_key(name.as_str())
@@ -579,10 +820,18 @@ impl IRCompiler {
                     }
                 }
                 // Pipeline call with arguments, e.g. `items | take 3`.
-                if let Expr::Call { callee, args, named: _ } = right.as_ref() {
+                if let Expr::Call {
+                    callee,
+                    args,
+                    named: _,
+                } = right.as_ref()
+                {
                     if let Expr::Ident(name) = callee.as_ref() {
-                        let args_ir: Vec<IRNode> = args.iter().map(|arg| self.compile_expr(arg)).collect();
-                        if let Some(stage_ir) = self.try_lower_builtin(name, &args_ir, Some(left_ir.clone())) {
+                        let args_ir: Vec<IRNode> =
+                            args.iter().map(|arg| self.compile_expr(arg)).collect();
+                        if let Some(stage_ir) =
+                            self.try_lower_builtin(name, &args_ir, Some(left_ir.clone()))
+                        {
                             return stage_ir;
                         }
                     }
@@ -603,31 +852,32 @@ impl IRCompiler {
                 let r = self.compile_expr(right);
                 IRNode::Binary(Box::new(l), *op, Box::new(r))
             }
-            Expr::Unary { op, expr } => {
-                IRNode::Unary(*op, Box::new(self.compile_expr(expr)))
-            }
+            Expr::Unary { op, expr } => IRNode::Unary(*op, Box::new(self.compile_expr(expr))),
             Expr::MemberAccess { object, field } => {
                 IRNode::MemberAccess(Box::new(self.compile_expr(object)), field.clone())
             }
-            Expr::Match { scrutinee, arms } => {
-                IRNode::Match(
-                    Box::new(self.compile_expr(scrutinee)),
-                    arms.iter().map(|arm| MatchArm {
+            Expr::Match { scrutinee, arms } => IRNode::Match(
+                Box::new(self.compile_expr(scrutinee)),
+                arms.iter()
+                    .map(|arm| MatchArm {
                         pattern: compile_pattern(&arm.pattern),
                         guard: arm.guard.as_ref().map(|g| Box::new(self.compile_expr(g))),
                         body: Box::new(self.compile_expr(&arm.body)),
-                    }).collect(),
-                )
-            }
+                    })
+                    .collect(),
+            ),
         }
     }
 
     /// Try to lower a builtin call into a specific IR pipeline stage.
-    fn try_lower_builtin(&self, name: &str, args: &[IRNode], pipe_input: Option<IRNode>) -> Option<IRNode> {
+    fn try_lower_builtin(
+        &self,
+        name: &str,
+        args: &[IRNode],
+        pipe_input: Option<IRNode>,
+    ) -> Option<IRNode> {
         let has_pipe = pipe_input.is_some();
-        let source = pipe_input.unwrap_or_else(|| {
-            args.first().cloned().unwrap_or(IRNode::Unit)
-        });
+        let source = pipe_input.unwrap_or_else(|| args.first().cloned().unwrap_or(IRNode::Unit));
 
         // Extract lambda (params, body) from an IRNode
         let extract_lam = |lam: &IRNode| -> Option<(Vec<String>, Box<crate::ast::Expr>)> {
@@ -639,36 +889,54 @@ impl IRCompiler {
 
         match name {
             "map" => {
-                let lam = args.get(if has_pipe { 0 } else { 1 })
+                let lam = args
+                    .get(if has_pipe { 0 } else { 1 })
                     .and_then(extract_lam)?;
-                return Some(IRNode::Pipeline(vec![source.clone(), IRNode::Map(lam.0, lam.1)]));
+                return Some(IRNode::Pipeline(vec![
+                    source.clone(),
+                    IRNode::Map(lam.0, lam.1),
+                ]));
             }
             "where" | "filter" => {
-                let pred = args.get(if has_pipe { 0 } else { 1 })
+                let pred = args
+                    .get(if has_pipe { 0 } else { 1 })
                     .and_then(extract_lam)?;
-                return Some(IRNode::Pipeline(vec![source.clone(), IRNode::Filter(pred.0, pred.1)]));
+                return Some(IRNode::Pipeline(vec![
+                    source.clone(),
+                    IRNode::Filter(pred.0, pred.1),
+                ]));
             }
             "sort" => {
-                let key = args.get(if has_pipe { 0 } else { 1 })
-                    .and_then(extract_lam);
-                return Some(IRNode::Pipeline(vec![source.clone(), IRNode::Sort(key.map(|k| (k.0, k.1)))]));
+                let key = args.get(if has_pipe { 0 } else { 1 }).and_then(extract_lam);
+                return Some(IRNode::Pipeline(vec![
+                    source.clone(),
+                    IRNode::Sort(key.map(|k| (k.0, k.1))),
+                ]));
             }
             "reduce" => {
                 let (lam, init) = if has_pipe {
-                    (args.first().and_then(extract_lam),
-                     args.get(1).cloned().unwrap_or(IRNode::Unit))
+                    (
+                        args.first().and_then(extract_lam),
+                        args.get(1).cloned().unwrap_or(IRNode::Unit),
+                    )
                 } else {
-                    (args.get(1).and_then(extract_lam),
-                     args.get(2).cloned().unwrap_or(IRNode::Unit))
+                    (
+                        args.get(1).and_then(extract_lam),
+                        args.get(2).cloned().unwrap_or(IRNode::Unit),
+                    )
                 };
                 let (params, body) = lam?;
                 return Some(IRNode::Reduce(params, body, Box::new(init)));
             }
             "take" => {
-                let n = args.get(if has_pipe { 0 } else { 1 })
+                let n = args
+                    .get(if has_pipe { 0 } else { 1 })
                     .cloned()
                     .unwrap_or(IRNode::Int(10));
-                return Some(IRNode::Pipeline(vec![source.clone(), IRNode::Take(Box::new(n))]));
+                return Some(IRNode::Pipeline(vec![
+                    source.clone(),
+                    IRNode::Take(Box::new(n)),
+                ]));
             }
             "reverse" => {
                 // Lower to Call(Var("arr.reverse"), [source]) which routes
@@ -678,10 +946,9 @@ impl IRCompiler {
                     vec![source.clone()],
                 ));
             }
-        _ => None,
+            _ => None,
+        }
     }
-}
-
 } // impl IRCompiler
 
 // ── V3 IR Evaluator ────────────────────────────────────
@@ -756,7 +1023,7 @@ impl IREvaluator {
                 } else {
                     Ok(Value::Str(s.clone()))
                 }
-            },
+            }
 
             IRNode::Array(items) => {
                 let vals: Result<Vec<Value>> = items.iter().map(|i| Self::eval(i, env)).collect();
@@ -764,7 +1031,9 @@ impl IREvaluator {
             }
             IRNode::Record(map) => {
                 let mut m = std::collections::BTreeMap::new();
-                for (k, v) in map { m.insert(k.clone(), Self::eval(v, env)?); }
+                for (k, v) in map {
+                    m.insert(k.clone(), Self::eval(v, env)?);
+                }
                 Ok(Value::Record(m))
             }
             IRNode::Var(name) => Ok(env.get_var(name).cloned().unwrap_or(Value::Null)),
@@ -775,7 +1044,10 @@ impl IREvaluator {
                 let result = Self::eval(body, env);
                 // Only restore if body is NOT Unit (i.e., scoped let within expression)
                 if !matches!(body.as_ref(), IRNode::Unit) {
-                    match old { Some(ov) => env.set_var_unchecked(name, ov), None => env.del_var(name), }
+                    match old {
+                        Some(ov) => env.set_var_unchecked(name, ov),
+                        None => env.del_var(name),
+                    }
                 }
                 result
             }
@@ -793,9 +1065,10 @@ impl IREvaluator {
                     _ => Err(anyhow!("bad unary op")),
                 }
             }
-            IRNode::Lambda(params, body) => {
-                Ok(Value::Lambda(crate::value::Lambda { params: params.clone(), body: body.clone() }))
-            }
+            IRNode::Lambda(params, body) => Ok(Value::Lambda(crate::value::Lambda {
+                params: params.clone(),
+                body: body.clone(),
+            })),
             IRNode::Call(callee, args) => {
                 let vals: Result<Vec<Value>> = args.iter().map(|a| Self::eval(a, env)).collect();
                 let pin = env.input().cloned();
@@ -811,11 +1084,15 @@ impl IREvaluator {
                     }
                     Value::Lambda(ref lam) => {
                         let vs = vals?;
-                        let mut bindings: Vec<(String, Value)> = Vec::with_capacity(lam.params.len());
+                        let mut bindings: Vec<(String, Value)> =
+                            Vec::with_capacity(lam.params.len());
                         for (i, p) in lam.params.iter().enumerate() {
                             bindings.push((p.clone(), vs.get(i).cloned().unwrap_or(Value::Null)));
                         }
-                        let bindings_refs: Vec<(&str, Value)> = bindings.iter().map(|(k, v)| (k.as_str(), v.clone())).collect();
+                        let bindings_refs: Vec<(&str, Value)> = bindings
+                            .iter()
+                            .map(|(k, v)| (k.as_str(), v.clone()))
+                            .collect();
                         env.with_frame(&bindings_refs, |env| crate::eval::eval_expr(&lam.body, env))
                     }
                     _ => Err(anyhow!("IR Call: cannot call non-function value")),
@@ -843,10 +1120,15 @@ impl IREvaluator {
                             if let Some(index_param) = mparams.get(1) {
                                 bindings.push((index_param.as_str(), Value::Int(i as i64)));
                             }
-                            let mapped = env.with_frame(&bindings, |env| crate::eval::eval_expr(mbody, env))?;
-                            let keep = env.with_frame(&[(fparams[0].as_str(), mapped.clone())], |env| {
-                                is_truthy_v(&crate::eval::eval_expr(fbody, env).unwrap_or(Value::Bool(false)))
-                            });
+                            let mapped = env
+                                .with_frame(&bindings, |env| crate::eval::eval_expr(mbody, env))?;
+                            let keep =
+                                env.with_frame(&[(fparams[0].as_str(), mapped.clone())], |env| {
+                                    is_truthy_v(
+                                        &crate::eval::eval_expr(fbody, env)
+                                            .unwrap_or(Value::Bool(false)),
+                                    )
+                                });
                             if keep {
                                 out.push(mapped);
                             }
@@ -871,15 +1153,25 @@ impl IREvaluator {
                     (IRNode::Filter(fparams, fbody), IRNode::Map(mparams, mbody)) => {
                         let mut out = Vec::new();
                         for (i, v) in arr.iter().enumerate() {
-                            let passes = env.with_frame(&[(fparams[0].as_str(), v.clone())], |env| {
-                                is_truthy_v(&crate::eval::eval_expr(fbody, env).unwrap_or(Value::Bool(false)))
-                            });
-                            if !passes { continue; }
+                            let passes =
+                                env.with_frame(&[(fparams[0].as_str(), v.clone())], |env| {
+                                    is_truthy_v(
+                                        &crate::eval::eval_expr(fbody, env)
+                                            .unwrap_or(Value::Bool(false)),
+                                    )
+                                });
+                            if !passes {
+                                continue;
+                            }
                             let mut bindings = vec![(mparams[0].as_str(), v.clone())];
                             if let Some(index_param) = mparams.get(1) {
                                 bindings.push((index_param.as_str(), Value::Int(i as i64)));
                             }
-                            out.push(env.with_frame(&bindings, |env| crate::eval::eval_expr(mbody, env))?);
+                            out.push(
+                                env.with_frame(&bindings, |env| {
+                                    crate::eval::eval_expr(mbody, env)
+                                })?,
+                            );
                         }
                         Ok(Value::Array(out))
                     }
@@ -904,12 +1196,15 @@ impl IREvaluator {
                             if let Some(index_param) = ap.get(1) {
                                 first.push((index_param.as_str(), Value::Int(i as i64)));
                             }
-                            let mid = env.with_frame(&first, |env| crate::eval::eval_expr(ab, env))?;
+                            let mid =
+                                env.with_frame(&first, |env| crate::eval::eval_expr(ab, env))?;
                             let mut second = vec![(bp[0].as_str(), mid)];
                             if let Some(index_param) = bp.get(1) {
                                 second.push((index_param.as_str(), Value::Int(i as i64)));
                             }
-                            out.push(env.with_frame(&second, |env| crate::eval::eval_expr(bb, env))?);
+                            out.push(
+                                env.with_frame(&second, |env| crate::eval::eval_expr(bb, env))?,
+                            );
                         }
                         Ok(Value::Array(out))
                     }
@@ -948,7 +1243,9 @@ impl IREvaluator {
                             Err(_) => false,
                         }
                     });
-                    if passes { out.push(v.clone()); }
+                    if passes {
+                        out.push(v.clone());
+                    }
                 }
                 Ok(Value::Array(out))
             }
@@ -976,10 +1273,8 @@ impl IREvaluator {
                 let arr = expect_array(&input)?;
                 let mut acc = Self::eval(init, env)?;
                 for (i, v) in arr.iter().enumerate() {
-                    let mut bindings = vec![
-                        (params[0].as_str(), acc),
-                        (params[1].as_str(), v.clone()),
-                    ];
+                    let mut bindings =
+                        vec![(params[0].as_str(), acc), (params[1].as_str(), v.clone())];
                     if let Some(index_param) = params.get(2) {
                         bindings.push((index_param.as_str(), Value::Int(i as i64)));
                     }
@@ -1011,33 +1306,39 @@ impl IREvaluator {
                         _ => {}
                     }
                 }
-                let arg_vals: Result<Vec<Value>> = args.iter().map(|a| Self::eval(a, env)).collect();
+                let arg_vals: Result<Vec<Value>> =
+                    args.iter().map(|a| Self::eval(a, env)).collect();
                 let pin = env.input().cloned();
                 crate::builtins::call_with_input(name, arg_vals?, pin, env)
             }
             IRNode::MemberAccess(obj, field) => {
                 let val = Self::eval(obj, env)?;
                 match val {
-                    Value::Record(map) => map.get(field).cloned().ok_or_else(|| anyhow!("field '{}' not found", field)),
+                    Value::Record(map) => map
+                        .get(field)
+                        .cloned()
+                        .ok_or_else(|| anyhow!("field '{}' not found", field)),
                     _ => Err(anyhow!("cannot access field on non-record")),
                 }
             }
-            IRNode::Try(body, catch_var, catch_expr) => {
-                match Self::eval(body, env) {
-                    Ok(v) => Ok(v),
-                    Err(e) => {
-                        if let Some(var) = catch_var {
-                            env.set_var_unchecked(var, Value::Str(e.to_string()));
-                        }
-                        Self::eval(catch_expr, env)
+            IRNode::Try(body, catch_var, catch_expr) => match Self::eval(body, env) {
+                Ok(v) => Ok(v),
+                Err(e) => {
+                    if let Some(var) = catch_var {
+                        env.set_var_unchecked(var, Value::Str(e.to_string()));
                     }
+                    Self::eval(catch_expr, env)
                 }
-            }
+            },
             IRNode::Throw(inner) => {
                 let v = Self::eval(inner, env)?;
                 Err(anyhow!("{}", v))
             }
-            IRNode::Error(code, msg) => Err(anyhow!("[{}] {}", code, msg.as_deref().unwrap_or("unknown"))),
+            IRNode::Error(code, msg) => Err(anyhow!(
+                "[{}] {}",
+                code,
+                msg.as_deref().unwrap_or("unknown")
+            )),
             IRNode::If(cond, then_branch, else_branch) => {
                 // Control flow: eval cond, branch on truthiness (matches eval.rs semantics
                 // via is_truthy_v: Null / false / 0 / 0.0 / "" are falsy, everything else truthy)
@@ -1191,14 +1492,24 @@ fn binop_value(op: &BinOp, a: Value, b: Value) -> Result<Value> {
 }
 
 fn is_truthy_v(v: &Value) -> bool {
-    match v { Value::Null => false, Value::Bool(false) => false, Value::Int(0) => false, Value::Float(0.0) => false, Value::Str(s) if s.is_empty() => false, _ => true }
+    match v {
+        Value::Null => false,
+        Value::Bool(false) => false,
+        Value::Int(0) => false,
+        Value::Float(0.0) => false,
+        Value::Str(s) if s.is_empty() => false,
+        _ => true,
+    }
 }
 
 fn value_eq_v(a: &Value, b: &Value) -> bool {
     use Value::*;
     match (a, b) {
-        (Null, Null) => true, (Bool(x), Bool(y)) => x == y, (Int(x), Int(y)) => x == y,
-        (Float(x), Float(y)) => x == y, (Str(x), Str(y)) => x == y,
+        (Null, Null) => true,
+        (Bool(x), Bool(y)) => x == y,
+        (Int(x), Int(y)) => x == y,
+        (Float(x), Float(y)) => x == y,
+        (Str(x), Str(y)) => x == y,
         _ => false,
     }
 }
@@ -1252,7 +1563,10 @@ fn match_pattern_ir_impl(
 }
 
 fn expect_array(v: &Value) -> Result<&Vec<Value>> {
-    match v { Value::Array(arr) => Ok(arr), _ => Err(anyhow!("expected array")) }
+    match v {
+        Value::Array(arr) => Ok(arr),
+        _ => Err(anyhow!("expected array")),
+    }
 }
 
 fn compare_values(a: &Value, b: &Value) -> std::cmp::Ordering {
@@ -1414,7 +1728,11 @@ mod tests {
                 Box::new(IRNode::Int(1)),
                 Box::new(IRNode::Int(2)),
             );
-            assert_eq!(eval_node(&node).unwrap(), Value::Int(2), "expected else branch");
+            assert_eq!(
+                eval_node(&node).unwrap(),
+                Value::Int(2),
+                "expected else branch"
+            );
         }
     }
 

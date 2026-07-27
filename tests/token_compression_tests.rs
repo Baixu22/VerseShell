@@ -5,8 +5,8 @@
 
 use std::fs;
 use std::path::PathBuf;
-use verseshell::reducers::{reduce_for_profile, ReduceOutput};
 use verseshell::operation::Diagnostic;
+use verseshell::reducers::{reduce_for_profile, ReduceOutput};
 
 fn adv_fixture(name: &str) -> String {
     let mut p = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
@@ -102,19 +102,21 @@ fn npm_large_noise_high_compression() {
         "fixture too small ({} tokens)",
         raw_tokens
     );
-    assert!(
-        ratio >= 0.7,
-        "compression ratio {:.4} < 0.7",
-        ratio
-    );
+    assert!(ratio >= 0.7, "compression ratio {:.4} < 0.7", ratio);
 
     // Must extract structured stats from the noise
     assert_eq!(out.stats.get("added"), Some(&serde_json::json!(1024)));
-    assert_eq!(out.stats.get("vulnerabilities"), Some(&serde_json::json!(0)));
+    assert_eq!(
+        out.stats.get("vulnerabilities"),
+        Some(&serde_json::json!(0))
+    );
     // Summary should NOT contain the HTTP fetch noise
     let s = out.summary.as_ref().unwrap();
     assert!(!s.contains("GET 200"), "summary contains HTTP noise");
-    assert!(!s.contains("registry.npmjs.org"), "summary contains registry noise");
+    assert!(
+        !s.contains("registry.npmjs.org"),
+        "summary contains registry noise"
+    );
 }
 
 #[test]
@@ -132,25 +134,12 @@ fn git_diff_large_truncates_body() {
     );
 
     assert!(raw_tokens >= 2000, "fixture too small");
-    assert!(
-        ratio >= 0.7,
-        "compression ratio {:.4} < 0.7",
-        ratio
-    );
+    assert!(ratio >= 0.7, "compression ratio {:.4} < 0.7", ratio);
 
     // Must capture diff stat
-    assert_eq!(
-        out.stats.get("files_changed"),
-        Some(&serde_json::json!(51))
-    );
-    assert_eq!(
-        out.stats.get("insertions"),
-        Some(&serde_json::json!(750))
-    );
-    assert_eq!(
-        out.stats.get("deletions"),
-        Some(&serde_json::json!(125))
-    );
+    assert_eq!(out.stats.get("files_changed"), Some(&serde_json::json!(51)));
+    assert_eq!(out.stats.get("insertions"), Some(&serde_json::json!(750)));
+    assert_eq!(out.stats.get("deletions"), Some(&serde_json::json!(125)));
 }
 
 #[test]

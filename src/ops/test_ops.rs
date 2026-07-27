@@ -1,7 +1,9 @@
 //! Thin test orchestration ops over exec.run profiles.
 
 use super::common::{arg_str, err, now, ok, require_capability};
-use crate::operation::{Observation, ObservationBudget, OperationRegistry, OperationRequest, OperationSpec};
+use crate::operation::{
+    Observation, ObservationBudget, OperationRegistry, OperationRequest, OperationSpec,
+};
 use crate::safety;
 use serde_json::json;
 use std::sync::Mutex;
@@ -69,7 +71,9 @@ fn schema_run() -> serde_json::Value {
 
 fn execute_discover(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "cat") { return o; }
+    if let Err(o) = require_capability(req, "cat") {
+        return o;
+    }
     let root = safety::workspace_root();
     let mut runners = Vec::new();
     if root.join("Cargo.toml").exists() {
@@ -96,7 +100,9 @@ fn execute_discover(req: &OperationRequest) -> Observation {
 
 fn execute_run_target(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "sh") { return o; }
+    if let Err(o) = require_capability(req, "sh") {
+        return o;
+    }
     let runner = arg_str(&req.args, "runner").unwrap_or_else(|| "auto".into());
     let target = arg_str(&req.args, "target");
     let timeout_ms = req
@@ -111,12 +117,20 @@ fn execute_run_target(req: &OperationRequest) -> Observation {
         .unwrap_or(req.budget.max_tokens as u64) as usize;
 
     let argv: Vec<String> = if let Some(arr) = req.args.get("argv").and_then(|v| v.as_array()) {
-        arr.iter().filter_map(|v| v.as_str().map(|s| s.to_string())).collect()
+        arr.iter()
+            .filter_map(|v| v.as_str().map(|s| s.to_string()))
+            .collect()
     } else {
         build_argv(&runner, target.as_deref())
     };
     if argv.is_empty() {
-        return err(req, "test", "E_BAD_ARG", "could not determine test argv", start);
+        return err(
+            req,
+            "test",
+            "E_BAD_ARG",
+            "could not determine test argv",
+            start,
+        );
     }
 
     let exec_req = OperationRequest {
@@ -149,7 +163,11 @@ fn execute_run_target(req: &OperationRequest) -> Observation {
                 .and_then(|s| s.get("summary").or_else(|| s.get("text")))
                 .and_then(|v| v.as_str())
         })
-        .unwrap_or(if obs.ok { "tests passed" } else { "tests failed" })
+        .unwrap_or(if obs.ok {
+            "tests passed"
+        } else {
+            "tests failed"
+        })
         .to_string();
     let exit_code = obs
         .data
@@ -189,8 +207,14 @@ fn execute_run_target(req: &OperationRequest) -> Observation {
             &req.id,
             &req.op,
             "test",
-            obs.error.as_ref().map(|e| e.code.as_str()).unwrap_or("E_TEST_FAILED"),
-            obs.error.as_ref().map(|e| e.message.clone()).unwrap_or_else(|| "tests failed".into()),
+            obs.error
+                .as_ref()
+                .map(|e| e.code.as_str())
+                .unwrap_or("E_TEST_FAILED"),
+            obs.error
+                .as_ref()
+                .map(|e| e.message.clone())
+                .unwrap_or_else(|| "tests failed".into()),
             true,
             Some(json!({
                 "ok": false,
@@ -271,6 +295,12 @@ fn execute_summarize_last(req: &OperationRequest) -> Observation {
             &["file.read"],
             start,
         ),
-        None => err(req, "test", "E_NO_LAST_TEST", "no prior test.run_target in this process", start),
+        None => err(
+            req,
+            "test",
+            "E_NO_LAST_TEST",
+            "no prior test.run_target in this process",
+            start,
+        ),
     }
 }

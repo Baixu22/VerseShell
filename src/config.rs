@@ -151,8 +151,7 @@ impl ShellConfig {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).ok();
         }
-        let content = toml::to_string_pretty(self)
-            .context("failed to serialize config")?;
+        let content = toml::to_string_pretty(self).context("failed to serialize config")?;
         fs::write(&path, content)
             .with_context(|| format!("failed to write config to {}", path.display()))?;
         Ok(())
@@ -163,7 +162,10 @@ impl ShellConfig {
     }
 
     pub fn config_dir() -> PathBuf {
-        Self::config_file().parent().map(|p| p.to_path_buf()).unwrap_or_else(|| PathBuf::from("."))
+        Self::config_file()
+            .parent()
+            .map(|p| p.to_path_buf())
+            .unwrap_or_else(|| PathBuf::from("."))
     }
 
     pub fn data_dir() -> PathBuf {

@@ -29,11 +29,7 @@ fn now_secs() -> u64 {
 pub fn move_to_trash(path: &Path) -> Result<String, String> {
     let root = trash_root();
     fs::create_dir_all(&root).map_err(|e| format!("cannot create trash: {e}"))?;
-    let id = format!(
-        "{}-{}",
-        now_secs(),
-        &uuid::Uuid::new_v4().to_string()[..8]
-    );
+    let id = format!("{}-{}", now_secs(), &uuid::Uuid::new_v4().to_string()[..8]);
     let entry = root.join(&id);
     fs::create_dir_all(&entry).map_err(|e| format!("cannot create trash entry: {e}"))?;
     let payload = entry.join("payload");

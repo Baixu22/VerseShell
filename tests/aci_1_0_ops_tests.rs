@@ -7,6 +7,8 @@ fn run_server(input: &str, workspace: &Path) -> Vec<Value> {
     let mut child = Command::new(env!("CARGO_BIN_EXE_ae"))
         .arg("--serve")
         .arg("--agent")
+        .arg("--cap")
+        .arg("all")
         .env("AETHER_WORKSPACE", workspace)
         .env("AETHER_MODE", "agent")
         .env_remove("AETHER_CAPS")
@@ -274,7 +276,10 @@ fn ops_list_includes_1_0_surface() {
         "repo.search",
         "test.discover",
     ] {
-        assert!(names.iter().any(|n| n == need), "missing {need} in {names:?}");
+        assert!(
+            names.iter().any(|n| n == need),
+            "missing {need} in {names:?}"
+        );
     }
     let _ = std::fs::remove_dir_all(workspace);
 }

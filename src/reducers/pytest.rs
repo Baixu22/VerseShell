@@ -1,4 +1,4 @@
-﻿//! Pytest semantic reducer.
+//! Pytest semantic reducer.
 
 use super::{diag, normalize_path, ReduceInput, ReduceOutput};
 use regex::Regex;
@@ -7,16 +7,12 @@ use std::sync::OnceLock;
 
 fn re_failed_header() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
-    RE.get_or_init(|| {
-        Regex::new(r"^_{5,}\s+(?P<node>.+?)\s+_{5,}\s*$").unwrap()
-    })
+    RE.get_or_init(|| Regex::new(r"^_{5,}\s+(?P<node>.+?)\s+_{5,}\s*$").unwrap())
 }
 
 fn re_file_line() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
-    RE.get_or_init(|| {
-        Regex::new(r"^(?P<path>[^:\s].*?\.py):(?P<line>\d+):(?P<rest>.*)$").unwrap()
-    })
+    RE.get_or_init(|| Regex::new(r"^(?P<path>[^:\s].*?\.py):(?P<line>\d+):(?P<rest>.*)$").unwrap())
 }
 
 fn re_assert() -> &'static Regex {
@@ -64,7 +60,10 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
             let mut j = i + 1;
             while j < lines.len() && j < i + 80 {
                 let l = lines[j];
-                if re_failed_header().is_match(l) || l.starts_with("=====") || l.starts_with("-----") && l.contains("short test") {
+                if re_failed_header().is_match(l)
+                    || l.starts_with("=====")
+                    || l.starts_with("-----") && l.contains("short test")
+                {
                     break;
                 }
                 if let Some(fc) = re_file_line().captures(l) {
@@ -89,14 +88,7 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
                 }
             }
 
-            diagnostics.push(diag(
-                "pytest",
-                "error",
-                message,
-                path,
-                line_no,
-                None,
-            ));
+            diagnostics.push(diag("pytest", "error", message, path, line_no, None));
             // stash node in stats later via message prefix if needed
             if diagnostics.len() >= 20 {
                 break;
@@ -166,9 +158,7 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
             "pytest: {failed} failed, {passed} passed, {skipped} skipped; {first}"
         ))
     } else {
-        Some(format!(
-            "pytest: {passed} passed, {skipped} skipped"
-        ))
+        Some(format!("pytest: {passed} passed, {skipped} skipped"))
     };
 
     ReduceOutput {

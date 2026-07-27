@@ -213,7 +213,9 @@ pub fn eval_stmt(stmt: &Stmt, env: &mut Env) -> Result<Value> {
         }
         Stmt::Export { items, from_source } => {
             if from_source.is_some() {
-                Err(anyhow!("re-export from module is not supported; use inline code"))
+                Err(anyhow!(
+                    "re-export from module is not supported; use inline code"
+                ))
             } else {
                 // Export local items — mark them for visibility
                 for item in items {
@@ -485,7 +487,8 @@ pub fn eval_expr(expr: &Expr, env: &mut Env) -> Result<Value> {
                             .iter()
                             .map(|(name, val)| (name.as_str(), val.clone()))
                             .collect();
-                        let guard_result = env.with_frame(&frame, |env| eval_expr(guard_expr, env))?;
+                        let guard_result =
+                            env.with_frame(&frame, |env| eval_expr(guard_expr, env))?;
                         if !is_truthy(&guard_result) {
                             continue; // Guard failed, try next arm
                         }

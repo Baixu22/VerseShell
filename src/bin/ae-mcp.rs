@@ -18,10 +18,8 @@ async fn main() -> anyhow::Result<()> {
         .with_writer(std::io::stderr)
         .try_init();
 
-    // Initialize capability system from AETHER_CAPS env var (or no-op if unset).
-    // This is critical for Line A: without it, all builtins are allowed even
-    // when AETHER_CAPS is set, defeating the capability security model for
-    // MCP-launched agents.
+    // MCP is an agent-facing production surface: an absent AETHER_CAPS is an
+    // explicit empty allow-list, not unrestricted compatibility behavior.
     verseshell::capability::init_caps(None);
 
     verseshell::mcp::serve_stdio().await

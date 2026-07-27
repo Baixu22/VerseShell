@@ -2,18 +2,21 @@
 
 use crate::artifact::{display_path, ArtifactMetadata, ArtifactStore};
 use crate::observation_ledger;
-use crate::reducers::{self, ReduceInput};
 use crate::process_runner::{self, CapturedStream, ExecLimits};
+use crate::reducers::{self, ReduceInput};
 use crate::safety::{self, Effect, GuardCtx, Mode};
 use anyhow::{anyhow, Result};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 pub const OBSERVATION_SCHEMA: &str = "verseshell.observation/v1";
+pub const SERVER_PROTOCOL: &str = "verseshell.jsonl/v1";
+pub const OPERATION_CATALOG_SCHEMA: &str = "verseshell.operation-catalog/v1";
 pub const DEFAULT_MAX_TOKENS: usize = 4_000;
 /// Hard cap for model-visible success summaries (noisy install/build profiles).
 pub const SUCCESS_SUMMARY_TOKENS: usize = 120;
@@ -97,7 +100,11 @@ pub struct Diagnostic {
 }
 
 impl Diagnostic {
-    pub fn basic(tool: impl Into<String>, severity: impl Into<String>, message: impl Into<String>) -> Self {
+    pub fn basic(
+        tool: impl Into<String>,
+        severity: impl Into<String>,
+        message: impl Into<String>,
+    ) -> Self {
         Self {
             tool: tool.into(),
             severity: severity.into(),
@@ -309,6 +316,30 @@ impl OperationRegistry {
         self.specs.values().collect()
     }
 
+    /// Deterministic public catalog used for compatibility pinning. The ordered
+    /// registry map is deliberately projected into JSON before hashing so a new
+    /// operation, capability, effect, or input schema changes the identity.
+    pub fn catalog(&self) -> Vec<Value> {
+        self.list()
+            .into_iter()
+            .map(|spec| {
+                json!({
+                    "name": spec.name,
+                    "mcp_name": spec.mcp_name,
+                    "description": spec.description,
+                    "effect": spec.effect,
+                    "capability": spec.capability,
+                    "input_schema": (spec.input_schema)(),
+                })
+            })
+            .collect()
+    }
+
+    pub fn catalog_digest(&self) -> String {
+        let encoded =
+            serde_json::to_vec(&self.catalog()).expect("operation catalog must be serializable");
+        format!("sha256:{}", hex::encode(Sha256::digest(encoded)))
+    }
     pub fn spec(&self, name: &str) -> Option<&OperationSpec> {
         self.specs.get(name)
     }
@@ -345,7 +376,7 @@ impl OperationRegistry {
                     "E_OPERATION_UNKNOWN",
                     msg,
                     true,
-                )
+                );
             }
         };
         let obs = (spec.handler)(&req);
@@ -1225,7 +1256,10 @@ fn detect_profile(argv: &[String], requested: &str) -> String {
             "generic".into()
         }
         "npm" | "npm.cmd" | "pnpm" | "yarn" | "bun"
-            if matches!(subcommand.as_str(), "install" | "i" | "add" | "ci" | "update") =>
+            if matches!(
+                subcommand.as_str(),
+                "install" | "i" | "add" | "ci" | "update"
+            ) =>
         {
             "npm_install".into()
         }
@@ -1243,7 +1277,6 @@ fn detect_profile(argv: &[String], requested: &str) -> String {
         _ => "generic".into(),
     }
 }
-
 
 /// Drop stream body text when semantic summary/diagnostics carry the meaning.
 /// Keeps artifact handles so agents can still recover full logs via result.query.
@@ -1264,11 +1297,7 @@ fn collapse_stream_to_summary(stream: &mut StreamObservation, summary: Option<&s
     }
     stream.status = "reduced";
     stream.text = None;
-    stream.returned_bytes = stream
-        .summary
-        .as_ref()
-        .map(|s| s.len() as u64)
-        .unwrap_or(0);
+    stream.returned_bytes = stream.summary.as_ref().map(|s| s.len() as u64).unwrap_or(0);
     stream.omitted_bytes = stream.raw_bytes.saturating_sub(stream.returned_bytes);
 }
 
@@ -1296,9 +1325,8 @@ fn failure_grep_pattern(profile: &str) -> &'static str {
 }
 
 fn reduce_success(text: &str, profile: &str) -> String {
-    reduce_success_optional(text, profile).unwrap_or_else(|| {
-        format!("{} completed successfully", profile.replace('_', " "))
-    })
+    reduce_success_optional(text, profile)
+        .unwrap_or_else(|| format!("{} completed successfully", profile.replace('_', " ")))
 }
 
 fn reduce_success_optional(text: &str, profile: &str) -> Option<String> {
@@ -1315,7 +1343,13 @@ fn reduce_success_optional(text: &str, profile: &str) -> Option<String> {
         ],
         "cargo" => &["Finished", "test result:"],
         "python_install" => &["Successfully installed", "Installed", "Resolved"],
-        "pytest" => &[" passed", " failed", " skipped", "warnings summary", "====="],
+        "pytest" => &[
+            " passed",
+            " failed",
+            " skipped",
+            "warnings summary",
+            "=====",
+        ],
         "msbuild" => &[
             "Build succeeded",
             "Build FAILED",
@@ -1356,9 +1390,9 @@ fn reduce_success_optional(text: &str, profile: &str) -> Option<String> {
             {
                 return false;
             }
-            needles.iter().any(|needle| {
-                line.contains(needle) || lower.contains(&needle.to_ascii_lowercase())
-            })
+            needles
+                .iter()
+                .any(|needle| line.contains(needle) || lower.contains(&needle.to_ascii_lowercase()))
         })
         .collect();
     lines.dedup();
@@ -1516,10 +1550,10 @@ fn extract_warnings(text: &str, profile: &str) -> Vec<Diagnostic> {
             path: None,
             line: None,
             column: None,
-                code: None,
-                expected: None,
-                found: None,
-                suggested_fix: None,
+            code: None,
+            expected: None,
+            found: None,
+            suggested_fix: None,
         })
         .collect()
 }

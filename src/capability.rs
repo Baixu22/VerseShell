@@ -19,50 +19,50 @@ use std::sync::RwLock;
 #[serde(rename_all = "kebab-case")]
 pub enum Capability {
     // ── System ──
-    SysRead,        // sys.cpu_info, sys.mem_info, sys.disk_info, sys.load_avg, sys.hostname, sys.os, sys.arch
-    SysUptime,      // sys.uptime (can leak process start time)
-    SysEnv,         // sys.env_all, win.env_get
+    SysRead, // sys.cpu_info, sys.mem_info, sys.disk_info, sys.load_avg, sys.hostname, sys.os, sys.arch
+    SysUptime, // sys.uptime (can leak process start time)
+    SysEnv,  // sys.env_all, win.env_get
 
     // ── File System ──
-    FileRead,       // file.read, file.ls, file.pwd, file.head, file.tail, file.grep
-    FileWrite,      // file.write, file.append, file.mkdir
-    FileDelete,     // file.delete (destructive)
-    FileLock,       // file.lock
-    FileWatch,      // file.watch (future)
+    FileRead,   // file.read, file.ls, file.pwd, file.head, file.tail, file.grep
+    FileWrite,  // file.write, file.append, file.mkdir
+    FileDelete, // file.delete (destructive)
+    FileLock,   // file.lock
+    FileWatch,  // file.watch (future)
 
     // ── Network ──
-    NetHttpGet,     // http.get
-    NetHttpPost,    // http.post, http.put
-    NetHttpDelete,  // http.delete
-    NetPing,        // net.ping
-    NetDns,         // net.dns_lookup
+    NetHttpGet,    // http.get
+    NetHttpPost,   // http.post, http.put
+    NetHttpDelete, // http.delete
+    NetPing,       // net.ping
+    NetDns,        // net.dns_lookup
 
     // ── Process ──
-    ProcList,       // proc.list
-    ProcKill,       // proc.kill, win.process_kill
-    ProcSpawn,      // proc.spawn
-    ShellExec,      // shell.exec, sh (PASSTHROUGH — HIGH RISK)
+    ProcList,  // proc.list
+    ProcKill,  // proc.kill, win.process_kill
+    ProcSpawn, // proc.spawn
+    ShellExec, // shell.exec, sh (PASSTHROUGH — HIGH RISK)
 
     // ── Windows ──
-    WinRegistry,    // win.registry_get
-    WinService,     // win.service_list, win.service_status
-    WinEnv,         // win.env_get, win.env_set
-    WinAdmin,       // win.is_admin
+    WinRegistry, // win.registry_get
+    WinService,  // win.service_list, win.service_status
+    WinEnv,      // win.env_get, win.env_set
+    WinAdmin,    // win.is_admin
 
     // ── Crypto ──
-    CryptoHash,     // crypto.hash
-    CryptoRandom,   // crypto.random_bytes, crypto.uuid
+    CryptoHash,   // crypto.hash
+    CryptoRandom, // crypto.random_bytes, crypto.uuid
 
     // ── Database ──
-    DbRead,         // db.sqlite_query
-    DbWrite,        // db.sqlite_exec, db.sqlite_insert
+    DbRead,  // db.sqlite_query
+    DbWrite, // db.sqlite_exec, db.sqlite_insert
 
     // ── Git ──
-    GitRead,        // git.status, git.log, git.diff, git.branch
-    GitWrite,       // git.commit
+    GitRead,  // git.status, git.log, git.diff, git.branch
+    GitWrite, // git.commit
 
     // ── Universal ──
-    All,            // Grants ALL capabilities (equivalent to --cap all)
+    All, // Grants ALL capabilities (equivalent to --cap all)
 }
 
 impl Capability {
@@ -109,33 +109,185 @@ impl Capability {
     /// Which builtins require this capability.
     pub fn covered_builtins(&self) -> &[&str] {
         match self {
-            Self::SysRead => &["sys_cpu_info","sys_mem_info","sys_disk_info","sys_load_avg","sys_hostname","sys_os","sys_arch","sys_cpu_count","sys_cpu_freq","sys_swap_info","sys_info","sys_users","sys_groups","sys_user_info","sys_boot_time","sys_timezone","sys_locale","platform_os_version","platform_arch","platform_cpu","platform_memory","platform_disks","platform_gpus","platform_network_interfaces","platform_hardware_summary","platform_disk_usage","hw_cpu","hw_memory","hw_disk","hw_gpu","hw_battery"],
+            Self::SysRead => &[
+                "sys_cpu_info",
+                "sys_mem_info",
+                "sys_disk_info",
+                "sys_load_avg",
+                "sys_hostname",
+                "sys_os",
+                "sys_arch",
+                "sys_cpu_count",
+                "sys_cpu_freq",
+                "sys_swap_info",
+                "sys_info",
+                "sys_users",
+                "sys_groups",
+                "sys_user_info",
+                "sys_boot_time",
+                "sys_timezone",
+                "sys_locale",
+                "platform_os_version",
+                "platform_arch",
+                "platform_cpu",
+                "platform_memory",
+                "platform_disks",
+                "platform_gpus",
+                "platform_network_interfaces",
+                "platform_hardware_summary",
+                "platform_disk_usage",
+                "hw_cpu",
+                "hw_memory",
+                "hw_disk",
+                "hw_gpu",
+                "hw_battery",
+            ],
             Self::SysUptime => &["sys_uptime"],
-            Self::SysEnv => &["sys_env_all","win_env_get"],
-            Self::FileRead => &["cat","read_text","head","tail","grep","find","ls","pwd","file_exists","fs_stat","fs_walk","fs_tree","wc","file_type","file_diff","fs_readlink","fs_realpath","fs_glob","fs_df","fs_du","fs_mounts"],
-            Self::FileWrite => &["file_write","file_append","file_mkdir","file_copy","file_move","file_rename","file_replace","file_patch","file_insert","file_backup","file_edit","fs_mount","fs_unmount","fs_chmod","fs_chown","fs_link","fs_symlink","fs_tempfile","fs_tempdir"],
-            Self::FileDelete => &["file_delete_lines","fs_unmount"],
+            Self::SysEnv => &["sys_env_all", "win_env_get"],
+            Self::FileRead => &[
+                "cat",
+                "read_text",
+                "head",
+                "tail",
+                "grep",
+                "find",
+                "ls",
+                "pwd",
+                "file_exists",
+                "fs_stat",
+                "fs_walk",
+                "fs_tree",
+                "wc",
+                "file_type",
+                "file_diff",
+                "fs_readlink",
+                "fs_realpath",
+                "fs_glob",
+                "fs_df",
+                "fs_du",
+                "fs_mounts",
+            ],
+            Self::FileWrite => &[
+                "file_write",
+                "file_append",
+                "file_mkdir",
+                "file_copy",
+                "file_move",
+                "file_rename",
+                "file_replace",
+                "file_patch",
+                "file_insert",
+                "file_backup",
+                "file_edit",
+                "fs_mount",
+                "fs_unmount",
+                "fs_chmod",
+                "fs_chown",
+                "fs_link",
+                "fs_symlink",
+                "fs_tempfile",
+                "fs_tempdir",
+            ],
+            Self::FileDelete => &["file_delete_lines", "fs_unmount"],
             Self::FileLock => &["file_lock"],
-            Self::FileWatch => &["fs_watch","fs_unwatch"],
-            Self::NetHttpGet => &["http_get","web_get","web_fetch"],
-            Self::NetHttpPost => &["web_post","web_json_post","http_put","web_form_submit","web_upload_file"],
-            Self::NetHttpDelete => &["http_delete","web_rest_api"],
+            Self::FileWatch => &["fs_watch", "fs_unwatch"],
+            Self::NetHttpGet => &["http_get", "web_get", "web_fetch"],
+            Self::NetHttpPost => &[
+                "web_post",
+                "web_json_post",
+                "http_put",
+                "web_form_submit",
+                "web_upload_file",
+            ],
+            Self::NetHttpDelete => &["http_delete", "web_rest_api"],
             Self::NetPing => &["net_ping"],
-            Self::NetDns => &["net_dns_lookup","net_dns_reverse"],
-            Self::ProcList => &["proc_list","proc_info","proc_exists","proc_children","proc_parent","proc_cpu_usage","proc_mem_usage","proc_threads","proc_cwd","proc_exe","proc_cmdline","proc_start_time","proc_env"],
-            Self::ProcKill => &["proc_kill","win_process_kill"],
-            Self::ProcSpawn => &["proc_spawn","proc_resume","proc_suspend","proc_set_priority"],
-            Self::ShellExec => &["sh","shell","shell_exec"],
+            Self::NetDns => &["net_dns_lookup", "net_dns_reverse"],
+            Self::ProcList => &[
+                "proc_list",
+                "proc_info",
+                "proc_exists",
+                "proc_children",
+                "proc_parent",
+                "proc_cpu_usage",
+                "proc_mem_usage",
+                "proc_threads",
+                "proc_cwd",
+                "proc_exe",
+                "proc_cmdline",
+                "proc_start_time",
+                "proc_env",
+            ],
+            Self::ProcKill => &["proc_kill", "win_process_kill"],
+            Self::ProcSpawn => &[
+                "proc_spawn",
+                "proc_resume",
+                "proc_suspend",
+                "proc_set_priority",
+            ],
+            Self::ShellExec => &["sh", "shell", "shell_exec"],
             Self::WinRegistry => &["win_registry_get"],
-            Self::WinService => &["win_service_list","win_service_status"],
-            Self::WinEnv => &["win_env_get","win_env_set"],
+            Self::WinService => &["win_service_list", "win_service_status"],
+            Self::WinEnv => &["win_env_get", "win_env_set"],
             Self::WinAdmin => &["win_is_admin"],
-            Self::CryptoHash => &["crypto_hash","crypto_hash_file","crypto_hmac","crypto_checksum","crypto_hex_encode","crypto_hex_decode"],
-            Self::CryptoRandom => &["crypto_random_bytes","crypto_uuid","crypto_random_string"],
-            Self::DbRead => &["db_sqlite_query","db_sqlite_schema","db_sqlite_tables","db_sqlite_count","db_kv_get","db_kv_keys"],
-            Self::DbWrite => &["db_sqlite_open","db_sqlite_exec","db_sqlite_insert","db_sqlite_update","db_sqlite_delete","db_sqlite_create_table","db_sqlite_drop_table","db_sqlite_dump","db_sqlite_backup","db_sqlite_vacuum","db_kv_set","db_kv_delete"],
-            Self::GitRead => &["git_status","git_log","git_diff","git_diff_staged","git_branch","git_branches","git_show","git_tags","git_blame","git_root","git_rev_parse","git_remote"],
-            Self::GitWrite => &["git_commit","git_add","git_checkout","git_merge","git_rebase","git_pull","git_push","git_stash","git_stash_pop","git_reset","git_clean","git_cherry_pick"],
+            Self::CryptoHash => &[
+                "crypto_hash",
+                "crypto_hash_file",
+                "crypto_hmac",
+                "crypto_checksum",
+                "crypto_hex_encode",
+                "crypto_hex_decode",
+            ],
+            Self::CryptoRandom => &["crypto_random_bytes", "crypto_uuid", "crypto_random_string"],
+            Self::DbRead => &[
+                "db_sqlite_query",
+                "db_sqlite_schema",
+                "db_sqlite_tables",
+                "db_sqlite_count",
+                "db_kv_get",
+                "db_kv_keys",
+            ],
+            Self::DbWrite => &[
+                "db_sqlite_open",
+                "db_sqlite_exec",
+                "db_sqlite_insert",
+                "db_sqlite_update",
+                "db_sqlite_delete",
+                "db_sqlite_create_table",
+                "db_sqlite_drop_table",
+                "db_sqlite_dump",
+                "db_sqlite_backup",
+                "db_sqlite_vacuum",
+                "db_kv_set",
+                "db_kv_delete",
+            ],
+            Self::GitRead => &[
+                "git_status",
+                "git_log",
+                "git_diff",
+                "git_diff_staged",
+                "git_branch",
+                "git_branches",
+                "git_show",
+                "git_tags",
+                "git_blame",
+                "git_root",
+                "git_rev_parse",
+                "git_remote",
+            ],
+            Self::GitWrite => &[
+                "git_commit",
+                "git_add",
+                "git_checkout",
+                "git_merge",
+                "git_rebase",
+                "git_pull",
+                "git_push",
+                "git_stash",
+                "git_stash_pop",
+                "git_reset",
+                "git_clean",
+                "git_cherry_pick",
+            ],
             Self::All => &[],
         }
     }
@@ -196,21 +348,31 @@ pub enum CapabilityMode {
 }
 
 impl Default for CapabilityMode {
-    fn default() -> Self { Self::AllowList }
+    fn default() -> Self {
+        Self::AllowList
+    }
 }
 
 impl CapabilitySet {
     /// Create a new capability set from a comma-separated string.
     pub fn parse(input: &str, mode: CapabilityMode) -> Result<Self, String> {
         if input == "all" || input == "*" {
-            let mut set = Self { granted: HashSet::new(), mode };
+            let mut set = Self {
+                granted: HashSet::new(),
+                mode,
+            };
             set.grant(Capability::All);
             return Ok(set);
         }
-        let mut caps = Self { granted: HashSet::new(), mode };
+        let mut caps = Self {
+            granted: HashSet::new(),
+            mode,
+        };
         for part in input.split(',') {
             let part = part.trim();
-            if part.is_empty() { continue; }
+            if part.is_empty() {
+                continue;
+            }
             let cap: Capability = part.parse()?;
             caps.grant(cap);
         }
@@ -256,13 +418,73 @@ impl CapabilitySet {
     /// Check if a builtin is allowed given the current capability set.
     pub fn check(&self, builtin_name: &str) -> CapabilityResult {
         // Safe-by-default functions that never need capabilities
-        if matches!(builtin_name,
-            "abs"|"min"|"max"|"floor"|"ceil"|"round"|"sqrt"|"pow"|"sin"|"cos"|"log"|"sum"|"mean"|
-            "upper"|"lower"|"trim"|"split"|"replace"|"contains"|"starts_with"|"ends_with"|"len"|"length"|"slice"|"join"|
-            "range"|"flatten"|"unique"|"sort"|"reverse"|"zip"|"concat"|"in"|"first"|"last"|"any"|"all"|"take"|
-            "map"|"where"|"filter"|"reduce"|"each"|"keys"|"values"|"group_by"|"select"|
-            "json_parse"|"json_stringify"|"echo"|"print"|"help"|"describe"|"typeof"|"type_of"|
-            "now"|"sleep"|"exit"|"pwd"|"which"|"clear"|"call"|"null"|"true"|"false"
+        if matches!(
+            builtin_name,
+            "abs"
+                | "min"
+                | "max"
+                | "floor"
+                | "ceil"
+                | "round"
+                | "sqrt"
+                | "pow"
+                | "sin"
+                | "cos"
+                | "log"
+                | "sum"
+                | "mean"
+                | "upper"
+                | "lower"
+                | "trim"
+                | "split"
+                | "replace"
+                | "contains"
+                | "starts_with"
+                | "ends_with"
+                | "len"
+                | "length"
+                | "slice"
+                | "join"
+                | "range"
+                | "flatten"
+                | "unique"
+                | "sort"
+                | "reverse"
+                | "zip"
+                | "concat"
+                | "in"
+                | "first"
+                | "last"
+                | "any"
+                | "all"
+                | "take"
+                | "map"
+                | "where"
+                | "filter"
+                | "reduce"
+                | "each"
+                | "keys"
+                | "values"
+                | "group_by"
+                | "select"
+                | "json_parse"
+                | "json_stringify"
+                | "echo"
+                | "print"
+                | "help"
+                | "describe"
+                | "typeof"
+                | "type_of"
+                | "now"
+                | "sleep"
+                | "exit"
+                | "pwd"
+                | "which"
+                | "clear"
+                | "call"
+                | "null"
+                | "true"
+                | "false"
         ) {
             return CapabilityResult::Allow;
         }
@@ -279,17 +501,33 @@ impl CapabilitySet {
                 // Check against granted set
                 // Find which capability covers this builtin
                 let all_caps = [
-                    Capability::SysRead, Capability::SysUptime, Capability::SysEnv,
-                    Capability::FileRead, Capability::FileWrite, Capability::FileDelete,
-                    Capability::FileLock, Capability::FileWatch,
-                    Capability::NetHttpGet, Capability::NetHttpPost, Capability::NetHttpDelete,
-                    Capability::NetPing, Capability::NetDns,
-                    Capability::ProcList, Capability::ProcKill, Capability::ProcSpawn,
+                    Capability::SysRead,
+                    Capability::SysUptime,
+                    Capability::SysEnv,
+                    Capability::FileRead,
+                    Capability::FileWrite,
+                    Capability::FileDelete,
+                    Capability::FileLock,
+                    Capability::FileWatch,
+                    Capability::NetHttpGet,
+                    Capability::NetHttpPost,
+                    Capability::NetHttpDelete,
+                    Capability::NetPing,
+                    Capability::NetDns,
+                    Capability::ProcList,
+                    Capability::ProcKill,
+                    Capability::ProcSpawn,
                     Capability::ShellExec,
-                    Capability::WinRegistry, Capability::WinService, Capability::WinEnv, Capability::WinAdmin,
-                    Capability::CryptoHash, Capability::CryptoRandom,
-                    Capability::DbRead, Capability::DbWrite,
-                    Capability::GitRead, Capability::GitWrite,
+                    Capability::WinRegistry,
+                    Capability::WinService,
+                    Capability::WinEnv,
+                    Capability::WinAdmin,
+                    Capability::CryptoHash,
+                    Capability::CryptoRandom,
+                    Capability::DbRead,
+                    Capability::DbWrite,
+                    Capability::GitRead,
+                    Capability::GitWrite,
                 ];
                 for cap in &all_caps {
                     if cap.covered_builtins().contains(&builtin_name) {
@@ -316,13 +554,19 @@ impl CapabilitySet {
         }
     }
 
-    pub fn is_empty(&self) -> bool { self.granted.is_empty() && self.mode == CapabilityMode::AllowList }
+    pub fn is_empty(&self) -> bool {
+        self.granted.is_empty() && self.mode == CapabilityMode::AllowList
+    }
 
     /// Return the list of granted capability names as strings
     /// (e.g. `["file.read", "proc.kill"]`), sorted alphabetically.
     /// Used by the `describe_capabilities` MCP tool.
     pub fn granted_caps_as_strings(&self) -> Vec<String> {
-        let mut names: Vec<String> = self.granted.iter().map(|c| c.name_str().to_string()).collect();
+        let mut names: Vec<String> = self
+            .granted
+            .iter()
+            .map(|c| c.name_str().to_string())
+            .collect();
         names.sort();
         names
     }
@@ -378,60 +622,96 @@ fn cap_name(cap: &Capability) -> &'static str {
 // ── Global Capability State ──────────────────────────────────────────
 
 lazy_static::lazy_static! {
-    static ref GLOBAL_CAPS: RwLock<CapabilitySet> = RwLock::new(CapabilitySet::default());
+    static ref GLOBAL_CAPS: RwLock<GlobalCapabilityState> =
+        RwLock::new(GlobalCapabilityState::Uninitialized);
 }
 
-/// Initialize capabilities from the AETHER_CAPS environment variable or CLI --cap flag.
+#[derive(Debug, Clone)]
+enum GlobalCapabilityState {
+    /// No production policy has been installed yet. Capability-gated calls fail closed.
+    Uninitialized,
+    /// An explicit allow-list, including an intentionally empty list.
+    Enforced(CapabilitySet),
+    /// Compatibility behavior for an explicitly human/legacy CLI entry point.
+    LegacyUnrestricted,
+}
+
+/// Initialize an enforced capability allow-list from the environment or CLI.
+/// An absent or empty value is an explicit deny-by-default policy.
 pub fn init_caps(caps_str: Option<&str>) {
-    let mode = if std::env::var("AETHER_MODE").map(|m| m == "agent").unwrap_or(false) {
-        CapabilityMode::AllowList
-    } else {
-        CapabilityMode::AllowList
-    };
+    let caps_str = caps_str
+        .map(str::to_owned)
+        .or_else(|| std::env::var("AETHER_CAPS").ok())
+        .unwrap_or_default();
+    let caps = CapabilitySet::parse(&caps_str, CapabilityMode::AllowList)
+        .unwrap_or_else(|_| CapabilitySet::default());
+    *GLOBAL_CAPS.write().unwrap() = GlobalCapabilityState::Enforced(caps);
+}
 
-    let caps_str = caps_str.map(|s| s.to_string())
+/// Preserve the historical unrestricted behavior only for explicit human and
+/// legacy CLI paths. Agent and server entry points must call [`init_caps`].
+pub fn init_caps_legacy(caps_str: Option<&str>) {
+    let configured = caps_str
+        .map(str::to_owned)
         .or_else(|| std::env::var("AETHER_CAPS").ok());
+    let state = match configured {
+        Some(value) => CapabilitySet::parse(&value, CapabilityMode::AllowList)
+            .map(GlobalCapabilityState::Enforced)
+            .unwrap_or_else(|_| GlobalCapabilityState::Enforced(CapabilitySet::default())),
+        None => GlobalCapabilityState::LegacyUnrestricted,
+    };
+    *GLOBAL_CAPS.write().unwrap() = state;
+}
 
-    if let Some(ref s) = caps_str {
-        if let Ok(caps) = CapabilitySet::parse(s, mode) {
-            *GLOBAL_CAPS.write().unwrap() = caps;
+/// Check a builtin against the current capability state. Both an uninitialized
+/// production surface and an explicitly empty allow-list deny gated calls.
+pub fn check_capability(builtin_name: &str) -> CapabilityResult {
+    let state = GLOBAL_CAPS.read().unwrap();
+    match &*state {
+        GlobalCapabilityState::LegacyUnrestricted => CapabilityResult::Allow,
+        GlobalCapabilityState::Enforced(caps) => caps.check(builtin_name),
+        GlobalCapabilityState::Uninitialized => match CapabilitySet::default().check(builtin_name) {
+            CapabilityResult::Allow => CapabilityResult::Allow,
+            CapabilityResult::Deny(_) => CapabilityResult::Deny(format!(
+                "capability state is uninitialized; '{builtin_name}' is denied until an explicit allow-list is installed"
+            )),
+        },
+    }
+}
+
+/// Return the explicitly granted capability names, sorted alphabetically.
+pub fn current_capabilities() -> Vec<String> {
+    let state = GLOBAL_CAPS.read().unwrap();
+    match &*state {
+        GlobalCapabilityState::Enforced(caps) => caps.granted_caps_as_strings(),
+        GlobalCapabilityState::Uninitialized | GlobalCapabilityState::LegacyUnrestricted => {
+            Vec::new()
         }
     }
 }
 
-/// Check a builtin against the current capability set.
-pub fn check_capability(builtin_name: &str) -> CapabilityResult {
-    let caps = GLOBAL_CAPS.read().unwrap();
-    if caps.is_empty() {
-        return CapabilityResult::Allow; // No capability restrictions set
-    }
-    caps.check(builtin_name)
-}
-
-/// Return the currently granted capability names as strings
-/// (e.g. `["file.read", "proc.kill"]`), sorted alphabetically.
-///
-/// Returns an empty `Vec` if `init_caps` was never called (default state,
-/// which means "no restrictions" — all builtins allowed).
-/// Used by the `describe_capabilities` MCP tool.
-pub fn current_capabilities() -> Vec<String> {
-    let caps = GLOBAL_CAPS.read().unwrap();
-    caps.granted_caps_as_strings()
-}
-
-/// Return the current capability mode as a string label.
-/// Used by the `describe_capabilities` MCP tool.
+/// Return a stable capability-policy label for handshakes and diagnostics.
 pub fn current_mode_str() -> &'static str {
-    let caps = GLOBAL_CAPS.read().unwrap();
-    caps.mode_str()
+    let state = GLOBAL_CAPS.read().unwrap();
+    match &*state {
+        GlobalCapabilityState::Uninitialized => "uninitialized_deny",
+        GlobalCapabilityState::Enforced(caps) => caps.mode_str(),
+        GlobalCapabilityState::LegacyUnrestricted => "legacy_unrestricted",
+    }
 }
 
-/// Return true if no capability restrictions have been set
-/// (i.e. `init_caps` was never called or was called with empty input).
-/// In this state, all builtins are allowed.
+/// Return true only for an explicitly enforced empty allow-list.
 pub fn caps_is_empty() -> bool {
-    let caps = GLOBAL_CAPS.read().unwrap();
-    caps.is_empty()
+    let state = GLOBAL_CAPS.read().unwrap();
+    matches!(&*state, GlobalCapabilityState::Enforced(caps) if caps.is_empty())
+}
+
+/// Whether compatibility mode intentionally grants every capability.
+pub fn is_unrestricted() -> bool {
+    matches!(
+        &*GLOBAL_CAPS.read().unwrap(),
+        GlobalCapabilityState::LegacyUnrestricted
+    )
 }
 
 #[cfg(test)]
@@ -443,7 +723,10 @@ mod tests {
         let caps = CapabilitySet::parse("file.read,file.write", CapabilityMode::AllowList).unwrap();
         assert_eq!(caps.check("cat"), CapabilityResult::Allow);
         assert!(matches!(caps.check("file_write"), CapabilityResult::Allow));
-        assert!(matches!(caps.check("file_delete_lines"), CapabilityResult::Deny(_)));
+        assert!(matches!(
+            caps.check("file_delete_lines"),
+            CapabilityResult::Deny(_)
+        ));
     }
 
     #[test]
@@ -458,7 +741,10 @@ mod tests {
     fn test_file_read_requires_cap() {
         let caps = CapabilitySet::default();
         let r = caps.check("cat");
-        assert!(matches!(r, CapabilityResult::Deny(_)), "cat should require capability");
+        assert!(
+            matches!(r, CapabilityResult::Deny(_)),
+            "cat should require capability"
+        );
     }
 
     #[test]

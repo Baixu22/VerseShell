@@ -202,10 +202,7 @@ const HW_MODULE: &[(&str, &str)] = &[
     ("battery", "hw_battery"),
 ];
 
-const CLIP_MODULE: &[(&str, &str)] = &[
-    ("read", "clipboard_get"),
-    ("write", "clipboard_set"),
-];
+const CLIP_MODULE: &[(&str, &str)] = &[("read", "clipboard_get"), ("write", "clipboard_set")];
 
 const INPUT_MODULE: &[(&str, &str)] = &[
     ("read_line", "input_read_line"),
@@ -279,10 +276,7 @@ const WIN_MODULE: &[(&str, &str)] = &[
     ("env_set", "win_env_set"),
 ];
 
-const JSON_MODULE: &[(&str, &str)] = &[
-    ("parse", "json_parse"),
-    ("stringify", "json_stringify"),
-];
+const JSON_MODULE: &[(&str, &str)] = &[("parse", "json_parse"), ("stringify", "json_stringify")];
 
 const SHELL_MODULE: &[(&str, &str)] = &[
     ("exec", "sh"),

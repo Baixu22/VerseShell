@@ -78,10 +78,7 @@ fn benchmark_tasks() -> Vec<BenchmarkTask> {
         BenchmarkTask {
             id: "sys-snapshot-basic",
             prompt: "Get CPU and memory info",
-            pre_recorded_calls: vec![(
-                "system_snapshot",
-                json!({"aspects": ["cpu", "mem"]}),
-            )],
+            pre_recorded_calls: vec![("system_snapshot", json!({"aspects": ["cpu", "mem"]}))],
             caps_env: None,
             expected_check: |r| {
                 r.get("structuredContent")
@@ -184,10 +181,7 @@ fn benchmark_tasks() -> Vec<BenchmarkTask> {
         BenchmarkTask {
             id: "transpile-bash-ls",
             prompt: "Transpile 'ls -la' to VerseShell",
-            pre_recorded_calls: vec![(
-                "transpile_bash",
-                json!({"bash_code": "ls -la"}),
-            )],
+            pre_recorded_calls: vec![("transpile_bash", json!({"bash_code": "ls -la"}))],
             caps_env: None,
             expected_check: |r| {
                 r.get("structuredContent")
@@ -261,10 +255,7 @@ fn benchmark_tasks() -> Vec<BenchmarkTask> {
         BenchmarkTask {
             id: "capability-violation",
             prompt: "Attempt proc.kill with restricted caps (expect denial)",
-            pre_recorded_calls: vec![(
-                "eval",
-                json!({"code": "proc.kill(999999)"}),
-            )],
+            pre_recorded_calls: vec![("eval", json!({"code": "proc.kill(999999)"}))],
             caps_env: Some("sys.read,file.read"),
             expected_check: |r| {
                 // Should return is_error=true with capability denial message.
@@ -284,19 +275,14 @@ fn frame(body: &str) -> String {
 /// `result` object on success, or `None` on parse failure.
 fn parse_first_response_result(output: &str) -> Option<Value> {
     let bytes = output.as_bytes();
-    let header_end = bytes
-        .windows(4)
-        .position(|w| w == b"\r\n\r\n")
-        .map(|p| p)?;
+    let header_end = bytes.windows(4).position(|w| w == b"\r\n\r\n").map(|p| p)?;
     let headers = std::str::from_utf8(&bytes[..header_end]).ok()?;
-    let content_length = headers
-        .lines()
-        .find_map(|line| {
-            let (name, value) = line.split_once(':')?;
-            name.eq_ignore_ascii_case("content-length")
-                .then(|| value.trim().parse::<usize>().ok())
-                .flatten()
-        })?;
+    let content_length = headers.lines().find_map(|line| {
+        let (name, value) = line.split_once(':')?;
+        name.eq_ignore_ascii_case("content-length")
+            .then(|| value.trim().parse::<usize>().ok())
+            .flatten()
+    })?;
     let body_start = header_end + 4;
     let body_end = body_start + content_length;
     if body_end > bytes.len() {
@@ -334,18 +320,16 @@ fn run_task(task: &BenchmarkTask) -> TaskResult {
             cmd.env("AETHER_CAPS", caps);
         }
 
-        let result = cmd
-            .spawn()
-            .and_then(|mut child| {
-                {
-                    let stdin = child.stdin.as_mut().ok_or_else(|| {
-                        std::io::Error::new(std::io::ErrorKind::Other, "missing stdin")
-                    })?;
-                    stdin.write_all(framed.as_bytes())?;
-                }
-                drop(child.stdin.take());
-                child.wait_with_output()
-            });
+        let result = cmd.spawn().and_then(|mut child| {
+            {
+                let stdin = child.stdin.as_mut().ok_or_else(|| {
+                    std::io::Error::new(std::io::ErrorKind::Other, "missing stdin")
+                })?;
+                stdin.write_all(framed.as_bytes())?;
+            }
+            drop(child.stdin.take());
+            child.wait_with_output()
+        });
 
         match result {
             Ok(out) => {

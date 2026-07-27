@@ -1,4 +1,4 @@
-﻿//! Meta ops for session observation ledger (reference context).
+//! Meta ops for session observation ledger (reference context).
 
 use super::common::{arg_str, arg_u64, audit, now, ok};
 use crate::observation_ledger;
@@ -11,7 +11,8 @@ pub fn specs() -> Vec<OperationSpec> {
         OperationSpec {
             name: "ops.observation_recent",
             mcp_name: "ops_observation_recent",
-            description: "Return recent observation summaries for this agent session (reference context).",
+            description:
+                "Return recent observation summaries for this agent session (reference context).",
             effect: "meta",
             capability: "meta",
             input_schema: schema_recent,
@@ -20,7 +21,8 @@ pub fn specs() -> Vec<OperationSpec> {
         OperationSpec {
             name: "ops.observation_open_errors",
             mcp_name: "ops_observation_open_errors",
-            description: "Paths with unresolved error diagnostics in the session observation ledger.",
+            description:
+                "Paths with unresolved error diagnostics in the session observation ledger.",
             effect: "meta",
             capability: "meta",
             input_schema: schema_empty,

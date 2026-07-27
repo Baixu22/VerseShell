@@ -66,11 +66,7 @@ fn cargo_adv_fail_multi_error() {
         .iter()
         .filter(|d| d.severity == "error")
         .collect();
-    assert!(
-        errs.len() >= 2,
-        "expected >=2 errors, got {}",
-        errs.len()
-    );
+    assert!(errs.len() >= 2, "expected >=2 errors, got {}", errs.len());
     // First error should be E0308 with path:line
     let first = &errs[0];
     assert!(first.code.as_deref().unwrap_or("").starts_with("E"));
@@ -90,7 +86,12 @@ fn cargo_adv_fail_noisy() {
         .iter()
         .filter(|d| d.severity == "error")
         .collect();
-    assert_eq!(errors.len(), 1, "should find exactly 1 error in noise (E0599), got: {:?}", errors.iter().map(|d| &d.message).collect::<Vec<_>>());
+    assert_eq!(
+        errors.len(),
+        1,
+        "should find exactly 1 error in noise (E0599), got: {:?}",
+        errors.iter().map(|d| &d.message).collect::<Vec<_>>()
+    );
     let d = &errors[0];
     assert_eq!(d.code.as_deref(), Some("E0599"));
     assert!(d.path.as_deref().unwrap_or("").contains("server.rs"));
@@ -126,7 +127,10 @@ fn cargo_adv_fail_malformed() {
     let out = reduce_for_profile("cargo", &text, false).expect("cargo reducer");
     // The header regex may or may not match the broken "error[E0308]" line
     // but we must not crash and must produce a summary
-    assert!(out.summary.is_some(), "must produce summary even for malformed");
+    assert!(
+        out.summary.is_some(),
+        "must produce summary even for malformed"
+    );
 }
 
 // ── pytest ───────────────────────────────────────────────────
@@ -161,7 +165,11 @@ fn pytest_adv_fail_multi() {
     // First failure should have path+line from the first FAILURES block
     let first = &out.diagnostics[0];
     assert!(
-        first.path.as_deref().unwrap_or("").contains("test_parser.py"),
+        first
+            .path
+            .as_deref()
+            .unwrap_or("")
+            .contains("test_parser.py"),
         "first diag path expected test_parser.py, got {:?}",
         first.path
     );
@@ -184,7 +192,10 @@ fn pytest_adv_ok_noisy() {
     let out = reduce_for_profile("pytest", &text, true).expect("pytest reducer");
     // Should parse 12 passed, not get confused by ANSI
     assert!(out.summary.as_ref().unwrap().contains("12"));
-    assert!(out.stats.get("passed").map_or(false, |v| v.as_u64() == Some(12)));
+    assert!(out
+        .stats
+        .get("passed")
+        .map_or(false, |v| v.as_u64() == Some(12)));
     // No false error diagnostics on success
     assert!(out.diagnostics.is_empty());
     assert!(out.summary.as_ref().unwrap().len() < 400);
@@ -262,7 +273,10 @@ fn npm_adv_success() {
     let text = adv_fixture("../npm_ok.txt");
     let out = reduce_for_profile("npm_install", &text, true).expect("npm reducer");
     assert!(out.summary.as_ref().unwrap().contains("added"));
-    assert_eq!(out.stats.get("vulnerabilities"), Some(&serde_json::json!(0)));
+    assert_eq!(
+        out.stats.get("vulnerabilities"),
+        Some(&serde_json::json!(0))
+    );
 }
 
 #[test]
@@ -282,7 +296,10 @@ fn npm_adv_success_noisy() {
     );
     // Should NOT contain the raw deprecation noise in summary
     let s = out.summary.as_ref().unwrap();
-    assert!(!s.contains("deprecated"), "summary should not include deprecation noise");
+    assert!(
+        !s.contains("deprecated"),
+        "summary should not include deprecation noise"
+    );
 }
 
 #[test]
@@ -290,9 +307,12 @@ fn npm_adv_fail_eresolve() {
     let text = adv_fixture("../npm_fail.txt");
     let out = reduce_for_profile("npm_install", &text, false).expect("npm reducer");
     assert!(!out.diagnostics.is_empty());
-    assert!(
-        out.summary.as_ref().unwrap().to_ascii_lowercase().contains("fail")
-    );
+    assert!(out
+        .summary
+        .as_ref()
+        .unwrap()
+        .to_ascii_lowercase()
+        .contains("fail"));
 }
 
 #[test]

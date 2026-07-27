@@ -1,10 +1,10 @@
 // benches/pipeline_performance.rs
 // Benchmarks for AetherShell pipeline execution
 
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use verseshell::env::Env;
 use verseshell::eval::eval_program;
 use verseshell::parser::parse_program;
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
 fn create_test_env() -> Env {
     Env::new()
@@ -322,7 +322,6 @@ fn benchmark_pipeline_any_all(c: &mut Criterion) {
     group.finish();
 }
 
-
 fn benchmark_env_size_pipeline(c: &mut Criterion) {
     // Regression: pipeline map cost should not scale with unrelated session vars.
     let mut group = c.benchmark_group("env_size_pipeline");
@@ -335,18 +334,22 @@ fn benchmark_env_size_pipeline(c: &mut Criterion) {
     );
     let code = format!("{} | map(fn(x) => x + 1)", array);
     for env_vars in [0usize, 50, 200] {
-        group.bench_with_input(BenchmarkId::new("map_plus1", env_vars), &env_vars, |b, &n| {
-            b.iter(|| {
-                let mut env = create_test_env();
-                for i in 0..n {
-                    env.set_var_unchecked(
-                        &format!("pad{i}"),
-                        verseshell::value::Value::Int(i as i64),
-                    );
-                }
-                parse_and_eval(black_box(&code), &mut env)
-            })
-        });
+        group.bench_with_input(
+            BenchmarkId::new("map_plus1", env_vars),
+            &env_vars,
+            |b, &n| {
+                b.iter(|| {
+                    let mut env = create_test_env();
+                    for i in 0..n {
+                        env.set_var_unchecked(
+                            &format!("pad{i}"),
+                            verseshell::value::Value::Int(i as i64),
+                        );
+                    }
+                    parse_and_eval(black_box(&code), &mut env)
+                })
+            },
+        );
     }
     group.finish();
 }

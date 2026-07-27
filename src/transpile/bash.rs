@@ -81,7 +81,11 @@ pub fn transpile_bash_to_ae(src: &str) -> Result<String> {
         // output and should not trigger the fallback path. Also expand $(...)
         // command substitutions before checking for redirects.
         let expanded_line = expand_command_substitutions(line);
-        let line_ref: &str = if expanded_line != line { &expanded_line } else { line };
+        let line_ref: &str = if expanded_line != line {
+            &expanded_line
+        } else {
+            line
+        };
 
         if let Some(logical) = parse_logical_chain(line_ref) {
             if !line_ref.chars().any(|c| c == '<') {
@@ -199,8 +203,14 @@ fn expand_command_substitutions(s: &str) -> String {
     while i < chars.len() {
         let ch = chars[i];
         match ch {
-            '\'' if !dq => { sq = !sq; out.push(ch); }
-            '"' if !sq => { dq = !dq; out.push(ch); }
+            '\'' if !dq => {
+                sq = !sq;
+                out.push(ch);
+            }
+            '"' if !sq => {
+                dq = !dq;
+                out.push(ch);
+            }
             '$' if !sq && i + 1 < chars.len() && chars[i + 1] == '(' => {
                 let start = i + 2;
                 let mut depth = 1;
@@ -220,8 +230,10 @@ fn expand_command_substitutions(s: &str) -> String {
                 if depth == 0 {
                     let inner_cmd: String = chars[start..j - 1].iter().collect();
                     // Transpile the inner command and wrap as shell.exec
-                    let ae_inner = format!("shell.exec([\"bash\",\"-lc\",\"{}\"]).stdout",
-                        inner_cmd.replace('\\', "\\\\").replace('"', "\\\""));
+                    let ae_inner = format!(
+                        "shell.exec([\"bash\",\"-lc\",\"{}\"]).stdout",
+                        inner_cmd.replace('\\', "\\\\").replace('"', "\\\"")
+                    );
                     out.push_str(&ae_inner);
                     i = j;
                 } else {
@@ -262,8 +274,14 @@ fn parse_logical_chain(line: &str) -> Option<String> {
     while i < chars.len() {
         let ch = chars[i];
         match ch {
-            '\'' if !dq => { sq = !sq; cur.push(ch); }
-            '"' if !sq => { dq = !dq; cur.push(ch); }
+            '\'' if !dq => {
+                sq = !sq;
+                cur.push(ch);
+            }
+            '"' if !sq => {
+                dq = !dq;
+                cur.push(ch);
+            }
             '&' if !sq && !dq && i + 1 < chars.len() && chars[i + 1] == '&' => {
                 if !cur.trim().is_empty() {
                     parts.push((cur.trim().to_string(), Some("&&")));

@@ -88,7 +88,9 @@ pub enum Framing {
 /// Returns `Ok(None)` at EOF (stdin closed). Returns `Ok(Some(msg))` with the
 /// message body and detected framing. The body is a JSON string ready to be
 /// parsed into `JsonRpcRequest`.
-pub async fn read_message<R: AsyncBufRead + Unpin>(reader: &mut R) -> Result<Option<(String, Framing)>> {
+pub async fn read_message<R: AsyncBufRead + Unpin>(
+    reader: &mut R,
+) -> Result<Option<(String, Framing)>> {
     // Loop to skip stray blank lines between messages (some clients emit `\r\n`
     // separators). Using a loop instead of recursion avoids the async-fn
     // recursion boxing requirement.

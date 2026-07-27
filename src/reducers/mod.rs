@@ -1,4 +1,4 @@
-﻿//! Command-aware semantic observation reducers.
+//! Command-aware semantic observation reducers.
 //!
 //! Profile-specific parsers turn raw tool output into structured
 //! `summary` + `diagnostics` + `stats` for verseshell.observation/v1.
@@ -62,7 +62,10 @@ pub fn reduce_for_profile(profile: &str, text: &str, success: bool) -> Option<Re
 }
 
 /// Build suggested next actions from diagnostics (minimal rule set).
-pub fn suggested_from_diagnostics(profile: &str, diagnostics: &[Diagnostic]) -> Vec<crate::operation::SuggestedAction> {
+pub fn suggested_from_diagnostics(
+    profile: &str,
+    diagnostics: &[Diagnostic],
+) -> Vec<crate::operation::SuggestedAction> {
     use crate::operation::SuggestedAction;
     let mut out = Vec::new();
     for d in diagnostics.iter().take(5) {

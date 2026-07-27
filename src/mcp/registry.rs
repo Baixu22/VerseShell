@@ -26,8 +26,9 @@ pub type BoxFuture<T> = Pin<Box<dyn Future<Output = T> + Send>>;
 
 /// A tool handler: async function taking parsed arguments + shared runtime,
 /// returning either a normal tool result or a protocol-level RPC error.
-pub type ToolHandler =
-    Box<dyn Fn(Value, Arc<SharedRuntime>) -> BoxFuture<Result<CallToolResult, RpcError>> + Send + Sync>;
+pub type ToolHandler = Box<
+    dyn Fn(Value, Arc<SharedRuntime>) -> BoxFuture<Result<CallToolResult, RpcError>> + Send + Sync,
+>;
 
 /// JSON-Schema-described tool surface exposed via `tools/list`.
 #[derive(Debug, Clone, Serialize)]

@@ -4,7 +4,17 @@ use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 
 fn run_mcp(input: &str) -> String {
-    let mut child = Command::new(env!("CARGO_BIN_EXE_ae-mcp"))
+    run_mcp_with_caps(input, Some("shell.exec"))
+}
+
+fn run_mcp_with_caps(input: &str, caps: Option<&str>) -> String {
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_ae-mcp"));
+    if let Some(caps) = caps {
+        cmd.env("AETHER_CAPS", caps);
+    } else {
+        cmd.env_remove("AETHER_CAPS");
+    }
+    let mut child = cmd
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -137,8 +147,33 @@ fn exec_run_returns_observation_structured_content() {
     let responses = parse_json_lines(&run_mcp(&(body.to_string() + "\n")));
     let result = &responses[0]["result"];
     assert_eq!(result["isError"], false);
-    assert_eq!(result["structuredContent"]["schema"], "verseshell.observation/v1");
+    assert_eq!(
+        result["structuredContent"]["schema"],
+        "verseshell.observation/v1"
+    );
     assert_eq!(result["structuredContent"]["data"]["exit_code"], 0);
+}
+
+#[test]
+fn exec_run_is_denied_without_explicit_capability() {
+    #[cfg(windows)]
+    let argv = serde_json::json!(["cmd", "/C", "echo denied"]);
+    #[cfg(not(windows))]
+    let argv = serde_json::json!(["sh", "-c", "echo denied"]);
+    let body = serde_json::json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "tools/call",
+        "params": {"name": "exec_run", "arguments": {"argv": argv, "cwd": "."}}
+    });
+
+    let responses = parse_json_lines(&run_mcp_with_caps(&(body.to_string() + "\n"), None));
+    let result = &responses[0]["result"];
+    assert_eq!(result["isError"], true, "result={result}");
+    assert_eq!(
+        result["structuredContent"]["error"]["code"], "E_CAPABILITY_DENY",
+        "result={result}"
+    );
 }
 
 #[test]

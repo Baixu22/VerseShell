@@ -19,26 +19,86 @@ use crate::value::Value as VmValue;
 
 // Legacy DSL core surface — the ~70 most-used builtins for agent tasks.
 const CORE_BUILTINS: &[&str] = &[
-    "sys_hostname", "sys_os", "sys_arch", "sys_cpu_info", "sys_mem_info",
-    "sys_disk_info", "sys_load_avg", "sys_process_info", "sys_uptime",
-    "sys_env_all", "sys_describe",
-    "proc_list", "proc_kill", "proc_info", "proc_grep", "proc_spawn",
-    "file_ls", "file_read", "file_write", "file_stat", "file_find",
-    "file_mkdir", "file_copy", "file_move", "file_remove", "file_exists",
-    "file_head", "file_tail", "file_grep", "file_wc",
-    "http_get", "http_post",
-    "net_ping", "net_interfaces", "net_dns_lookup",
+    "sys_hostname",
+    "sys_os",
+    "sys_arch",
+    "sys_cpu_info",
+    "sys_mem_info",
+    "sys_disk_info",
+    "sys_load_avg",
+    "sys_process_info",
+    "sys_uptime",
+    "sys_env_all",
+    "sys_describe",
+    "proc_list",
+    "proc_kill",
+    "proc_info",
+    "proc_grep",
+    "proc_spawn",
+    "file_ls",
+    "file_read",
+    "file_write",
+    "file_stat",
+    "file_find",
+    "file_mkdir",
+    "file_copy",
+    "file_move",
+    "file_remove",
+    "file_exists",
+    "file_head",
+    "file_tail",
+    "file_grep",
+    "file_wc",
+    "http_get",
+    "http_post",
+    "net_ping",
+    "net_interfaces",
+    "net_dns_lookup",
     "shell_exec",
-    "str_upper", "str_lower", "str_trim", "str_split", "str_join",
-    "str_replace", "str_contains", "str_length", "str_grep",
-    "arr_sort", "arr_filter", "arr_map", "arr_reduce",
-    "arr_first", "arr_last", "arr_take", "arr_any", "arr_all",
-    "arr_unique", "arr_flatten", "arr_range", "arr_keys",
-    "math_abs", "math_min", "math_max", "math_sum", "math_mean",
-    "json_parse", "json_stringify",
-    "win_snapshot", "win_registry_get", "win_env_get",
-    "crypto_hash", "crypto_uuid",
-    "sort", "where", "map", "reduce", "take", "reverse", "first", "last", "any", "all",
+    "str_upper",
+    "str_lower",
+    "str_trim",
+    "str_split",
+    "str_join",
+    "str_replace",
+    "str_contains",
+    "str_length",
+    "str_grep",
+    "arr_sort",
+    "arr_filter",
+    "arr_map",
+    "arr_reduce",
+    "arr_first",
+    "arr_last",
+    "arr_take",
+    "arr_any",
+    "arr_all",
+    "arr_unique",
+    "arr_flatten",
+    "arr_range",
+    "arr_keys",
+    "math_abs",
+    "math_min",
+    "math_max",
+    "math_sum",
+    "math_mean",
+    "json_parse",
+    "json_stringify",
+    "win_snapshot",
+    "win_registry_get",
+    "win_env_get",
+    "crypto_hash",
+    "crypto_uuid",
+    "sort",
+    "where",
+    "map",
+    "reduce",
+    "take",
+    "reverse",
+    "first",
+    "last",
+    "any",
+    "all",
 ];
 
 /// Box an async closure into the `ToolHandler` signature.
@@ -131,8 +191,17 @@ fn observation_tool_result(observation: crate::operation::Observation) -> CallTo
         .and_then(|data| data.get("stdout"))
         .and_then(|stdout| stdout.get("summary").or_else(|| stdout.get("text")))
         .and_then(Value::as_str)
-        .or_else(|| observation.error.as_ref().map(|error| error.message.as_str()))
-        .unwrap_or(if observation.ok { "operation completed" } else { "operation failed" })
+        .or_else(|| {
+            observation
+                .error
+                .as_ref()
+                .map(|error| error.message.as_str())
+        })
+        .unwrap_or(if observation.ok {
+            "operation completed"
+        } else {
+            "operation failed"
+        })
         .to_string();
     CallToolResult {
         content: vec![Content::Text { text }],
@@ -247,22 +316,16 @@ async fn execute_via_runtime(
     });
 
     let exec_result = if timeout_ms > 0 {
-        match tokio::time::timeout(
-            std::time::Duration::from_millis(timeout_ms),
-            rx,
-        )
-        .await
-        {
+        match tokio::time::timeout(std::time::Duration::from_millis(timeout_ms), rx).await {
             Ok(inner) => inner,
             Err(_elapsed) => {
                 // Outer timeout fired. Return RPC error per mcp_stdio_tests
                 // contract: message "timed out after {N}ms", data.codeLength
                 // set, no source echo.
-                return Err(RpcError::new(
-                    -1,
-                    format!("timed out after {}ms", timeout_ms),
-                )
-                .with_data(json!({ "codeLength": code_bytes })));
+                return Err(
+                    RpcError::new(-1, format!("timed out after {}ms", timeout_ms))
+                        .with_data(json!({ "codeLength": code_bytes })),
+                );
             }
         }
     } else {
@@ -294,20 +357,16 @@ async fn execute_via_runtime(
             .as_ref()
             .map(|e| e.code.as_str())
             .unwrap_or("E_INTERNAL");
-        let msg = err
-            .as_ref()
-            .map(|e| e.message.clone())
-            .unwrap_or_default();
+        let msg = err.as_ref().map(|e| e.message.clone()).unwrap_or_default();
 
         if code_str == "E_TIMEOUT" {
             // Inner T5 deadline fired (CPU-bound timeout). Same contract as
             // outer timeout: RPC error with codeLength, no source echo.
             let reported_ms = if timeout_ms > 0 { timeout_ms } else { 30000 };
-            return Err(RpcError::new(
-                -1,
-                format!("timed out after {}ms", reported_ms),
-            )
-            .with_data(json!({ "codeLength": code_bytes })));
+            return Err(
+                RpcError::new(-1, format!("timed out after {}ms", reported_ms))
+                    .with_data(json!({ "codeLength": code_bytes })),
+            );
         }
 
         // Other errors: return as soft-error result so the agent sees the
@@ -432,16 +491,16 @@ fn exec_tool() -> Tool {
     }
 }
 
-async fn exec_handler(args: Value, runtime: Arc<SharedRuntime>) -> Result<CallToolResult, RpcError> {
+async fn exec_handler(
+    args: Value,
+    runtime: Arc<SharedRuntime>,
+) -> Result<CallToolResult, RpcError> {
     let code = args
         .get("code")
         .and_then(|v| v.as_str())
         .ok_or_else(|| RpcError::new(-32602, "missing required argument: code"))?
         .to_string();
-    let timeout_ms = args
-        .get("timeout_ms")
-        .and_then(|v| v.as_u64())
-        .unwrap_or(0);
+    let timeout_ms = args.get("timeout_ms").and_then(|v| v.as_u64()).unwrap_or(0);
     execute_via_runtime(runtime, code, timeout_ms, "mcp-exec").await
 }
 
@@ -484,9 +543,7 @@ async fn system_snapshot_handler(
                 .filter_map(|x| x.as_str().map(String::from))
                 .collect()
         })
-        .unwrap_or_else(|| {
-            vec!["cpu".into(), "mem".into(), "processes".into()]
-        });
+        .unwrap_or_else(|| vec!["cpu".into(), "mem".into(), "processes".into()]);
 
     let mut fields: Vec<String> = Vec::new();
     for aspect in &aspects {
@@ -582,16 +639,10 @@ async fn process_inspect_handler(
 
     if let Some(mem_mb_gt) = filter.get("mem_mb_gt").and_then(|v| v.as_f64()) {
         let mem_bytes = (mem_mb_gt * 1048576.0) as u64;
-        current = format!(
-            "where({}, fn(p) => p.mem > {})",
-            current, mem_bytes
-        );
+        current = format!("where({}, fn(p) => p.mem > {})", current, mem_bytes);
     }
     if let Some(pid_lt) = filter.get("pid_lt").and_then(|v| v.as_i64()) {
-        current = format!(
-            "where({}, fn(p) => p.pid < {})",
-            current, pid_lt
-        );
+        current = format!("where({}, fn(p) => p.pid < {})", current, pid_lt);
     }
     if let Some(name_contains) = filter.get("name_contains").and_then(|v| v.as_str()) {
         // Escape double quotes in the needle.
@@ -701,10 +752,7 @@ async fn process_terminate_handler(
 
     // Step 2: if confirm_name is provided, verify the process name matches.
     if let Some(expected) = confirm_name {
-        let actual_name = proc_info
-            .get("name")
-            .and_then(|v| v.as_str())
-            .unwrap_or("");
+        let actual_name = proc_info.get("name").and_then(|v| v.as_str()).unwrap_or("");
         if actual_name != expected {
             return Ok(CallToolResult::error_text(format!(
                 "process_terminate: name mismatch — expected {:?}, got {:?}. Aborting to prevent accidental kill.",
@@ -778,9 +826,7 @@ async fn transpile_bash_handler(
     let ae_src = match crate::transpile::bash::transpile_bash_to_ae(bash_code) {
         Ok(s) => s,
         Err(e) => {
-            return Ok(CallToolResult::error_text(format!(
-                "transpile failed: {e}"
-            )));
+            return Ok(CallToolResult::error_text(format!("transpile failed: {e}")));
         }
     };
 
@@ -804,10 +850,7 @@ async fn transpile_bash_handler(
                 result.insert("tool_calls".into(), Value::Array(tool_calls));
             }
             Err(e) => {
-                result.insert(
-                    "tool_calls_error".into(),
-                    Value::String(e.to_string()),
-                );
+                result.insert("tool_calls_error".into(), Value::String(e.to_string()));
             }
         }
     }
@@ -848,16 +891,16 @@ fn eval_tool() -> Tool {
     }
 }
 
-async fn eval_handler(args: Value, runtime: Arc<SharedRuntime>) -> Result<CallToolResult, RpcError> {
+async fn eval_handler(
+    args: Value,
+    runtime: Arc<SharedRuntime>,
+) -> Result<CallToolResult, RpcError> {
     let code = args
         .get("code")
         .and_then(|v| v.as_str())
         .ok_or_else(|| RpcError::new(-32602, "missing required argument: code"))?
         .to_string();
-    let timeout_ms = args
-        .get("timeout_ms")
-        .and_then(|v| v.as_u64())
-        .unwrap_or(0);
+    let timeout_ms = args.get("timeout_ms").and_then(|v| v.as_u64()).unwrap_or(0);
     let result = execute_via_runtime(runtime, code, timeout_ms, "mcp-eval").await?;
     let hints = AgentHints {
         next_actions: vec!["describe_capabilities".into(), "system_snapshot".into()],
@@ -930,7 +973,11 @@ mod tests {
         assert!(names.contains(&"repo_search"));
         assert!(names.contains(&"test_discover"));
         assert!(names.contains(&"ops_list"));
-        assert!(tools.len() >= 20, "expected legacy + full 1.0 op surface, got {}", tools.len());
+        assert!(
+            tools.len() >= 20,
+            "expected legacy + full 1.0 op surface, got {}",
+            tools.len()
+        );
     }
 
     #[test]
@@ -942,7 +989,9 @@ mod tests {
             .iter()
             .find(|t| t.schema.name == "system_snapshot")
             .unwrap();
-        let aspects_schema = snap.schema.input_schema
+        let aspects_schema = snap
+            .schema
+            .input_schema
             .get("properties")
             .and_then(|p| p.get("aspects"))
             .and_then(|a| a.get("items"))

@@ -128,7 +128,9 @@ pub fn check_expected_hash(content: &str, expected: Option<&str>) -> Result<(), 
 }
 
 pub fn arg_str(args: &Value, key: &str) -> Option<String> {
-    args.get(key).and_then(|v| v.as_str()).map(|s| s.to_string())
+    args.get(key)
+        .and_then(|v| v.as_str())
+        .map(|s| s.to_string())
 }
 
 pub fn arg_u64(args: &Value, key: &str, default: u64) -> u64 {

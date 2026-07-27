@@ -1,10 +1,10 @@
 // benches/eval_performance.rs
 // Benchmarks for the AetherShell evaluator
 
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use verseshell::env::Env;
 use verseshell::eval::eval_program;
 use verseshell::parser::parse_program;
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
 fn create_test_env() -> Env {
     Env::new()

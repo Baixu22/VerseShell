@@ -1,4 +1,4 @@
-﻿//! Git status/diff/log semantic reducer — short summaries only.
+//! Git status/diff/log semantic reducer — short summaries only.
 
 use super::{ReduceInput, ReduceOutput};
 use regex::Regex;
@@ -121,7 +121,10 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
 
     let commits: Vec<String> = re_commit()
         .captures_iter(text)
-        .filter_map(|c| c.name("hash").map(|m| m.as_str()[..7.min(m.as_str().len())].to_string()))
+        .filter_map(|c| {
+            c.name("hash")
+                .map(|m| m.as_str()[..7.min(m.as_str().len())].to_string())
+        })
         .take(5)
         .collect();
     if !commits.is_empty() {

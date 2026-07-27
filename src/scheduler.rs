@@ -127,7 +127,11 @@ pub struct JobScheduler {
 
 impl JobScheduler {
     /// Create a new scheduler with N worker threads.
-    pub fn new(num_workers: usize, default_cpu_budget: usize, default_mem_budget: u64) -> Arc<Self> {
+    pub fn new(
+        num_workers: usize,
+        default_cpu_budget: usize,
+        default_mem_budget: u64,
+    ) -> Arc<Self> {
         let mut workers = Vec::with_capacity(num_workers);
         for i in 0..num_workers {
             workers.push(Arc::new(Worker::new(i)));
@@ -212,7 +216,10 @@ impl JobScheduler {
         }
         drop(quotas);
         let mut quotas = self.quotas.write().unwrap();
-        let q = Arc::new(AgentQuota::new(self.default_cpu_budget, self.default_mem_budget));
+        let q = Arc::new(AgentQuota::new(
+            self.default_cpu_budget,
+            self.default_mem_budget,
+        ));
         quotas.insert(agent_id.to_string(), Arc::clone(&q));
         q
     }
@@ -229,11 +236,7 @@ impl JobScheduler {
     /// Steal a job from another worker's queue if available.
     fn steal_job(&self, thief_id: usize) -> Option<ScheduledJob> {
         // Try to steal from the worker with the longest queue
-        let targets: Vec<_> = self
-            .workers
-            .iter()
-            .filter(|w| w.id != thief_id)
-            .collect();
+        let targets: Vec<_> = self.workers.iter().filter(|w| w.id != thief_id).collect();
 
         // Shuffle to avoid herd behavior
         let mut targets = targets;
@@ -316,17 +319,16 @@ fn worker_loop(worker: Arc<Worker>, scheduler: Arc<JobScheduler>) {
                 // Wait with timeout
                 let idle_start = Instant::now();
                 let mut queue = worker.queue.lock().unwrap();
-                let result = worker
-                    .condvar
-                    .wait_timeout(queue, idle_poll)
-                    .unwrap();
+                let result = worker.condvar.wait_timeout(queue, idle_poll).unwrap();
                 queue = result.0;
                 // Check if a job arrived
                 if let Some(job) = queue.pop_front() {
                     drop(queue);
                     execute_job(&worker, &scheduler, job);
                 } else {
-                    worker.idle.fetch_add(idle_start.elapsed().as_nanos() as u64, Ordering::Relaxed);
+                    worker
+                        .idle
+                        .fetch_add(idle_start.elapsed().as_nanos() as u64, Ordering::Relaxed);
                 }
             }
         }
@@ -398,10 +400,15 @@ mod tests {
 
         for _ in 0..10 {
             let c = Arc::clone(&counter);
-            assert!(s.submit("agent-a", Priority::Normal, Box::new(move || {
-                c.fetch_add(1, Ordering::Relaxed);
-                thread::sleep(Duration::from_millis(1));
-            }), 1000));
+            assert!(s.submit(
+                "agent-a",
+                Priority::Normal,
+                Box::new(move || {
+                    c.fetch_add(1, Ordering::Relaxed);
+                    thread::sleep(Duration::from_millis(1));
+                }),
+                1000
+            ));
         }
 
         // Wait for completion
@@ -419,12 +426,17 @@ mod tests {
         for _ in 0..5 {
             let running_now = Arc::clone(&running);
             let maximum = Arc::clone(&max_running);
-            assert!(s.submit("agent-a", Priority::Normal, Box::new(move || {
-                let active = running_now.fetch_add(1, Ordering::SeqCst) + 1;
-                maximum.fetch_max(active, Ordering::SeqCst);
-                thread::sleep(Duration::from_millis(5));
-                running_now.fetch_sub(1, Ordering::SeqCst);
-            }), 5000));
+            assert!(s.submit(
+                "agent-a",
+                Priority::Normal,
+                Box::new(move || {
+                    let active = running_now.fetch_add(1, Ordering::SeqCst) + 1;
+                    maximum.fetch_max(active, Ordering::SeqCst);
+                    thread::sleep(Duration::from_millis(5));
+                    running_now.fetch_sub(1, Ordering::SeqCst);
+                }),
+                5000
+            ));
         }
 
         thread::sleep(Duration::from_millis(100));
@@ -439,21 +451,36 @@ mod tests {
 
         // Occupy the only worker so low/high are both queued before selection.
         let (release_tx, release_rx) = std::sync::mpsc::channel();
-        s.submit("blocker", Priority::Normal, Box::new(move || {
-            let _ = release_rx.recv();
-        }), 1000);
+        s.submit(
+            "blocker",
+            Priority::Normal,
+            Box::new(move || {
+                let _ = release_rx.recv();
+            }),
+            1000,
+        );
         thread::sleep(Duration::from_millis(5));
 
         // Submit low priority first, then high
         let o1 = Arc::clone(&order);
-        s.submit("a", Priority::Low, Box::new(move || {
-            o1.lock().unwrap().push("low");
-        }), 1000);
+        s.submit(
+            "a",
+            Priority::Low,
+            Box::new(move || {
+                o1.lock().unwrap().push("low");
+            }),
+            1000,
+        );
 
         let o2 = Arc::clone(&order);
-        s.submit("a", Priority::High, Box::new(move || {
-            o2.lock().unwrap().push("high");
-        }), 1000);
+        s.submit(
+            "a",
+            Priority::High,
+            Box::new(move || {
+                o2.lock().unwrap().push("high");
+            }),
+            1000,
+        );
 
         release_tx.send(()).unwrap();
         thread::sleep(Duration::from_millis(30));

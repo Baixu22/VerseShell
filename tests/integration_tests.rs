@@ -79,7 +79,10 @@ fn test_variables() {
 
 #[test]
 fn test_string_interpolation() {
-    assert_eq!(run("let name = \"world\"; \"hello ${name}\""), "hello world");
+    assert_eq!(
+        run("let name = \"world\"; \"hello ${name}\""),
+        "hello world"
+    );
     assert_eq!(run("\"1+1=${1+1}\""), "1+1=2");
 }
 
@@ -91,7 +94,10 @@ fn test_lambda() {
 
 #[test]
 fn test_match() {
-    assert_eq!(run("match 2 { 1 => \"one\", 2 => \"two\", _ => \"other\" }"), "two");
+    assert_eq!(
+        run("match 2 { 1 => \"one\", 2 => \"two\", _ => \"other\" }"),
+        "two"
+    );
     assert_eq!(run("match 99 { 1 => \"one\", _ => \"many\" }"), "many");
 }
 
@@ -130,7 +136,10 @@ fn test_pipeline_sort() {
 
 #[test]
 fn test_pipeline_reduce() {
-    assert_eq!(run("let f = fn(acc,x) => acc + x; [1,2,3,4] | reduce f 0"), "10");
+    assert_eq!(
+        run("let f = fn(acc,x) => acc + x; [1,2,3,4] | reduce f 0"),
+        "10"
+    );
 }
 
 #[test]
@@ -272,7 +281,10 @@ fn test_str_length() {
 
 #[test]
 fn test_file_exists() {
-    assert_eq!(run("file.exists(\"Cargo.toml\")"), "{exists: true, is_dir: false, is_file: true, path: Cargo.toml}");
+    assert_eq!(
+        run("file.exists(\"Cargo.toml\")"),
+        "{exists: true, is_dir: false, is_file: true, path: Cargo.toml}"
+    );
 }
 
 #[test]
@@ -341,8 +353,11 @@ fn test_error_recovery() {
 
 #[test]
 fn test_structured_error() {
-    let stderr = run_err("json.parse(\"bad\")");  // This should produce an error
-    assert!(!stderr.is_empty(), "expected error output for json.parse of bad input");
+    let stderr = run_err("json.parse(\"bad\")"); // This should produce an error
+    assert!(
+        !stderr.is_empty(),
+        "expected error output for json.parse of bad input"
+    );
 }
 
 // ==================== Type Introspection ====================
@@ -359,11 +374,16 @@ fn test_describe() {
 
 #[test]
 fn test_agent_mode_refuses_dangerous() {
+    let audit_dir = std::env::temp_dir().join(format!("verseshell-audit-{}", uuid::Uuid::new_v4()));
+    std::fs::create_dir_all(&audit_dir).expect("create isolated audit directory");
+    let audit_log = audit_dir.join("audit.log");
     let output = Command::new(ae_path())
         .args(["--agent", "-c", "sh(\"rm -rf /\")"])
+        .env("AETHER_AUDIT_LOG", &audit_log)
         .output()
         .expect("failed");
     let stderr = String::from_utf8_lossy(&output.stderr);
     // Should output structured error in agent mode
     assert!(stderr.contains("error") || stderr.contains("code") || !output.status.success());
+    let _ = std::fs::remove_dir_all(audit_dir);
 }

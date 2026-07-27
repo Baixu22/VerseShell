@@ -1,4 +1,4 @@
-﻿//! npm/pnpm/yarn install semantic reducer.
+//! npm/pnpm/yarn install semantic reducer.
 
 use super::{diag, ReduceInput, ReduceOutput};
 use regex::Regex;
@@ -8,7 +8,8 @@ use std::sync::OnceLock;
 fn re_added() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
     RE.get_or_init(|| {
-        Regex::new(r"(?P<added>\d+)\s+packages?\s+added|(?P<added2>added)\s+(?P<n>\d+)\s+packages?").unwrap()
+        Regex::new(r"(?P<added>\d+)\s+packages?\s+added|(?P<added2>added)\s+(?P<n>\d+)\s+packages?")
+            .unwrap()
     })
 }
 
@@ -24,18 +25,13 @@ fn re_npm_done() -> &'static Regex {
 
 fn re_audited() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
-    RE.get_or_init(|| {
-        Regex::new(r"found\s+(?P<count>\d+)\s+vulnerabilit").unwrap()
-    })
+    RE.get_or_init(|| Regex::new(r"found\s+(?P<count>\d+)\s+vulnerabilit").unwrap())
 }
 
 fn re_packages_in() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
-    RE.get_or_init(|| {
-        Regex::new(r"(?P<n>\d+)\s+packages?\s+in\s+(?P<elapsed>[\d.]+s)").unwrap()
-    })
+    RE.get_or_init(|| Regex::new(r"(?P<n>\d+)\s+packages?\s+in\s+(?P<elapsed>[\d.]+s)").unwrap())
 }
-
 
 fn re_added_packages() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
@@ -53,13 +49,22 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
     let mut diagnostics = Vec::new();
 
     if let Some(caps) = re_npm_done().captures(text) {
-        if let Some(a) = caps.name("added").and_then(|m| m.as_str().parse::<u64>().ok()) {
+        if let Some(a) = caps
+            .name("added")
+            .and_then(|m| m.as_str().parse::<u64>().ok())
+        {
             stats.insert("added".into(), json!(a));
         }
-        if let Some(r) = caps.name("removed").and_then(|m| m.as_str().parse::<u64>().ok()) {
+        if let Some(r) = caps
+            .name("removed")
+            .and_then(|m| m.as_str().parse::<u64>().ok())
+        {
             stats.insert("removed".into(), json!(r));
         }
-        if let Some(c) = caps.name("changed").and_then(|m| m.as_str().parse::<u64>().ok()) {
+        if let Some(c) = caps
+            .name("changed")
+            .and_then(|m| m.as_str().parse::<u64>().ok())
+        {
             stats.insert("changed".into(), json!(c));
         }
         if let Some(e) = caps.name("elapsed") {
@@ -80,7 +85,10 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
     }
 
     if let Some(caps) = re_audited().captures(text) {
-        if let Some(c) = caps.name("count").and_then(|m| m.as_str().parse::<u64>().ok()) {
+        if let Some(c) = caps
+            .name("count")
+            .and_then(|m| m.as_str().parse::<u64>().ok())
+        {
             stats.insert("vulnerabilities".into(), json!(c));
             if c > 0 {
                 diagnostics.push(diag(
@@ -103,14 +111,7 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
     if !peer_lines.is_empty() {
         stats.insert("peer_dep_issues".into(), json!(peer_lines.len()));
         for l in peer_lines {
-            diagnostics.push(diag(
-                "npm",
-                "warning",
-                l.trim(),
-                None,
-                None,
-                None,
-            ));
+            diagnostics.push(diag("npm", "warning", l.trim(), None, None, None));
         }
     }
 

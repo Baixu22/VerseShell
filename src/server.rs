@@ -21,8 +21,8 @@
 //! The wire protocol (line-delimited JSON, `STATS`/`GC`/`REFRESH`/`SHUTDOWN`
 //! control commands) is unchanged — existing clients and tests are unaffected.
 
-use crate::runtime::{AgentRequest, RuntimeConfig, SharedRuntime};
 use crate::operation::{Observation, OperationRegistry, OperationRequest};
+use crate::runtime::{AgentRequest, RuntimeConfig, SharedRuntime};
 use crate::scheduler;
 use anyhow::Result;
 use serde::Serialize;
@@ -106,7 +106,10 @@ fn encode_observation(observation: &Observation) -> String {
         .unwrap_or(false);
     if use_compact {
         let json = serde_json::to_value(observation).unwrap_or_default();
-        format!("O {}", crate::compact::encode_value(&crate::value::Value::from_json(&json)))
+        format!(
+            "O {}",
+            crate::compact::encode_value(&crate::value::Value::from_json(&json))
+        )
     } else {
         serde_json::to_string(observation).unwrap_or_default()
     }
@@ -291,9 +294,11 @@ async fn serve_stdio(runtime: SharedRuntime, use_scheduler: bool) -> Result<()> 
             } else {
                 let rt_clone = runtime.clone_ref();
                 let operations_clone = operations.clone();
-                let out_str = tokio::task::spawn_blocking(move || execute_server_request(req, &rt_clone, &operations_clone))
-                    .await
-                    .map_err(|e| anyhow::anyhow!("worker task panicked: {}", e))?;
+                let out_str = tokio::task::spawn_blocking(move || {
+                    execute_server_request(req, &rt_clone, &operations_clone)
+                })
+                .await
+                .map_err(|e| anyhow::anyhow!("worker task panicked: {}", e))?;
                 write_line(&out, &out_str);
             }
         } else {
@@ -304,9 +309,11 @@ async fn serve_stdio(runtime: SharedRuntime, use_scheduler: bool) -> Result<()> 
                 let out_clone = Arc::clone(&out);
                 let operations_clone = operations.clone();
                 let handle = tokio::spawn(async move {
-                    let out_str = tokio::task::spawn_blocking(move || execute_server_request(req, &rt_clone, &operations_clone))
-                        .await
-                        .map_err(|e| anyhow::anyhow!("worker task panicked: {}", e))?;
+                    let out_str = tokio::task::spawn_blocking(move || {
+                        execute_server_request(req, &rt_clone, &operations_clone)
+                    })
+                    .await
+                    .map_err(|e| anyhow::anyhow!("worker task panicked: {}", e))?;
                     write_line(&out_clone, &out_str);
                     Ok::<(), anyhow::Error>(())
                 });

@@ -1,4 +1,4 @@
-﻿//! Cargo build/check/test/clippy semantic reducer.
+//! Cargo build/check/test/clippy semantic reducer.
 
 use super::{diag, diag_rich, normalize_path, ReduceInput, ReduceOutput};
 use regex::Regex;
@@ -7,23 +7,17 @@ use std::sync::OnceLock;
 
 fn re_error_header() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
-    RE.get_or_init(|| {
-        Regex::new(r"(?m)^(error(?:\[(?P<code>E\d+)\])?): (?P<msg>.+)$").unwrap()
-    })
+    RE.get_or_init(|| Regex::new(r"(?m)^(error(?:\[(?P<code>E\d+)\])?): (?P<msg>.+)$").unwrap())
 }
 
 fn re_warning_header() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
-    RE.get_or_init(|| {
-        Regex::new(r"(?m)^(warning(?:\[(?P<code>[^\]]+)\])?): (?P<msg>.+)$").unwrap()
-    })
+    RE.get_or_init(|| Regex::new(r"(?m)^(warning(?:\[(?P<code>[^\]]+)\])?): (?P<msg>.+)$").unwrap())
 }
 
 fn re_location() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
-    RE.get_or_init(|| {
-        Regex::new(r"^\s*-->\s+(?P<path>.+):(?P<line>\d+):(?P<col>\d+)\s*$").unwrap()
-    })
+    RE.get_or_init(|| Regex::new(r"^\s*-->\s+(?P<path>.+):(?P<line>\d+):(?P<col>\d+)\s*$").unwrap())
 }
 
 fn re_expected_found() -> &'static Regex {
@@ -68,7 +62,11 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
         } else {
             None
         };
-        let severity = if err_caps.is_some() { "error" } else { "warning" };
+        let severity = if err_caps.is_some() {
+            "error"
+        } else {
+            "warning"
+        };
         if let Some(caps) = err_caps.or(warn_caps) {
             let code = caps.name("code").map(|m| m.as_str().to_string());
             let mut message = caps
@@ -77,9 +75,7 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
                 .unwrap_or_else(|| line.trim().to_string());
             // Skip meta-messages that are not real diagnostics
             let lower_msg = message.to_ascii_lowercase();
-            if lower_msg.contains("aborting due to")
-                || lower_msg.contains("could not compile")
-            {
+            if lower_msg.contains("aborting due to") || lower_msg.contains("could not compile") {
                 i += 1;
                 continue;
             }
@@ -98,9 +94,7 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
                     break;
                 }
                 if let Some(loc) = re_location().captures(l) {
-                    path = loc
-                        .name("path")
-                        .map(|m| normalize_path(m.as_str().trim()));
+                    path = loc.name("path").map(|m| normalize_path(m.as_str().trim()));
                     line_no = loc.name("line").and_then(|m| m.as_str().parse().ok());
                     col = loc.name("col").and_then(|m| m.as_str().parse().ok());
                 }
@@ -161,10 +155,7 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
     }
 
     let mut stats = std::collections::BTreeMap::new();
-    let errors = diagnostics
-        .iter()
-        .filter(|d| d.severity == "error")
-        .count();
+    let errors = diagnostics.iter().filter(|d| d.severity == "error").count();
     let warnings = diagnostics
         .iter()
         .filter(|d| d.severity == "warning")
@@ -220,17 +211,17 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
                 ) + &loc
             })
             .unwrap_or_else(|| "cargo failed".into());
-        Some(format!("cargo: {errors} error(s), {warnings} warning(s); {first}"))
+        Some(format!(
+            "cargo: {errors} error(s), {warnings} warning(s); {first}"
+        ))
     } else if let (Some(Value::Number(p)), Some(Value::Number(f))) =
         (stats.get("tests_passed"), stats.get("tests_failed"))
     {
         Some(format!(
             "cargo test: {} passed, {} failed, {} ignored",
-            p, f,
-            stats
-                .get("tests_ignored")
-                .cloned()
-                .unwrap_or(json!(0))
+            p,
+            f,
+            stats.get("tests_ignored").cloned().unwrap_or(json!(0))
         ))
     } else if let Some(Value::String(elapsed)) = stats.get("elapsed") {
         Some(format!(
@@ -238,7 +229,10 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
             warnings, elapsed
         ))
     } else {
-        Some(format!("cargo completed successfully ({} warning(s))", warnings))
+        Some(format!(
+            "cargo completed successfully ({} warning(s))",
+            warnings
+        ))
     };
 
     // Keep only errors on failure for model focus; include warnings on success.

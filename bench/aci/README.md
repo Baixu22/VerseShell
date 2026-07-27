@@ -9,6 +9,7 @@ Agent-level A/B framework comparing **raw shell** (Condition A) vs **VerseShell 
 ```powershell
 $env:AETHER_APPROVE_ALL = "1"
 python bench/aci/runners/run_suite.py --mode mock
+# Use --out <directory>/latest.json to keep a full result bundle outside the repo.
 # optional live (multi-model config + cache)
 python bench/aci/runners/run_suite.py --mode live
 ```

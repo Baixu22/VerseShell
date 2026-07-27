@@ -1,7 +1,11 @@
 use anyhow::Result;
 
 use crate::{
-    ast::Stmt, builtins, env::Env, ir::{IRCompiler, IREvaluator}, parser,
+    ast::Stmt,
+    builtins,
+    env::Env,
+    ir::{IRCompiler, IREvaluator},
+    parser,
     safety::{self, Mode, SafetyError},
 };
 

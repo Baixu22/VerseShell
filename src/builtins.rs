@@ -2,7 +2,9 @@
 #![allow(dead_code, unused_variables)]
 
 // Stub helpers used by builtin implementations
-fn validate_http_url(url: &str) -> Result<String> { Ok(url.to_string()) }
+fn validate_http_url(url: &str) -> Result<String> {
+    Ok(url.to_string())
+}
 fn create_secure_http_client() -> Result<reqwest::blocking::Client> {
     let timeout_secs = current_timeout_secs();
     Ok(reqwest::blocking::Client::builder()
@@ -10,9 +12,20 @@ fn create_secure_http_client() -> Result<reqwest::blocking::Client> {
         .build()
         .unwrap_or_else(|_| reqwest::blocking::Client::new()))
 }
-fn validate_read_path(p: &str) -> Result<std::path::PathBuf> { let path = std::path::PathBuf::from(p); if path.exists() { Ok(path) } else { Err(anyhow::anyhow!("path does not exist: {}", p)) } }
-fn check_file_size_limit(_size: u64) -> Result<()> { Ok(()) }
-fn validate_sh_allowed() -> Result<()> { Ok(()) }
+fn validate_read_path(p: &str) -> Result<std::path::PathBuf> {
+    let path = std::path::PathBuf::from(p);
+    if path.exists() {
+        Ok(path)
+    } else {
+        Err(anyhow::anyhow!("path does not exist: {}", p))
+    }
+}
+fn check_file_size_limit(_size: u64) -> Result<()> {
+    Ok(())
+}
+fn validate_sh_allowed() -> Result<()> {
+    Ok(())
+}
 
 // ── Phase 4: deadline-aware timeout ─────────────────────────────────
 //
@@ -80,7 +93,6 @@ fn current_timeout_secs() -> u64 {
         })
         .unwrap_or(30) // no deadline — default 30s
 }
-
 
 #[allow(dead_code, unreachable_code, unused_variables)]
 use anyhow::{anyhow, Context, Result};
@@ -3807,8 +3819,8 @@ static BUILTIN_DISPATCH: &[fn(Vec<Value>, Option<Value>, &mut Env) -> Result<Val
     |args, input, _| bi_governor_status(args, input), // 1137
     |args, input, _| bi_governor_reset(args, input),  // 1138
     // AI tool environment detection
-    |args, input, _| bi_env_starship(args, input),    // 1139
-    |args, input, _| bi_env_claude(args, input),      // 1140
+    |args, input, _| bi_env_starship(args, input), // 1139
+    |args, input, _| bi_env_claude(args, input),   // 1140
 ];
 
 fn fast_builtin_lookup(
@@ -3881,19 +3893,16 @@ pub fn call_with_input(
         "describe" => bi_describe(args, input),
 
         // AI-enhanced commands (removed)
-        "ai" | "ai-suggest" | "suggest" | "ai-explain" | "explain" | "ai-complete" | "complete" | "ai-fix" | "fix" => {
-            Err(anyhow!("AI commands are not available in this build"))
-        }
+        "ai" | "ai-suggest" | "suggest" | "ai-explain" | "explain" | "ai-complete" | "complete"
+        | "ai-fix" | "fix" => Err(anyhow!("AI commands are not available in this build")),
 
         // AI/Agents (removed)
-        "agent" | "swarm" => {
-            Err(anyhow!("Agent commands are not available in this build"))
-        }
+        "agent" | "swarm" => Err(anyhow!("Agent commands are not available in this build")),
 
         // AI Backend Detection (removed)
-        "ai_backends" | "ai-backends" | "ai_detect" | "ai-detect" => {
-            Err(anyhow!("AI backend detection is not available in this build"))
-        }
+        "ai_backends" | "ai-backends" | "ai_detect" | "ai-detect" => Err(anyhow!(
+            "AI backend detection is not available in this build"
+        )),
 
         // AI Cost Tracking (removed)
         "ai_usage" | "ai-usage" | "ai_cost" | "ai-cost" | "ai_reset_usage" | "ai-reset-usage" => {
@@ -3901,22 +3910,42 @@ pub fn call_with_input(
         }
 
         // GPU Memory Management (removed)
-        "ai_gpu_memory" | "ai-gpu-memory" | "ai_model_fits" | "ai-model-fits" => {
-            Err(anyhow!("GPU memory management is not available in this build"))
-        }
+        "ai_gpu_memory" | "ai-gpu-memory" | "ai_model_fits" | "ai-model-fits" => Err(anyhow!(
+            "GPU memory management is not available in this build"
+        )),
 
         // Provider Routing & Registry (removed)
-        "ai_providers" | "ai-providers" | "ai_routes" | "ai-routes" | "ai_add_route" | "ai-add-route" | "ai_set_default" | "ai-set-default" | "ai_registry_stats" | "ai-registry-stats" | "ai_set_load_balancing" | "ai-set-load-balancing" | "ai_load_balancing" | "ai-load-balancing" => {
-            Err(anyhow!("AI provider routing is not available in this build"))
-        }
+        "ai_providers"
+        | "ai-providers"
+        | "ai_routes"
+        | "ai-routes"
+        | "ai_add_route"
+        | "ai-add-route"
+        | "ai_set_default"
+        | "ai-set-default"
+        | "ai_registry_stats"
+        | "ai-registry-stats"
+        | "ai_set_load_balancing"
+        | "ai-set-load-balancing"
+        | "ai_load_balancing"
+        | "ai-load-balancing" => Err(anyhow!(
+            "AI provider routing is not available in this build"
+        )),
 
         // Model Format Conversion (removed)
-        "ai_convert_model" | "ai-convert-model" | "ai_supported_conversions" | "ai-supported-conversions" | "ai_detect_format" | "ai-detect-format" => {
-            Err(anyhow!("Model format conversion is not available in this build"))
-        }
+        "ai_convert_model"
+        | "ai-convert-model"
+        | "ai_supported_conversions"
+        | "ai-supported-conversions"
+        | "ai_detect_format"
+        | "ai-detect-format" => Err(anyhow!(
+            "Model format conversion is not available in this build"
+        )),
 
         // Local Inference (removed)
-        "ai_local_backends" | "ai-local-backends" | "ai_local_load" | "ai-local-load" | "ai_local_generate" | "ai-local-generate" | "ai_local_embed" | "ai-local-embed" | "ai_local_unload" | "ai-local-unload" => {
+        "ai_local_backends" | "ai-local-backends" | "ai_local_load" | "ai-local-load"
+        | "ai_local_generate" | "ai-local-generate" | "ai_local_embed" | "ai-local-embed"
+        | "ai_local_unload" | "ai-local-unload" => {
             Err(anyhow!("Local inference is not available in this build"))
         }
 
@@ -3977,14 +4006,22 @@ fn levenshtein(a: &str, b: &str) -> usize {
     let b_chars: Vec<char> = b.chars().collect();
     let m = a_chars.len();
     let n = b_chars.len();
-    if m == 0 { return n; }
-    if n == 0 { return m; }
+    if m == 0 {
+        return n;
+    }
+    if n == 0 {
+        return m;
+    }
     let mut prev: Vec<usize> = (0..=n).collect();
     let mut curr = vec![0usize; n + 1];
     for i in 1..=m {
         curr[0] = i;
         for j in 1..=n {
-            let cost = if a_chars[i - 1] == b_chars[j - 1] { 0 } else { 1 };
+            let cost = if a_chars[i - 1] == b_chars[j - 1] {
+                0
+            } else {
+                1
+            };
             curr[j] = (prev[j] + 1).min(curr[j - 1] + 1).min(prev[j - 1] + cost);
         }
         std::mem::swap(&mut prev, &mut curr);
@@ -3995,7 +4032,9 @@ fn levenshtein(a: &str, b: &str) -> usize {
 /// Suggest the closest builtin name by Levenshtein distance (≤3 → "did you mean").
 pub(crate) fn nearest_builtin_hint(input: &str) -> String {
     let names: Vec<&str> = BUILTIN_LOOKUP.keys().copied().collect();
-    if names.is_empty() { return format!("unknown builtin: {}", input); }
+    if names.is_empty() {
+        return format!("unknown builtin: {}", input);
+    }
     let input_lower = input.to_lowercase();
     let mut best: Option<(&str, usize)> = None;
     for name in &names {
@@ -4005,7 +4044,9 @@ pub(crate) fn nearest_builtin_hint(input: &str) -> String {
         }
     }
     match best {
-        Some((name, dist)) if dist <= 3 => format!("unknown builtin: '{}'; did you mean '{}'?", input, name),
+        Some((name, dist)) if dist <= 3 => {
+            format!("unknown builtin: '{}'; did you mean '{}'?", input, name)
+        }
         Some((name, _)) => format!("unknown builtin: '{}'; closest match: '{}'", input, name),
         None => format!("unknown builtin: '{}'", input),
     }
@@ -4013,7 +4054,9 @@ pub(crate) fn nearest_builtin_hint(input: &str) -> String {
 
 /// Suggest the closest method name on a module record by Levenshtein distance.
 pub(crate) fn nearest_method_hint(methods: &[String], field: &str, module: &str) -> String {
-    if methods.is_empty() { return format!("field '{}' not found in module '{}'", field, module); }
+    if methods.is_empty() {
+        return format!("field '{}' not found in module '{}'", field, module);
+    }
     let input_lower = field.to_lowercase();
     let mut best: Option<(&str, usize)> = None;
     for m in methods {
@@ -4023,8 +4066,14 @@ pub(crate) fn nearest_method_hint(methods: &[String], field: &str, module: &str)
         }
     }
     match best {
-        Some((name, dist)) if dist <= 3 => format!("field '{}' not found in module '{}'; did you mean '{}'?", field, module, name),
-        Some((name, _)) => format!("field '{}' not found in module '{}'; closest: '{}'", field, module, name),
+        Some((name, dist)) if dist <= 3 => format!(
+            "field '{}' not found in module '{}'; did you mean '{}'?",
+            field, module, name
+        ),
+        Some((name, _)) => format!(
+            "field '{}' not found in module '{}'; closest: '{}'",
+            field, module, name
+        ),
         None => format!("field '{}' not found in module '{}'", field, module),
     }
 }
@@ -4868,11 +4917,11 @@ fn bi_config(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     let mut history = BTreeMap::new();
     history.insert(
         "max_entries".to_string(),
-Value::Int(config.history.max_entries as i64),
+        Value::Int(config.history.max_entries as i64),
     );
     history.insert(
         "save_on_exit".to_string(),
-Value::Bool(config.history.save_on_exit),
+        Value::Bool(config.history.save_on_exit),
     );
     map.insert("history".to_string(), Value::Record(history));
 
@@ -4949,7 +4998,7 @@ fn bi_config_set(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
         }
     }
 
-// FIXME: method removed -> return error:     config.save()?;
+    // FIXME: method removed -> return error:     config.save()?;
     Ok(Value::Str(format!(
         "Config saved: {} = {:?}",
         path, args[1]
@@ -4957,15 +5006,25 @@ fn bi_config_set(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 }
 
 /// Get config file paths
-fn bi_config_path(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_config_path is not available (ShellConfig methods removed)")) }
+fn bi_config_path(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_config_path is not available (ShellConfig methods removed)"
+    ))
+}
 
 /// Initialize config directories and create default config file
 fn bi_config_init(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
-    Err(anyhow!("builtin bi_config_init is not available (config structure changed)"))
+    Err(anyhow!(
+        "builtin bi_config_init is not available (config structure changed)"
+    ))
 }
 
 /// Reload configuration from disk
-fn bi_config_reload(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_config_reload is not available (reload_config not found)")) }
+fn bi_config_reload(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_config_reload is not available (reload_config not found)"
+    ))
+}
 
 /// List all available color themes
 fn bi_themes() -> Result<Value> {
@@ -4975,112 +5034,53 @@ fn bi_themes() -> Result<Value> {
 // ===================== Plugin Builtins =====================
 
 /// List all registered plugins
-fn bi_plugins(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_plugins is not available (module removed)")) }
-
-
+fn bi_plugins(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_plugins is not available (module removed)"
+    ))
+}
 
 /// Get detailed information about a plugin
-fn bi_plugin_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_plugin_info is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_plugin_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_plugin_info is not available (module removed)"
+    ))
+}
 
 /// Enable a plugin by ID
-fn bi_plugin_enable(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_plugin_enable is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_plugin_enable(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_plugin_enable is not available (module removed)"
+    ))
+}
 
 /// Disable a plugin by ID
-fn bi_plugin_disable(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_plugin_disable is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_plugin_disable(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_plugin_disable is not available (module removed)"
+    ))
+}
 
 /// Load a plugin from a manifest file path
-fn bi_plugin_load(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_plugin_load is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_plugin_load(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_plugin_load is not available (module removed)"
+    ))
+}
 
 /// Unload a plugin by ID
-fn bi_plugin_unload(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_plugin_unload is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_plugin_unload(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_plugin_unload is not available (module removed)"
+    ))
+}
 
 /// List all plugin categories
-fn bi_plugin_categories(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_plugin_categories is not available (module removed)")) }
-
-
+fn bi_plugin_categories(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_plugin_categories is not available (module removed)"
+    ))
+}
 
 fn bi_len(args: Vec<Value>, input: Option<Value>) -> Result<Value> {
     let val = if let Some(input_val) = input {
@@ -6554,239 +6554,29 @@ fn bi_semantic_cache_clear(args: Vec<Value>, _input: Option<Value>) -> Result<Va
 
 // --------------- AI / Agents wrappers (optional) ---------------
 
-fn bi_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn agent_from_record(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin agent_from_record is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn bi_swarm(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_swarm is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn swarm_from_record(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin swarm_from_record is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_agent is not available (module removed)"
+    ))
+}
+
+fn agent_from_record(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin agent_from_record is not available (module removed)"
+    ))
+}
+
+fn bi_swarm(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_swarm is not available (module removed)"
+    ))
+}
+
+fn swarm_from_record(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin swarm_from_record is not available (module removed)"
+    ))
+}
 
 // --------------- File system commands ---------------
 
@@ -6820,9 +6610,7 @@ fn bi_ls(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
             .to_string();
 
         // is_dir from read_dir file_type (free on most OSes, no extra syscall)
-        let is_dir = entry.file_type()
-            .map(|ft| ft.is_dir())
-            .unwrap_or(false);
+        let is_dir = entry.file_type().map(|ft| ft.is_dir()).unwrap_or(false);
 
         let mut record = BTreeMap::new();
         record.insert("name".to_string(), Value::Str(name));
@@ -8247,176 +8035,9 @@ fn bi_describe(_args: Vec<Value>, input: Option<Value>) -> Result<Value> {
 ///   ai("prompt", {audio: ["path"]})           - With audio
 ///   ai("prompt", {video: ["path"]})           - With video
 ///   ai("prompt", {model: "openai:gpt-4o"})    - Specify model
-fn bi_ai(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!("builtin bi_ai is not available (module removed)"))
+}
 
 // ============ Option Type Constructors ============
 
@@ -8453,30 +8074,11 @@ fn bi_none() -> Result<Value> {
 ///
 /// Example:
 ///   ai_backends() | select(["name", "available", "models"])
-fn bi_ai_backends(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_backends is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_backends(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_backends is not available (module removed)"
+    ))
+}
 
 /// ai_detect() - Automatically detect and return the best available backend
 /// Returns: String with the model URI (e.g., "ollama:llama3" or "vllm:model")
@@ -8485,12 +8087,11 @@ fn bi_ai_backends(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { E
 /// Example:
 ///   let backend = ai_detect()
 ///   if backend != "" { ai(backend, "Hello!") }
-fn bi_ai_detect(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_detect is not available (module removed)")) }
-
-
-
-
-
+fn bi_ai_detect(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_detect is not available (module removed)"
+    ))
+}
 
 /// ai_usage() - Get detailed AI usage statistics for the current session
 /// Returns: Record with call_count, total_tokens, total_cost_usd, and per-call records
@@ -8498,38 +8099,33 @@ fn bi_ai_detect(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err
 /// Example:
 ///   ai_usage()
 ///   ai_usage() | get("total_cost_usd")
-fn bi_ai_usage(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_usage is not available (module removed)")) }
-
-
-
-
-
-
+fn bi_ai_usage(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_usage is not available (module removed)"
+    ))
+}
 
 /// ai_cost() - Get total estimated cost for the current session in USD
 /// Returns: Float (cost in USD)
 ///
 /// Example:
 ///   ai_cost()  # => 0.0042
-fn bi_ai_cost(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_cost is not available (module removed)")) }
-
-
-
-
-
+fn bi_ai_cost(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_cost is not available (module removed)"
+    ))
+}
 
 /// ai_reset_usage() - Reset all usage tracking counters
 /// Returns: String confirmation
 ///
 /// Example:
 ///   ai_reset_usage()
-fn bi_ai_reset_usage(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_reset_usage is not available (module removed)")) }
-
-
-
-
-
-
+fn bi_ai_reset_usage(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_reset_usage is not available (module removed)"
+    ))
+}
 
 /// ai_gpu_memory() - Query GPU memory status
 /// Returns: Record with GPU memory info for all available GPUs
@@ -8537,10 +8133,11 @@ fn bi_ai_reset_usage(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> 
 /// Example:
 ///   ai_gpu_memory()
 ///   ai_gpu_memory() | get("gpus") | map(fn(g) => g.free_mb)
-fn bi_ai_gpu_memory(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_gpu_memory is not available (module removed)")) }
-
-
-
+fn bi_ai_gpu_memory(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_gpu_memory is not available (module removed)"
+    ))
+}
 
 /// ai_model_fits(config) - Check if a model fits in GPU memory
 /// Args: config record with params_b (float), file_size_mb (int), quantization (string)
@@ -8549,40 +8146,11 @@ fn bi_ai_gpu_memory(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 /// Example:
 ///   ai_model_fits({params_b: 7.0, quantization: "q4_k_m"})
 ///   ai_model_fits({file_size_mb: 4096})
-fn bi_ai_model_fits(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_model_fits is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_model_fits(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_model_fits is not available (module removed)"
+    ))
+}
 
 // =========================== AI Provider Registry Builtins ===========================
 
@@ -8592,92 +8160,22 @@ fn bi_ai_model_fits(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 /// Example:
 ///   ai_providers()
 ///   ai_providers() | where(fn(p) => p.status == "ready")
-fn bi_ai_providers(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_providers is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_providers(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_providers is not available (module removed)"
+    ))
+}
 
 /// ai_routes() - List all configured routing rules
 /// Returns: Array of records with rule info
 ///
 /// Example:
 ///   ai_routes()
-fn bi_ai_routes(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_routes is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_routes(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_routes is not available (module removed)"
+    ))
+}
 
 /// ai_add_route(config) - Add a routing rule
 /// Args: config record with name, priority (int), condition (string), target (string), allow_fallback (bool)
@@ -8687,115 +8185,11 @@ fn bi_ai_routes(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err
 /// Example:
 ///   ai_add_route({name: "tools_to_openai", priority: 100, condition: "has_tools", target: "openai"})
 ///   ai_add_route({name: "large_to_groq", priority: 50, condition: "tokens_over:4000", target: "groq"})
-fn bi_ai_add_route(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_add_route is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_add_route(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_add_route is not available (module removed)"
+    ))
+}
 
 /// ai_set_default(provider) - Set the default AI provider for registry routing
 /// Args: provider name string (e.g., "openai", "anthropic", "ollama")
@@ -8803,96 +8197,22 @@ fn bi_ai_add_route(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { 
 ///
 /// Example:
 ///   ai_set_default("openai")
-fn bi_ai_set_default(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_set_default is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_set_default(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_set_default is not available (module removed)"
+    ))
+}
 
 /// ai_registry_stats() - Get usage statistics from the provider registry
 /// Returns: Record with per-provider request/token/success counts
 ///
 /// Example:
 ///   ai_registry_stats()
-fn bi_ai_registry_stats(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_registry_stats is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_registry_stats(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_registry_stats is not available (module removed)"
+    ))
+}
 
 /// ai_set_load_balancing(strategy) - Set the load balancing strategy for AI providers
 /// Args: strategy string: "none", "round_robin", "least_latency", "least_requests", "adaptive"
@@ -8903,77 +8223,22 @@ fn bi_ai_registry_stats(_args: Vec<Value>, _input: Option<Value>) -> Result<Valu
 ///   ai_set_load_balancing("round_robin")
 ///   ai_set_load_balancing("least_latency")
 ///   ai_set_load_balancing({type: "weighted", weights: {openai: 3, anthropic: 1}})
-fn bi_ai_set_load_balancing(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_set_load_balancing is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_set_load_balancing(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_set_load_balancing is not available (module removed)"
+    ))
+}
 
 /// ai_load_balancing() - Get the current load balancing strategy
 /// Returns: String describing the active strategy
 ///
 /// Example:
 ///   ai_load_balancing()
-fn bi_ai_load_balancing(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_load_balancing is not available (module removed)")) }
-
-
-
-
-
+fn bi_ai_load_balancing(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_load_balancing is not available (module removed)"
+    ))
+}
 
 /// ai_convert_model(config) - Convert a model between formats
 /// Args: config record with source, target, source_format, target_format, quantization (optional)
@@ -8981,146 +8246,19 @@ fn bi_ai_load_balancing(_args: Vec<Value>, _input: Option<Value>) -> Result<Valu
 ///
 /// Example:
 ///   ai_convert_model({source: "model.pt", target: "model.safetensors", source_format: "pytorch", target_format: "safetensors"})
-fn bi_ai_convert_model(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_convert_model is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_convert_model(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_convert_model is not available (module removed)"
+    ))
+}
 
 /// ai_supported_conversions() - List all supported model format conversions
 /// Returns: Array of records with source_format and target_format
-fn bi_ai_supported_conversions(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_supported_conversions is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_supported_conversions(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_supported_conversions is not available (module removed)"
+    ))
+}
 
 /// ai_detect_format(path) - Detect the format of a model file
 /// Args: path (string)
@@ -9160,103 +8298,22 @@ fn bi_ai_detect_format(args: Vec<Value>) -> Result<Value> {
 ///
 /// Example:
 ///   ai_local_backends()
-fn bi_ai_local_backends(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_local_backends is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_local_backends(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_local_backends is not available (module removed)"
+    ))
+}
 
 /// ai_local_load(path) - Load a local model file into an inference backend
 /// Returns: Record with handle, backend name, and estimated memory
 ///
 /// Example:
 ///   ai_local_load("models/llama-3.2-1b-q4_k_m.gguf")
-fn bi_ai_local_load(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_local_load is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_local_load(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_local_load is not available (module removed)"
+    ))
+}
 
 /// ai_local_generate(handle, prompt, params?) - Generate text using a loaded local model
 /// Returns: Record with generated text, token counts, and performance metrics
@@ -9264,170 +8321,33 @@ fn bi_ai_local_load(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 /// Example:
 ///   ai_local_generate("candle:llama", "What is Rust?")
 ///   ai_local_generate("candle:llama", "Hello", {max_tokens: 100, temperature: 0.5})
-fn bi_ai_local_generate(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_local_generate is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_local_generate(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_local_generate is not available (module removed)"
+    ))
+}
 
 /// ai_local_embed(handle, inputs) - Generate embeddings using a loaded local model
 /// Returns: Record with embeddings array and token count
 ///
 /// Example:
 ///   ai_local_embed("candle:embed-model", ["Hello world", "Rust is great"])
-fn bi_ai_local_embed(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_local_embed is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_local_embed(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_local_embed is not available (module removed)"
+    ))
+}
 
 /// ai_local_unload(handle) - Unload a previously loaded local model
 /// Returns: String confirmation
 ///
 /// Example:
 ///   ai_local_unload("candle:llama")
-fn bi_ai_local_unload(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ai_local_unload is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ai_local_unload(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ai_local_unload is not available (module removed)"
+    ))
+}
 
 // ========== Runtime Type Introspection ==========
 
@@ -9682,31 +8602,35 @@ fn bi_is_type(args: Vec<Value>) -> Result<Value> {
 
 /// ontology_json() - Export the OS ontology as JSON Schema
 /// Returns: Record with the full JSON Schema representation
-fn bi_ontology_json(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ontology_json is not available (module removed)")) }
-
-
-
+fn bi_ontology_json(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ontology_json is not available (module removed)"
+    ))
+}
 
 /// ontology_jsonld() - Export the OS ontology as JSON-LD (Linked Data)
 /// Returns: Record with JSON-LD representation for semantic web
-fn bi_ontology_jsonld(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ontology_jsonld is not available (module removed)")) }
-
-
-
+fn bi_ontology_jsonld(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ontology_jsonld is not available (module removed)"
+    ))
+}
 
 /// ontology_owl() - Export the OS ontology as OWL/RDF Turtle format
 /// Returns: String with OWL Turtle serialization
-fn bi_ontology_owl(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ontology_owl is not available (module removed)")) }
-
-
-
+fn bi_ontology_owl(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ontology_owl is not available (module removed)"
+    ))
+}
 
 /// ontology_shacl() - Export the OS ontology as SHACL shapes for validation
 /// Returns: Record with SHACL shapes graph
-fn bi_ontology_shacl(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ontology_shacl is not available (module removed)")) }
-
-
-
+fn bi_ontology_shacl(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ontology_shacl is not available (module removed)"
+    ))
+}
 
 // ========== MCP Server Detection Functions ==========
 
@@ -9722,26 +8646,11 @@ fn bi_ontology_shacl(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> 
 /// Example:
 ///   let servers = mcp_servers()
 ///   servers | foreach(fn(s) => print(s.name + ": " + len(s.tools) + " tools"))
-fn bi_mcp_servers(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_mcp_servers is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_mcp_servers(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_mcp_servers is not available (module removed)"
+    ))
+}
 
 /// mcp_detect(endpoint?) - Detect MCP server at specific endpoint or find first available
 /// Args:
@@ -9751,43 +8660,11 @@ fn bi_mcp_servers(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { E
 /// Example:
 ///   let fs_server = mcp_detect("http://localhost:3001")
 ///   let any_server = mcp_detect()
-fn bi_mcp_detect(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_mcp_detect is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_mcp_detect(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_mcp_detect is not available (module removed)"
+    ))
+}
 
 /// mcp_cache_clear() - Clear the MCP detection cache
 /// Returns: Bool - true if cache was cleared successfully
@@ -9795,10 +8672,11 @@ fn bi_mcp_detect(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Er
 /// Example:
 ///   mcp_cache_clear()
 ///   let servers = mcp_servers()  # This will re-detect servers
-fn bi_mcp_cache_clear(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_mcp_cache_clear is not available (module removed)")) }
-
-
-
+fn bi_mcp_cache_clear(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_mcp_cache_clear is not available (module removed)"
+    ))
+}
 
 /// mcp_cache_status() - Get MCP cache status information
 /// Returns: Record with cache status details
@@ -9806,65 +8684,20 @@ fn bi_mcp_cache_clear(_args: Vec<Value>, _input: Option<Value>) -> Result<Value>
 /// Example:
 ///   let status = mcp_cache_status()
 ///   print("Cache hit rate: " + status.hit_rate)
-fn bi_mcp_cache_status(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_mcp_cache_status is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_mcp_cache_status(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_mcp_cache_status is not available (module removed)"
+    ))
+}
 
 // ==================== MCP Server/Client Functions ====================
 
 /// Helper function to map category strings to ToolCategory enum
-fn parse_tool_category(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin parse_tool_category is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn parse_tool_category(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin parse_tool_category is not available (module removed)"
+    ))
+}
 
 /// mcp_server(config?) - Create a local MCP server instance for AI tool access
 /// Args:
@@ -9879,100 +8712,11 @@ fn parse_tool_category(_args: Vec<Value>, _input: Option<Value>) -> Result<Value
 ///   let server = mcp_server()
 ///   let safe_server = mcp_server({ max_safety_level: "safe" })
 ///   let k8s_server = mcp_server({ categories: ["kubernetes", "containers"] })
-fn bi_mcp_server(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_mcp_server is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_mcp_server(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_mcp_server is not available (module removed)"
+    ))
+}
 
 /// mcp_tools(config?) - List available MCP tools with their schemas
 /// Args:
@@ -9986,74 +8730,11 @@ fn bi_mcp_server(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Er
 ///   let all_tools = mcp_tools()
 ///   let k8s_tools = mcp_tools({ category: "kubernetes" })
 ///   let git_tools = mcp_tools({ search: "git" })
-fn bi_mcp_tools(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_mcp_tools is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_mcp_tools(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_mcp_tools is not available (module removed)"
+    ))
+}
 
 /// mcp_call(name, args?) - Call an MCP tool by name with arguments
 /// Args:
@@ -10064,77 +8745,11 @@ fn bi_mcp_tools(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err
 /// Example:
 ///   let result = mcp_call("ls", { path: "." })
 ///   let files = mcp_call("find", { directory: "/home", pattern: "*.rs" })
-fn bi_mcp_call(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_mcp_call is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_mcp_call(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_mcp_call is not available (module removed)"
+    ))
+}
 
 /// mcp_resources(type?) - List available MCP resources
 /// Args:
@@ -10144,49 +8759,11 @@ fn bi_mcp_call(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(
 /// Example:
 ///   let resources = mcp_resources()
 ///   let text_resources = mcp_resources("text")
-fn bi_mcp_resources(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_mcp_resources is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_mcp_resources(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_mcp_resources is not available (module removed)"
+    ))
+}
 
 /// mcp_prompts(name?) - List available MCP prompts or get specific prompt
 /// Args:
@@ -10196,76 +8773,11 @@ fn bi_mcp_resources(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 /// Example:
 ///   let prompts = mcp_prompts()
 ///   let find_prompt = mcp_prompts("find-tool")
-fn bi_mcp_prompts(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_mcp_prompts is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_mcp_prompts(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_mcp_prompts is not available (module removed)"
+    ))
+}
 
 /// mcp_connect(endpoint) - Connect to an external MCP server
 /// Args:
@@ -10275,40 +8787,11 @@ fn bi_mcp_prompts(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { E
 /// Example:
 ///   let client = mcp_connect("http://localhost:3001")
 ///   let tools = client.tools
-fn bi_mcp_connect(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_mcp_connect is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_mcp_connect(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_mcp_connect is not available (module removed)"
+    ))
+}
 
 // Helper function to convert owned Value to serde_json::Value
 fn value_to_json_owned(v: Value) -> serde_json::Value {
@@ -10621,9 +9104,11 @@ fn bi_join(args: Vec<Value>, input: Option<Value>) -> Result<Value> {
     } else {
         // Not piped: detect arg order
         // join(arr, sep) or join(sep, arr) — auto-detect
-        let a0 = args.first()
+        let a0 = args
+            .first()
             .ok_or_else(|| crate::safety::arg_err("join requires array input"))?;
-        let a1 = args.get(1)
+        let a1 = args
+            .get(1)
             .ok_or_else(|| crate::safety::arg_err("join requires delimiter argument"))?;
         // If first arg is String and second is Array, swap
         if matches!(a0, Value::Str(_)) && matches!(a1, Value::Array(_)) {
@@ -11809,58 +10294,11 @@ fn bi_ab_decode(args: Vec<Value>, input: Option<Value>) -> Result<Value> {
 ///
 /// Example:
 ///   nn_create("policy", [8, 16, 8, 4])  # 8 inputs, 2 hidden layers, 4 outputs
-fn bi_nn_create(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_nn_create is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_nn_create(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_nn_create is not available (module removed)"
+    ))
+}
 
 /// nn_forward(network, input)
 /// Forward pass through the network
@@ -11868,27 +10306,11 @@ fn bi_nn_create(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err
 ///   - network: Record - Network from nn_create
 ///   - input: Array[Float] - Input values
 /// Returns: Array[Float] - Output values
-fn bi_nn_forward(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_nn_forward is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_nn_forward(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_nn_forward is not available (module removed)"
+    ))
+}
 
 /// nn_mutate(network, rate, strength)
 /// Mutate network parameters
@@ -11897,25 +10319,11 @@ fn bi_nn_forward(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Er
 ///   - rate: Float - Mutation probability (0.0-1.0)
 ///   - strength: Float - Mutation magnitude
 /// Returns: Record - Mutated network
-fn bi_nn_mutate(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_nn_mutate is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_nn_mutate(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_nn_mutate is not available (module removed)"
+    ))
+}
 
 /// nn_crossover(network1, network2)
 /// Crossover two networks
@@ -11923,32 +10331,22 @@ fn bi_nn_mutate(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err
 ///   - network1: Record - First parent network
 ///   - network2: Record - Second parent network
 /// Returns: Record - Child network
-fn bi_nn_crossover(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_nn_crossover is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
+fn bi_nn_crossover(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_nn_crossover is not available (module removed)"
+    ))
+}
 
 /// nn_params(network)
 /// Get network parameters as flat array
 /// Args:
 ///   - network: Record - Network
 /// Returns: Array[Float] - All weights and biases
-fn bi_nn_params(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_nn_params is not available (module removed)")) }
-
-
-
-
-
-
-
-
+fn bi_nn_params(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_nn_params is not available (module removed)"
+    ))
+}
 
 /// nn_set_params(network, params)
 /// Set network parameters from flat array
@@ -11956,107 +10354,33 @@ fn bi_nn_params(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err
 ///   - network: Record - Network
 ///   - params: Array[Float] - New parameters
 /// Returns: Record - Updated network
-fn bi_nn_set_params(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_nn_set_params is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_nn_set_params(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_nn_set_params is not available (module removed)"
+    ))
+}
 
 /// nn_layers(network)
 /// Get layer information
 /// Args:
 ///   - network: Record - Network
 /// Returns: Array[Record] - Layer specifications
-fn bi_nn_layers(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_nn_layers is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_nn_layers(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_nn_layers is not available (module removed)"
+    ))
+}
 
 /// nn_info(network)
 /// Get network summary information
 /// Args:
 ///   - network: Record - Network
 /// Returns: Record - Network info including total params, layer count, etc.
-fn bi_nn_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_nn_info is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_nn_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_nn_info is not available (module removed)"
+    ))
+}
 
 /// consensus_net(name, agent_count, input_size, hidden_size, output_size)
 /// Create a consensus network for distributed decision making
@@ -12067,22 +10391,11 @@ fn bi_nn_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(a
 ///   - hidden_size: Int - Hidden layer size
 ///   - output_size: Int - Output dimension (decision size)
 /// Returns: Record - Consensus network
-fn bi_consensus_net(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_consensus_net is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_consensus_net(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_consensus_net is not available (module removed)"
+    ))
+}
 
 /// consensus_vote(network, agent_inputs)
 /// Run consensus voting across all agents
@@ -12090,112 +10403,22 @@ fn bi_consensus_net(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 ///   - network: Record - Consensus network
 ///   - agent_inputs: Array[Array[Float]] - Each agent's input
 /// Returns: Record - {decisions: Array[Array], consensus: Array[Float], confidence: Float}
-fn bi_consensus_vote(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_consensus_vote is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_consensus_vote(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_consensus_vote is not available (module removed)"
+    ))
+}
 
 /// activation(name)
 /// Get activation function by name
 /// Args:
 ///   - name: String - "relu", "sigmoid", "tanh", "softmax", "linear", "swish", "leaky_relu"
 /// Returns: Record - Activation function info
-fn bi_activation(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_activation is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_activation(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_activation is not available (module removed)"
+    ))
+}
 
 // --------------- Evolution Builtins ---------------
 
@@ -12206,54 +10429,11 @@ fn bi_activation(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Er
 ///   - genome_type: String - "nn" for neural network, "vec" for float vector
 ///   - config: Record (optional) - Evolution configuration
 /// Returns: Record - Population state
-fn bi_population(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_population is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_population(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_population is not available (module removed)"
+    ))
+}
 
 /// evolve(population, fitness_fn, generations)
 /// Run evolution for multiple generations
@@ -12262,194 +10442,35 @@ fn bi_population(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Er
 ///   - fitness_fn: Lambda - fn(genome) => Float
 ///   - generations: Int - Number of generations
 /// Returns: Record - Updated population with stats
-fn bi_evolve(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_evolve is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_evolve(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_evolve is not available (module removed)"
+    ))
+}
 
 /// evolve_step(population, fitness_fn)
 /// Run single evolution step
-fn bi_evolve_step(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_evolve_step is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_evolve_step(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_evolve_step is not available (module removed)"
+    ))
+}
 
 /// fitness(population, fitness_fn)
 /// Evaluate fitness of all individuals
-fn bi_fitness(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_fitness is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_fitness(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_fitness is not available (module removed)"
+    ))
+}
 
 /// best_individual(population)
 /// Get the best individual from population
-fn bi_best_individual(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_best_individual is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_best_individual(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_best_individual is not available (module removed)"
+    ))
+}
 
 /// evolution_stats(population)
 /// Get evolution statistics
@@ -12472,210 +10493,35 @@ fn bi_evolution_stats(args: Vec<Value>, input: Option<Value>) -> Result<Value> {
 /// Args:
 ///   - name: String - "tournament", "roulette", "rank", "truncation", "elite"
 ///   - param: Int/Float (optional) - Strategy parameter
-fn bi_selection_strategy(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_selection_strategy is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_selection_strategy(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_selection_strategy is not available (module removed)"
+    ))
+}
 
 /// crossover_strategy(name, [param])
 /// Create crossover strategy
-fn bi_crossover_strategy(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_crossover_strategy is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_crossover_strategy(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_crossover_strategy is not available (module removed)"
+    ))
+}
 
 /// evolution_config([options])
 /// Create evolution configuration
-fn bi_evolution_config(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_evolution_config is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_evolution_config(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_evolution_config is not available (module removed)"
+    ))
+}
 
 /// coevolve(populations, fitness_fn, generations)
 /// Run coevolution across multiple populations
-fn bi_coevolve(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_coevolve is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_coevolve(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_coevolve is not available (module removed)"
+    ))
+}
 
 // --------------- Neural/Evolution Helpers ---------------
 
@@ -12687,58 +10533,29 @@ fn value_to_f64(v: &Value) -> Result<f64> {
     }
 }
 
-fn nn_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin nn_to_value is not available (module removed)")) }
+fn nn_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin nn_to_value is not available (module removed)"
+    ))
+}
 
+fn value_to_nn(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin value_to_nn is not available (module removed)"
+    ))
+}
 
+fn consensus_net_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin consensus_net_to_value is not available (module removed)"
+    ))
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn value_to_nn(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin value_to_nn is not available (module removed)")) }
-
-
-
-
-
-
-
-
-fn consensus_net_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin consensus_net_to_value is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn value_to_consensus_net(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin value_to_consensus_net is not available (module removed)")) }
-
-
-
-
-
-
-
+fn value_to_consensus_net(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin value_to_consensus_net is not available (module removed)"
+    ))
+}
 
 fn get_population_genome_type(v: &Value) -> Result<String> {
     if let Value::Record(rec) = v {
@@ -12749,951 +10566,213 @@ fn get_population_genome_type(v: &Value) -> Result<String> {
     Err(anyhow!("Could not determine genome type from population"))
 }
 
-fn population_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin population_to_value is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn value_to_population_nn(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin value_to_population_nn is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn value_to_population_vec(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin value_to_population_vec is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn population_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin population_to_value is not available (module removed)"
+    ))
+}
+
+fn value_to_population_nn(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin value_to_population_nn is not available (module removed)"
+    ))
+}
+
+fn value_to_population_vec(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin value_to_population_vec is not available (module removed)"
+    ))
+}
 
 // ==================== Reinforcement Learning Builtins ====================
 
 /// Create a Q-learning agent
 /// Usage: rl_agent(name, state_size, action_size, [config])
-fn bi_rl_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_agent is not available (module removed)"
+    ))
+}
 
 /// Select action using Q-learning agent
 /// Usage: rl_action(agent, state)
-fn bi_rl_action(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_action is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_action(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_action is not available (module removed)"
+    ))
+}
 
 /// Update Q-learning agent
 /// Usage: rl_update(agent, state, action, reward, next_state, done)
-fn bi_rl_update(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_update is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_update(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_update is not available (module removed)"
+    ))
+}
 
 /// Create a SARSA agent
-fn bi_rl_sarsa_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_sarsa_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_sarsa_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_sarsa_agent is not available (module removed)"
+    ))
+}
 
 /// Update SARSA agent
-fn bi_rl_sarsa_update(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_sarsa_update is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_sarsa_update(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_sarsa_update is not available (module removed)"
+    ))
+}
 
 /// Create a Policy Gradient agent
-fn bi_rl_pg_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_pg_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_pg_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_pg_agent is not available (module removed)"
+    ))
+}
 
 /// Record step for Policy Gradient agent
-fn bi_rl_pg_step(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_pg_step is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_pg_step(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_pg_step is not available (module removed)"
+    ))
+}
 
 /// End episode for Policy Gradient agent (triggers update)
-fn bi_rl_pg_episode_end(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_pg_episode_end is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_pg_episode_end(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_pg_episode_end is not available (module removed)"
+    ))
+}
 
 /// Create an Actor-Critic agent
-fn bi_rl_ac_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_ac_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_ac_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_ac_agent is not available (module removed)"
+    ))
+}
 
 /// Update Actor-Critic agent
-fn bi_rl_ac_update(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_ac_update is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_ac_update(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_ac_update is not available (module removed)"
+    ))
+}
 
 /// Create a DQN agent
-fn bi_rl_dqn_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_dqn_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_dqn_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_dqn_agent is not available (module removed)"
+    ))
+}
 
 /// Step DQN agent (store experience and train)
-fn bi_rl_dqn_step(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_dqn_step is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_dqn_step(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_dqn_step is not available (module removed)"
+    ))
+}
 
 /// Create a replay buffer
-fn bi_rl_replay_buffer(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_replay_buffer is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_replay_buffer(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_replay_buffer is not available (module removed)"
+    ))
+}
 
 /// Create a gridworld environment
-fn bi_rl_gridworld(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_gridworld is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_gridworld(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_gridworld is not available (module removed)"
+    ))
+}
 
 /// Step gridworld environment
-fn bi_rl_env_step(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rl_env_step is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rl_env_step(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rl_env_step is not available (module removed)"
+    ))
+}
 
 // ==================== RL Helper Functions ====================
 
-fn q_agent_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin q_agent_to_value is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn value_to_q_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin value_to_q_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn sarsa_agent_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin sarsa_agent_to_value is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn value_to_sarsa_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin value_to_sarsa_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-fn pg_agent_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin pg_agent_to_value is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn value_to_pg_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin value_to_pg_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-fn ac_agent_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin ac_agent_to_value is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn value_to_ac_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin value_to_ac_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-fn dqn_agent_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin dqn_agent_to_value is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn value_to_dqn_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin value_to_dqn_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-fn replay_buffer_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin replay_buffer_to_value is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-fn gridworld_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin gridworld_to_value is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn value_to_gridworld(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin value_to_gridworld is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn q_agent_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin q_agent_to_value is not available (module removed)"
+    ))
+}
+
+fn value_to_q_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin value_to_q_agent is not available (module removed)"
+    ))
+}
+
+fn sarsa_agent_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin sarsa_agent_to_value is not available (module removed)"
+    ))
+}
+
+fn value_to_sarsa_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin value_to_sarsa_agent is not available (module removed)"
+    ))
+}
+
+fn pg_agent_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin pg_agent_to_value is not available (module removed)"
+    ))
+}
+
+fn value_to_pg_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin value_to_pg_agent is not available (module removed)"
+    ))
+}
+
+fn ac_agent_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin ac_agent_to_value is not available (module removed)"
+    ))
+}
+
+fn value_to_ac_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin value_to_ac_agent is not available (module removed)"
+    ))
+}
+
+fn dqn_agent_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin dqn_agent_to_value is not available (module removed)"
+    ))
+}
+
+fn value_to_dqn_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin value_to_dqn_agent is not available (module removed)"
+    ))
+}
+
+fn replay_buffer_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin replay_buffer_to_value is not available (module removed)"
+    ))
+}
+
+fn gridworld_to_value(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin gridworld_to_value is not available (module removed)"
+    ))
+}
+
+fn value_to_gridworld(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin value_to_gridworld is not available (module removed)"
+    ))
+}
 
 // ===========================================================================
 // OS Tools Builtins
@@ -13701,387 +10780,43 @@ fn value_to_gridworld(_args: Vec<Value>, _input: Option<Value>) -> Result<Value>
 
 /// List all available tools or filter by category/OS
 /// Usage: tools() | tools("network") | tools("linux")
-fn bi_tools(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_tools is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_tools(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_tools is not available (module removed)"
+    ))
+}
 
 /// Get detailed information about a specific tool
 /// Usage: tool_info("curl") | tool_info("nmap")
-fn bi_tool_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_tool_info is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_tool_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_tool_info is not available (module removed)"
+    ))
+}
 
 /// Get OpenAI-compatible function calling schemas for tools
 /// Usage: tool_schema("curl") | tool_schema() for all | tool_schema("network") for category
-fn bi_tool_schema(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_tool_schema is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_tool_schema(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_tool_schema is not available (module removed)"
+    ))
+}
 
 /// Execute a tool with given arguments
 /// Usage: tool_exec("ls", ["-la"]) | tool_exec("curl", ["-s", "https://example.com"])
-fn bi_tool_exec(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_tool_exec is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_tool_exec(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_tool_exec is not available (module removed)"
+    ))
+}
 
 /// Search for tools by keyword or description
 /// Usage: tool_search("network") | tool_search("file copy")
-fn bi_tool_search(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_tool_search is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_tool_search(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_tool_search is not available (module removed)"
+    ))
+}
 
 // ===========================================================================
 // Recursive Language Model (RLM) Builtins
@@ -14090,130 +10825,19 @@ fn bi_tool_search(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { E
 /// Run a recursive agent that can spawn subagents
 /// Usage: rlm_agent("goal", ["tool1", "tool2"])
 ///        rlm_agent("goal", ["tools"], {max_depth: 3, max_agents: 20})
-fn bi_rlm_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rlm_agent is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rlm_agent(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rlm_agent is not available (module removed)"
+    ))
+}
 
 /// Create an RLM configuration
 /// Usage: rlm_config({max_depth: 5, max_agents: 50, timeout: 60})
-fn bi_rlm_config(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rlm_config is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rlm_config(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rlm_config is not available (module removed)"
+    ))
+}
 
 /// Get RLM statistics from the last run
 /// Usage: rlm_stats()
@@ -14240,107 +10864,18 @@ fn bi_rlm_stats(args: Vec<Value>, input: Option<Value>) -> Result<Value> {
 
 /// Spawn a subagent (used in agent context)
 /// Usage: rlm_spawn("name", "goal", ["tools"])
-fn bi_rlm_spawn(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rlm_spawn is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rlm_spawn(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rlm_spawn is not available (module removed)"
+    ))
+}
 
 /// Parse RLM configuration from a Value
-fn parse_rlm_config(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin parse_rlm_config is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn parse_rlm_config(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin parse_rlm_config is not available (module removed)"
+    ))
+}
 
 // =============== New Aspirational Feature Builtins ===============
 
@@ -14422,7 +10957,11 @@ fn bi_sh(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     .with_context(|| format!("sh: failed to execute '{}'", program))?;
 
     if output.timed_out {
-        return Err(anyhow!("sh: command '{}' timed out after {}s", program, timeout_secs));
+        return Err(anyhow!(
+            "sh: command '{}' timed out after {}s",
+            program,
+            timeout_secs
+        ));
     }
 
     // Audit log the execution
@@ -14431,18 +10970,23 @@ fn bi_sh(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
         program, cmd_args
     );
 
-    let stdout_display = output.stdout.text.clone().unwrap_or_else(|| String::from_utf8_lossy(&output.stdout.bytes).into_owned());
-    let stderr_display = output.stderr.text.clone().unwrap_or_else(|| String::from_utf8_lossy(&output.stderr.bytes).into_owned());
+    let stdout_display = output
+        .stdout
+        .text
+        .clone()
+        .unwrap_or_else(|| String::from_utf8_lossy(&output.stdout.bytes).into_owned());
+    let stderr_display = output
+        .stderr
+        .text
+        .clone()
+        .unwrap_or_else(|| String::from_utf8_lossy(&output.stderr.bytes).into_owned());
     let success = output.exit_code == 0;
 
     let mut record = BTreeMap::new();
     record.insert("stdout".to_string(), Value::Str(stdout_display));
     record.insert("stderr".to_string(), Value::Str(stderr_display));
     record.insert("success".to_string(), Value::Bool(success));
-    record.insert(
-        "exit_code".to_string(),
-        Value::Int(output.exit_code as i64),
-    );
+    record.insert("exit_code".to_string(), Value::Int(output.exit_code as i64));
 
     Ok(Value::Record(record))
 }
@@ -14902,14 +11446,22 @@ fn aecon_decode_atom(cell: &str) -> Value {
 /// integral floats) — making the round-trip lossless. Returns the parsed array;
 /// non-tabular input (a single `{k=v}` record, a scalar array, or a bare scalar)
 /// is returned as a best-effort single value.
-fn aecon_decode(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin aecon_decode is not available (module removed)")) }
+fn aecon_decode(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin aecon_decode is not available (module removed)"
+    ))
+}
 
 /// Token count used by the token-economy builtins (`tokens`/`budget`/`digest`)
 /// and the Agent API accounting. With `--features real-tokens` this is the
 /// **real GPT-4 cl100k BPE** (vocab embedded in `tiktoken-rs`); otherwise a
 /// labeled heuristic (alphanumeric run ≈ ceil(len/4) tokens; each symbol ≈ 1).
 #[cfg(feature = "real-tokens")]
-fn est_token_count(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin est_token_count is not available (module removed)")) }
+fn est_token_count(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin est_token_count is not available (module removed)"
+    ))
+}
 
 #[cfg(not(feature = "real-tokens"))]
 pub fn est_token_count(s: &str) -> usize {
@@ -16044,28 +12596,20 @@ fn bi_sess_close(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 /// disclosure: categories with builtin counts, effect classes, and samples,
 /// plus the effect legend. Load this cheaply, then `ontology_describe` the slice
 /// you need instead of carrying the full ontology in context.
-fn bi_ontology_manifest(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ontology_manifest is not available (module removed)")) }
-
-
+fn bi_ontology_manifest(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ontology_manifest is not available (module removed)"
+    ))
+}
 
 /// ontology_describe(name) - Expand one ontology slice: a category name → its
 /// builtins (name, signature, effect), or a builtin name → its full definition
 /// (effect, params, examples).
-fn bi_ontology_describe(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_ontology_describe is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_ontology_describe(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_ontology_describe is not available (module removed)"
+    ))
+}
 
 lazy_static::lazy_static! {
     /// The process-global RBAC manager backing the in-shell `rbac_*` builtins
@@ -16085,57 +12629,20 @@ fn global_rbac() -> std::sync::Arc<crate::auth::RbacManager> {
 /// rbac_principal(user_id?) - Set or get the current acting principal for safety
 /// authorization. With an argument, sets the principal (creating the user if
 /// needed) and activates RBAC; with none, returns the current principal or null.
-fn bi_rbac_principal(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rbac_principal is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rbac_principal(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rbac_principal is not available (module removed)"
+    ))
+}
 
 /// rbac_grant(user_id, permission) - Grant a direct permission (e.g.
 /// "effect:destructive", "effect:*", "builtin:rm", "*:*") to a user so that,
 /// when acting as that principal, guarded ops of that class bypass approval.
-fn bi_rbac_grant(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_rbac_grant is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_rbac_grant(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_rbac_grant is not available (module removed)"
+    ))
+}
 
 /// rbac_can(permission) - Whether the current principal holds `permission`
 /// (resolving roles + wildcards). Returns false if no principal is set.
@@ -16378,78 +12885,11 @@ fn bi_mcp_server_start(args: Vec<Value>, _input: Option<Value>) -> Result<Value>
 
 /// agent_with_mcp(goal, tools, endpoint) - Create agent with MCP tool access
 /// Usage: agent_with_mcp("Task description", ["mcp:read_file", "mcp:list_dir"], server.endpoint)
-fn bi_agent_with_mcp(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_agent_with_mcp is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_agent_with_mcp(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_agent_with_mcp is not available (module removed)"
+    ))
+}
 
 /// each(fn) - Like map but for side effects, returns original array
 /// Usage: arr | each(fn(x) => print(x))
@@ -17248,389 +13688,109 @@ fn bi_finetune_cancel(args: Vec<Value>, input: Option<Value>) -> Result<Value> {
 // ===================== A2UI (Agent-to-User Interface) Builtins =====================
 
 /// a2ui_notify(message, {level: "info"|"success"|"warning"|"error"}) - Send notification to user
-fn bi_a2ui_notify(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_notify is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_notify(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_notify is not available (module removed)"
+    ))
+}
 
 /// a2ui_prompt(message, {placeholder: "..."}) - Request text input from user (blocking)
-fn bi_a2ui_prompt(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_prompt is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_prompt(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_prompt is not available (module removed)"
+    ))
+}
 
 /// a2ui_confirm(message) - Request yes/no confirmation from user (blocking)
-fn bi_a2ui_confirm(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_confirm is not available (module removed)")) }
-
-
-
-
-
-
-
-
+fn bi_a2ui_confirm(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_confirm is not available (module removed)"
+    ))
+}
 
 /// a2ui_select(message, options) - Request selection from user (blocking)
-fn bi_a2ui_select(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_select is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_select(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_select is not available (module removed)"
+    ))
+}
 
 /// a2ui_progress(label, current, total) - Update a progress indicator
-fn bi_a2ui_progress(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_progress is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_progress(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_progress is not available (module removed)"
+    ))
+}
 
 /// a2ui_progress_complete(progress_id) - Complete a progress indicator
-fn bi_a2ui_progress_complete(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_progress_complete is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_progress_complete(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_progress_complete is not available (module removed)"
+    ))
+}
 
 /// a2ui_render(content) - Render content in the UI
-fn bi_a2ui_render(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_render is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_render(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_render is not available (module removed)"
+    ))
+}
 
 /// a2ui_render_table(headers, rows) - Render a table in the UI
-fn bi_a2ui_render_table(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_render_table is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_render_table(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_render_table is not available (module removed)"
+    ))
+}
 
 /// a2ui_render_code(language, code) - Render code with syntax highlighting
-fn bi_a2ui_render_code(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_render_code is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_render_code(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_render_code is not available (module removed)"
+    ))
+}
 
 /// a2ui_toast(message, level, duration_ms) - Show a toast notification
-fn bi_a2ui_toast(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_toast is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_toast(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_toast is not available (module removed)"
+    ))
+}
 
 /// a2ui_status(text) - Update the status bar
-fn bi_a2ui_status(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_status is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_status(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_status is not available (module removed)"
+    ))
+}
 
 /// a2ui_clear() - Clear the A2UI event channel
-fn bi_a2ui_clear(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_clear is not available (module removed)")) }
-
-
-
+fn bi_a2ui_clear(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_clear is not available (module removed)"
+    ))
+}
 
 /// a2ui_agent_started(agent_id, task) - Notify that an agent started working
-fn bi_a2ui_agent_started(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_agent_started is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_agent_started(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_agent_started is not available (module removed)"
+    ))
+}
 
 /// a2ui_agent_completed(agent_id, success, result) - Notify that an agent completed
-fn bi_a2ui_agent_completed(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_agent_completed is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_agent_completed(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_agent_completed is not available (module removed)"
+    ))
+}
 
 /// a2ui_agent_thinking(agent_id, thought, step) - Show agent's reasoning process
-fn bi_a2ui_agent_thinking(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_a2ui_agent_thinking is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_a2ui_agent_thinking(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_a2ui_agent_thinking is not available (module removed)"
+    ))
+}
 
 // ============================================================================
 // 230-249: Process Management
@@ -17642,17 +13802,49 @@ fn bi_proc_list(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     for (pid, proc) in sys.processes() {
         let mut rec = std::collections::BTreeMap::new();
         rec.insert("pid".to_string(), Value::Int(pid.as_u32() as i64));
-        rec.insert("name".to_string(), Value::Str(proc.name().to_string_lossy().to_string()));
+        rec.insert(
+            "name".to_string(),
+            Value::Str(proc.name().to_string_lossy().to_string()),
+        );
         rec.insert("cpu".to_string(), Value::Float(proc.cpu_usage() as f64));
         rec.insert("mem".to_string(), Value::Int(proc.memory() as i64));
-        rec.insert("command".to_string(), Value::Str(
-            proc.exe().map(|p| p.to_string_lossy().to_string()).unwrap_or_else(|| proc.name().to_string_lossy().to_string())
-        ));
+        rec.insert(
+            "command".to_string(),
+            Value::Str(
+                proc.exe()
+                    .map(|p| p.to_string_lossy().to_string())
+                    .unwrap_or_else(|| proc.name().to_string_lossy().to_string()),
+            ),
+        );
         procs.push(Value::Record(rec));
     }
     procs.sort_by(|a, b| {
-        let pid_a = match a { Value::Record(r) => r.get("pid").and_then(|v| if let Value::Int(n) = v { Some(*n) } else { None }).unwrap_or(0), _ => 0 };
-        let pid_b = match b { Value::Record(r) => r.get("pid").and_then(|v| if let Value::Int(n) = v { Some(*n) } else { None }).unwrap_or(0), _ => 0 };
+        let pid_a = match a {
+            Value::Record(r) => r
+                .get("pid")
+                .and_then(|v| {
+                    if let Value::Int(n) = v {
+                        Some(*n)
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or(0),
+            _ => 0,
+        };
+        let pid_b = match b {
+            Value::Record(r) => r
+                .get("pid")
+                .and_then(|v| {
+                    if let Value::Int(n) = v {
+                        Some(*n)
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or(0),
+            _ => 0,
+        };
         pid_a.cmp(&pid_b)
     });
     Ok(Value::Array(procs))
@@ -18074,47 +14266,11 @@ fn bi_proc_priority(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     Ok(Value::Null)
 }
 
-fn bi_proc_set_priority(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_proc_set_priority is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_proc_set_priority(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_proc_set_priority is not available (module removed)"
+    ))
+}
 
 fn bi_proc_cpu_usage(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     let pid = match args.first() {
@@ -18629,39 +14785,11 @@ fn bi_fs_chmod(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     Ok(Value::Bool(false))
 }
 
-fn bi_fs_chown(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_fs_chown is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_fs_chown(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_fs_chown is not available (module removed)"
+    ))
+}
 
 fn bi_fs_link(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     let src = match args.first() {
@@ -18967,13 +15095,29 @@ fn bi_fs_df(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
         let total = disk.total_space();
         let available = disk.available_space();
         let used = total.saturating_sub(available);
-        let use_pct = if total > 0 { (used as f64 / total as f64 * 100.0) as i64 } else { 0 };
-        rec.insert("filesystem".to_string(), Value::Str(disk.file_system().to_str().unwrap_or("?").to_string()));
+        let use_pct = if total > 0 {
+            (used as f64 / total as f64 * 100.0) as i64
+        } else {
+            0
+        };
+        rec.insert(
+            "filesystem".to_string(),
+            Value::Str(disk.file_system().to_str().unwrap_or("?").to_string()),
+        );
         rec.insert("size".to_string(), Value::Str(format_bytes(total as i64)));
         rec.insert("used".to_string(), Value::Str(format_bytes(used as i64)));
-        rec.insert("available".to_string(), Value::Str(format_bytes(available as i64)));
-        rec.insert("use_percent".to_string(), Value::Str(format!("{}%", use_pct)));
-        rec.insert("mounted_on".to_string(), Value::Str(disk.mount_point().to_str().unwrap_or("?").to_string()));
+        rec.insert(
+            "available".to_string(),
+            Value::Str(format_bytes(available as i64)),
+        );
+        rec.insert(
+            "use_percent".to_string(),
+            Value::Str(format!("{}%", use_pct)),
+        );
+        rec.insert(
+            "mounted_on".to_string(),
+            Value::Str(disk.mount_point().to_str().unwrap_or("?").to_string()),
+        );
         drives.push(Value::Record(rec));
     }
     Ok(Value::Array(drives))
@@ -19092,7 +15236,11 @@ fn bi_net_interfaces(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> 
         let mut rec = std::collections::BTreeMap::new();
         rec.insert("name".to_string(), Value::Str(name.to_string()));
         rec.insert("mac".to_string(), Value::Str(net.mac_address().to_string()));
-        let ips: Vec<Value> = net.ip_networks().iter().map(|ip| Value::Str(ip.addr.to_string())).collect();
+        let ips: Vec<Value> = net
+            .ip_networks()
+            .iter()
+            .map(|ip| Value::Str(ip.addr.to_string()))
+            .collect();
         rec.insert("ips".to_string(), Value::Array(ips));
         rec.insert("mtu".to_string(), Value::Int(net.mtu() as i64));
         interfaces.push(Value::Record(rec));
@@ -19166,116 +15314,17 @@ fn bi_net_ip(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     Ok(Value::Null)
 }
 
-fn bi_net_dns_lookup(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_net_dns_lookup is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn bi_net_dns_reverse(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_net_dns_reverse is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_net_dns_lookup(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_net_dns_lookup is not available (module removed)"
+    ))
+}
+
+fn bi_net_dns_reverse(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_net_dns_reverse is not available (module removed)"
+    ))
+}
 
 /// Parse ping output into a structured Record with host, packets_sent, packets_received,
 /// packet_loss_pct, min_rtt, avg_rtt, max_rtt. Works for both Windows and Unix ping output.
@@ -19347,127 +15396,17 @@ fn parse_ping_output(text: &str, host: &str) -> Value {
     Value::Record(rec)
 }
 
-fn bi_net_ping(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_net_ping is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn bi_net_traceroute(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_net_traceroute is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_net_ping(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_net_ping is not available (module removed)"
+    ))
+}
+
+fn bi_net_traceroute(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_net_traceroute is not available (module removed)"
+    ))
+}
 
 fn bi_net_connections(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     #[cfg(target_os = "windows")]
@@ -19937,38 +15876,11 @@ fn bi_net_bandwidth(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     Ok(Value::Null)
 }
 
-fn bi_net_latency(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_net_latency is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_net_latency(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_net_latency is not available (module removed)"
+    ))
+}
 
 fn bi_net_scan(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     // Port scanning requires more complex implementation
@@ -19977,80 +15889,11 @@ fn bi_net_scan(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     ))
 }
 
-fn bi_net_whois(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_net_whois is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_net_whois(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_net_whois is not available (module removed)"
+    ))
+}
 
 // ============================================================================
 // 290-309: System Information
@@ -20213,7 +16056,10 @@ fn bi_sys_cpu_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     let cpu = &cpus[0];
     let mut rec = std::collections::BTreeMap::new();
     rec.insert("name".to_string(), Value::Str(cpu.brand().to_string()));
-    rec.insert("cores".to_string(), Value::Int(sys.physical_core_count().unwrap_or(1) as i64));
+    rec.insert(
+        "cores".to_string(),
+        Value::Int(sys.physical_core_count().unwrap_or(1) as i64),
+    );
     rec.insert("mhz".to_string(), Value::Float(cpu.frequency() as f64));
     Ok(Value::Record(rec))
 }
@@ -20275,7 +16121,10 @@ fn bi_sys_mem_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     let mut rec = std::collections::BTreeMap::new();
     rec.insert("total".to_string(), Value::Int(sys.total_memory() as i64));
     rec.insert("free".to_string(), Value::Int(sys.free_memory() as i64));
-    rec.insert("available".to_string(), Value::Int(sys.available_memory() as i64));
+    rec.insert(
+        "available".to_string(),
+        Value::Int(sys.available_memory() as i64),
+    );
     Ok(Value::Record(rec))
 }
 
@@ -22656,14 +18505,22 @@ fn bi_hw_gpu(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     {
         // Use wmic (native C++, faster than PowerShell) — returns GPU name, VRAM, driver
         if let Ok(output) = std::process::Command::new("wmic")
-            .args(["path", "Win32_VideoController", "get", "Name,AdapterRAM,DriverVersion", "/format:csv"])
+            .args([
+                "path",
+                "Win32_VideoController",
+                "get",
+                "Name,AdapterRAM,DriverVersion",
+                "/format:csv",
+            ])
             .output()
         {
             let text = String::from_utf8_lossy(&output.stdout);
             let mut gpus: Vec<Value> = Vec::new();
             for line in text.lines().skip(2) {
                 let line = line.trim();
-                if line.is_empty() { continue; }
+                if line.is_empty() {
+                    continue;
+                }
                 let parts: Vec<&str> = line.split(',').collect();
                 if parts.len() >= 4 {
                     let mut rec = std::collections::BTreeMap::new();
@@ -22678,10 +18535,14 @@ fn bi_hw_gpu(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
                     if !driver.is_empty() {
                         rec.insert("driver".to_string(), Value::Str(driver.to_string()));
                     }
-                    if !rec.is_empty() { gpus.push(Value::Record(rec)); }
+                    if !rec.is_empty() {
+                        gpus.push(Value::Record(rec));
+                    }
                 }
             }
-            if !gpus.is_empty() { return Ok(Value::Array(gpus)); }
+            if !gpus.is_empty() {
+                return Ok(Value::Array(gpus));
+            }
         }
     }
     #[cfg(target_os = "linux")]
@@ -23004,13 +18865,21 @@ fn bi_hw_battery(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     {
         // Use wmic (native C++, faster than PowerShell)
         if let Ok(output) = std::process::Command::new("wmic")
-            .args(["path", "Win32_Battery", "get", "EstimatedChargeRemaining,BatteryStatus", "/format:csv"])
+            .args([
+                "path",
+                "Win32_Battery",
+                "get",
+                "EstimatedChargeRemaining,BatteryStatus",
+                "/format:csv",
+            ])
             .output()
         {
             let text = String::from_utf8_lossy(&output.stdout);
             for line in text.lines().skip(2) {
                 let line = line.trim();
-                if line.is_empty() { continue; }
+                if line.is_empty() {
+                    continue;
+                }
                 let parts: Vec<&str> = line.split(',').collect();
                 if parts.len() >= 3 {
                     let mut rec = std::collections::BTreeMap::new();
@@ -23024,7 +18893,9 @@ fn bi_hw_battery(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
                         _ => "unknown",
                     };
                     rec.insert("status".to_string(), Value::Str(status.to_string()));
-                    if !rec.is_empty() { return Ok(Value::Record(rec)); }
+                    if !rec.is_empty() {
+                        return Ok(Value::Record(rec));
+                    }
                 }
             }
         }
@@ -30107,53 +25978,77 @@ fn bi_env_activate(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 
 fn bi_env_starship(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     let mut info = std::collections::BTreeMap::new();
-    info.insert("config_path".to_string(), Value::Str(
-        std::env::var("STARSHIP_CONFIG").unwrap_or_else(|_| {
+    info.insert(
+        "config_path".to_string(),
+        Value::Str(std::env::var("STARSHIP_CONFIG").unwrap_or_else(|_| {
             dirs::home_dir()
-                .map(|h| h.join(".config").join("starship.toml").to_string_lossy().to_string())
+                .map(|h| {
+                    h.join(".config")
+                        .join("starship.toml")
+                        .to_string_lossy()
+                        .to_string()
+                })
                 .unwrap_or_default()
-        })
-    ));
-    info.insert("cache_path".to_string(), Value::Str(
-        std::env::var("STARSHIP_CACHE").unwrap_or_default()
-    ));
-    info.insert("session".to_string(), Value::Str(
-        std::env::var("STARSHIP_SESSION_KEY").unwrap_or_default()
-    ));
-    info.insert("shell".to_string(), Value::Str(
-        std::env::var("STARSHIP_SHELL").unwrap_or_default()
-    ));
-    info.insert("terminal_width".to_string(), Value::Str(
-        std::env::var("STARSHIP_TERMINAL_WIDTH").unwrap_or_default()
-    ));
-    info.insert("version".to_string(), Value::Str(
-        get_tool_version("starship").unwrap_or_default()
-    ));
+        })),
+    );
+    info.insert(
+        "cache_path".to_string(),
+        Value::Str(std::env::var("STARSHIP_CACHE").unwrap_or_default()),
+    );
+    info.insert(
+        "session".to_string(),
+        Value::Str(std::env::var("STARSHIP_SESSION_KEY").unwrap_or_default()),
+    );
+    info.insert(
+        "shell".to_string(),
+        Value::Str(std::env::var("STARSHIP_SHELL").unwrap_or_default()),
+    );
+    info.insert(
+        "terminal_width".to_string(),
+        Value::Str(std::env::var("STARSHIP_TERMINAL_WIDTH").unwrap_or_default()),
+    );
+    info.insert(
+        "version".to_string(),
+        Value::Str(get_tool_version("starship").unwrap_or_default()),
+    );
     Ok(Value::Record(info))
 }
 
 fn bi_env_claude(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     let mut info = std::collections::BTreeMap::new();
-    info.insert("api_key".to_string(), gate_env_secret("ANTHROPIC_API_KEY",
-        std::env::var("ANTHROPIC_API_KEY").unwrap_or_default()
-    ));
-    info.insert("claude_api_key".to_string(), gate_env_secret("CLAUDE_API_KEY",
-        std::env::var("CLAUDE_API_KEY").unwrap_or_default()
-    ));
-    info.insert("base_url".to_string(), Value::Str(
-        std::env::var("ANTHROPIC_BASE_URL").unwrap_or_default()
-    ));
-    info.insert("model".to_string(), Value::Str(
-        std::env::var("CLAUDE_MODEL").unwrap_or_else(|_| {
-            std::env::var("ANTHROPIC_MODEL").unwrap_or_default()
-        })
-    ));
-    info.insert("max_tokens".to_string(), Value::Str(
-        std::env::var("CLAUDE_MAX_TOKENS").unwrap_or_default()
-    ));
-    info.insert("version".to_string(), Value::Str(
-        get_tool_version("claude").unwrap_or_default()
-    ));
+    info.insert(
+        "api_key".to_string(),
+        gate_env_secret(
+            "ANTHROPIC_API_KEY",
+            std::env::var("ANTHROPIC_API_KEY").unwrap_or_default(),
+        ),
+    );
+    info.insert(
+        "claude_api_key".to_string(),
+        gate_env_secret(
+            "CLAUDE_API_KEY",
+            std::env::var("CLAUDE_API_KEY").unwrap_or_default(),
+        ),
+    );
+    info.insert(
+        "base_url".to_string(),
+        Value::Str(std::env::var("ANTHROPIC_BASE_URL").unwrap_or_default()),
+    );
+    info.insert(
+        "model".to_string(),
+        Value::Str(
+            std::env::var("CLAUDE_MODEL")
+                .unwrap_or_else(|_| std::env::var("ANTHROPIC_MODEL").unwrap_or_default()),
+        ),
+    );
+    info.insert(
+        "max_tokens".to_string(),
+        Value::Str(std::env::var("CLAUDE_MAX_TOKENS").unwrap_or_default()),
+    );
+    info.insert(
+        "version".to_string(),
+        Value::Str(get_tool_version("claude").unwrap_or_default()),
+    );
     Ok(Value::Record(info))
 }
 
@@ -30813,7 +26708,16 @@ fn bi_platform_tool_versions(_args: Vec<Value>, _input: Option<Value>) -> Result
     }
 
     // Shell & Terminal Tools
-    let shell_tools = ["starship", "oh-my-posh", "zsh", "bash", "fish", "powershell", "nu", "elvish"];
+    let shell_tools = [
+        "starship",
+        "oh-my-posh",
+        "zsh",
+        "bash",
+        "fish",
+        "powershell",
+        "nu",
+        "elvish",
+    ];
     for tool in shell_tools {
         if let Some(ver) = get_tool_version(tool) {
             versions.insert(format!("shell.{}", tool), Value::Str(ver));
@@ -32116,9 +28020,18 @@ fn bi_platform_cpu(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
         info.insert("name".to_string(), Value::Str(cpu.brand().to_string()));
         info.insert("mhz".to_string(), Value::Float(cpu.frequency() as f64));
     }
-    info.insert("cores".to_string(), Value::Int(sys.physical_core_count().unwrap_or(1) as i64));
-    info.insert("logical_processors".to_string(), Value::Int(cpus.len() as i64));
-    info.insert("arch".to_string(), Value::Str(std::env::consts::ARCH.to_string()));
+    info.insert(
+        "cores".to_string(),
+        Value::Int(sys.physical_core_count().unwrap_or(1) as i64),
+    );
+    info.insert(
+        "logical_processors".to_string(),
+        Value::Int(cpus.len() as i64),
+    );
+    info.insert(
+        "arch".to_string(),
+        Value::Str(std::env::consts::ARCH.to_string()),
+    );
 
     Ok(Value::Record(info))
 }
@@ -32151,7 +28064,10 @@ fn bi_platform_memory(_args: Vec<Value>, _input: Option<Value>) -> Result<Value>
     let available = sys.available_memory() as i64;
 
     info.insert("total_bytes".to_string(), Value::Int(total));
-    info.insert("total_gb".to_string(), Value::Float(total as f64 / 1024.0 / 1024.0 / 1024.0));
+    info.insert(
+        "total_gb".to_string(),
+        Value::Float(total as f64 / 1024.0 / 1024.0 / 1024.0),
+    );
     info.insert("free_bytes".to_string(), Value::Int(free));
     info.insert("available_bytes".to_string(), Value::Int(available));
     info.insert("used_bytes".to_string(), Value::Int(total - available));
@@ -32165,10 +28081,18 @@ fn bi_platform_memory(_args: Vec<Value>, _input: Option<Value>) -> Result<Value>
                     let val = val.trim().replace(" kB", "");
                     if let Ok(kb) = val.parse::<i64>() {
                         match key {
-                            "Buffers" => { info.insert("buffers_kb".to_string(), Value::Int(kb)); }
-                            "Cached" => { info.insert("cached_kb".to_string(), Value::Int(kb)); }
-                            "SwapTotal" => { info.insert("swap_total_kb".to_string(), Value::Int(kb)); }
-                            "SwapFree" => { info.insert("swap_free_kb".to_string(), Value::Int(kb)); }
+                            "Buffers" => {
+                                info.insert("buffers_kb".to_string(), Value::Int(kb));
+                            }
+                            "Cached" => {
+                                info.insert("cached_kb".to_string(), Value::Int(kb));
+                            }
+                            "SwapTotal" => {
+                                info.insert("swap_total_kb".to_string(), Value::Int(kb));
+                            }
+                            "SwapFree" => {
+                                info.insert("swap_free_kb".to_string(), Value::Int(kb));
+                            }
                             _ => {}
                         }
                     }
@@ -32198,13 +28122,28 @@ fn bi_platform_disks(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> 
         let mut d = std::collections::BTreeMap::new();
         let total = disk.total_space();
         let avail = disk.available_space();
-        d.insert("mount".to_string(), Value::Str(disk.mount_point().to_str().unwrap_or("?").to_string()));
+        d.insert(
+            "mount".to_string(),
+            Value::Str(disk.mount_point().to_str().unwrap_or("?").to_string()),
+        );
         d.insert("size_bytes".to_string(), Value::Int(total as i64));
-        d.insert("size_gb".to_string(), Value::Float(total as f64 / 1024.0 / 1024.0 / 1024.0));
+        d.insert(
+            "size_gb".to_string(),
+            Value::Float(total as f64 / 1024.0 / 1024.0 / 1024.0),
+        );
         d.insert("free_bytes".to_string(), Value::Int(avail as i64));
-        d.insert("free_gb".to_string(), Value::Float(avail as f64 / 1024.0 / 1024.0 / 1024.0));
-        d.insert("filesystem".to_string(), Value::Str(disk.file_system().to_str().unwrap_or("?").to_string()));
-        d.insert("used_bytes".to_string(), Value::Int(total.saturating_sub(avail) as i64));
+        d.insert(
+            "free_gb".to_string(),
+            Value::Float(avail as f64 / 1024.0 / 1024.0 / 1024.0),
+        );
+        d.insert(
+            "filesystem".to_string(),
+            Value::Str(disk.file_system().to_str().unwrap_or("?").to_string()),
+        );
+        d.insert(
+            "used_bytes".to_string(),
+            Value::Int(total.saturating_sub(avail) as i64),
+        );
         disks.push(Value::Record(d));
     }
 
@@ -32219,7 +28158,8 @@ fn bi_platform_disk_usage(args: Vec<Value>, _input: Option<Value>) -> Result<Val
         let mount = disk.mount_point().to_str().unwrap_or("");
         // Match exact mount or target starts with mount prefix
         let mount_normalized = mount.trim_end_matches('/').trim_end_matches('\\');
-        if target == mount || target == mount_normalized
+        if target == mount
+            || target == mount_normalized
             || target.starts_with(&format!("{}/", mount_normalized))
             || target.starts_with(&format!("{}\\", mount_normalized))
         {
@@ -32230,9 +28170,14 @@ fn bi_platform_disk_usage(args: Vec<Value>, _input: Option<Value>) -> Result<Val
             info.insert("total_bytes".to_string(), Value::Int(total as i64));
             info.insert("free_bytes".to_string(), Value::Int(avail as i64));
             info.insert("used_bytes".to_string(), Value::Int(used as i64));
-            info.insert("usage_percent".to_string(), Value::Float(
-                if total > 0 { (used as f64 / total as f64) * 100.0 } else { 0.0 }
-            ));
+            info.insert(
+                "usage_percent".to_string(),
+                Value::Float(if total > 0 {
+                    (used as f64 / total as f64) * 100.0
+                } else {
+                    0.0
+                }),
+            );
             return Ok(Value::Record(info));
         }
     }
@@ -42084,204 +38029,20 @@ fn bi_workspace_sync(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 /// Publish a plugin or agent to the marketplace.
 /// Publishes to packages.nervosys.ai registry if auth token is set, otherwise local-only.
 /// Usage: marketplace.publish({name, version, description, category?, keywords?, path?})
-fn bi_marketplace_publish(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_marketplace_publish is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_marketplace_publish(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_marketplace_publish is not available (module removed)"
+    ))
+}
 
 /// Search the marketplace for packages.
 /// Searches the remote registry at packages.nervosys.ai, falls back to local cache.
 /// Usage: marketplace.search(query) or marketplace.search({q?, category?})
-fn bi_marketplace_search(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_marketplace_search is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_marketplace_search(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_marketplace_search is not available (module removed)"
+    ))
+}
 
 fn marketplace_package_to_value(pkg: &MarketplacePackage) -> Value {
     let mut rec = BTreeMap::new();
@@ -42313,96 +38074,11 @@ fn marketplace_package_to_value(pkg: &MarketplacePackage) -> Value {
 /// Install a package from the marketplace.
 /// Downloads from packages.nervosys.ai registry, falls back to local cache.
 /// Usage: marketplace.install(name) or marketplace.install(name, version)
-fn bi_marketplace_install(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_marketplace_install is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_marketplace_install(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_marketplace_install is not available (module removed)"
+    ))
+}
 
 /// Uninstall a marketplace package.
 /// Usage: marketplace.uninstall(name)
@@ -42450,35 +38126,11 @@ fn bi_marketplace_list(_args: Vec<Value>, _input: Option<Value>) -> Result<Value
 /// Get detailed info about a marketplace package.
 /// Checks remote registry first, falls back to local cache.
 /// Usage: marketplace.info(name)
-fn bi_marketplace_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_marketplace_info is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_marketplace_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_marketplace_info is not available (module removed)"
+    ))
+}
 
 /// Rate a marketplace package.
 /// Usage: marketplace.rate(name, score) — score 1-5
@@ -42525,60 +38177,11 @@ fn bi_marketplace_rate(args: Vec<Value>, _input: Option<Value>) -> Result<Value>
 /// Update an installed marketplace package to the latest version.
 /// Checks the remote registry for newer versions.
 /// Usage: marketplace.update(name) or marketplace.update() for all
-fn bi_marketplace_update(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> { Err(anyhow!("builtin bi_marketplace_update is not available (module removed)")) }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn bi_marketplace_update(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
+    Err(anyhow!(
+        "builtin bi_marketplace_update is not available (module removed)"
+    ))
+}
 
 // ===================== Telemetry & Analytics Builtins =====================
 
@@ -47594,7 +43197,9 @@ fn bi_win_registry_get(args: Vec<Value>) -> Result<Value> {
             let text = String::from_utf8_lossy(&output.stdout);
             for line in text.lines() {
                 let trimmed = line.trim();
-                if trimmed.is_empty() || trimmed.starts_with("HKEY") { continue; }
+                if trimmed.is_empty() || trimmed.starts_with("HKEY") {
+                    continue;
+                }
                 if let Some(pos) = trimmed.rfind("REG_") {
                     let value = trimmed[pos..].trim();
                     if let Some(val_pos) = value.find(' ') {
@@ -47625,15 +43230,24 @@ fn bi_win_service_list(_args: Vec<Value>) -> Result<Value> {
                         services.push(Value::Record(rec));
                     }
                     let mut rec = std::collections::BTreeMap::new();
-                    rec.insert("name".to_string(), Value::Str(trimmed[14..].trim().to_string()));
+                    rec.insert(
+                        "name".to_string(),
+                        Value::Str(trimmed[14..].trim().to_string()),
+                    );
                     current = Some(rec);
                 } else if let Some(ref mut rec) = current {
                     if trimmed.starts_with("DISPLAY_NAME:") {
-                        rec.insert("display".to_string(), Value::Str(trimmed[14..].trim().to_string()));
+                        rec.insert(
+                            "display".to_string(),
+                            Value::Str(trimmed[14..].trim().to_string()),
+                        );
                     } else if trimmed.starts_with("STATE") && trimmed.contains(':') {
                         let parts: Vec<&str> = trimmed.splitn(2, ':').collect();
                         if parts.len() == 2 {
-                            rec.insert("state".to_string(), Value::Str(parts[1].trim().to_string()));
+                            rec.insert(
+                                "state".to_string(),
+                                Value::Str(parts[1].trim().to_string()),
+                            );
                         }
                     }
                 }
@@ -47671,7 +43285,10 @@ fn bi_win_service_status(args: Vec<Value>) -> Result<Value> {
                         rec.insert("state".to_string(), Value::Str(parts[1].trim().to_string()));
                     }
                 } else if trimmed.starts_with("DISPLAY_NAME:") {
-                    rec.insert("display".to_string(), Value::Str(trimmed[14..].trim().to_string()));
+                    rec.insert(
+                        "display".to_string(),
+                        Value::Str(trimmed[14..].trim().to_string()),
+                    );
                 }
             }
             return Ok(Value::Record(rec));
@@ -47695,47 +43312,82 @@ fn bi_win_env_path(_args: Vec<Value>) -> Result<Value> {
 fn bi_win_snapshot(_args: Vec<Value>) -> Result<Value> {
     let mut snap = std::collections::BTreeMap::new();
 
-    snap.insert("os".to_string(), Value::Str(std::env::consts::OS.to_string()));
-    snap.insert("arch".to_string(), Value::Str(std::env::consts::ARCH.to_string()));
-    snap.insert("hostname".to_string(), Value::Str(sysinfo::System::host_name().unwrap_or_default()));
+    snap.insert(
+        "os".to_string(),
+        Value::Str(std::env::consts::OS.to_string()),
+    );
+    snap.insert(
+        "arch".to_string(),
+        Value::Str(std::env::consts::ARCH.to_string()),
+    );
+    snap.insert(
+        "hostname".to_string(),
+        Value::Str(sysinfo::System::host_name().unwrap_or_default()),
+    );
 
     let sys = sysinfo::System::new_all();
     let cpus = sys.cpus();
     if let Some(cpu) = cpus.first() {
         let mut cpu_rec = std::collections::BTreeMap::new();
         cpu_rec.insert("brand".to_string(), Value::Str(cpu.brand().to_string()));
-        cpu_rec.insert("cores".to_string(), Value::Int(sys.physical_core_count().unwrap_or(1) as i64));
+        cpu_rec.insert(
+            "cores".to_string(),
+            Value::Int(sys.physical_core_count().unwrap_or(1) as i64),
+        );
         cpu_rec.insert("logical".to_string(), Value::Int(cpus.len() as i64));
         cpu_rec.insert("freq_mhz".to_string(), Value::Float(cpu.frequency() as f64));
         snap.insert("cpu".to_string(), Value::Record(cpu_rec));
     }
 
     let mut mem_rec = std::collections::BTreeMap::new();
-    mem_rec.insert("total_bytes".to_string(), Value::Int(sys.total_memory() as i64));
-    mem_rec.insert("free_bytes".to_string(), Value::Int(sys.free_memory() as i64));
-    mem_rec.insert("available_bytes".to_string(), Value::Int(sys.available_memory() as i64));
+    mem_rec.insert(
+        "total_bytes".to_string(),
+        Value::Int(sys.total_memory() as i64),
+    );
+    mem_rec.insert(
+        "free_bytes".to_string(),
+        Value::Int(sys.free_memory() as i64),
+    );
+    mem_rec.insert(
+        "available_bytes".to_string(),
+        Value::Int(sys.available_memory() as i64),
+    );
     snap.insert("memory".to_string(), Value::Record(mem_rec));
 
     let disks = sysinfo::Disks::new_with_refreshed_list();
     let mut disk_arr = Vec::new();
     for disk in disks.list() {
         let mut d = std::collections::BTreeMap::new();
-        d.insert("mount".to_string(), Value::Str(disk.mount_point().to_str().unwrap_or("?").to_string()));
-        d.insert("fs".to_string(), Value::Str(disk.file_system().to_str().unwrap_or("?").to_string()));
+        d.insert(
+            "mount".to_string(),
+            Value::Str(disk.mount_point().to_str().unwrap_or("?").to_string()),
+        );
+        d.insert(
+            "fs".to_string(),
+            Value::Str(disk.file_system().to_str().unwrap_or("?").to_string()),
+        );
         d.insert("total".to_string(), Value::Int(disk.total_space() as i64));
-        d.insert("available".to_string(), Value::Int(disk.available_space() as i64));
+        d.insert(
+            "available".to_string(),
+            Value::Int(disk.available_space() as i64),
+        );
         disk_arr.push(Value::Record(d));
     }
     snap.insert("disks".to_string(), Value::Array(disk_arr));
 
     let path = std::env::var("PATH").unwrap_or_default();
-    snap.insert("path_entries".to_string(), Value::Int(path.split(';').count() as i64));
-    snap.insert("user".to_string(), Value::Str(
-        std::env::var("USERNAME").unwrap_or_else(|_| "unknown".to_string())
-    ));
-    snap.insert("temp".to_string(), Value::Str(
-        std::env::var("TEMP").unwrap_or_else(|_| "unknown".to_string())
-    ));
+    snap.insert(
+        "path_entries".to_string(),
+        Value::Int(path.split(';').count() as i64),
+    );
+    snap.insert(
+        "user".to_string(),
+        Value::Str(std::env::var("USERNAME").unwrap_or_else(|_| "unknown".to_string())),
+    );
+    snap.insert(
+        "temp".to_string(),
+        Value::Str(std::env::var("TEMP").unwrap_or_else(|_| "unknown".to_string())),
+    );
 
     Ok(Value::Record(snap))
 }
@@ -47775,7 +43427,11 @@ fn bi_par_map(args: Vec<Value>, input: Option<Value>, env: &mut Env) -> Result<V
     let num_threads = std::env::var("AE_PAR_MAP_THREADS")
         .ok()
         .and_then(|s| s.parse::<usize>().ok())
-        .unwrap_or_else(|| std::thread::available_parallelism().map(|p| p.get()).unwrap_or(4))
+        .unwrap_or_else(|| {
+            std::thread::available_parallelism()
+                .map(|p| p.get())
+                .unwrap_or(4)
+        })
         .min(arr.len());
 
     let chunk_size = (arr.len() + num_threads - 1) / num_threads;
@@ -47878,8 +43534,15 @@ Write-Output $shortcut.TargetPath"#,
 
 /// sys.audit_log(n?) — Query recent audit log entries.
 fn bi_sys_audit_log(args: Vec<Value>) -> Result<Value> {
-    let limit = args.first()
-        .and_then(|v| if let Value::Int(n) = v { Some(*n as usize) } else { None })
+    let limit = args
+        .first()
+        .and_then(|v| {
+            if let Value::Int(n) = v {
+                Some(*n as usize)
+            } else {
+                None
+            }
+        })
         .unwrap_or(50);
     let entries = crate::safety::read_audit_tail(limit);
     let values: Vec<Value> = entries.into_iter().map(|j| Value::from_json(&j)).collect();
@@ -47892,7 +43555,8 @@ fn bi_sys_audit_log(args: Vec<Value>) -> Result<Value> {
 
 /// file.lock(path, fn) — Acquire an advisory lock, execute fn, release lock.
 fn bi_file_lock(args: Vec<Value>, input: Option<Value>, env: &mut Env) -> Result<Value> {
-    let path_val = args.first()
+    let path_val = args
+        .first()
         .ok_or_else(|| crate::safety::arg_err("file_lock requires a file path"))?;
     let path = match path_val {
         Value::Str(s) => s.as_str(),
@@ -47900,8 +43564,9 @@ fn bi_file_lock(args: Vec<Value>, input: Option<Value>, env: &mut Env) -> Result
     };
     let resolved = crate::safety::resolve_path_str(path);
 
-    let lam_val = args.get(1)
-        .ok_or_else(|| crate::safety::arg_err("file_lock requires a lambda (fn to execute while locked)"))?;
+    let lam_val = args.get(1).ok_or_else(|| {
+        crate::safety::arg_err("file_lock requires a lambda (fn to execute while locked)")
+    })?;
     let lam = crate::builtins::need_lambda(lam_val, "file_lock")?;
 
     let lock_path = format!("{}.ae_lock", resolved);
@@ -47920,12 +43585,18 @@ fn bi_file_lock(args: Vec<Value>, input: Option<Value>, env: &mut Env) -> Result
                     if let Ok(elapsed) = modified.elapsed() {
                         if elapsed.as_secs() > 30 {
                             let _ = std::fs::remove_file(&lock_path);
-                            return Err(anyhow!("file_lock: stale lock cleared for '{}', retry", resolved));
+                            return Err(anyhow!(
+                                "file_lock: stale lock cleared for '{}', retry",
+                                resolved
+                            ));
                         }
                     }
                 }
             }
-            return Err(anyhow!("file_lock: '{}' is locked by another process", resolved));
+            return Err(anyhow!(
+                "file_lock: '{}' is locked by another process",
+                resolved
+            ));
         }
     };
 
@@ -48044,12 +43715,20 @@ fn bi_sys_process_info(args: Vec<Value>) -> Result<Value> {
     if let Some(proc) = sys.process(sysinfo::Pid::from_u32(pid_val)) {
         let mut rec = BTreeMap::new();
         rec.insert("pid".to_string(), Value::Int(proc.pid().as_u32() as i64));
-        rec.insert("name".to_string(), Value::Str(proc.name().to_string_lossy().to_string()));
+        rec.insert(
+            "name".to_string(),
+            Value::Str(proc.name().to_string_lossy().to_string()),
+        );
         rec.insert("cpu".to_string(), Value::Float(proc.cpu_usage() as f64));
         rec.insert("mem_bytes".to_string(), Value::Int(proc.memory() as i64));
-        rec.insert("exe".to_string(), Value::Str(
-            proc.exe().map(|p| p.to_string_lossy().to_string()).unwrap_or_default()
-        ));
+        rec.insert(
+            "exe".to_string(),
+            Value::Str(
+                proc.exe()
+                    .map(|p| p.to_string_lossy().to_string())
+                    .unwrap_or_default(),
+            ),
+        );
         return Ok(Value::Record(rec));
     }
     Ok(Value::Null)
@@ -48137,12 +43816,19 @@ mod phase4_tests {
             let inner = Instant::now() + Duration::from_secs(5);
             let _inner_g = DeadlineGuard::enter(Some(inner));
             let inner_secs = current_timeout_secs();
-            assert!(inner_secs == 4 || inner_secs == 5, "expected ~5s, got {}", inner_secs);
+            assert!(
+                inner_secs == 4 || inner_secs == 5,
+                "expected ~5s, got {}",
+                inner_secs
+            );
         }
         // After inner guard drops, outer should be restored.
         // Allow drift for elapsed time during the inner scope.
         let restored = current_timeout_secs();
-        assert!(restored >= 58 && restored <= 60, "expected ~60s, got {}", restored);
+        assert!(
+            restored >= 58 && restored <= 60,
+            "expected ~60s, got {}",
+            restored
+        );
     }
 }
-

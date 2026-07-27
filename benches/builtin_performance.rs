@@ -1,8 +1,8 @@
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use std::collections::BTreeMap;
 use verseshell::builtins::call_with_input;
 use verseshell::env::Env;
 use verseshell::value::Value;
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
-use std::collections::BTreeMap;
 
 fn create_test_array(size: usize) -> Value {
     let data: Vec<Value> = (1..=size).map(|i| Value::Int(i as i64)).collect();

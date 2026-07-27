@@ -4,16 +4,36 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 
 fn run_server(input: &str, workspace: &Path) -> Vec<Value> {
-    let mut child = Command::new(env!("CARGO_BIN_EXE_ae"))
-        .arg("--serve")
+    run_server_with_args(input, workspace, &["--cap", "shell.exec"])
+}
+
+fn run_server_without_caps(input: &str, workspace: &Path) -> Vec<Value> {
+    run_server_with_args(input, workspace, &[])
+}
+
+fn run_server_with_args(input: &str, workspace: &Path, args: &[&str]) -> Vec<Value> {
+    run_server_with_args_and_env(input, workspace, args, &[])
+}
+
+fn run_server_with_args_and_env(
+    input: &str,
+    workspace: &Path,
+    args: &[&str],
+    env: &[(&str, &str)],
+) -> Vec<Value> {
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_ae"));
+    cmd.arg("--serve")
+        .args(args)
         .env("AETHER_WORKSPACE", workspace)
         .env_remove("AETHER_MODE")
         .env_remove("AETHER_CAPS")
+        .env_remove("VERSESHELL_POLICY_PROFILE_ID")
+        .env_remove("VERSESHELL_POLICY_PROFILE_DIGEST")
+        .envs(env.iter().copied())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .unwrap();
+        .stderr(Stdio::piped());
+    let mut child = cmd.spawn().unwrap();
     child
         .stdin
         .as_mut()
@@ -35,6 +55,46 @@ fn run_server(input: &str, workspace: &Path) -> Vec<Value> {
 }
 
 #[test]
+fn runtime_handshake_is_registered_and_reports_enforced_allow_list() {
+    let workspace = std::env::temp_dir().join(format!("verseshell-op-{}", uuid::Uuid::new_v4()));
+    std::fs::create_dir_all(&workspace).unwrap();
+    let request = json!({
+        "id": "handshake", "agent": "test", "op": "runtime.handshake",
+        "args": {}, "timeout_ms": 5000, "budget": {"max_tokens": 4000}
+    });
+
+    let response = run_server_with_args_and_env(
+        &(request.to_string() + "\n"),
+        &workspace,
+        &[],
+        &[
+            ("VERSESHELL_POLICY_PROFILE_ID", "agent-minimal"),
+            (
+                "VERSESHELL_POLICY_PROFILE_DIGEST",
+                "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            ),
+        ],
+    )
+    .remove(0);
+    assert_eq!(response["ok"], true, "response={response}");
+    assert_eq!(response["schema"], "verseshell.observation/v1");
+    assert_eq!(response["data"]["server_protocol"], "verseshell.jsonl/v1");
+    assert_eq!(response["data"]["capabilities"]["mode"], "allow_list");
+    assert_eq!(response["data"]["capabilities"]["granted"], json!([]));
+    assert_eq!(response["data"]["workspace"]["canonical"], true);
+    assert_eq!(
+        response["data"]["policy_profile"],
+        json!({
+            "id": "agent-minimal",
+            "digest": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+        })
+    );
+    assert!(response["data"]["operation_catalog"]["digest"]
+        .as_str()
+        .is_some_and(|digest| digest.starts_with("sha256:")));
+    let _ = std::fs::remove_dir_all(workspace);
+}
+#[test]
 fn legacy_cache_hits_preserve_value() {
     let workspace = std::env::temp_dir().join(format!("verseshell-op-{}", uuid::Uuid::new_v4()));
     std::fs::create_dir_all(&workspace).unwrap();
@@ -46,6 +106,29 @@ fn legacy_cache_hits_preserve_value() {
     assert_eq!(responses[0]["value"], 3);
     assert_eq!(responses[1]["value"], 3);
     assert_eq!(responses[1]["meta"]["cache_hit"], true);
+    let _ = std::fs::remove_dir_all(workspace);
+}
+
+#[test]
+fn exec_run_is_denied_without_explicit_capability() {
+    let workspace = std::env::temp_dir().join(format!("verseshell-op-{}", uuid::Uuid::new_v4()));
+    std::fs::create_dir_all(&workspace).unwrap();
+    #[cfg(windows)]
+    let argv = json!(["cmd", "/C", "echo denied"]);
+    #[cfg(not(windows))]
+    let argv = json!(["sh", "-c", "echo denied"]);
+    let request = json!({
+        "id": "denied", "agent": "test", "op": "exec.run",
+        "args": {"argv": argv, "cwd": "."},
+        "timeout_ms": 5000, "budget": {"max_tokens": 4000}
+    });
+
+    let response = run_server_without_caps(&(request.to_string() + "\n"), &workspace).remove(0);
+    assert_eq!(response["ok"], false, "response={response}");
+    assert_eq!(
+        response["error"]["code"], "E_CAPABILITY_DENY",
+        "response={response}"
+    );
     let _ = std::fs::remove_dir_all(workspace);
 }
 
@@ -176,7 +259,10 @@ fn failure_window_prefers_error_lines_over_noise() {
     );
     let has_artifact = response["data"]["stdout"]["artifact"].as_str().is_some()
         || response["data"]["stderr"]["artifact"].as_str().is_some();
-    assert!(has_artifact, "full log must remain recoverable via artifact");
+    assert!(
+        has_artifact,
+        "full log must remain recoverable via artifact"
+    );
     let _ = std::fs::remove_dir_all(workspace);
 }
 
@@ -186,13 +272,13 @@ fn ansi_color_codes_are_stripped_from_observations() {
     std::fs::create_dir_all(&workspace).unwrap();
     // Produce a colored error via PowerShell / printf escape sequences.
     #[cfg(windows)]
-    let argv = json!([
-        "cmd",
-        "/C",
-        "echo [31merror: boom[0m 1>&2 & exit /B 1"
-    ]);
+    let argv = json!(["cmd", "/C", "echo [31merror: boom[0m 1>&2 & exit /B 1"]);
     #[cfg(not(windows))]
-    let argv = json!(["sh", "-c", "printf '\\033[31merror: boom\\033[0m\\n' >&2; exit 1"]);
+    let argv = json!([
+        "sh",
+        "-c",
+        "printf '\\033[31merror: boom\\033[0m\\n' >&2; exit 1"
+    ]);
     let request = json!({
         "id": "ansi", "agent": "test", "op": "exec.run",
         "args": {"argv": argv, "cwd": ".", "artifact": "auto"},
@@ -201,11 +287,16 @@ fn ansi_color_codes_are_stripped_from_observations() {
     let response = run_server(&(request.to_string() + "\n"), &workspace).remove(0);
     assert_eq!(response["ok"], false);
     let text = response["data"]["stderr"]["text"].as_str().unwrap_or("");
-    assert!(text.contains("error: boom") || text.contains("boom"), "got text={text}");
-    assert!(!text.contains('\u{1b}'), "ANSI escapes should be stripped, got {text:?}");
+    assert!(
+        text.contains("error: boom") || text.contains("boom"),
+        "got text={text}"
+    );
+    assert!(
+        !text.contains('\u{1b}'),
+        "ANSI escapes should be stripped, got {text:?}"
+    );
     let _ = std::fs::remove_dir_all(workspace);
 }
-
 
 #[test]
 fn budget_truncation_is_explicit_with_omitted_marker() {
@@ -228,7 +319,10 @@ fn budget_truncation_is_explicit_with_omitted_marker() {
     let stdout = &response["data"]["stdout"];
     assert_eq!(stdout["status"], "truncated", "stdout={stdout}");
     let text = stdout["text"].as_str().unwrap();
-    assert!(text.contains("omitted"), "expected omitted marker in {text}");
+    assert!(
+        text.contains("omitted"),
+        "expected omitted marker in {text}"
+    );
     assert!(stdout["omitted_bytes"].as_u64().unwrap() > 0);
     assert!(stdout["artifact"].as_str().is_some());
     let _ = std::fs::remove_dir_all(workspace);
@@ -248,7 +342,7 @@ fn git_profile_is_auto_detected() {
     if response["ok"] == true {
         assert_eq!(response["meta"]["profile"], "git");
     } else {
-        // git may be missing in some CI images — treat as soft skip.
+        // git may be missing in some CI images �?treat as soft skip.
         let code = response["error"]["code"].as_str().unwrap_or("");
         assert!(
             code == "E_EXEC_NOT_FOUND" || code == "E_EXEC_SPAWN",

@@ -2,9 +2,9 @@
 // Multi-agent concurrent stress test.
 // Run: cargo test --test concurrent_performance_tests -- --nocapture
 
-use verseshell::runtime::{AgentRequest, RuntimeConfig, SharedRuntime};
 use std::sync::{Arc, Barrier, Mutex};
 use std::time::Instant;
+use verseshell::runtime::{AgentRequest, RuntimeConfig, SharedRuntime};
 
 #[derive(Clone)]
 struct LatencyRecord {
@@ -14,12 +14,19 @@ struct LatencyRecord {
 
 fn percentile(mut values: Vec<u64>, p: f64) -> u64 {
     values.sort();
-    if values.is_empty() { return 0; }
+    if values.is_empty() {
+        return 0;
+    }
     let idx = ((p / 100.0) * (values.len() - 1) as f64) as usize;
     values[idx.min(values.len() - 1)]
 }
 
-fn run_bench(rt: &SharedRuntime, concurrency: usize, requests: usize, cmd: &str) -> Vec<LatencyRecord> {
+fn run_bench(
+    rt: &SharedRuntime,
+    concurrency: usize,
+    requests: usize,
+    cmd: &str,
+) -> Vec<LatencyRecord> {
     let barrier = Arc::new(Barrier::new(concurrency));
     let records = Arc::new(Mutex::new(Vec::new()));
     let mut handles = Vec::new();
@@ -52,7 +59,9 @@ fn run_bench(rt: &SharedRuntime, concurrency: usize, requests: usize, cmd: &str)
             }
         }));
     }
-    for h in handles { h.join().unwrap(); }
+    for h in handles {
+        h.join().unwrap();
+    }
     let guard = records.lock().unwrap();
     guard.clone()
 }
@@ -66,7 +75,10 @@ fn test_throughput_vs_concurrency() {
     println!("{:>6} {:>8} {:>10}", "Thrds", "Req", "Req/sec");
 
     for &conc in &[1, 2, 4, 8] {
-        let rt = SharedRuntime::new(RuntimeConfig { max_concurrency: conc, ..Default::default() });
+        let rt = SharedRuntime::new(RuntimeConfig {
+            max_concurrency: conc,
+            ..Default::default()
+        });
         let start = Instant::now();
         let records = run_bench(&rt, conc, base, cmd);
         let total = records.len();
@@ -74,10 +86,14 @@ fn test_throughput_vs_concurrency() {
         let tput = total as f64 / elapsed;
 
         let times: Vec<u64> = records.iter().map(|r| r.usec).collect();
-        println!("{:>6} {:>8} {:>10.0} (P50:{}μs P95:{}μs)",
-            conc, total, tput,
+        println!(
+            "{:>6} {:>8} {:>10.0} (P50:{}μs P95:{}μs)",
+            conc,
+            total,
+            tput,
             percentile(times.clone(), 50.0),
-            percentile(times.clone(), 95.0));
+            percentile(times.clone(), 95.0)
+        );
         assert!(tput > 0.0, "throughput must be positive");
     }
 }
@@ -87,22 +103,33 @@ fn test_single_agent_latency() {
     println!("\n═══ Single-Agent Latency (100 requests each) ═══");
     let workloads = [
         ("simple_math", "1+2"),
-        ("pipeline", "[5,2,4,1,3] | sort | where fn(x)=>x>2 | map fn(x)=>x*10"),
+        (
+            "pipeline",
+            "[5,2,4,1,3] | sort | where fn(x)=>x>2 | map fn(x)=>x*10",
+        ),
         ("sys_cpu", "sys.cpu_info()"),
         ("json_ops", "json.stringify(json.parse(\"[1,2,3]\"))"),
         ("record_create", "{a:1,b:\"hello\",c:[1,2,3]}"),
     ];
 
-    println!("{:<16} {:>8} {:>8} {:>8} {:>8}", "Workload", "Avg(μs)", "P50", "P95", "P99");
+    println!(
+        "{:<16} {:>8} {:>8} {:>8} {:>8}",
+        "Workload", "Avg(μs)", "P50", "P95", "P99"
+    );
 
     for (name, cmd) in &workloads {
         let rt = SharedRuntime::new(RuntimeConfig::default());
         let records = run_bench(&rt, 1, 100, cmd);
         let times: Vec<u64> = records.iter().map(|r| r.usec).collect();
         let avg = times.iter().sum::<u64>() / times.len().max(1) as u64;
-        println!("{:<16} {:>8} {:>8} {:>8} {:>8}",
-            name, avg, percentile(times.clone(), 50.0),
-            percentile(times.clone(), 95.0), percentile(times.clone(), 99.0));
+        println!(
+            "{:<16} {:>8} {:>8} {:>8} {:>8}",
+            name,
+            avg,
+            percentile(times.clone(), 50.0),
+            percentile(times.clone(), 95.0),
+            percentile(times.clone(), 99.0)
+        );
         assert!(avg < 500000, "{} avg latency {}μs exceeds 500ms", name, avg);
     }
 }
@@ -145,7 +172,10 @@ fn test_sys_snapshot_cache() {
 #[test]
 fn test_mixed_workload_concurrent() {
     let cmds = ["1+2", "sys.cpu_info()", "{a:1}", "[1,2,3]|sort"];
-    let rt = SharedRuntime::new(RuntimeConfig { max_concurrency: 4, ..Default::default() });
+    let rt = SharedRuntime::new(RuntimeConfig {
+        max_concurrency: 4,
+        ..Default::default()
+    });
     let start = Instant::now();
 
     let records = Arc::new(Mutex::new(Vec::new()));
@@ -177,7 +207,9 @@ fn test_mixed_workload_concurrent() {
             }
         }));
     }
-    for h in handles { h.join().unwrap(); }
+    for h in handles {
+        h.join().unwrap();
+    }
 
     let total = records.lock().unwrap().len();
     let elapsed = start.elapsed().as_secs_f64();
@@ -187,11 +219,23 @@ fn test_mixed_workload_concurrent() {
     let times: Vec<u64> = recs.iter().map(|r| r.usec).collect();
 
     println!("\n═══ Mixed Workload (4 agents, 25 req each) ═══");
-    println!("Total: {} req in {:.1}s = {:.0} req/s", total, elapsed, tput);
-    println!("Cache hits: {}/{} ({:.0}%)", hits, total, hits as f64 / total as f64 * 100.0);
-    println!("Latency: P50={}μs P95={}μs P99={}μs Avg={:.0}μs",
-        percentile(times.clone(), 50.0), percentile(times.clone(), 95.0),
-        percentile(times.clone(), 99.0), times.iter().sum::<u64>() as f64 / times.len() as f64);
+    println!(
+        "Total: {} req in {:.1}s = {:.0} req/s",
+        total, elapsed, tput
+    );
+    println!(
+        "Cache hits: {}/{} ({:.0}%)",
+        hits,
+        total,
+        hits as f64 / total as f64 * 100.0
+    );
+    println!(
+        "Latency: P50={}μs P95={}μs P99={}μs Avg={:.0}μs",
+        percentile(times.clone(), 50.0),
+        percentile(times.clone(), 95.0),
+        percentile(times.clone(), 99.0),
+        times.iter().sum::<u64>() as f64 / times.len() as f64
+    );
 
     assert!(tput > 0.0);
 }
@@ -203,8 +247,13 @@ fn test_session_reuse_benefit() {
     let s = Instant::now();
     for _ in 0..50 {
         shared.execute(AgentRequest {
-            id: "s".into(), agent: "a".into(), cmd: "1+2".into(), timeout_ms: 0, budget: None,
-            dry_run: false, trace: false,
+            id: "s".into(),
+            agent: "a".into(),
+            cmd: "1+2".into(),
+            timeout_ms: 0,
+            budget: None,
+            dry_run: false,
+            trace: false,
         });
     }
     let shared_ms = s.elapsed().as_micros();
@@ -214,16 +263,32 @@ fn test_session_reuse_benefit() {
     for _ in 0..50 {
         let fresh = SharedRuntime::new(RuntimeConfig::default());
         fresh.execute(AgentRequest {
-            id: "f".into(), agent: "b".into(), cmd: "1+2".into(), timeout_ms: 0, budget: None,
-            dry_run: false, trace: false,
+            id: "f".into(),
+            agent: "b".into(),
+            cmd: "1+2".into(),
+            timeout_ms: 0,
+            budget: None,
+            dry_run: false,
+            trace: false,
         });
     }
     let fresh_ms = f.elapsed().as_micros();
 
     println!("\n═══ Session Reuse Benefit ═══");
-    println!("Shared session: {}μs total ({}μs avg)", shared_ms, shared_ms / 50);
-    println!("Fresh per call: {}μs total ({}μs avg)", fresh_ms, fresh_ms / 50);
+    println!(
+        "Shared session: {}μs total ({}μs avg)",
+        shared_ms,
+        shared_ms / 50
+    );
+    println!(
+        "Fresh per call: {}μs total ({}μs avg)",
+        fresh_ms,
+        fresh_ms / 50
+    );
     println!("Speedup: {:.1}x", fresh_ms as f64 / shared_ms.max(1) as f64);
 
-    assert!(shared_ms < fresh_ms, "Session reuse should be faster than fresh per call");
+    assert!(
+        shared_ms < fresh_ms,
+        "Session reuse should be faster than fresh per call"
+    );
 }

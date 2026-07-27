@@ -209,7 +209,10 @@ pub fn decode_value(input: &str) -> Result<Value, String> {
     let v = parser.parse_value()?;
     parser.skip_ws();
     if !parser.is_eof() {
-        return Err(format!("trailing content after value: {:?}", parser.remaining()));
+        return Err(format!(
+            "trailing content after value: {:?}",
+            parser.remaining()
+        ));
     }
     Ok(v)
 }
@@ -448,11 +451,14 @@ mod tests {
     fn test_roundtrip_nested() {
         let mut inner = std::collections::BTreeMap::new();
         inner.insert("a".into(), Value::Str("with space".into()));
-        inner.insert("b".into(), Value::Array(vec![
-            Value::Int(1),
-            Value::Str("two words".into()),
-            Value::Null,
-        ]));
+        inner.insert(
+            "b".into(),
+            Value::Array(vec![
+                Value::Int(1),
+                Value::Str("two words".into()),
+                Value::Null,
+            ]),
+        );
         let original = Value::Record(inner);
         let encoded = encode_value(&original);
         let decoded = decode_value(&encoded).unwrap();

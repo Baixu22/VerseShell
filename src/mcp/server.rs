@@ -45,12 +45,8 @@ pub async fn serve_stdio_with_runtime(runtime: Arc<SharedRuntime>) -> Result<()>
             Ok(r) => r,
             Err(e) => {
                 // Malformed JSON: respond with parse error, id unknown.
-                let resp = JsonRpcResponse::error(
-                    Value::Null,
-                    -32700,
-                    format!("parse error: {e}"),
-                    None,
-                );
+                let resp =
+                    JsonRpcResponse::error(Value::Null, -32700, format!("parse error: {e}"), None);
                 let resp_body = serde_json::to_string(&resp)?;
                 write_message(&mut out, &resp_body, framing).await?;
                 continue;

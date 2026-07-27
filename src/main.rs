@@ -15,9 +15,7 @@ fn create_env_with_modules() -> Env {
 
 #[derive(Parser)]
 #[command(name = "ae")]
-#[command(
-    about = "VerseShell — Agent Action / Observation Runtime for local systems"
-)]
+#[command(about = "VerseShell — Agent Action / Observation Runtime for local systems")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
 struct Cli {
     /// Bash compatibility mode (transpile bash to aeshell)
@@ -131,11 +129,20 @@ fn main() -> Result<()> {
     // instead of the AE_TIMEOUT env var. AE_TIMEOUT is no longer read.
     verseshell::safety::init_rbac_from_env();
 
-    // Init V2 capability system
+    // Agent, server, and explicitly capability-scoped invocations must start
+    // fail-closed. Preserve the historical permissive behavior only for the
+    // interactive human CLI with no capability configuration.
     if let Some(ref caps) = cli.cap {
         std::env::set_var("AETHER_CAPS", caps);
     }
-    verseshell::capability::init_caps(cli.cap.as_deref());
+    if cli.serve {
+        std::env::set_var("AE_MAX_CONCURRENCY", cli.max_concurrency.to_string());
+    }
+    if cli.serve || cli.agent || cli.cap.is_some() {
+        verseshell::capability::init_caps(cli.cap.as_deref());
+    } else {
+        verseshell::capability::init_caps_legacy(None);
+    }
 
     // ── Server mode ──────────────────────────────────────────
     if cli.serve {

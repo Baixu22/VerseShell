@@ -1,4 +1,4 @@
-﻿//! Semantic reducer quality gates (fixtures + diagnostics integrity).
+//! Semantic reducer quality gates (fixtures + diagnostics integrity).
 
 use std::fs;
 use std::path::PathBuf;
@@ -40,7 +40,12 @@ fn cargo_ok_fixture() {
     let text = fixture("cargo_ok.txt");
     let out = reduce_for_profile("cargo", &text, true).expect("cargo reducer");
     let summary = out.summary.as_ref().unwrap();
-    assert!(summary.to_ascii_lowercase().contains("pass") || summary.contains("finished") || summary.contains("successfully") || summary.contains("cargo"));
+    assert!(
+        summary.to_ascii_lowercase().contains("pass")
+            || summary.contains("finished")
+            || summary.contains("successfully")
+            || summary.contains("cargo")
+    );
     assert!(summary.len() < 300);
 }
 
@@ -78,12 +83,22 @@ fn git_status_and_diff_fixtures() {
 fn npm_fixtures() {
     let ok = fixture("npm_ok.txt");
     let out = reduce_for_profile("npm_install", &ok, true).expect("npm");
-    assert!(out.summary.as_ref().unwrap().contains("120") || out.summary.as_ref().unwrap().contains("added"));
+    assert!(
+        out.summary.as_ref().unwrap().contains("120")
+            || out.summary.as_ref().unwrap().contains("added")
+    );
 
     let fail = fixture("npm_fail.txt");
     let out = reduce_for_profile("npm_install", &fail, false).expect("npm fail");
     assert!(!out.diagnostics.is_empty());
-    assert!(out.summary.as_ref().unwrap().to_ascii_lowercase().contains("fail") || out.summary.as_ref().unwrap().contains("npm"));
+    assert!(
+        out.summary
+            .as_ref()
+            .unwrap()
+            .to_ascii_lowercase()
+            .contains("fail")
+            || out.summary.as_ref().unwrap().contains("npm")
+    );
 }
 
 #[test]
@@ -115,4 +130,3 @@ fn match_guard_does_not_require_env_clone_api() {
     assert_eq!(env.get_var("v0"), Some(&Value::Int(0)));
     assert_eq!(env.get_var("v199"), Some(&Value::Int(199)));
 }
-

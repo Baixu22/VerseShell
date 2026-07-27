@@ -21,6 +21,8 @@ Thumbs.db
 
 # Python scripts (cleanup scripts from pruning)
 *.py
+**/__pycache__/
+*.py[cod]
 
 # Error logs from pruning
 *_errors*.txt

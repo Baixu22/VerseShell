@@ -1,8 +1,8 @@
 // benches/parser_performance.rs
 // Benchmarks for the AetherShell parser
 
-use verseshell::parser::parse_program;
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use verseshell::parser::parse_program;
 
 fn benchmark_parser_simple(c: &mut Criterion) {
     let mut group = c.benchmark_group("parser_simple");

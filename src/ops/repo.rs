@@ -57,7 +57,9 @@ fn schema_search() -> serde_json::Value {
 
 fn execute_search(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "cat") { return o; }
+    if let Err(o) = require_capability(req, "cat") {
+        return o;
+    }
     let query = match arg_str(&req.args, "query") {
         Some(q) if !q.is_empty() => q,
         _ => return err(req, "repo", "E_BAD_ARG", "query is required", start),
@@ -68,8 +70,23 @@ fn execute_search(req: &OperationRequest) -> Observation {
     let root = safety::workspace_root();
     let mut matches = Vec::new();
     let mut scanned = 0u64;
-    walk_search(&root, &root, glob.as_deref(), &query, context_lines, max_items, &mut matches, &mut scanned);
-    audit("repo.search", Effect::ReadLocal, "allow", &query, json!({"matches": matches.len(), "scanned": scanned}));
+    walk_search(
+        &root,
+        &root,
+        glob.as_deref(),
+        &query,
+        context_lines,
+        max_items,
+        &mut matches,
+        &mut scanned,
+    );
+    audit(
+        "repo.search",
+        Effect::ReadLocal,
+        "allow",
+        &query,
+        json!({"matches": matches.len(), "scanned": scanned}),
+    );
     ok(
         req,
         "repo",
@@ -114,7 +131,16 @@ fn walk_search(
             continue;
         }
         if path.is_dir() {
-            walk_search(root, &path, glob, query, context_lines, max_items, matches, scanned);
+            walk_search(
+                root,
+                &path,
+                glob,
+                query,
+                context_lines,
+                max_items,
+                matches,
+                scanned,
+            );
             continue;
         }
         if let Some(g) = glob {
@@ -182,7 +208,9 @@ fn glob_match(name: &str, pattern: &str) -> bool {
 
 fn execute_changed(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "cat") { return o; }
+    if let Err(o) = require_capability(req, "cat") {
+        return o;
+    }
     let root = safety::workspace_root();
     let output = Command::new("git")
         .args(["status", "--porcelain"])
@@ -223,13 +251,21 @@ fn execute_changed(req: &OperationRequest) -> Observation {
                 start,
             )
         }
-        Err(e) => err(req, "repo", "E_GIT", format!("git not available: {e}"), start),
+        Err(e) => err(
+            req,
+            "repo",
+            "E_GIT",
+            format!("git not available: {e}"),
+            start,
+        ),
     }
 }
 
 fn execute_summary(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "cat") { return o; }
+    if let Err(o) = require_capability(req, "cat") {
+        return o;
+    }
     let root = safety::workspace_root();
     let branch = git_out(&root, &["rev-parse", "--abbrev-ref", "HEAD"]);
     let dirty = git_out(&root, &["status", "--porcelain"])
@@ -259,7 +295,11 @@ fn execute_summary(req: &OperationRequest) -> Observation {
 }
 
 fn git_out(root: &Path, args: &[&str]) -> Option<String> {
-    let out = Command::new("git").args(args).current_dir(root).output().ok()?;
+    let out = Command::new("git")
+        .args(args)
+        .current_dir(root)
+        .output()
+        .ok()?;
     if !out.status.success() {
         return None;
     }

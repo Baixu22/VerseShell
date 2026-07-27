@@ -1,9 +1,9 @@
 //! File ACI operations: view, edit, hash, remove (with trash).
 
 use super::common::{
-    arg_bool, arg_str, arg_u64, audit, check_expected_hash, content_hash_str, err, err_data, guard_delete,
-    guard_read, guard_write, now, numbered_lines, ok, read_text_file, require_capability,
-    resolve_workspace_path, write_text_file,
+    arg_bool, arg_str, arg_u64, audit, check_expected_hash, content_hash_str, err, err_data,
+    guard_delete, guard_read, guard_write, now, numbered_lines, ok, read_text_file,
+    require_capability, resolve_workspace_path, write_text_file,
 };
 use super::trash;
 use crate::operation::{Diagnostic, Observation, OperationRequest, OperationSpec, SuggestedAction};
@@ -17,7 +17,8 @@ pub fn specs() -> Vec<OperationSpec> {
         OperationSpec {
             name: "file.read_range",
             mcp_name: "file_read_range",
-            description: "Read a line range from a file with content hash. Default hard cap 500 lines.",
+            description:
+                "Read a line range from a file with content hash. Default hard cap 500 lines.",
             effect: "fs.read",
             capability: "file.read",
             input_schema: schema_read_range,
@@ -26,7 +27,8 @@ pub fn specs() -> Vec<OperationSpec> {
         OperationSpec {
             name: "file.view",
             mcp_name: "file_view",
-            description: "View a window of lines around a cursor with total_lines and content hash.",
+            description:
+                "View a window of lines around a cursor with total_lines and content hash.",
             effect: "fs.read",
             capability: "file.read",
             input_schema: schema_view,
@@ -35,7 +37,8 @@ pub fn specs() -> Vec<OperationSpec> {
         OperationSpec {
             name: "file.hash",
             mcp_name: "file_hash",
-            description: "Return sha256 content hash of a file for expected_hash optimistic concurrency.",
+            description:
+                "Return sha256 content hash of a file for expected_hash optimistic concurrency.",
             effect: "fs.read",
             capability: "file.read",
             input_schema: schema_path_only,
@@ -44,7 +47,8 @@ pub fn specs() -> Vec<OperationSpec> {
         OperationSpec {
             name: "file.replace_exact",
             mcp_name: "file_replace_exact",
-            description: "Replace exactly one unique occurrence of old with new. Optional expected_hash.",
+            description:
+                "Replace exactly one unique occurrence of old with new. Optional expected_hash.",
             effect: "fs.write",
             capability: "file.write",
             input_schema: schema_replace,
@@ -62,7 +66,8 @@ pub fn specs() -> Vec<OperationSpec> {
         OperationSpec {
             name: "file.edit_range",
             mcp_name: "file_edit_range",
-            description: "Replace a line range with replacement text. Optional expected_hash and check.",
+            description:
+                "Replace a line range with replacement text. Optional expected_hash and check.",
             effect: "fs.write",
             capability: "file.write",
             input_schema: schema_edit_range,
@@ -71,7 +76,8 @@ pub fn specs() -> Vec<OperationSpec> {
         OperationSpec {
             name: "file.diff",
             mcp_name: "file_diff",
-            description: "Unified-style line diff between file content and provided new_text (or empty).",
+            description:
+                "Unified-style line diff between file content and provided new_text (or empty).",
             effect: "fs.read",
             capability: "file.read",
             input_schema: schema_diff,
@@ -190,13 +196,16 @@ fn schema_remove() -> Value {
 
 fn execute_read_range(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "cat") { return o; }
+    if let Err(o) = require_capability(req, "cat") {
+        return o;
+    }
     let path = match arg_str(&req.args, "path") {
         Some(p) => p,
         None => return err(req, "file", "E_BAD_ARG", "path is required", start),
     };
     let start_line = arg_u64(&req.args, "start_line", 1).max(1) as usize;
-    let end_line = arg_u64(&req.args, "end_line", start_line as u64).max(start_line as u64) as usize;
+    let end_line =
+        arg_u64(&req.args, "end_line", start_line as u64).max(start_line as u64) as usize;
     let max_lines = arg_u64(&req.args, "max_lines", 500).clamp(1, 2000) as usize;
     let resolved = match resolve_workspace_path(&path) {
         Ok(p) => p,
@@ -218,7 +227,13 @@ fn execute_read_range(req: &OperationRequest) -> Observation {
         to = from + max_lines;
     }
     let slice = &all[from..to];
-    audit("file.read_range", Effect::ReadLocal, "allow", &path, json!({"start": start_line, "end": end_line}));
+    audit(
+        "file.read_range",
+        Effect::ReadLocal,
+        "allow",
+        &path,
+        json!({"start": start_line, "end": end_line}),
+    );
     ok(
         req,
         "file",
@@ -239,7 +254,9 @@ fn execute_read_range(req: &OperationRequest) -> Observation {
 
 fn execute_view(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "cat") { return o; }
+    if let Err(o) = require_capability(req, "cat") {
+        return o;
+    }
     let path = match arg_str(&req.args, "path") {
         Some(p) => p,
         None => return err(req, "file", "E_BAD_ARG", "path is required", start),
@@ -265,7 +282,11 @@ fn execute_view(req: &OperationRequest) -> Observation {
         from = all.len().saturating_sub(window);
     }
     let to = (from + window).min(all.len());
-    let slice = if all.is_empty() { &[][..] } else { &all[from..to] };
+    let slice = if all.is_empty() {
+        &[][..]
+    } else {
+        &all[from..to]
+    };
     ok(
         req,
         "file",
@@ -287,7 +308,9 @@ fn execute_view(req: &OperationRequest) -> Observation {
 
 fn execute_hash(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "cat") { return o; }
+    if let Err(o) = require_capability(req, "cat") {
+        return o;
+    }
     let path = match arg_str(&req.args, "path") {
         Some(p) => p,
         None => return err(req, "file", "E_BAD_ARG", "path is required", start),
@@ -320,7 +343,9 @@ fn execute_hash(req: &OperationRequest) -> Observation {
 
 fn execute_replace_exact(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "file_write") { return o; }
+    if let Err(o) = require_capability(req, "file_write") {
+        return o;
+    }
     let path = match arg_str(&req.args, "path") {
         Some(p) => p,
         None => return err(req, "file", "E_BAD_ARG", "path is required", start),
@@ -350,7 +375,13 @@ fn execute_replace_exact(req: &OperationRequest) -> Observation {
     }
     let count = text.matches(&old).count();
     if count == 0 {
-        return err(req, "file", "E_NOT_FOUND", "old text not found in file", start);
+        return err(
+            req,
+            "file",
+            "E_NOT_FOUND",
+            "old text not found in file",
+            start,
+        );
     }
     if count > 1 {
         return err(
@@ -367,7 +398,13 @@ fn execute_replace_exact(req: &OperationRequest) -> Observation {
         return err(req, "file", "E_WRITE", e, start);
     }
     let new_hash = content_hash_str(&updated);
-    audit("file.replace_exact", Effect::WriteLocal, "completed", &path, json!({"content_hash": new_hash}));
+    audit(
+        "file.replace_exact",
+        Effect::WriteLocal,
+        "completed",
+        &path,
+        json!({"content_hash": new_hash}),
+    );
     ok(
         req,
         "file",
@@ -385,7 +422,9 @@ fn execute_replace_exact(req: &OperationRequest) -> Observation {
 
 fn execute_apply_patch(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "file_write") { return o; }
+    if let Err(o) = require_capability(req, "file_write") {
+        return o;
+    }
     let path = match arg_str(&req.args, "path") {
         Some(p) => p,
         None => return err(req, "file", "E_BAD_ARG", "path is required", start),
@@ -443,7 +482,13 @@ fn execute_apply_patch(req: &OperationRequest) -> Observation {
     let new_hash = content_hash_str(&text);
     let success = failed.is_empty();
     if success {
-        audit("file.apply_patch", Effect::WriteLocal, "completed", &path, json!({"applied": applied.len()}));
+        audit(
+            "file.apply_patch",
+            Effect::WriteLocal,
+            "completed",
+            &path,
+            json!({"applied": applied.len()}),
+        );
         ok(
             req,
             "file",
@@ -480,13 +525,16 @@ fn execute_apply_patch(req: &OperationRequest) -> Observation {
 
 fn execute_edit_range(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "file_write") { return o; }
+    if let Err(o) = require_capability(req, "file_write") {
+        return o;
+    }
     let path = match arg_str(&req.args, "path") {
         Some(p) => p,
         None => return err(req, "file", "E_BAD_ARG", "path is required", start),
     };
     let start_line = arg_u64(&req.args, "start_line", 1).max(1) as usize;
-    let end_line = arg_u64(&req.args, "end_line", start_line as u64).max(start_line as u64) as usize;
+    let end_line =
+        arg_u64(&req.args, "end_line", start_line as u64).max(start_line as u64) as usize;
     let replacement = arg_str(&req.args, "replacement").unwrap_or_default();
     let expected = arg_str(&req.args, "expected_hash");
     let check = arg_bool(&req.args, "check", false);
@@ -564,7 +612,13 @@ fn execute_edit_range(req: &OperationRequest) -> Observation {
         return err(req, "file", "E_WRITE", e, start);
     }
     let new_hash = content_hash_str(&updated);
-    audit("file.edit_range", Effect::WriteLocal, "completed", &path, json!({"content_hash": new_hash}));
+    audit(
+        "file.edit_range",
+        Effect::WriteLocal,
+        "completed",
+        &path,
+        json!({"content_hash": new_hash}),
+    );
     ok(
         req,
         "file",
@@ -602,11 +656,15 @@ fn lint_check(path: &Path, content: &str) -> Option<Diagnostic> {
                     Some(Diagnostic {
                         tool: "py_compile".into(),
                         severity: "error".into(),
-                        message: if msg.is_empty() { "python syntax error".into() } else { msg },
+                        message: if msg.is_empty() {
+                            "python syntax error".into()
+                        } else {
+                            msg
+                        },
                         path: Some(crate::artifact::display_path(path)),
                         line: None,
                         column: None,
-                                            code: None,
+                        code: None,
                         expected: None,
                         found: None,
                         suggested_fix: None,
@@ -624,10 +682,10 @@ fn lint_check(path: &Path, content: &str) -> Option<Diagnostic> {
                 path: Some(crate::artifact::display_path(path)),
                 line: None,
                 column: None,
-                        code: None,
-                        expected: None,
-                        found: None,
-                        suggested_fix: None,
+                code: None,
+                expected: None,
+                found: None,
+                suggested_fix: None,
             }),
         },
         _ => None,
@@ -636,7 +694,9 @@ fn lint_check(path: &Path, content: &str) -> Option<Diagnostic> {
 
 fn execute_diff(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "cat") { return o; }
+    if let Err(o) = require_capability(req, "cat") {
+        return o;
+    }
     let path = match arg_str(&req.args, "path") {
         Some(p) => p,
         None => return err(req, "file", "E_BAD_ARG", "path is required", start),
@@ -695,7 +755,9 @@ fn execute_diff(req: &OperationRequest) -> Observation {
 
 fn execute_write(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "write") { return o; }
+    if let Err(o) = require_capability(req, "write") {
+        return o;
+    }
     let path = match arg_str(&req.args, "path") {
         Some(p) => p,
         None => return err(req, "file", "E_BAD_ARG", "path is required", start),
@@ -715,7 +777,13 @@ fn execute_write(req: &OperationRequest) -> Observation {
         return err(req, "file", "E_WRITE_FAILED", e, start);
     }
     let hash = content_hash_str(&content);
-    audit("file.write", Effect::WriteLocal, "allow", &path, json!({"bytes": content.len()}));
+    audit(
+        "file.write",
+        Effect::WriteLocal,
+        "allow",
+        &path,
+        json!({"bytes": content.len()}),
+    );
     ok(
         req,
         "file",
@@ -732,7 +800,9 @@ fn execute_write(req: &OperationRequest) -> Observation {
 
 fn execute_remove(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "rm") { return o; }
+    if let Err(o) = require_capability(req, "rm") {
+        return o;
+    }
     let path = match arg_str(&req.args, "path") {
         Some(p) => p,
         None => return err(req, "file", "E_BAD_ARG", "path is required", start),
@@ -743,7 +813,13 @@ fn execute_remove(req: &OperationRequest) -> Observation {
         Err(e) => return err(req, "file", "E_OUTSIDE_WORKSPACE", e, start),
     };
     if !resolved.exists() {
-        return err(req, "file", "E_NOT_FOUND", format!("path not found: {path}"), start);
+        return err(
+            req,
+            "file",
+            "E_NOT_FOUND",
+            format!("path not found: {path}"),
+            start,
+        );
     }
     let use_trash = !hard && safety::current_mode() == Mode::Agent;
     // Trash is reversible -> WriteLocal; hard delete is Destructive (may need approval).
@@ -788,7 +864,13 @@ fn execute_remove(req: &OperationRequest) -> Observation {
         };
         match result {
             Ok(()) => {
-                audit("file.remove", Effect::Destructive, "deleted", &path, json!({}));
+                audit(
+                    "file.remove",
+                    Effect::Destructive,
+                    "deleted",
+                    &path,
+                    json!({}),
+                );
                 ok(
                     req,
                     "file",

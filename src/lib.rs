@@ -1,4 +1,4 @@
-﻿//! # VerseShell — Agent Action / Observation Runtime
+//! # VerseShell — Agent Action / Observation Runtime
 //!
 //! ## Core (always available)
 //! - [`ast`] — Abstract syntax tree
@@ -27,9 +27,9 @@ pub mod types;
 pub mod value;
 
 #[cfg(feature = "native")]
-pub mod auth;
-#[cfg(feature = "native")]
 pub mod artifact;
+#[cfg(feature = "native")]
+pub mod auth;
 #[cfg(feature = "native")]
 pub mod builtins;
 #[cfg(feature = "native")]
@@ -61,9 +61,9 @@ pub mod reducers;
 #[cfg(feature = "native")]
 pub mod repl;
 #[cfg(feature = "native")]
-pub mod runtime;
-#[cfg(feature = "native")]
 pub mod rule;
+#[cfg(feature = "native")]
+pub mod runtime;
 #[cfg(feature = "native")]
 pub mod safety;
 #[cfg(feature = "native")]

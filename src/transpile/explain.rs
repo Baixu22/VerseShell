@@ -85,10 +85,7 @@ pub fn explain_as_tools(bash_src: &str) -> anyhow::Result<Vec<ToolCall>> {
         Some("process_terminate") => vec![ToolCall {
             tool: "process_terminate".into(),
             arguments: json!({}),
-            rationale: format!(
-                "bash code maps to process kill; ae_source: {}",
-                ae_src
-            ),
+            rationale: format!("bash code maps to process kill; ae_source: {}", ae_src),
         }],
         _ => {
             // Fallback: use eval with the transpiled ae_src (not bash_src!).

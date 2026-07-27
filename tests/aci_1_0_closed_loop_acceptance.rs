@@ -11,6 +11,8 @@ fn run_server(input: &str, workspace: &Path, extra_env: &[(&str, Option<&str>)])
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_ae"));
     cmd.arg("--serve")
         .arg("--agent")
+        .arg("--cap")
+        .arg("all")
         .env("AETHER_WORKSPACE", workspace)
         .env("AETHER_MODE", "agent")
         .env_remove("AETHER_CAPS")
@@ -77,7 +79,12 @@ fn by_id<'a>(responses: &'a [Value], id: &str) -> &'a Value {
     responses
         .iter()
         .find(|r| r.get("id").and_then(|v| v.as_str()) == Some(id))
-        .unwrap_or_else(|| panic!("missing response id={id}; got {:?}", responses.iter().map(|r| r.get("id")).collect::<Vec<_>>()))
+        .unwrap_or_else(|| {
+            panic!(
+                "missing response id={id}; got {:?}",
+                responses.iter().map(|r| r.get("id")).collect::<Vec<_>>()
+            )
+        })
 }
 
 fn assert_ok(r: &Value, label: &str) {
@@ -94,7 +101,11 @@ fn write_fixture(ws: &Path) {
     std::fs::write(ws.join("app.py"), "def add(a, b):\n    return a + b\n").unwrap();
     std::fs::write(ws.join("readme.md"), "# Demo\nneedle marker\n").unwrap();
     std::fs::write(ws.join("cfg.json"), "{\n  \"ok\": true\n}\n").unwrap();
-    std::fs::write(ws.join("src/main.txt"), "line1\nline2\nline3\nline4\nline5\n").unwrap();
+    std::fs::write(
+        ws.join("src/main.txt"),
+        "line1\nline2\nline3\nline4\nline5\n",
+    )
+    .unwrap();
     std::fs::write(ws.join("dup.txt"), "x foo y foo z\n").unwrap();
 }
 
@@ -140,9 +151,17 @@ fn coder_agent_full_closed_loop() {
     let has_git = try_git_init(&ws);
 
     #[cfg(windows)]
-    let success_argv = json!(["cmd", "/C", "echo noise && echo added 12 packages && echo found 0 vulnerabilities"]);
+    let success_argv = json!([
+        "cmd",
+        "/C",
+        "echo noise && echo added 12 packages && echo found 0 vulnerabilities"
+    ]);
     #[cfg(not(windows))]
-    let success_argv = json!(["sh", "-c", "printf 'noise\\nadded 12 packages\\nfound 0 vulnerabilities\\n'"]);
+    let success_argv = json!([
+        "sh",
+        "-c",
+        "printf 'noise\\nadded 12 packages\\nfound 0 vulnerabilities\\n'"
+    ]);
 
     #[cfg(windows)]
     let fail_argv = json!(["cmd", "/C", "echo ERROR: boom failed& exit /b 1"]);
@@ -248,9 +267,9 @@ fn coder_agent_full_closed_loop() {
     // id 20 filled after we know handle — two-phase: first batch ends at 19, second continues...
     // For single-session closed loop we chain result.query using a second server call is NOT same process for LAST_TEST,
     // but artifact is on disk. result.query and trash restore work cross-process.
-    // Plan requires same-session for 17-20; we inject result.query after parsing intermediate? 
+    // Plan requires same-session for 17-20; we inject result.query after parsing intermediate?
     // Better: run one script that includes placeholder — can't. So: build script in two waves
-    // Wave A: 1-19, then append 20 with handle, 21-26 in second process for restore? 
+    // Wave A: 1-19, then append 20 with handle, 21-26 in second process for restore?
     // Plan: "同会话 result.query" — artifact store is workspace-scoped so cross-process query is fine
     // and still validates recovery. For same process we can do two run_server calls with same workspace
     // but LAST_TEST is process-local. test.run_target + summarize must be same process.
@@ -402,10 +421,7 @@ fn coder_agent_full_closed_loop() {
 
     assert_ok(r2("20"), "result.query");
     let raw = r2("20")["data"]["text"].as_str().unwrap_or("");
-    assert!(
-        raw.contains("ERROR") || raw.contains("boom"),
-        "raw={raw}"
-    );
+    assert!(raw.contains("ERROR") || raw.contains("boom"), "raw={raw}");
 
     assert_ok(r2("21"), "test.run_target");
     assert_ok(r2("22"), "test.summarize_last");
@@ -476,10 +492,7 @@ fn agent_exec_denied_without_approval_exposes_hint() {
     let responses = run_server(
         &script,
         &ws,
-        &[
-            ("AETHER_APPROVE_ALL", None),
-            ("AETHER_APPROVE", None),
-        ],
+        &[("AETHER_APPROVE_ALL", None), ("AETHER_APPROVE", None)],
     );
     let r = by_id(&responses, "1");
     assert_err(r, "E_NEEDS_APPROVAL", "denied");

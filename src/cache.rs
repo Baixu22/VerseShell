@@ -7,8 +7,8 @@ use crate::ast::Stmt;
 use crate::ir::IRNode;
 use crate::plan::ExecutionPlan;
 use std::collections::{HashMap, VecDeque};
-use std::sync::{Arc, RwLock};
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
 
 // ── Cached unit: pre-computed compiled IR + plan ─────────────────────
@@ -64,10 +64,13 @@ impl<V: Clone> TieredCache<V> {
         self.map.remove(&key);
         self.order.retain(|k| k != &key);
 
-        self.map.insert(key.clone(), CacheEntry {
-            value,
-            inserted_at: Instant::now(),
-        });
+        self.map.insert(
+            key.clone(),
+            CacheEntry {
+                value,
+                inserted_at: Instant::now(),
+            },
+        );
         self.order.push_front(key);
 
         // Evict oldest if over capacity
@@ -197,7 +200,10 @@ impl GlobalCache {
     }
 
     pub fn put_compiled(&self, source: String, unit: CompiledUnit) {
-        self.compiled.write().unwrap().insert(source, Arc::new(unit));
+        self.compiled
+            .write()
+            .unwrap()
+            .insert(source, Arc::new(unit));
     }
 
     // ── System snapshot ────────────────────────────────────────────

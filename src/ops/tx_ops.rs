@@ -79,10 +79,18 @@ fn schema_restore() -> serde_json::Value {
 
 fn execute_begin(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "file_write") { return o; }
+    if let Err(o) = require_capability(req, "file_write") {
+        return o;
+    }
     match tx::begin() {
         Ok(id) => {
-            audit("tx.begin", Effect::WriteLocal, "allow", &id, json!({"depth": tx::depth()}));
+            audit(
+                "tx.begin",
+                Effect::WriteLocal,
+                "allow",
+                &id,
+                json!({"depth": tx::depth()}),
+            );
             ok(
                 req,
                 "tx",
@@ -98,10 +106,18 @@ fn execute_begin(req: &OperationRequest) -> Observation {
 
 fn execute_commit(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "file_write") { return o; }
+    if let Err(o) = require_capability(req, "file_write") {
+        return o;
+    }
     match tx::commit() {
         Ok(ops) => {
-            audit("tx.commit", Effect::WriteLocal, "allow", "tx", json!({"ops": ops}));
+            audit(
+                "tx.commit",
+                Effect::WriteLocal,
+                "allow",
+                "tx",
+                json!({"ops": ops}),
+            );
             ok(
                 req,
                 "tx",
@@ -117,10 +133,18 @@ fn execute_commit(req: &OperationRequest) -> Observation {
 
 fn execute_rollback(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "file_write") { return o; }
+    if let Err(o) = require_capability(req, "file_write") {
+        return o;
+    }
     match tx::rollback() {
         Ok(n) => {
-            audit("tx.rollback", Effect::WriteLocal, "allow", "tx", json!({"restored": n}));
+            audit(
+                "tx.rollback",
+                Effect::WriteLocal,
+                "allow",
+                "tx",
+                json!({"restored": n}),
+            );
             ok(
                 req,
                 "tx",
@@ -154,7 +178,9 @@ fn execute_status(req: &OperationRequest) -> Observation {
 
 fn execute_restore(req: &OperationRequest) -> Observation {
     let start = now();
-    if let Err(o) = require_capability(req, "file_write") { return o; }
+    if let Err(o) = require_capability(req, "file_write") {
+        return o;
+    }
     let token = match arg_str(&req.args, "restore_token") {
         Some(t) => t,
         None => return err(req, "tx", "E_BAD_ARG", "restore_token is required", start),

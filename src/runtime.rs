@@ -12,8 +12,8 @@
 use crate::cache::{GlobalCache, SystemSnapshot};
 use crate::env::Env;
 use crate::ir::{IRCompiler, IREffect, IREvaluator, IRNode};
-pub use crate::plan::{ExecutionPlan, RiskLevel};
 use crate::modules;
+pub use crate::plan::{ExecutionPlan, RiskLevel};
 use crate::rule::{self, RuleDecision};
 use crate::value::Value;
 use serde::{Deserialize, Serialize};
@@ -75,9 +75,16 @@ pub struct AgentResponse {
 pub enum RuleDecisionInfo {
     Pass,
     Allow,
-    Deny { reason: String },
-    RateLimit { rate_per_minute: u32, reason: String },
-    Confirm { reason: String },
+    Deny {
+        reason: String,
+    },
+    RateLimit {
+        rate_per_minute: u32,
+        reason: String,
+    },
+    Confirm {
+        reason: String,
+    },
 }
 
 impl From<&RuleDecision> for RuleDecisionInfo {
@@ -86,7 +93,10 @@ impl From<&RuleDecision> for RuleDecisionInfo {
             RuleDecision::Pass => RuleDecisionInfo::Pass,
             RuleDecision::Allow => RuleDecisionInfo::Allow,
             RuleDecision::Deny(r) => RuleDecisionInfo::Deny { reason: r.clone() },
-            RuleDecision::RateLimit { rate_per_minute, reason } => RuleDecisionInfo::RateLimit {
+            RuleDecision::RateLimit {
+                rate_per_minute,
+                reason,
+            } => RuleDecisionInfo::RateLimit {
                 rate_per_minute: *rate_per_minute,
                 reason: reason.clone(),
             },
@@ -508,7 +518,7 @@ impl AgentRuntime {
                     trace: trace_data,
                     rule_decision: None,
                 }
-            },
+            }
             Err(e) => {
                 let msg = e.to_string();
                 let (code, recoverable) = classify_error_with_hint(&msg);
@@ -656,29 +666,71 @@ impl AgentRuntime {
         for (pid, proc) in sys.processes() {
             let mut rec = std::collections::BTreeMap::new();
             rec.insert("pid".to_string(), Value::Int(pid.as_u32() as i64));
-            rec.insert("name".to_string(), Value::Str(proc.name().to_string_lossy().to_string()));
+            rec.insert(
+                "name".to_string(),
+                Value::Str(proc.name().to_string_lossy().to_string()),
+            );
             rec.insert("cpu".to_string(), Value::Float(proc.cpu_usage() as f64));
             rec.insert("mem".to_string(), Value::Int(proc.memory() as i64));
-            rec.insert("command".to_string(), Value::Str(
-                proc.exe().map(|p| p.to_string_lossy().to_string()).unwrap_or_else(|| proc.name().to_string_lossy().to_string())
-            ));
+            rec.insert(
+                "command".to_string(),
+                Value::Str(
+                    proc.exe()
+                        .map(|p| p.to_string_lossy().to_string())
+                        .unwrap_or_else(|| proc.name().to_string_lossy().to_string()),
+                ),
+            );
             procs.push(Value::Record(rec));
         }
         procs.sort_by(|a, b| {
-            let pid_a = match a { Value::Record(r) => r.get("pid").and_then(|v| if let Value::Int(n) = v { Some(*n) } else { None }).unwrap_or(0), _ => 0 };
-            let pid_b = match b { Value::Record(r) => r.get("pid").and_then(|v| if let Value::Int(n) = v { Some(*n) } else { None }).unwrap_or(0), _ => 0 };
+            let pid_a = match a {
+                Value::Record(r) => r
+                    .get("pid")
+                    .and_then(|v| {
+                        if let Value::Int(n) = v {
+                            Some(*n)
+                        } else {
+                            None
+                        }
+                    })
+                    .unwrap_or(0),
+                _ => 0,
+            };
+            let pid_b = match b {
+                Value::Record(r) => r
+                    .get("pid")
+                    .and_then(|v| {
+                        if let Value::Int(n) = v {
+                            Some(*n)
+                        } else {
+                            None
+                        }
+                    })
+                    .unwrap_or(0),
+                _ => 0,
+            };
             pid_a.cmp(&pid_b)
         });
 
         // Build cached sys_info with os_name from sysinfo instead of spawning powershell
         let mut sys_info_rec = std::collections::BTreeMap::new();
-        sys_info_rec.insert("os".to_string(), Value::Str(std::env::consts::OS.to_string()));
-        sys_info_rec.insert("arch".to_string(), Value::Str(std::env::consts::ARCH.to_string()));
-        sys_info_rec.insert("family".to_string(), Value::Str(std::env::consts::FAMILY.to_string()));
+        sys_info_rec.insert(
+            "os".to_string(),
+            Value::Str(std::env::consts::OS.to_string()),
+        );
+        sys_info_rec.insert(
+            "arch".to_string(),
+            Value::Str(std::env::consts::ARCH.to_string()),
+        );
+        sys_info_rec.insert(
+            "family".to_string(),
+            Value::Str(std::env::consts::FAMILY.to_string()),
+        );
         // Use sysinfo for OS name (works cross-platform without subprocess)
-        sys_info_rec.insert("os_name".to_string(), Value::Str(
-            sysinfo::System::name().unwrap_or_else(|| std::env::consts::OS.to_string())
-        ));
+        sys_info_rec.insert(
+            "os_name".to_string(),
+            Value::Str(sysinfo::System::name().unwrap_or_else(|| std::env::consts::OS.to_string())),
+        );
 
         cache.put_sys_snapshot(SystemSnapshot {
             cpu_info: Value::Record(cpu_rec),
@@ -747,7 +799,10 @@ impl AgentRuntime {
     }
 }
 
-fn response_value_with_budget(value: Value, budget: Option<usize>) -> (serde_json::Value, Option<usize>) {
+fn response_value_with_budget(
+    value: Value,
+    budget: Option<usize>,
+) -> (serde_json::Value, Option<usize>) {
     match budget.filter(|budget| *budget > 0) {
         Some(max_tokens) => {
             let budgeted = crate::builtins::budget_value(&value, max_tokens, 0);
@@ -1014,11 +1069,7 @@ fn build_execution_plan(ir: &[IRNode]) -> ExecutionPlan {
 }
 
 /// Recursively walk an IR node, collecting Builtin calls and counting nodes.
-fn collect_builtins(
-    node: &IRNode,
-    out: &mut Vec<(String, IREffect)>,
-    count: &mut usize,
-) {
+fn collect_builtins(node: &IRNode, out: &mut Vec<(String, IREffect)>, count: &mut usize) {
     *count += 1;
     match node {
         IRNode::Builtin(name, args, effect) => {
@@ -1098,9 +1149,16 @@ fn collect_builtins(
         }
         // Leaf nodes or AST-Expr-bearing nodes (Lambda/Map/Filter/Sort carry
         // `Box<Expr>` which is AST, not IR — no builtins to collect there).
-        IRNode::Unit | IRNode::Bool(_) | IRNode::Int(_) | IRNode::Float(_)
-        | IRNode::Str(_) | IRNode::Var(_) | IRNode::Lambda(_, _)
-        | IRNode::Map(_, _) | IRNode::Filter(_, _) | IRNode::Sort(_)
+        IRNode::Unit
+        | IRNode::Bool(_)
+        | IRNode::Int(_)
+        | IRNode::Float(_)
+        | IRNode::Str(_)
+        | IRNode::Var(_)
+        | IRNode::Lambda(_, _)
+        | IRNode::Map(_, _)
+        | IRNode::Filter(_, _)
+        | IRNode::Sort(_)
         | IRNode::Error(_, _) => {}
     }
 }
@@ -1177,13 +1235,24 @@ fn compute_risk(builtins: &[(String, IREffect)]) -> RiskLevel {
 fn effect_to_risk(e: &IREffect) -> RiskLevel {
     match e {
         IREffect::Pure => RiskLevel::Pure,
-        IREffect::SysRead | IREffect::FileRead | IREffect::ProcList
-        | IREffect::WinRegistry | IREffect::WinService | IREffect::CryptoHash
-        | IREffect::CryptoRandom | IREffect::DbRead | IREffect::GitRead
+        IREffect::SysRead
+        | IREffect::FileRead
+        | IREffect::ProcList
+        | IREffect::WinRegistry
+        | IREffect::WinService
+        | IREffect::CryptoHash
+        | IREffect::CryptoRandom
+        | IREffect::DbRead
+        | IREffect::GitRead
         | IREffect::NetHttpGet => RiskLevel::ReadOnly,
-        IREffect::FileWrite | IREffect::NetHttpPost | IREffect::ProcSpawn
-        | IREffect::DbWrite | IREffect::GitWrite => RiskLevel::Mutating,
-        IREffect::FileDelete | IREffect::NetHttpDelete | IREffect::ProcKill
+        IREffect::FileWrite
+        | IREffect::NetHttpPost
+        | IREffect::ProcSpawn
+        | IREffect::DbWrite
+        | IREffect::GitWrite => RiskLevel::Mutating,
+        IREffect::FileDelete
+        | IREffect::NetHttpDelete
+        | IREffect::ProcKill
         | IREffect::ShellExec => RiskLevel::Destructive,
         IREffect::Combined(effects) => {
             let mut r = RiskLevel::Pure;
@@ -1216,9 +1285,15 @@ fn compute_side_effects(builtins: &[(String, IREffect)]) -> Vec<String> {
 fn effect_side_effect_categories(e: &IREffect) -> Vec<&'static str> {
     match e {
         IREffect::Pure => vec![],
-        IREffect::SysRead | IREffect::FileRead | IREffect::ProcList
-        | IREffect::WinRegistry | IREffect::WinService | IREffect::CryptoHash
-        | IREffect::CryptoRandom | IREffect::DbRead | IREffect::GitRead => vec!["reads"],
+        IREffect::SysRead
+        | IREffect::FileRead
+        | IREffect::ProcList
+        | IREffect::WinRegistry
+        | IREffect::WinService
+        | IREffect::CryptoHash
+        | IREffect::CryptoRandom
+        | IREffect::DbRead
+        | IREffect::GitRead => vec!["reads"],
         IREffect::FileWrite | IREffect::DbWrite | IREffect::GitWrite => vec!["writes"],
         IREffect::NetHttpPost | IREffect::NetHttpDelete | IREffect::NetHttpGet => vec!["network"],
         IREffect::ProcSpawn => vec!["process"],
@@ -1285,12 +1360,18 @@ mod tests {
     fn dry_run_detects_mutating_risk() {
         let rt = AgentRuntime::new(RuntimeConfig::default());
         // file.write is a mutating op — use dry_run so we don't actually write
-        let resp = rt.execute(exec_req("file.write(\"/tmp/_dry_run_test\", \"x\")", true, false));
+        let resp = rt.execute(exec_req(
+            "file.write(\"/tmp/_dry_run_test\", \"x\")",
+            true,
+            false,
+        ));
 
         assert!(resp.ok);
         let plan = resp.plan.unwrap();
         assert_eq!(plan.risk_level, RiskLevel::Mutating);
-        assert!(plan.capabilities_required.contains(&"file.write".to_string()));
+        assert!(plan
+            .capabilities_required
+            .contains(&"file.write".to_string()));
         assert!(plan.side_effects.contains(&"writes".to_string()));
     }
 
@@ -1313,15 +1394,18 @@ mod tests {
     #[test]
     fn trace_labels_builtins() {
         let rt = AgentRuntime::new(RuntimeConfig::default());
-        // sys.os() compiles to a Builtin node
-        let resp = rt.execute(exec_req("sys.os()", false, true));
+        // abs() compiles to a Builtin node and needs no ambient capability.
+        let resp = rt.execute(exec_req("abs(-1)", false, true));
 
         assert!(resp.ok);
         let trace = resp.trace.expect("trace should be collected");
-        let has_builtin = trace.iter().any(|ev| {
-            ev.node_type == "Builtin" && ev.builtin_name.is_some()
-        });
-        assert!(has_builtin, "trace should contain at least one Builtin event");
+        let has_builtin = trace
+            .iter()
+            .any(|ev| ev.node_type == "Builtin" && ev.builtin_name.is_some());
+        assert!(
+            has_builtin,
+            "trace should contain at least one Builtin event"
+        );
     }
 
     #[test]
@@ -1331,8 +1415,14 @@ mod tests {
         let resp = rt.execute(exec_req("1 + 2", false, false));
 
         assert!(resp.ok);
-        assert!(resp.plan.is_some(), "plan should be attached to normal responses");
-        assert!(resp.trace.is_none(), "trace should be None when trace=false");
+        assert!(
+            resp.plan.is_some(),
+            "plan should be attached to normal responses"
+        );
+        assert!(
+            resp.trace.is_none(),
+            "trace should be None when trace=false"
+        );
     }
 
     #[test]
