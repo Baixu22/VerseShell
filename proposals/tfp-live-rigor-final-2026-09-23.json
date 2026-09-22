@@ -1,0 +1,41 @@
+{
+  "proposal_id": "TFP-live-rigor-final-2026-09-23",
+  "session_id": "ses_verseshell-tf-live2-2026-09-22",
+  "rationale": "提交 3639cdd 已完成，回填 commit hash 并把 TF-0046 与 TF-0041 转 done，本轮收口。森林记录随第二次提交落库。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0046",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "本轮改动已提交：commit 3639cdd「chore(bench): slim live observations, add sampling controls, re-measure with 3 runs」，30 个文件，覆盖 live runner 瘦身与采样控制、3 次合并产物与两份基线归档、C13 更新、C12 依赖声明收紧、CHANGELOG 与 ACI-Bench 文档。",
+        "next_action": "无。后续 live 复测请带 --temperature 0 与 --seed，并至少跑 3 次后用合并脚本汇总。",
+        "evidence": [
+          "git commit 3639cdd（30 files changed）",
+          "提交前门禁：python tools/claim_gate.py → 11/11 gated claims pass, exit 0（C12 4/4 fresh）",
+          "凭据安全：git grep \"sk-a2a\" 无命中"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0041",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "全部 desired_outcomes 均有证据：①harness 侧观察冗余有确定性前后对比（10 行 file.view −43.7%、失败观察 −24.6%，信息不丢）；②live runner 支持 --temperature/--seed/--repeat，产物记录三者与 run_index；③3 次重复（seeds 42/43/44）给出均值与离散度：A 0.600/3.1/154.6、D 0.633/6.53/345.3，D/A 工具比 2.12（1.94–2.32，σ=0.16）、token 比 2.24（2.04–2.47，σ=0.17），并给出瘦身前后对比（D 的 token 399.0→345.3，−13.5%；比值 2.62→2.23；工具数未变）；④门禁全绿、evidence 回写森林、提案 apply/validate/export 通过、改动已提交（3639cdd）。明确边界：仍是单模型；端点接受 seed 但不严格复现（同 seed 的 tool_call id 与 token 数仍不同），所以区间是经验值；产品侧观察形状与多文件读取未做，已登记 TF-0045。",
+        "next_action": "若要继续推进 ACI 的省步骤论点：实现 TF-0045 的多文件读取与信封瘦身后复测；或换第二个模型验证结论是否与模型相关。",
+        "evidence": [
+          "确定性瘦身：file.view 2 行 212→187、10 行 444→250；失败 pytest 529→399 字符",
+          "3 次重复统计：ratio_tools {mean 2.12, min 1.941, max 2.321, σ 0.156}、ratio_tokens {mean 2.239, min 2.043, max 2.465, σ 0.174}",
+          "逐任务（3 次均值）：唯一更省 windows_path_normalize_edit（0.48x），最差 rust_fix_compile_error（5.49x）",
+          "per-op（合并 3 次）：exec.run 5248（失败 3935）、file.view 3809、replace_exact 614",
+          "docs/claims-and-evidence.md C13（含区间、瘦身 delta、名义确定性边界）",
+          "git commit 3639cdd；claim_gate 11/11"
+        ]
+      }
+    }
+  ]
+}
