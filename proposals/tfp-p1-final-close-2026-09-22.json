@@ -1,0 +1,43 @@
+{
+  "proposal_id": "TFP-p1-final-close-2026-09-22",
+  "session_id": "ses_verseshell-tf-relay-2026-09-22",
+  "rationale": "提交已完成（86dae75），工作区干净，回填 commit hash 并把 TF-0024 与 TF-0019 转 done，本轮收口。森林记录本身随第二次提交落库。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0024",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "P1 WIP 与本轮改动已提交：commit 86dae75「feat: close P1 process-lifecycle WIP and register claims C8/C9」，94 个文件，覆盖未跟踪的进程生命周期源码与测试、本轮文档与门禁（docs/1.0-aci.md、README、CHANGELOG、src/compact.rs、tools/claim_gate.py、examples/compact_ratio.rs、.gitignore、docs/task-forest-policy.md）、声明与证据（docs/claims-and-evidence.md、eval/）以及森林数据与提案（.agent-workbench/task-forest/、proposals/）。提交后 git status 干净。",
+        "next_action": "无。森林记录随第二次提交落库；后续轮次沿用根策略 §6 的收尾动作。",
+        "evidence": [
+          "git commit 86dae75（94 files changed）→ 提交信息含门禁结果与验收口径",
+          "git status --porcelain 在提交后为空（工作区干净）",
+          "提交前门禁：python tools/claim_gate.py → 8/8 gated claims pass, exit 0；python tools/validate_manifest.py → exit 0（2026-09-22）",
+          "提交内容含 TF-0025 的 .gitignore 负向规则，提交后 git ls-files 可列出 tools/claim_gate.py、tools/jev_obs_judge.py、tools/validate_manifest.py"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0019",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "全部 desired_outcomes 均有可复现证据：①五个 process.* op 在 docs/1.0-aci.md 与 README 中有与源码逐条对照的操作面说明；②进程生命周期契约登记为 C8 并接入 claim_gate（8/8 pass，exit 0）；③README 中「exec 路径不使用 ConPTY」等过时表述已修正，roadmap 不再把已实现的 ConPTY 列为 deferred；④compact 未登记数字已处置——原「50–70%」实测无法复现，改登记为 C9（小响应信封 42.4%，观察载荷 −3.1%）；⑤全量 cargo test 全绿（16 suites / 277 passed / 0 failed / 1 ignored）；⑥森林节点 evidence 已回写，proposal-apply / validate / export 通过，P1 WIP 与本轮改动已提交（86dae75）。期间另发现并修复工具链缺口 TF-0025（门禁脚本被 *.py 规则挡在版本库外）。明确边界：C8 证据仅 Windows；compact 的负向结论（大载荷不节省）同样登记在 C9 的失效边界里。",
+        "next_action": "如需继续扩展：新增对外数字先按 docs/claims-and-evidence.md §4 登记为 Cx；进程生命周期的跨平台（Unix）行为若要声明，需先补 Unix 用例。",
+        "evidence": [
+          "python tools/claim_gate.py → 8/8 gated claims pass, exit 0（C1 0.106、C2 0.55、C3 1.00、C4 1.00、C5 N/A、C6 PASS、C7 16 suites/277 passed/0 failed/1 ignored、C8 3 passed、C9 0.4203）",
+          "python tools/validate_manifest.py → exit 0（34 条来源全部存在）",
+          "docs/1.0-aci.md Process lifecycle 一节（op 表 + 归属/快照/cursor/终止与保留/PTY/审批/错误码/边界）",
+          "docs/claims-and-evidence.md：C8、C9 两行（六要素齐全）+ §6 记录 compact 数字处置",
+          "examples/compact_ratio.rs + eval/compact_ratio.json（verseshell.compact-ratio/v1）",
+          "git commit 86dae75；git status 干净",
+          "TF-0020 / TF-0021 / TF-0022 / TF-0025 的 evidence 字段"
+        ]
+      }
+    }
+  ]
+}
