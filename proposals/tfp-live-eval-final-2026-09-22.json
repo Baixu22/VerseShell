@@ -1,0 +1,41 @@
+{
+  "proposal_id": "TFP-live-eval-final-2026-09-22",
+  "session_id": "ses_verseshell-tf-live-2026-09-22",
+  "rationale": "提交 b54f554 已完成，回填 commit hash 并把 TF-0040 与 TF-0036 转 done，本轮收口。森林记录随第二次提交落库。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0040",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "本轮改动已提交：commit b54f554「feat(bench): run the live A/D benchmark and fix the harness that made it meaningless」，33 个文件，覆盖 live harness 三处修复、live 产物与修复前基线归档、C13 声明与文档、C12 覆盖 live 产物。",
+        "next_action": "无。后续 live 跑请带 --cap（默认已内置）；改动被测代码后先重跑数据集再跑门禁（C12 会拦截陈旧产物）。",
+        "evidence": [
+          "git commit b54f554（33 files changed）",
+          "提交前门禁：python tools/claim_gate.py → 11/11 gated claims pass, exit 0（C12 4/4 fresh）",
+          "凭据安全：git grep \"sk-a2a\" 无命中；key 只经 DEEPSEEK_API_KEY 环境变量传入"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0036",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "全部 desired_outcomes 均有证据：①live 通路可用且有实测记录（端点三种形状 200、目标模型 tool_calls 实测可用、单次调用 20.1s；凭据只经环境变量）；②D 条件真实生效——修复能力授权后由「全量 E_CAPABILITY_DENY」变为可执行，试点由 FAIL 变 PASS；③全量 10 任务 × 2 条件跑了两次（修复前/后），产物含 live_config 与代码指纹并登记为 C13；④口径边界写清楚——bench/aci/README.md 与 claims §4 明确 mock 的 D 套 GOLDEN 属管线自检，不得与 live 混用；⑤门禁全绿（claim_gate 11/11，C12 覆盖 live 产物）、evidence 回写森林、提案 apply/validate/export 通过、改动已提交（b54f554）。核心结论：在该模型与该任务集上，ACI 的成功率与 raw shell 相同（0.6），但工具数与观察 token 约为 2–2.6 倍。明确边界：单模型、单次运行、模型随机性大（逐任务 1.5–3 倍波动），量级不可外推。",
+        "next_action": "如需继续：固定温度/种子并重复多次以给出置信区间；或针对「D 的 file.view 与失败 exec 占 60%+ token」做观察体积优化后再测。",
+        "evidence": [
+          "python tools/claim_gate.py → 11/11 gated claims pass, exit 0（C1–C4、C6–C12；C5 N/A）",
+          "全量 live 两次：修复前 A 0.6/2.7/151.8、D 0.6/5.4/306.4（2.00/2.02）；修复后 A 0.6/2.8/152.1、D 0.6/6.5/399.0（2.32/2.62）",
+          "harness 修复验证：能力授权（无 --cap → E_CAPABILITY_DENY；修复后 D PASS）、夹具 __pycache__（诊断 path 由 ../../../../Desktop/... 变为 tests/test_greet.py）、失败观察去重（958→689 字符；最差任务 D token 658→363）",
+          "docs/claims-and-evidence.md C13（六要素 + 五条失效边界）+ §4 live 口径规则 + §2 复现入口",
+          "bench/aci/README.md：mock 条件表补充「D 套 GOLDEN ⇒ 0.106/0.55 是管线自检」与 live 用法/--cap 必要性",
+          "git commit b54f554；git grep 无 key 命中"
+        ]
+      }
+    }
+  ]
+}
