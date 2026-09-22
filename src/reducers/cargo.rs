@@ -20,6 +20,51 @@ fn re_location() -> &'static Regex {
     RE.get_or_init(|| Regex::new(r"^\s*-->\s+(?P<path>.+):(?P<line>\d+):(?P<col>\d+)\s*$").unwrap())
 }
 
+/// `thread 'main' panicked at src/engine.rs:42:9:`
+fn re_panic_header() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| {
+        Regex::new(r"(?m)^thread '[^']*' panicked at (?P<path>.+):(?P<line>\d+):(?P<col>\d+):\s*$")
+            .unwrap()
+    })
+}
+
+/// `path:line` / `path:line:col` assembled from a possibly wrapped arrow line.
+fn re_location_joined() -> &'static Regex {
+    static RE: OnceLock<Regex> = OnceLock::new();
+    RE.get_or_init(|| Regex::new(r"^(?P<path>.+?):(?P<line>\d+)(?::(?P<col>\d+))?$").unwrap())
+}
+
+/// Malformed output can split the arrow from its location (`-->` on one line,
+/// `src/mixed\path.rs:42` on the next). Assemble the location from the arrow
+/// line plus the next non-empty lines, and only accept an exact
+/// `path:line[:col]` match so unrelated paths are never mistaken for a site.
+fn recover_wrapped_location(lines: &[&str]) -> Option<(String, Option<u64>, Option<u64>)> {
+    let arrow = lines.first()?.trim_start().strip_prefix("-->")?.trim().to_string();
+    let mut joined = arrow;
+    if !re_location_joined().is_match(&joined) {
+        for l in lines.iter().skip(1).take(4) {
+            let t = l.trim();
+            if t.is_empty() {
+                continue;
+            }
+            if re_error_header().is_match(t) || re_warning_header().is_match(t) {
+                break;
+            }
+            joined.push_str(t);
+            if re_location_joined().is_match(&joined) {
+                break;
+            }
+        }
+    }
+    let caps = re_location_joined().captures(&joined)?;
+    Some((
+        normalize_path(caps.name("path")?.as_str().trim()),
+        caps.name("line").and_then(|m| m.as_str().parse().ok()),
+        caps.name("col").and_then(|m| m.as_str().parse().ok()),
+    ))
+}
+
 fn re_expected_found() -> &'static Regex {
     static RE: OnceLock<Regex> = OnceLock::new();
     RE.get_or_init(|| {
@@ -97,6 +142,12 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
                     path = loc.name("path").map(|m| normalize_path(m.as_str().trim()));
                     line_no = loc.name("line").and_then(|m| m.as_str().parse().ok());
                     col = loc.name("col").and_then(|m| m.as_str().parse().ok());
+                } else if path.is_none() {
+                    if let Some((p, ln, cl)) = recover_wrapped_location(&lines[j..]) {
+                        path = Some(p);
+                        line_no = ln;
+                        col = cl;
+                    }
                 }
                 if let Some(ef) = re_expected_found().captures(l) {
                     expected = ef.name("expected").map(|m| m.as_str().to_string());
@@ -152,6 +203,27 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
             continue;
         }
         i += 1;
+    }
+
+    // A panic has no `error:` header but does carry a location, so keep it as an
+    // anchored error diagnostic instead of falling back to an unanchored line.
+    if let Some(caps) = re_panic_header().captures(text) {
+        let path = caps.name("path").map(|m| normalize_path(m.as_str().trim()));
+        let line_no = caps.name("line").and_then(|m| m.as_str().parse().ok());
+        let col = caps.name("col").and_then(|m| m.as_str().parse().ok());
+        let detail = text[caps.get(0).map(|m| m.end()).unwrap_or(0)..]
+            .lines()
+            .map(str::trim)
+            .find(|l| {
+                !l.is_empty() && !l.starts_with("stack backtrace") && !l.starts_with("note:")
+            })
+            .unwrap_or("panic");
+        let message = format!("panicked: {detail}");
+        if !diagnostics.iter().any(|d| d.message == message) {
+            diagnostics.push(diag_rich(
+                "cargo", "error", message, path, line_no, col, None, None, None, None,
+            ));
+        }
     }
 
     let mut stats = std::collections::BTreeMap::new();

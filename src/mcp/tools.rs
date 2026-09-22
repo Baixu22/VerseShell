@@ -126,11 +126,12 @@ pub fn default_tools() -> Vec<Tool> {
         describe_capabilities_tool(),
     ];
     // ── Typed operations from OperationRegistry (1.0) ──
-    // exec_run / result_query keep specialized handlers; all other ops auto-bind.
+    // exec_run / result_query keep specialized handlers. Stateful process lifecycle
+    // stays on the host-owned JSONL transport and is not a new model-facing MCP tool.
     tools.push(exec_run_tool());
     tools.push(result_query_tool());
     for spec in crate::operation::OperationRegistry::new().list() {
-        if matches!(spec.name, "exec.run" | "result.query") {
+        if matches!(spec.name, "exec.run" | "result.query") || spec.name.starts_with("process.") {
             continue;
         }
         tools.push(registry_op_tool(spec));
@@ -973,6 +974,18 @@ mod tests {
         assert!(names.contains(&"repo_search"));
         assert!(names.contains(&"test_discover"));
         assert!(names.contains(&"ops_list"));
+        for hidden in [
+            "process_start",
+            "process_poll",
+            "process_write",
+            "process_kill",
+            "process_list",
+        ] {
+            assert!(
+                !names.contains(&hidden),
+                "lifecycle tool {hidden} leaked into MCP"
+            );
+        }
         assert!(
             tools.len() >= 20,
             "expected legacy + full 1.0 op surface, got {}",

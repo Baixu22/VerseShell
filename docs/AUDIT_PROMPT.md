@@ -4,6 +4,8 @@
 > 审计对象：`task-forest` 中已落地的开发-验收节点规划（提案 `TFP-aci-deepen-2026-09` + `TFP-forest-plan-v2`）。  
 > 你**不是**实现者，只做规划审计：对照「预期 ↔ 节点 ↔ 验收」一比一核对，指出缺漏、越界、不可验收项。  
 > 默认工作区：`C:\Users\27933\Desktop\verseshell\verseshell`（或当前 repo 根）。
+>
+> **时效说明（2026-09-22 接力轮后）**：§2.1 的节点状态是当时快照；该轮节点现已全部 `done`，当前状态以 `.agent-workbench/task-forest/exports/task-forest.html` 与 `graph/nodes.json` 为准。接力轮另新增了 P1 收尾目标（进程生命周期 ops 文档化 + C8/C9 声明与门禁 + 工具链边界），其证据见 `docs/claims-and-evidence.md` C8/C9 与 `eval/evidence.json`。
 
 ---
 
@@ -63,6 +65,7 @@
 - **少人标**：验收优先确定性指标 + 复用仓库内 fixture/GOLDEN/已有报告；人工只做小样本抽检而非全量标注。  
 - **数据有来源**：每条评测样本 / 声明证据必须能回溯到仓库文件或明确外部来源 URL/命令。  
 - **规划即执行骨架**：开发只能按 `task-forest` 的 `todo` 中 ready 节点推进；`done` 必须回写 evidence。  
+- **自主闭环（2026-09-22 起）**：工作区根策略 `docs/task-forest-policy.md` 规定「提案证据链完备即自动 apply / 自动 done」，用户只是发布者。审计方**不得**把「没有人工确认环节」判为缺陷，但必须逐条检查证据链是否真的完备（命令可复现、数字有 source、缺口已落成 follow_up 节点）。  
 - **工作区 WIP**：方案 A——已有未提交改动保留作 P1 收尾，不强制 `git checkout` 回退（已记入决策节点）。
 
 ---
@@ -257,14 +260,23 @@ TF-0002 P1 完成语义稳定
 ## 5. 审计时的证据抽查命令（只读）
 
 ```powershell
-# 节点与边
+# 节点与边（task-forest CLI 是本地工具安装，未进版本库；没有它就直接读下面的 JSON）
 python .mimocode/skills/task-forest/scripts/task_forest.py list --json
 python .mimocode/skills/task-forest/scripts/task_forest.py todo --json
 python .mimocode/skills/task-forest/scripts/task_forest.py validate
 
+# 同样数据的只读入口（在版本库内）
+Get-Content .agent-workbench/task-forest/graph/nodes.json
+Get-Content .agent-workbench/task-forest/graph/edges.json
+Get-Content .agent-workbench/task-forest/exports/task-forest.html
+
 # 提案与导出
 Get-ChildItem .agent-workbench/task-forest/proposals
 Get-ChildItem .agent-workbench/task-forest/exports
+
+# 机器门禁（证据链，claim_gate 覆盖 C1–C4 / C6–C9）
+python tools/claim_gate.py
+python tools/validate_manifest.py
 
 # 样本来源抽查（路径应真实存在）
 Get-ChildItem tests/fixtures/reducers/adversarial -ErrorAction SilentlyContinue

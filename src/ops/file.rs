@@ -371,7 +371,28 @@ fn execute_replace_exact(req: &OperationRequest) -> Observation {
         Err(e) => return err(req, "file", "E_NOT_FOUND", e, start),
     };
     if let Err(e) = check_expected_hash(&text, expected.as_deref()) {
-        return err(req, "file", "E_STALE_HASH", e, start);
+        return err_data(
+            req,
+            "file",
+            "E_STALE_HASH",
+            e.message.clone(),
+            json!({
+                "path": path,
+                "expected_hash": e.expected,
+                "actual_hash": e.actual,
+            }),
+            Vec::new(),
+            vec![SuggestedAction {
+                op: "file.replace_exact".into(),
+                args: json!({
+                    "path": path,
+                    "old": old,
+                    "new": new,
+                    "expected_hash": e.actual,
+                }),
+            }],
+            start,
+        );
     }
     let count = text.matches(&old).count();
     if count == 0 {
@@ -384,11 +405,51 @@ fn execute_replace_exact(req: &OperationRequest) -> Observation {
         );
     }
     if count > 1 {
-        return err(
+        let mut match_lines = Vec::new();
+        let mut search_from = 0usize;
+        while let Some(pos) = text[search_from..].find(&old) {
+            let abs = search_from + pos;
+            let line = text[..abs].matches('\n').count() as u64 + 1;
+            match_lines.push(json!({
+                "line": line,
+                "offset": abs,
+                "snippet": text[abs..].lines().next().unwrap_or("").chars().take(120).collect::<String>(),
+            }));
+            if match_lines.len() >= 8 {
+                break;
+            }
+            search_from = abs + old.len().max(1);
+        }
+        return err_data(
             req,
             "file",
             "E_AMBIGUOUS",
             format!("old text matches {count} times; must be unique"),
+            json!({
+                "path": path,
+                "match_count": count,
+                "matches": match_lines,
+            }),
+            Vec::new(),
+            vec![
+                SuggestedAction {
+                    op: "file.view".into(),
+                    args: json!({
+                        "path": path,
+                        "cursor": match_lines.first().and_then(|m| m.get("line")).cloned().unwrap_or(json!(1)),
+                        "window": 40,
+                    }),
+                },
+                SuggestedAction {
+                    op: "file.replace_exact".into(),
+                    args: json!({
+                        "path": path,
+                        "old": "<widen old with surrounding unique context>",
+                        "new": new,
+                        "expected_hash": content_hash_str(&text),
+                    }),
+                },
+            ],
             start,
         );
     }
@@ -446,7 +507,27 @@ fn execute_apply_patch(req: &OperationRequest) -> Observation {
         Err(e) => return err(req, "file", "E_NOT_FOUND", e, start),
     };
     if let Err(e) = check_expected_hash(&text, expected.as_deref()) {
-        return err(req, "file", "E_STALE_HASH", e, start);
+        return err_data(
+            req,
+            "file",
+            "E_STALE_HASH",
+            e.message.clone(),
+            json!({
+                "path": path,
+                "expected_hash": e.expected,
+                "actual_hash": e.actual,
+            }),
+            Vec::new(),
+            vec![SuggestedAction {
+                op: "file.apply_patch".into(),
+                args: json!({
+                    "path": path,
+                    "expected_hash": e.actual,
+                    "patches": patches,
+                }),
+            }],
+            start,
+        );
     }
     let mut applied = Vec::new();
     let mut failed = Vec::new();
@@ -550,7 +631,29 @@ fn execute_edit_range(req: &OperationRequest) -> Observation {
         Err(e) => return err(req, "file", "E_NOT_FOUND", e, start),
     };
     if let Err(e) = check_expected_hash(&text, expected.as_deref()) {
-        return err(req, "file", "E_STALE_HASH", e, start);
+        return err_data(
+            req,
+            "file",
+            "E_STALE_HASH",
+            e.message.clone(),
+            json!({
+                "path": path,
+                "expected_hash": e.expected,
+                "actual_hash": e.actual,
+            }),
+            Vec::new(),
+            vec![SuggestedAction {
+                op: "file.edit_range".into(),
+                args: json!({
+                    "path": path,
+                    "start_line": start_line,
+                    "end_line": end_line,
+                    "replacement": replacement,
+                    "expected_hash": e.actual,
+                }),
+            }],
+            start,
+        );
     }
     let lines: Vec<String> = text.lines().map(|s| s.to_string()).collect();
     let total = lines.len();

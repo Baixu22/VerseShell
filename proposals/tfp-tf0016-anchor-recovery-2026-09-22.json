@@ -1,0 +1,75 @@
+{
+  "proposal_id": "TFP-tf0016-anchor-recovery-2026-09-22",
+  "session_id": "ses_verseshell-tf-continue-2026-09-22",
+  "rationale": "TF-0016 收口：把「失败观察直接指导修复」从 diff 类失败扩展到无结构化位置的失败类别。按证据决定范围——原始输出里确实存在可恢复锚点的类别（cargo panic、git 冲突、pytest 无 header）已实现并加回归测试；路径本身不存在的类别（ENOENT / ERESOLVE / 网络 / 非 git 仓库）按设计不给剧本；位置被拆行的 cargo malformed 保留为缺口并落成后续节点。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0016",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "suggested_from_diagnostics 在诊断无结构化位置时从 message 恢复 path[:line]（panic 位置 / 合并冲突文件 / pytest FAILED file::case），并显式排除「路径不存在」的失败类别；cargo reducer 新增 panic 头识别，产出带 path+line 的 error 诊断。剧本可执行率 5/13 → 8/13。",
+        "next_action": "后续新失败类别一律先判断「是否有可定位点」，再决定是否给剧本",
+        "evidence": [
+          "python tools/jev_obs_judge.py → diagnostic_sufficient 10/13、script_actionable 8/13（breakdown: actionable 8 / no_locatable_site 4 / unrecoverable_anchor 1）（2026-09-22）",
+          "tests/semantic_reducer_adversarial_tests.rs::cargo_adv_fail_panic_is_anchored（panic 诊断 path=src/engine.rs line=42，剧本含 view(cursor=42)+exec.run）",
+          "tests/semantic_reducer_adversarial_tests.rs::anchor_recovery_skips_paths_that_do_not_exist（npm ENOENT 不给剧本）",
+          "cargo test --test semantic_reducer_adversarial_tests → 26 passed；python tools/claim_gate.py → 6/6 pass（C7: 16 suites / 276 passed / 0 failed）",
+          "docs/claims-and-evidence.md §8 记录逐类处理与证据"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "malformed-location",
+      "node": {
+        "title": "缺口：cargo 位置被拆行的诊断未结构化",
+        "kind": "follow_up",
+        "status": "ready",
+        "display_order": 81,
+        "priority": 3,
+        "difficulty": "low",
+        "summary": "对抗样本 cargo_fail_malformed.txt 的 `-->` 与 `path:line` 分处两行（`-->` 空行后才是 `src/mixed\\path.rs:42`，`:17` 又单独一行），当前 re_location 只认单行 `--> path:line:col`，故该诊断无锚点、无剧本。",
+        "purpose": "让「位置被换行拆散」的畸形输出也能给出可执行剧本，同时不引入误解析。",
+        "acceptance_criteria": [
+          "先明确策略：只在 `-->` 后紧邻若干行内出现唯一 path:line 时才恢复，避免把不相关路径当锚点",
+          "对 cargo_fail_malformed 产出合法且可执行的剧本（view + 重跑）",
+          "jev_obs_judge 报告中 unrecoverable_anchor 归零，且 no_locatable_site 仍只保留真正无可定位点的类别",
+          "全量 cargo test 与 claim_gate 保持通过"
+        ],
+        "execution_hints": [
+          "改 src/reducers/cargo.rs 的 re_location 扫描（允许位置跨行拼接）",
+          "改完跑 cargo run --example eval_metrics 与 python tools/jev_obs_judge.py 对比 script_breakdown"
+        ],
+        "source_sessions": ["ses_verseshell-tf-continue-2026-09-22"],
+        "evidence": [
+          "eval/jev_obs_report.json: adv_cargo_fail_malformed = unrecoverable_anchor",
+          "tests/fixtures/reducers/adversarial/cargo_fail_malformed.txt（`-->` 与路径分行）"
+        ]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "malformed-location",
+      "to": "TF-0016",
+      "type": "child_of",
+      "edge": { "reason": "TF-0016 收口时按证据保留下来的唯一未修缺口" }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0001",
+      "fields": {
+        "progress": 85.0,
+        "next_action": "推进 TF-0017（cargo 拆行位置解析），证据链完备即自动收口",
+        "summary": "步骤5–8 与 TF-0016 全部 done：manifest 校验、claims 文档、claim_gate 6/6、jev 质检（剧本可执行 8/13）、无锚点类别锚点恢复。仍留 in_progress：1 个拆行位置缺口（TF-0017）。执行方式为 agent 自主闭环（根策略），用户仅发布。",
+        "evidence": [
+          "python tools/claim_gate.py → 6/6 gated claims pass（C2 门槛按根策略收紧到 0.70）",
+          "python tools/jev_obs_judge.py → 8/13 actionable，剩余 4 为按设计无剧本、1 为已落节点缺口",
+          "全量 cargo test: 16 suites / 276 passed / 0 failed"
+        ]
+      }
+    }
+  ]
+}

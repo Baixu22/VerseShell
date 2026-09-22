@@ -96,7 +96,10 @@ windows-sys = { version = "0.59", features = [
     "Win32_Foundation",
     "Win32_Globalization",
     "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Console",
     "Win32_System_JobObjects",
+    "Win32_System_Pipes",
     "Win32_System_Threading",
 ] }
 
@@ -122,5 +125,4 @@ harness = false
 [[bench]]
 name = "observation_performance"
 harness = false
-
 

@@ -21,6 +21,8 @@ Thumbs.db
 
 # Python scripts (cleanup scripts from pruning)
 *.py
+# ...except the repo's own evidence gates: claim_gate / jev_obs_judge / validate_manifest
+!tools/*.py
 **/__pycache__/
 *.py[cod]
 
@@ -46,3 +48,7 @@ test_lock.txt.ae_lock
 
 # Editor planning notes
 .trae/
+
+# Local agent tool installs (e.g. the task-forest CLI). The forest DATA lives in
+# .agent-workbench/ and is committed; see docs/task-forest-policy.md §7.
+.mimocode/

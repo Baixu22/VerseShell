@@ -1,0 +1,134 @@
+{
+  "families": [
+    {
+      "aggregate": {
+        "byte_savings": -0.0308,
+        "case_count": 5,
+        "compact_bytes": 8231,
+        "compact_tokens": 2059,
+        "headline_savings": -0.0441,
+        "json_bytes": 7985,
+        "json_tokens": 1998,
+        "token_savings": -0.0305,
+        "worst_case_savings": -0.0441
+      },
+      "cases": [
+        {
+          "byte_savings": -0.0441,
+          "compact_bytes": 6250,
+          "compact_tokens": 1563,
+          "json_bytes": 5986,
+          "json_tokens": 1497,
+          "name": "ops_list_catalog",
+          "roundtrip_ok": true,
+          "source": "src/operation.rs (OperationRegistry::ops.list)",
+          "token_savings": -0.0441
+        },
+        {
+          "byte_savings": -0.0132,
+          "compact_bytes": 616,
+          "compact_tokens": 154,
+          "json_bytes": 608,
+          "json_tokens": 152,
+          "name": "cargo_large_noise",
+          "roundtrip_ok": true,
+          "source": "tests/fixtures/reducers/adversarial/cargo_large_noise.txt",
+          "token_savings": -0.0132
+        },
+        {
+          "byte_savings": 0.0282,
+          "compact_bytes": 379,
+          "compact_tokens": 95,
+          "json_bytes": 390,
+          "json_tokens": 98,
+          "name": "npm_large_noise",
+          "roundtrip_ok": true,
+          "source": "tests/fixtures/reducers/adversarial/npm_large_noise.txt",
+          "token_savings": 0.0306
+        },
+        {
+          "byte_savings": 0.0578,
+          "compact_bytes": 375,
+          "compact_tokens": 94,
+          "json_bytes": 398,
+          "json_tokens": 100,
+          "name": "git_diff_large",
+          "roundtrip_ok": true,
+          "source": "tests/fixtures/reducers/adversarial/git_diff_large.txt",
+          "token_savings": 0.06
+        },
+        {
+          "byte_savings": -0.0133,
+          "compact_bytes": 611,
+          "compact_tokens": 153,
+          "json_bytes": 603,
+          "json_tokens": 151,
+          "name": "cargo_fail_noisy",
+          "roundtrip_ok": true,
+          "source": "tests/fixtures/reducers/adversarial/cargo_fail_noisy.txt",
+          "token_savings": -0.0132
+        }
+      ],
+      "kind": "observation"
+    },
+    {
+      "aggregate": {
+        "byte_savings": -0.0045,
+        "case_count": 2,
+        "compact_bytes": 6449,
+        "compact_tokens": 1613,
+        "headline_savings": -0.0241,
+        "json_bytes": 6420,
+        "json_tokens": 1605,
+        "token_savings": -0.005,
+        "worst_case_savings": -0.0241
+      },
+      "cases": [
+        {
+          "byte_savings": 0.4239,
+          "compact_bytes": 159,
+          "compact_tokens": 40,
+          "json_bytes": 276,
+          "json_tokens": 69,
+          "name": "response_small_hash",
+          "roundtrip_ok": null,
+          "source": "src/server.rs (StreamDone vs encode_response)",
+          "token_savings": 0.4203
+        },
+        {
+          "byte_savings": -0.0238,
+          "compact_bytes": 6290,
+          "compact_tokens": 1573,
+          "json_bytes": 6144,
+          "json_tokens": 1536,
+          "name": "response_ops_list",
+          "roundtrip_ok": null,
+          "source": "src/server.rs (StreamDone vs encode_response)",
+          "token_savings": -0.0241
+        }
+      ],
+      "kind": "response"
+    }
+  ],
+  "method": {
+    "headline": "min(byte_savings, token_savings, worst per-case savings) — the conservative side",
+    "observation_compact": "format!(\"O {}\", compact::encode_value(Value::from_json(to_value(observation)))) — compact-mode server path",
+    "observation_json": "serde_json::to_string(observation) — JSON-mode server path",
+    "response_compact": "compact::encode_response(&AgentResponse)",
+    "response_json": "the StreamDone body src/server.rs serializes in JSON mode",
+    "roundtrip": "observation compact bodies are decoded back with compact::decode_value and compared with the original; response lines have no in-tree decoder and are not round-trip checked",
+    "token_proxy": "ceil(bytes / 4), same convention as tests/token_compression_tests.rs"
+  },
+  "overall": {
+    "byte_savings": -0.0191,
+    "case_count": 7,
+    "compact_bytes": 14680,
+    "compact_tokens": 3672,
+    "headline_savings": -0.0441,
+    "json_bytes": 14405,
+    "json_tokens": 3603,
+    "token_savings": -0.0192,
+    "worst_case_savings": -0.0441
+  },
+  "schema": "verseshell.compact-ratio/v1"
+}

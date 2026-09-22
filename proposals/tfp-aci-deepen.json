@@ -1,0 +1,251 @@
+{
+  "proposal_id": "TFP-aci-deepen-2026-09",
+  "session_id": "ses_ffe5f37e7f841ffewJ4lbJ9Cq2",
+  "rationale": "深化 ACI 观察合同：P0 诊断/修复剧本/一步恢复，并建立少人标的声明-证据验收与 Jev 质检。个人工程探索项目，数据须有来源。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "goal",
+      "node": {
+        "title": "深化 VerseShell 观察合同并建立可复现验收",
+        "kind": "global_task",
+        "status": "in_progress",
+        "summary": "让 coding agent 一次看懂失败、一步能修；每条对外声明绑定可复现证据。",
+        "purpose": "工程化探索 ACI 观察层，而非上线产品；减少真人标注，保证数据有来源。",
+        "desired_outcomes": [
+          "诊断字段在四个 reducer 上完备",
+          "失败观察携带可执行修复剧本",
+          "hash/歧义错误一步可恢复",
+          "声明-证据门禁可自动跑",
+          "Jev 观察质检脚本可跑且带来源元数据"
+        ],
+        "acceptance_criteria": [
+          "claim_gate 通过 C1-C7 中可自动测项",
+          "对抗 fixture 上 path+line+code 完备率达标",
+          "E_STALE_HASH/E_AMBIGUOUS 返回结构化恢复字段",
+          "数据集条目含 source 字段"
+        ],
+        "confidence": 0.9
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "p0-diagnostics",
+      "node": {
+        "title": "补齐语义诊断字段并生成修复剧本",
+        "kind": "milestone",
+        "status": "in_progress",
+        "summary": "pytest/npm/git 诊断补 code/expected/found/suggested_fix；suggested_next 升级为短剧本；错误码结构化一步恢复。",
+        "purpose": "直接减少 LLM 猜错与多余 tool 往返。",
+        "acceptance_criteria": [
+          "pytest assert diff 可抽出 expected/found",
+          "suggested_next 含 view → replace → rerun 且参数可填",
+          "E_STALE_HASH 返回 actual_hash 字段"
+        ],
+        "confidence": 0.85
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "p0-pytest",
+      "node": {
+        "title": "pytest 诊断补 expected/found",
+        "kind": "task",
+        "status": "in_progress",
+        "summary": "从 assert 与 E 行解析左右值，写入 Diagnostic.expected/found。",
+        "purpose": "测试失败时 LLM 直接知道期望与实际。"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "p0-playbook",
+      "node": {
+        "title": "失败观察生成修复剧本 suggested_next",
+        "kind": "task",
+        "status": "in_progress",
+        "summary": "按诊断生成 file.view / file.replace_exact / test.run_target 带参短剧本。",
+        "purpose": "失败后下一步无需再查文档。"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "p0-recover",
+      "node": {
+        "title": "E_STALE_HASH / E_AMBIGUOUS 一步恢复字段",
+        "kind": "task",
+        "status": "in_progress",
+        "summary": "错误 observation 的 data 携带 actual_hash 或候选位置，hint 给出重试路径。",
+        "purpose": "一次失败后可直接重试，不必再 read。"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "evidence",
+      "node": {
+        "title": "声明-证据矩阵与自动验收门禁",
+        "kind": "milestone",
+        "status": "in_progress",
+        "summary": "docs/claims-and-evidence.md 绑定 C1-C7；tools/claim_gate.py 算 L2 指标；未过线不得写进 README 主张。",
+        "purpose": "个人项目也要有理有据，避免自嗨数字。"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "claims-doc",
+      "node": {
+        "title": "写声明-证据文档",
+        "kind": "task",
+        "status": "in_progress",
+        "summary": "每条声明写清门槛、复现命令、数据来源、失效边界。",
+        "purpose": "保证所有数据有来源。"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "claim-gate",
+      "node": {
+        "title": "实现 claim_gate 自动指标脚本",
+        "kind": "task",
+        "status": "in_progress",
+        "summary": "统计诊断字段完备率、恢复字段存在率、mock bench 比值，输出 evidence JSON。",
+        "purpose": "少人标：确定性指标优先。"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "dataset",
+      "node": {
+        "title": "少人标数据集与来源元数据",
+        "kind": "milestone",
+        "status": "in_progress",
+        "summary": "复用 tests/fixtures 对抗样本 + GOLDEN，生成 dataset manifest（每条含 source/provenance）。",
+        "purpose": "单人开发不堆人工标注，只保证可追溯。"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "dataset-manifest",
+      "node": {
+        "title": "生成带 source 的评测清单",
+        "kind": "task",
+        "status": "in_progress",
+        "summary": "manifest.json 列出 fixture 路径、期望字段、来源（repo fixture / bench task / 报告）。",
+        "purpose": "数据有来源即可，不强制真人打标。"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "jev",
+      "node": {
+        "title": "Jev 观察质检接入",
+        "kind": "milestone",
+        "status": "ready",
+        "summary": "tools/jev_obs_judge.py：Choice/Score/Noul 打分诊断充分性与剧本可执行性；无 key 时降级为确定性启发式。",
+        "purpose": "用低方差 judge 替代昂贵 LLM-judge，控制人标成本。"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "jev-script",
+      "node": {
+        "title": "实现 jev_obs_judge 脚本",
+        "kind": "task",
+        "status": "ready",
+        "summary": "读 manifest 与 observation 样本，输出带 provenance 的质检报告；支持 offline heuristic 模式。",
+        "purpose": "无 API key 也能出可复现质检流水线。"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "p0-diagnostics",
+      "to": "goal",
+      "type": "child_of",
+      "edge": { "reason": "P0 功能是观察合同深化的主交付" }
+    },
+    {
+      "action": "add_edge",
+      "from": "p0-pytest",
+      "to": "p0-diagnostics",
+      "type": "child_of",
+      "edge": { "reason": "诊断字段补全子任务" }
+    },
+    {
+      "action": "add_edge",
+      "from": "p0-playbook",
+      "to": "p0-diagnostics",
+      "type": "child_of",
+      "edge": { "reason": "修复剧本子任务" }
+    },
+    {
+      "action": "add_edge",
+      "from": "p0-recover",
+      "to": "p0-diagnostics",
+      "type": "child_of",
+      "edge": { "reason": "一步恢复子任务" }
+    },
+    {
+      "action": "add_edge",
+      "from": "evidence",
+      "to": "goal",
+      "type": "child_of",
+      "edge": { "reason": "验收与证据是声明可信的必要条件" }
+    },
+    {
+      "action": "add_edge",
+      "from": "claims-doc",
+      "to": "evidence",
+      "type": "child_of",
+      "edge": { "reason": "先定义声明与门槛" }
+    },
+    {
+      "action": "add_edge",
+      "from": "claim-gate",
+      "to": "evidence",
+      "type": "child_of",
+      "edge": { "reason": "自动门禁实现" }
+    },
+    {
+      "action": "add_edge",
+      "from": "dataset",
+      "to": "goal",
+      "type": "child_of",
+      "edge": { "reason": "数据集支撑验收与 Jev" }
+    },
+    {
+      "action": "add_edge",
+      "from": "dataset-manifest",
+      "to": "dataset",
+      "type": "child_of",
+      "edge": { "reason": "来源元数据子任务" }
+    },
+    {
+      "action": "add_edge",
+      "from": "jev",
+      "to": "goal",
+      "type": "child_of",
+      "edge": { "reason": "Jev 质检属于验收层" }
+    },
+    {
+      "action": "add_edge",
+      "from": "jev-script",
+      "to": "jev",
+      "type": "child_of",
+      "edge": { "reason": "脚本实现子任务" }
+    },
+    {
+      "action": "add_edge",
+      "from": "claim-gate",
+      "to": "p0-diagnostics",
+      "type": "depends_on",
+      "edge": { "reason": "门禁指标依赖 P0 字段落地后才有意义" }
+    },
+    {
+      "action": "add_edge",
+      "from": "jev-script",
+      "to": "dataset-manifest",
+      "type": "depends_on",
+      "edge": { "reason": "质检输入依赖带来源的数据清单" }
+    }
+  ]
+}

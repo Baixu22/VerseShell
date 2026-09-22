@@ -54,6 +54,11 @@ fn cargo_adv_fail_e0308() {
         suggested.iter().any(|s| s.op == "file.view"),
         "expected file.view in suggested_next"
     );
+    // TF-0004: E0308 with expected/found should produce a concrete replace sketch
+    assert!(
+        suggested.iter().any(|s| s.op == "file.replace_exact"),
+        "expected file.replace_exact for E0308 expected/found"
+    );
 }
 
 #[test]
@@ -150,6 +155,10 @@ fn pytest_adv_fail() {
     let d = &out.diagnostics[0];
     assert!(d.path.as_deref().unwrap_or("").contains("test_math.py"));
     assert_eq!(d.line, Some(10));
+    // TF-0003: expected/found must be structured, not only message text
+    assert_eq!(d.expected.as_deref(), Some("3"), "expected value missing");
+    assert_eq!(d.found.as_deref(), Some("2"), "found value missing");
+    assert_eq!(d.code.as_deref(), Some("ASSERT"));
 }
 
 #[test]
@@ -174,6 +183,14 @@ fn pytest_adv_fail_multi() {
         first.path
     );
     assert_eq!(first.line, Some(25));
+    // TF-0003: multi-failure cases must also carry expected/found when assert is ==
+    if first.message.contains("==") || first.expected.is_some() {
+        assert!(
+            first.expected.is_some() && first.found.is_some(),
+            "assert-style failure must expose expected/found: {:?}",
+            first
+        );
+    }
     // Suggested actions for pytest should include file.view AND test.run_target
     let suggested = suggested_from_diagnostics("pytest", &out.diagnostics);
     assert!(
@@ -184,6 +201,17 @@ fn pytest_adv_fail_multi() {
         suggested.iter().any(|s| s.op == "test.run_target"),
         "expected test.run_target for pytest failures"
     );
+    // TF-0004: suggested_next should include a concrete replace when expected/found known
+    if out
+        .diagnostics
+        .iter()
+        .any(|d| d.expected.is_some() && d.found.is_some())
+    {
+        assert!(
+            suggested.iter().any(|s| s.op == "file.replace_exact"),
+            "expected file.replace_exact when expected/found present: {suggested:?}"
+        );
+    }
 }
 
 #[test]
@@ -383,6 +411,124 @@ fn all_failure_summaries_are_bounded() {
             );
         }
     }
+}
+
+#[test]
+fn expected_found_completeness_is_machine_checkable() {
+    // TF-0003: expected/found completeness rate is computable on adversarial fixtures.
+    use verseshell::reducers::expected_found_completeness;
+    let cases: Vec<(&str, &str)> = vec![
+        ("cargo", "../cargo_e0308.txt"),
+        ("pytest", "../pytest_fail.txt"),
+        ("pytest", "pytest_fail_multi.txt"),
+    ];
+    for (profile, fixture_name) in &cases {
+        let text = adv_fixture(fixture_name);
+        let out = reduce_for_profile(profile, &text, false).expect(profile);
+        let (complete, total, rate) = expected_found_completeness(&out.diagnostics);
+        assert!(total > 0, "{fixture_name} must have error diagnostics");
+        assert!(
+            rate >= 0.5,
+            "{fixture_name} expected/found completeness {rate} too low ({complete}/{total})"
+        );
+    }
+    // pytest_fail and multi assert cases must reach full expected/found coverage.
+    let text = adv_fixture("../pytest_fail.txt");
+    let out = reduce_for_profile("pytest", &text, false).unwrap();
+    let (complete, total, rate) = expected_found_completeness(&out.diagnostics);
+    assert_eq!((complete, total), (total, total), "pytest_fail must be complete");
+    assert!((rate - 1.0).abs() < 1e-9);
+}
+
+#[test]
+fn suggested_ops_are_legal_and_deduped() {
+    // TF-0004: suggested_next ops must be on the 1.0 ACI whitelist and unique.
+    use verseshell::reducers::{suggested_from_diagnostics, suggested_ops_are_legal};
+    let cases: Vec<(&str, &str)> = vec![
+        ("cargo", "../cargo_e0308.txt"),
+        ("pytest", "../pytest_fail.txt"),
+        ("pytest", "pytest_fail_multi.txt"),
+    ];
+    for (profile, fixture_name) in &cases {
+        let text = adv_fixture(fixture_name);
+        let out = reduce_for_profile(profile, &text, false).expect(profile);
+        let suggested = suggested_from_diagnostics(profile, &out.diagnostics);
+        assert!(
+            suggested_ops_are_legal(&suggested),
+            "{fixture_name} has illegal suggested ops: {suggested:?}"
+        );
+        let mut seen = std::collections::HashSet::new();
+        for action in &suggested {
+            let key = format!("{}:{}", action.op, action.args);
+            assert!(seen.insert(key.clone()), "duplicate suggested step {key}");
+        }
+    }
+}
+
+// ── TF-0016: anchor recovery for classes without a structured location ──────
+
+#[test]
+fn cargo_adv_fail_panic_is_anchored() {
+    // The panic header carries a location the cargo parser must keep, so the
+    // repair playbook can point at the panic site instead of a raw line.
+    let text = adv_fixture("cargo_fail_panic.txt");
+    let out = reduce_for_profile("cargo", &text, false).expect("cargo reducer");
+    let panicked = out
+        .diagnostics
+        .iter()
+        .find(|d| d.message.contains("panicked"))
+        .expect("panic diagnostic");
+    assert_eq!(panicked.severity, "error");
+    assert_eq!(panicked.path.as_deref(), Some("src/engine.rs"));
+    assert_eq!(panicked.line, Some(42));
+
+    let suggested = suggested_from_diagnostics("cargo", &out.diagnostics);
+    assert!(
+        suggested.iter().any(|s| s.op == "file.view"
+            && s.args["path"] == "src/engine.rs"
+            && s.args["cursor"] == 42),
+        "panic playbook should view the panic site: {suggested:?}"
+    );
+    assert!(
+        suggested.iter().any(|s| s.op == "exec.run"),
+        "panic playbook should include a rerun step: {suggested:?}"
+    );
+}
+
+#[test]
+fn cargo_adv_fail_malformed_recovers_wrapped_location() {
+    // The arrow and its `path:line` sit on different lines here; the parser must
+    // still anchor the diagnostic so a repair playbook can point at the site.
+    let text = adv_fixture("cargo_fail_malformed.txt");
+    let out = reduce_for_profile("cargo", &text, false).expect("cargo reducer");
+    let d = out
+        .diagnostics
+        .iter()
+        .find(|d| d.severity == "error")
+        .expect("error diagnostic");
+    assert_eq!(d.path.as_deref(), Some("src/mixed/path.rs"));
+    assert_eq!(d.line, Some(42));
+
+    let suggested = suggested_from_diagnostics("cargo", &out.diagnostics);
+    assert!(
+        suggested.iter().any(|s| s.op == "file.view"
+            && s.args["path"] == "src/mixed/path.rs"
+            && s.args["cursor"] == 42),
+        "wrapped-location playbook should view the site: {suggested:?}"
+    );
+}
+
+#[test]
+fn anchor_recovery_skips_paths_that_do_not_exist() {
+    // ENOENT names a path precisely because it is missing, so a `file.view`
+    // step would fail immediately: those classes must stay playbook-free.
+    let text = adv_fixture("npm_fail_enoent.txt");
+    let out = reduce_for_profile("npm_install", &text, false).expect("npm reducer");
+    let suggested = suggested_from_diagnostics("npm_install", &out.diagnostics);
+    assert!(
+        suggested.is_empty(),
+        "must not suggest steps for a missing path: {suggested:?}"
+    );
 }
 
 #[test]

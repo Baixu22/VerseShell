@@ -1,0 +1,418 @@
+{
+  "proposal_id": "TFP-p1-process-lifecycle-close-2026-09-22",
+  "session_id": "ses_verseshell-tf-relay-2026-09-22",
+  "rationale": "接力上一轮（ses_verseshell-tf-continue-2026-09-22，actor=verdent）已全部 done 的森林：上一轮把「观察合同深化」收口，但工作区里仍有一大块 P1 WIP 未纳入森林——process.start/poll/write/kill/list 五个 typed op 与 Windows ConPTY 已在源码与 tests/process_lifecycle_tests.rs 中就绪（claim_gate 6/6、全量测试绿），却没有进 docs/1.0-aci.md、README、CHANGELOG，声明-证据矩阵里没有对应声明，改动也未提交。本提案按 docs/task-forest-policy.md §3 把这些缺口落成节点：新建本轮 global_task TF-0019 及其子节点，并在 TF-0006（声明-证据矩阵）下补 compact 未登记数字与 C5 未证实两个缺口节点。节点只描述交付与验收，不预设实现细节。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "p1-close",
+      "node": {
+        "title": "P1 收尾：把进程生命周期 ops 纳入 ACI 主合同",
+        "kind": "global_task",
+        "status": "in_progress",
+        "display_order": 20,
+        "priority": 1,
+        "difficulty": "high",
+        "confidence": 0.85,
+        "summary": "工作区里已实现但未收口的 P1 WIP：五个 typed op（process.start / process.poll / process.write / process.kill / process.list）与 Windows ConPTY 已在源码、握手 features 与 tests/process_lifecycle_tests.rs 中就绪，全量测试绿；但对外文档（docs/1.0-aci.md、README、CHANGELOG）没有收录，声明-证据矩阵没有对应声明，改动也未提交。本轮把它们收进主合同：文档化操作面、登记声明 C8 并接入 claim_gate、修正 README 中已过时的「exec 路径不使用 ConPTY」表述、处置 compact 未登记数字，最后提交 P1 WIP 与本轮改动。",
+        "purpose": "让第三方只读仓库就能验收这批能力：文档可对照源码、声明有门槛与复现命令、改动已落盘可追溯。",
+        "desired_outcomes": [
+          "五个 process.* op 在 docs/1.0-aci.md 与 README 中有与源码逐条对照的操作面说明（含审批、归属、cursor、终态与清理语义）",
+          "进程生命周期契约登记为声明 C8 并接入 tools/claim_gate.py，python tools/claim_gate.py 退出码 0",
+          "README 中「exec 路径不使用 ConPTY」等已过时表述被修正，roadmap 不再把已实现的 ConPTY 列为 deferred",
+          "compact 50–70% 这个未登记对外数字被处置：或按 §4 登记为 Cx 并给出复现命令，或把 README 措辞降级为未证实",
+          "全量 cargo test 保持全绿",
+          "本轮节点 evidence 回写森林，proposal-apply / validate / export 通过，P1 WIP 与本轮改动已提交"
+        ],
+        "acceptance_criteria": [
+          "docs/1.0-aci.md 的 process.* 字段/错误码与 src/ops/process_ops.rs、src/process_lifecycle.rs 一致（抽查逐条可对上）",
+          "docs/claims-and-evidence.md 有 C8 行且门槛与 tools/claim_gate.py 的 C8 门槛数字一致",
+          "python tools/claim_gate.py 退出码 0，eval/evidence.json 含 C8 条目",
+          "README 不再出现无法登记的对外数字；roadmap 与进程契约段落与源码一致",
+          "cargo test 全量通过（0 failed）",
+          "proposal-apply --yes、validate、export 均成功；git 工作区除导出产物外无未提交改动"
+        ],
+        "non_goals": [
+          "不重写进程生命周期实现（源码与测试已就绪，本轮只做收口）",
+          "不新增 UI / LSP / 面向人类的 shell 模块",
+          "不调用真实模型或付费 API"
+        ],
+        "assumptions": [
+          "P1 WIP 源码可编译且测试全绿（已用 claim_gate 复现：6/6 pass，exit 0）"
+        ],
+        "execution_hints": [
+          "先 TF-0020 文档化，再 TF-0021 声明与门禁，再 TF-0022/TF-0023 处置遗留声明，最后 TF-0024 收口提交",
+          "每步都以命令输出为证据，不写无法复现的结论"
+        ],
+        "next_action": "先做 TF-0020：按源码把 process.* 操作面写进 docs/1.0-aci.md 与 README，并修掉过时的 ConPTY 表述。",
+        "alignment": {
+          "user_goal": "接力节点开发：把未纳入森林的 P1 WIP 收口，并保持开发流程与证据链完整",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "工作区里唯一「已实现但未验收、未文档化、未提交」的成块改动就是这批进程生命周期能力；把它收口是继续节点开发的自然下一步",
+          "why_not_enough": "本轮不改变能力本身，只补齐文档、声明、门禁与提交；能力的行为边界仍以源码与测试为准",
+          "validation_plan": [
+            "python tools/claim_gate.py（含新增 C8）退出码 0",
+            "cargo test 全量绿",
+            "proposal-apply --yes → validate → export",
+            "git status 与 git log 可核对提交"
+          ]
+        },
+        "source_sessions": [
+          "ses_verseshell-tf-relay-2026-09-22"
+        ],
+        "evidence": [
+          "python tools/claim_gate.py → 6/6 gated claims pass, exit 0（2026-09-22 21:12；C7: 16 suites / 277 passed / 0 failed / 1 ignored）",
+          "git status --porcelain：src/process_lifecycle.rs、src/process_lifecycle_windows.rs、src/process_command.rs、src/ops/process_ops.rs、tests/process_lifecycle_tests.rs 未跟踪；另有 21 个已跟踪文件未提交",
+          "docs/1.0-aci.md 与 README 全文 grep process.start/poll/write/kill/list 无命中；README 仍写「pipes + CREATE_NO_WINDOW (not ConPTY)」并把 ConPTY 列在 deferred"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "doc-surface",
+      "node": {
+        "title": "步骤9：文档化进程生命周期操作面",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1000,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.8,
+        "summary": "把五个 process.* op 与 Windows ConPTY 写进对外文档：docs/1.0-aci.md 新增 Process lifecycle 小节（逐 op 输入/返回/错误码/审批要求），README 区分一次性 exec.run 与长驻 process.* 两条路径并修正过时表述，CHANGELOG 记录新增 op 与握手 features。",
+        "purpose": "让 agent 与第三方只读文档就能正确调用，不必读 47KB 的源码。",
+        "acceptance_criteria": [
+          "docs/1.0-aci.md 的 op 名、输入字段、返回字段、错误码与 src/ops/process_ops.rs、src/process_lifecycle.rs 逐条对得上",
+          "README 的进程契约段落明确区分 exec.run（一次性、pipe、CREATE_NO_WINDOW）与 process.*（长驻、可轮询、可 PTY），并删掉/改写「not ConPTY」这类已过时句子",
+          "README roadmap 不再把已实现的 ConPTY 列为 deferred（或改写为剩余缺口）",
+          "CHANGELOG Unreleased 有对应条目",
+          "文档里每个字段名/错误码都能在源码或测试中找到出处，不臆造"
+        ],
+        "non_goals": [
+          "不改动 process.* 的实现与 schema"
+        ],
+        "execution_hints": [
+          "以 src/ops/process_ops.rs 的 schema 与 tests/process_lifecycle_tests.rs 的断言为准绳"
+        ],
+        "alignment": {
+          "user_goal": "让 P1 WIP 进入对外主合同",
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "why_this_task": "文档缺口是这批 op 当前最大的对外不可用点",
+          "why_not_enough": "文档本身不构成门禁，仍需 TF-0021 的声明与门禁",
+          "validation_plan": [
+            "逐字段对照源码抽查",
+            "cargo test 仍绿"
+          ]
+        },
+        "source_sessions": [
+          "ses_verseshell-tf-relay-2026-09-22"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "claim-c8",
+      "node": {
+        "title": "步骤10：进程生命周期声明-证据与门禁接入",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1001,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.8,
+        "summary": "在 docs/claims-and-evidence.md 新增 C8（进程生命周期契约：归属校验、cursor 单调、终态与 kill 幂等、清理不孤儿），给出门槛/复现命令/source/失效边界/状态；在 tools/claim_gate.py 增加同数字的 C8 门槛，让 eval/evidence.json 机器可读。",
+        "purpose": "让这批能力从「源码里存在」变成「有门槛、可复现的对外声明」。",
+        "acceptance_criteria": [
+          "docs/claims-and-evidence.md 的 C8 行含 门槛/复现命令/source/样本量/失效边界/状态 六要素",
+          "tools/claim_gate.py 的 C8 门槛与文档一致（改门槛必须同时改两处）",
+          "python tools/claim_gate.py 退出码 0，eval/evidence.json 含 C8 与 test_totals",
+          "C8 的复现命令可直接复制执行并得到相同结论"
+        ],
+        "non_goals": [
+          "不为无确定性指标的东西设门槛（例如主观学习成本）"
+        ],
+        "execution_hints": [
+          "复用 claim_gate 既有的 test_claim 通道，指定 --test process_lifecycle_tests"
+        ],
+        "alignment": {
+          "user_goal": "P1 WIP 的证据链完整",
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "why_this_task": "根策略 §3 要求对外数字有登记、门禁全绿才可 done",
+          "why_not_enough": "只覆盖本机平台，跨平台未覆盖需写进失效边界",
+          "validation_plan": [
+            "python tools/claim_gate.py",
+            "抽查 eval/evidence.json 的 C8 条目"
+          ]
+        },
+        "source_sessions": [
+          "ses_verseshell-tf-relay-2026-09-22"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "compact-gap",
+      "node": {
+        "title": "缺口：compact「50–70% token 节省」是对外数字但未登记",
+        "kind": "follow_up",
+        "status": "ready",
+        "display_order": 1002,
+        "priority": 2,
+        "difficulty": "medium",
+        "confidence": 0.75,
+        "summary": "README 的 --compact 行、能力表与正文（第 198/616/950 行附近）写了「50-70% savings vs JSON」，但 docs/claims-and-evidence.md §6 明确它尚未登记为 Cx，且仓库里现有测试量的是 reducer 压缩比（口径不同）。处置二选一：按 §4 补一行声明并给出可复现测量命令（登记后接入 claim_gate），或把 README 措辞降级为未证实/待测量。",
+        "purpose": "遵守声明纪律：任何对外数字都要能在声明-证据矩阵里找到一行，否则不得以肯定口吻出现。",
+        "acceptance_criteria": [
+          "README 中每个对外数字都能在 docs/claims-and-evidence.md 找到对应 Cx 行",
+          "若登记：给出可复现命令（测量 compact 编码 vs JSON 的规模比）并接入 claim_gate，实测值写进 README",
+          "若降级：README 不再出现该未证实数字，§6 记录处置理由",
+          "python tools/claim_gate.py 退出码 0"
+        ],
+        "non_goals": [
+          "不为凑数字改口径或改测试阈值"
+        ],
+        "execution_hints": [
+          "src/compact.rs 提供 encode_value / encode_response，可用于确定性测量"
+        ],
+        "alignment": {
+          "user_goal": "对外声明自圆其说",
+          "fit": "aligned",
+          "fit_confidence": 0.8,
+          "why_this_task": "这是上一轮 §6 明确留下的唯一「已进 README 但未登记」的数字",
+          "why_not_enough": "只解决这一处，不覆盖其它未来新增数字",
+          "validation_plan": [
+            "claim_gate exit 0",
+            "README 与 claims 文档逐数字对照"
+          ]
+        },
+        "source_sessions": [
+          "ses_verseshell-tf-relay-2026-09-22"
+        ],
+        "evidence": [
+          "docs/claims-and-evidence.md §6（2026-09-22 记录：尚未登记为 Cx 声明）"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "c5-decision",
+      "node": {
+        "title": "决策：C5 学习成本保持未证实，README 不得肯定化",
+        "kind": "decision",
+        "status": "done",
+        "display_order": 1003,
+        "priority": 3,
+        "difficulty": "low",
+        "confidence": 0.9,
+        "summary": "C5（一个 coding agent 只读 quickstart 就能正确使用主合同）没有确定性指标，按根策略 §4「口径冲突取更严一侧」：保持未证实，claim_gate 不设门槛（pass=null），README 禁止出现「上手成本低 / 零学习成本」类肯定句。将来若要转「已证实」，必须先定义固定任务集上的首次成功率指标与复现命令，再补门槛。",
+        "purpose": "把「测不了就不说」固化成决策，避免后续会话为了好看把它写成已证实。",
+        "acceptance_criteria": [
+          "docs/claims-and-evidence.md C5 行的状态为未证实且写明转正路径",
+          "README 无 C5 类肯定句",
+          "claim_gate 对 C5 记为 N/A 且不影响 exit code"
+        ],
+        "non_goals": [
+          "不为了转正而调用真实模型跑大规模评测（越界且付费）"
+        ],
+        "alignment": {
+          "user_goal": "对外声明自圆其说",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "它是上一轮留下的、唯一被显式标为未证实的 desired outcome",
+          "why_not_enough": "决策本身不产生新证据，只固定边界",
+          "validation_plan": [
+            "claim_gate 输出中 C5 为 N/A",
+            "README grep 无相关肯定句"
+          ]
+        },
+        "source_sessions": [
+          "ses_verseshell-tf-relay-2026-09-22"
+        ],
+        "evidence": [
+          "docs/claims-and-evidence.md §3 C5 行：门槛无、状态未证实、写明转正需先定义可复现指标",
+          "docs/claims-and-evidence.md §4：C5 未证实，README 不得出现「上手成本低」「零学习成本」"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-and-commit",
+      "node": {
+        "title": "步骤11：森林收口与 P1 WIP 提交",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1004,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.85,
+        "summary": "按根策略 §6 收尾：把本轮证据回写各节点，proposal-save → proposal-apply --yes → validate → export，并把 P1 WIP（未跟踪的进程生命周期源码与测试）连同本轮文档/门禁改动一起提交，留下可追溯的 commit。",
+        "purpose": "让本轮成果落盘可追溯，而不是停在未提交的工作区。",
+        "acceptance_criteria": [
+          "本轮各节点 evidence 字段已回写（不是只写在对话里）",
+          "proposal-save → proposal-apply --yes → validate → export 全部成功",
+          "git commit 覆盖 P1 WIP 与本轮文档/门禁改动",
+          "git status 除导出/缓存产物外无未提交改动",
+          "报告给出提案路径、HTML 路径、节点状态变化、门禁命令与结果"
+        ],
+        "non_goals": [
+          "不改写 git 历史、不 force push、不删除分支"
+        ],
+        "execution_hints": [
+          "提交信息写清：收口进程生命周期 ops 的文档/声明/门禁，并纳入 P1 WIP 源码"
+        ],
+        "alignment": {
+          "user_goal": "开发流程与证据链完整",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "未提交的 WIP 无法被第三方复现，收口必须包含落盘",
+          "why_not_enough": "提交只是载体，验收仍靠 claim_gate 与测试",
+          "validation_plan": [
+            "git log/show 核对提交内容",
+            "git status 核对干净度"
+          ]
+        },
+        "source_sessions": [
+          "ses_verseshell-tf-relay-2026-09-22"
+        ]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "doc-surface",
+      "to": "p1-close",
+      "type": "child_of",
+      "edge": {
+        "reason": "文档化是本轮收口的第一交付",
+        "confidence": 0.9
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "claim-c8",
+      "to": "p1-close",
+      "type": "child_of",
+      "edge": {
+        "reason": "声明与门禁是本轮收口的验收交付",
+        "confidence": 0.9
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-and-commit",
+      "to": "p1-close",
+      "type": "child_of",
+      "edge": {
+        "reason": "收口与落盘是全局任务的最后一步",
+        "confidence": 0.9
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "compact-gap",
+      "to": "TF-0006",
+      "type": "child_of",
+      "edge": {
+        "reason": "它是声明-证据矩阵遗留的未登记数字缺口",
+        "confidence": 0.85
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "c5-decision",
+      "to": "TF-0006",
+      "type": "child_of",
+      "edge": {
+        "reason": "它固定了声明矩阵中未证实项的处置边界",
+        "confidence": 0.85
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-and-commit",
+      "to": "doc-surface",
+      "type": "depends_on",
+      "edge": {
+        "reason": "收口必须在文档完成之后",
+        "confidence": 0.9
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-and-commit",
+      "to": "claim-c8",
+      "type": "depends_on",
+      "edge": {
+        "reason": "收口必须等门禁接入并跑通之后",
+        "confidence": 0.9
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-and-commit",
+      "to": "compact-gap",
+      "type": "depends_on",
+      "edge": {
+        "reason": "compact 数字处置属于本轮收口范围",
+        "confidence": 0.8
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "p1-close",
+      "to": "TF-0015",
+      "type": "derived_from",
+      "edge": {
+        "reason": "本轮的收口对象正是 TF-0015 决策保留的 P1 工作区 WIP",
+        "confidence": 0.9
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "p1-close",
+      "to": "TF-0001",
+      "type": "related_to",
+      "edge": {
+        "reason": "承接上一轮已 done 的全局目标，使用同一套声明-证据与门禁纪律",
+        "confidence": 0.8
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "doc-surface",
+      "fields": {
+        "display_order": 10
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "claim-c8",
+      "fields": {
+        "display_order": 20
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "close-and-commit",
+      "fields": {
+        "display_order": 30
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "compact-gap",
+      "fields": {
+        "display_order": 30
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "c5-decision",
+      "fields": {
+        "display_order": 40
+      }
+    }
+  ]
+}

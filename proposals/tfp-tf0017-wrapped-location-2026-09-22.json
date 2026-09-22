@@ -1,0 +1,38 @@
+{
+  "proposal_id": "TFP-tf0017-wrapped-location-2026-09-22",
+  "session_id": "ses_verseshell-tf-continue-2026-09-22",
+  "rationale": "TF-0017 收口：cargo 畸形输出里 `-->` 与 `path:line` 分处两行时也能恢复锚点，同时用「整体严格匹配 path:line[:col]」的约束避免误认无关路径。jev 质检中 unrecoverable_anchor 归零，剧本可执行 9/13，剩余 4 条为按设计无可定位点。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0017",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "cargo reducer 新增 recover_wrapped_location：把 `-->` 行与后续最多 4 行非空内容拼接，仅当整体严格匹配 `path:line[:col]` 才作为锚点采用，避免把无关路径当失败点。",
+        "evidence": [
+          "tests/semantic_reducer_adversarial_tests.rs::cargo_adv_fail_malformed_recovers_wrapped_location → path=src/mixed/path.rs, line=42（2026-09-22）",
+          "python tools/jev_obs_judge.py → script_breakdown {actionable: 9, no_locatable_site: 4}，unrecoverable_anchor 0",
+          "python tools/claim_gate.py → 6/6 pass（C7: 16 suites / 277 passed / 0 failed）",
+          "docs/claims-and-evidence.md §8 记录逐类处理与证据"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0001",
+      "fields": {
+        "progress": 95.0,
+        "next_action": "若要让 3 条无锚点失败的观察也达到 diagnostic_sufficient，需先定义「无锚点失败的通用可执行动作」并落成节点；否则全局任务按现状收口",
+        "summary": "步骤5–8、TF-0016、TF-0017 全部 done：manifest 校验通过、claims 文档齐备、claim_gate 6/6、jev 质检剧本可执行 9/13（其余 4 条按设计无可定位点）、cargo panic 与拆行位置均已锚定。剩余唯一议题是「无锚点失败的诊断是否算足够」，属口径问题已写入文档而非缺口。",
+        "evidence": [
+          "python tools/claim_gate.py → 6/6 gated claims pass（C2 门槛按根策略收紧到 0.70）",
+          "python tools/jev_obs_judge.py → diagnostic_sufficient 10/13、script_actionable 9/13、no_locatable_site 4、unrecoverable_anchor 0",
+          "全量 cargo test: 16 suites / 277 passed / 0 failed / 1 ignored",
+          "根策略 docs/task-forest-policy.md 生效：提案证据链完备即自动 apply（本轮两次提案均无人工确认）"
+        ]
+      }
+    }
+  ]
+}

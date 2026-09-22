@@ -109,7 +109,15 @@ pub fn guard_delete(path: &str) -> Result<(), String> {
     .map_err(|e| e.message)
 }
 
-pub fn check_expected_hash(content: &str, expected: Option<&str>) -> Result<(), String> {
+/// Structured hash-check failure so agents can retry in one step.
+#[derive(Debug, Clone)]
+pub struct HashMismatch {
+    pub expected: String,
+    pub actual: String,
+    pub message: String,
+}
+
+pub fn check_expected_hash(content: &str, expected: Option<&str>) -> Result<(), HashMismatch> {
     let Some(expected) = expected else {
         return Ok(());
     };
@@ -120,9 +128,14 @@ pub fn check_expected_hash(content: &str, expected: Option<&str>) -> Result<(), 
         format!("sha256:{expected}")
     };
     if actual != expected_norm {
-        return Err(format!(
+        let message = format!(
             "content hash mismatch: expected {expected_norm}, got {actual}"
-        ));
+        );
+        return Err(HashMismatch {
+            expected: expected_norm,
+            actual,
+            message,
+        });
     }
     Ok(())
 }

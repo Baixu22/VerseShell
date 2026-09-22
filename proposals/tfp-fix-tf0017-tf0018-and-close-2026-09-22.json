@@ -1,0 +1,72 @@
+{
+  "proposal_id": "TFP-fix-tf0017-tf0018-and-close-2026-09-22",
+  "session_id": "ses_verseshell-tf-continue-2026-09-22",
+  "rationale": "修正上一轮提案的节点错位：TFP-tf0017-wrapped-location 误把「拆行位置修复」的内容写进了决策节点 TF-0017（该缺口节点实际是 TF-0018），本提案把 TF-0017 的摘要与证据还原为自主闭环决策内容，并把拆行位置修复的证据写到真正的 TF-0018；同时按证据把 TF-0014 执行纪律与全局任务 TF-0001 收口。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0017",
+      "fields": {
+        "title": "决策：开发主线由 agent 自主闭环，证据链完备即自动 apply / 自动 done",
+        "status": "done",
+        "progress": 100.0,
+        "summary": "角色分工固定：用户只做发布与方向，agent 是开发主线唯一执行者。图变更仍先 proposal-save 留审计轨迹，但证据链完备立即 proposal-apply --yes + validate + export，不再等待用户确认；节点在四条硬门槛（验收逐条可复现证据、对外数字已登记且 claim_gate exit 0、相关门禁测试全绿、evidence 回写森林）全部满足时自动 done，缺口落成 follow_up 节点而不是问用户。",
+        "evidence": [
+          "docs/task-forest-policy.md（根策略：角色、提案即执行、自动 done 四门槛、自圆其说、非阻塞例外、收尾动作）",
+          ".mimocode/skills/task-forest/SKILL.md 规则3 与工作流步骤6/7 改为「证据链完备即 apply，工作区策略优先」",
+          ".mimocode/skills/task-forest/references/session-close-workflow.md 步骤4 同步为「策略允许则自主 apply」",
+          "docs/AUDIT_PROMPT.md §1.5 增补：审计方不得把「无人工确认」判为缺陷，但必须查证据链完备性",
+          "用户原话：不需要再针对性让我回答，我只是发布者，保证开发流程完整且证据链完整、验收自圆其说；不再追问 apply，证据链完整就自动 done",
+          "本轮 4 次提案均按本策略无人工确认自主 apply 并 validate 通过"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0018",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "cargo reducer 新增 recover_wrapped_location：把 `-->` 行与后续最多 4 行非空内容拼接，仅当整体严格匹配 `path:line[:col]` 才作为锚点采用，避免把无关路径当失败点。cargo_fail_malformed 现在有锚点与可执行剧本。",
+        "evidence": [
+          "tests/semantic_reducer_adversarial_tests.rs::cargo_adv_fail_malformed_recovers_wrapped_location → path=src/mixed/path.rs, line=42（2026-09-22）",
+          "python tools/jev_obs_judge.py → script_breakdown {actionable: 9, no_locatable_site: 4}，unrecoverable_anchor 0",
+          "python tools/claim_gate.py → 6/6 pass（C7: 16 suites / 277 passed / 0 failed / 1 ignored）",
+          "docs/claims-and-evidence.md §8 记录逐类处理与证据"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0014",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "evidence": [
+          "docs/task-forest-policy.md §2 §3 §6",
+          "本轮 4 次提案全部自主 apply（无人工确认）并 validate 通过",
+          "每轮收尾均执行 proposal-save → proposal-apply --yes → validate → export，导出 .agent-workbench/task-forest/exports/task-forest.html"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0001",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "next_action": "如需扩展：新增对外数字先按 docs/claims-and-evidence.md §4 登记为 Cx；无锚点失败若要有下一步需先定义通用可执行动作",
+        "summary": "全部 desired_outcomes 均有可复现证据：①诊断字段完备——diff 类 expected/found 完备率 1.00（C3），可定位失败类别锚点覆盖 9/9；②失败观察携带修复剧本——9/13 可直接执行，其余 4 条为按设计无可定位点（ENOENT/ERESOLVE/网络/非 git 仓库）；③hash/歧义一步恢复——C4=1.00；④声明-证据门禁可自动跑——claim_gate 6/6；⑤Jev 质检可跑且带 source——jev_obs_judge 报告逐条含 source。验收四条同样逐条有证据。明确边界：C5（学习成本）为未证实、不设门槛，README 不得以肯定口吻引用；compact 50–70% 数字未登记，不得作对外主张。",
+        "evidence": [
+          "python tools/claim_gate.py → 6/6 gated claims pass（C1 0.106<=0.50、C2 0.55<=0.70、C3 1.00>=0.90、C4 1.00==1.00、C6/C7 all pass；C5 N/A），exit 0",
+          "python tools/validate_manifest.py → OK: 34 entries, all sources exist（对应验收「数据集条目含 source 字段」）",
+          "python tools/jev_obs_judge.py → diagnostic_sufficient 10/13、script_actionable 9/13、no_locatable_site 4、unrecoverable_anchor 0（对应 desired_outcome 2）",
+          "全量 cargo test: 16 suites / 277 passed / 0 failed / 1 ignored",
+          "docs/claims-and-evidence.md：C1–C7 逐条含门槛/命令/source/失效边界/状态；§5 口径统一规则；§8 锚点恢复逐类证据",
+          "eval/evidence.json（机器可读门禁结果）、eval/jev_obs_report.json（质检明细）"
+        ]
+      }
+    }
+  ]
+}

@@ -14,7 +14,14 @@ use crate::{capability, safety};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 
-const HANDSHAKE_FEATURES: &[&str] = &["typed_operations", "result_artifacts", "legacy_cmd"];
+const HANDSHAKE_FEATURES: &[&str] = &[
+    "typed_operations",
+    "result_artifacts",
+    "process_lifecycle",
+    "monotonic_process_cursor",
+    "windows_conpty",
+    "legacy_cmd",
+];
 
 /// The host binds a named, immutable policy profile to a subprocess through
 /// these inherited environment values. The model-facing JSONL transport has no

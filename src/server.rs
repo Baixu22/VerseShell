@@ -328,6 +328,7 @@ async fn serve_stdio(runtime: SharedRuntime, use_scheduler: bool) -> Result<()> 
     if let Some(s) = scheduler::global_scheduler() {
         s.shutdown();
     }
+    crate::process_lifecycle::shutdown();
     eprintln!("[ae-serve] server stopped");
     Ok(())
 }

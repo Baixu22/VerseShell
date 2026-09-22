@@ -4,7 +4,8 @@ use anyhow::{anyhow, Context, Result};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use std::io::Read;
+use std::collections::BTreeMap;
+use std::io::{Read, Write};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::thread;
@@ -72,6 +73,16 @@ struct CaptureBytes {
 }
 
 pub fn run(argv: &[String], cwd: &Path, limits: &ExecLimits) -> Result<ProcessOutput> {
+    run_with_env_and_input(argv, cwd, limits, None, None)
+}
+
+pub fn run_with_env_and_input(
+    argv: &[String],
+    cwd: &Path,
+    limits: &ExecLimits,
+    env: Option<&BTreeMap<String, String>>,
+    stdin: Option<&[u8]>,
+) -> Result<ProcessOutput> {
     if argv.is_empty() || argv[0].is_empty() {
         return Err(anyhow!("E_EXEC_BAD_ARG: argv must contain a program"));
     }
@@ -86,13 +97,19 @@ pub fn run(argv: &[String], cwd: &Path, limits: &ExecLimits) -> Result<ProcessOu
         ));
     }
 
-    let mut command = Command::new(&argv[0]);
+    let resolved = crate::process_command::resolve_process_command(argv, cwd, env)?;
+    let mut command = Command::new(&resolved.executable);
     command
-        .args(&argv[1..])
+        .args(&resolved.args)
         .current_dir(cwd)
-        .stdin(Stdio::null())
+        .stdin(if stdin.is_some() {
+            Stdio::piped()
+        } else {
+            Stdio::null()
+        })
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
+    crate::process_command::configure_command_environment(&mut command, env);
 
     #[cfg(unix)]
     {
@@ -103,13 +120,27 @@ pub fn run(argv: &[String], cwd: &Path, limits: &ExecLimits) -> Result<ProcessOu
     {
         use std::os::windows::process::CommandExt;
         use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
+        if let Some(raw_arg) = resolved.windows_raw_arg.as_ref() {
+            command.raw_arg(raw_arg);
+        }
         command.creation_flags(CREATE_NO_WINDOW);
     }
 
     let start = Instant::now();
-    let mut child = command
-        .spawn()
-        .with_context(|| format!("failed to spawn '{}'", argv[0]))?;
+    let mut child = command.spawn().with_context(|| {
+        format!(
+            "failed to spawn resolved executable '{}' for '{}'",
+            resolved.audited_executable.display(),
+            argv[0]
+        )
+    })?;
+    if let Some(input) = stdin {
+        let mut child_stdin = child
+            .stdin
+            .take()
+            .ok_or_else(|| anyhow!("missing stdin pipe"))?;
+        child_stdin.write_all(input)?;
+    }
     #[cfg(unix)]
     let pid = child.id();
 
@@ -211,7 +242,7 @@ fn decode_capture(capture: CaptureBytes) -> CapturedStream {
         };
     }
 
-    let (text, encoding) = decode_text(&capture.bytes);
+    let (text, encoding) = decode_output_bytes(&capture.bytes);
     CapturedStream {
         bytes: capture.bytes,
         raw_bytes: capture.raw_bytes,
@@ -222,7 +253,7 @@ fn decode_capture(capture: CaptureBytes) -> CapturedStream {
     }
 }
 
-fn decode_text(bytes: &[u8]) -> (String, String) {
+pub(crate) fn decode_output_bytes(bytes: &[u8]) -> (String, String) {
     let bytes = bytes.strip_prefix(&[0xEF, 0xBB, 0xBF]).unwrap_or(bytes);
     if let Ok(text) = std::str::from_utf8(bytes) {
         return (text.to_string(), "utf-8".into());
@@ -289,15 +320,23 @@ pub fn normalize_preview(text: &str) -> String {
 }
 
 #[cfg(windows)]
-struct WindowsJob {
+pub(crate) struct WindowsJob {
     handle: windows_sys::Win32::Foundation::HANDLE,
 }
 
 #[cfg(windows)]
 impl WindowsJob {
-    fn attach(child: &std::process::Child, limits: &ExecLimits) -> Result<Self> {
-        use std::mem::{size_of, zeroed};
+    pub(crate) fn attach(child: &std::process::Child, limits: &ExecLimits) -> Result<Self> {
         use std::os::windows::io::AsRawHandle;
+
+        Self::attach_handle(child.as_raw_handle(), limits)
+    }
+
+    pub(crate) fn attach_handle(
+        process_handle: std::os::windows::io::RawHandle,
+        limits: &ExecLimits,
+    ) -> Result<Self> {
+        use std::mem::{size_of, zeroed};
         use windows_sys::Win32::Foundation::CloseHandle;
         use windows_sys::Win32::System::JobObjects::*;
 
@@ -327,7 +366,7 @@ impl WindowsJob {
             unsafe { CloseHandle(handle) };
             return Err(anyhow!("E_EXEC_JOB: SetInformationJobObject failed"));
         }
-        let assigned = unsafe { AssignProcessToJobObject(handle, child.as_raw_handle()) };
+        let assigned = unsafe { AssignProcessToJobObject(handle, process_handle) };
         if assigned == 0 {
             unsafe { CloseHandle(handle) };
             return Err(anyhow!("E_EXEC_JOB: AssignProcessToJobObject failed"));
@@ -335,13 +374,25 @@ impl WindowsJob {
         Ok(Self { handle })
     }
 
-    fn terminate(&self) {
+    pub(crate) fn terminate(&self) {
+        let _ = self.terminate_checked();
+    }
+
+    pub(crate) fn terminate_checked(&self) -> Result<()> {
         use windows_sys::Win32::System::JobObjects::TerminateJobObject;
-        unsafe {
-            TerminateJobObject(self.handle, 1);
+        if unsafe { TerminateJobObject(self.handle, 1) } == 0 {
+            Err(anyhow!("E_EXEC_JOB: TerminateJobObject failed"))
+        } else {
+            Ok(())
         }
     }
 }
+
+#[cfg(windows)]
+unsafe impl Send for WindowsJob {}
+
+#[cfg(windows)]
+unsafe impl Sync for WindowsJob {}
 
 #[cfg(windows)]
 impl Drop for WindowsJob {

@@ -1,0 +1,328 @@
+{
+  "proposal_id": "TFP-forest-plan-v2",
+  "session_id": "ses_ffe5f37e7f841ffewJ4lbJ9Cq2",
+  "rationale": "落实 task-forest 为规划骨架：补规划门、display_order、alignment 与 depends_on。个人工程探索，少人标，数据有来源。方案A保留P1 WIP。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0001",
+      "fields": {
+        "status": "in_progress",
+        "progress": 15,
+        "display_order": 10,
+        "priority": 1,
+        "difficulty": "high",
+        "alignment": {
+          "user_goal": "以 task-forest 为规划骨架深化 ACI 观察合同，并完成数据集/验收/Jev",
+          "fit": "aligned",
+          "fit_confidence": 0.95,
+          "why_this_task": "用户要求规划先落节点、开发跟节点走；个人项目少人标、数据有来源",
+          "why_not_enough": "不能替代具体功能节点的实现与 evidence",
+          "validation_plan": ["proposal-apply 后 validate/export", "todo 按 depends_on 顺序", "done 节点带 evidence"]
+        },
+        "source_sessions": ["ses_ffe5f37e7f841ffewJ4lbJ9Cq2"],
+        "evidence": ["用户确认规划序 1-8", "task-forest skill 已安装并 init"]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "plan-gate",
+      "node": {
+        "title": "规划门：提案确认并写入任务森林",
+        "kind": "milestone",
+        "status": "in_progress",
+        "display_order": 10,
+        "priority": 1,
+        "difficulty": "low",
+        "summary": "把完整工作流落成 forest 节点与依赖边，确认后才允许开发。",
+        "purpose": "保证开发被节点驱动。",
+        "acceptance_criteria": ["proposal-apply 成功", "export 出 HTML"],
+        "source_sessions": ["ses_ffe5f37e7f841ffewJ4lbJ9Cq2"],
+        "evidence": ["用户：确认，落实到节点"]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "exec-discipline",
+      "node": {
+        "title": "执行纪律：按节点推进并回写 evidence",
+        "kind": "requirement",
+        "status": "ready",
+        "display_order": 60,
+        "priority": 1,
+        "difficulty": "low",
+        "summary": "只做 todo 里 ready 节点；done 必须带 evidence；进度以 forest 为准。",
+        "purpose": "规划与开发同一本账。"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "wip-note",
+      "node": {
+        "title": "决策：P1 工作区 WIP 保留收尾不回退",
+        "kind": "decision",
+        "status": "done",
+        "display_order": 70,
+        "priority": 2,
+        "difficulty": "low",
+        "summary": "采用方案 A：已有 reducer/file 改动作为 P1 WIP 继续收尾。",
+        "purpose": "避免重复劳动。",
+        "evidence": ["git status 显示 ops/reducers 已改", "用户确认保留 WIP"]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0002",
+      "fields": {
+        "status": "in_progress",
+        "progress": 35,
+        "display_order": 20,
+        "priority": 1,
+        "difficulty": "high",
+        "summary": "步骤2-4：诊断字段、修复剧本、一步恢复。WIP 已覆盖部分代码，待测试收口。",
+        "alignment": {
+          "user_goal": "失败观察可直接指导修复",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "直接帮 LLM 的 P0 能力",
+          "why_not_enough": "仍需数据集与 claim_gate",
+          "validation_plan": ["单测", "对抗 fixture", "claim_gate"]
+        },
+        "evidence": ["WIP src/reducers/*, src/ops/file.rs, src/ops/common.rs"]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0003",
+      "fields": {
+        "title": "步骤2：pytest 诊断补 expected/found",
+        "status": "in_progress",
+        "progress": 50,
+        "display_order": 10,
+        "priority": 1,
+        "difficulty": "medium",
+        "summary": "assert/E 行解析左右值写入 Diagnostic；WIP 有 parse_expected_found。",
+        "acceptance_criteria": ["pytest_fail 抽出 expected/found", "cargo test --lib 通过"],
+        "evidence": ["WIP src/reducers/pytest.rs"]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0004",
+      "fields": {
+        "title": "步骤3：失败观察生成修复剧本 suggested_next",
+        "status": "in_progress",
+        "progress": 40,
+        "display_order": 20,
+        "priority": 1,
+        "difficulty": "medium",
+        "summary": "view → replace_exact → rerun 带参剧本；WIP 已改 suggested_from_diagnostics。",
+        "acceptance_criteria": ["suggested_next 含 rerun", "单测覆盖 cargo/pytest"],
+        "evidence": ["WIP src/reducers/mod.rs"]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0005",
+      "fields": {
+        "title": "步骤4：E_STALE_HASH / E_AMBIGUOUS 一步恢复字段",
+        "status": "in_progress",
+        "progress": 60,
+        "display_order": 30,
+        "priority": 1,
+        "difficulty": "medium",
+        "summary": "data.actual_hash / matches + 重试 suggested_next。",
+        "acceptance_criteria": ["E_STALE_HASH 含 actual_hash", "E_AMBIGUOUS 含 matches"],
+        "evidence": ["WIP src/ops/common.rs", "WIP src/ops/file.rs"]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0009",
+      "fields": {
+        "title": "数据集与来源元数据（少人标）",
+        "status": "ready",
+        "progress": 0,
+        "display_order": 30,
+        "priority": 2,
+        "difficulty": "medium",
+        "alignment": {
+          "user_goal": "数据有来源且少人标",
+          "fit": "aligned",
+          "fit_confidence": 0.95,
+          "why_this_task": "验收靠 fixture/GOLDEN/报告来源",
+          "why_not_enough": "不能代替 claim_gate",
+          "validation_plan": ["manifest 含 source", "路径存在校验"]
+        }
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0010",
+      "fields": {
+        "title": "步骤5：生成带 source 的评测清单 manifest",
+        "status": "ready",
+        "progress": 0,
+        "display_order": 10,
+        "priority": 2,
+        "difficulty": "low",
+        "summary": "汇总 fixtures/bench/deep_stress 为 eval/manifest.json（id/source/expect）。",
+        "acceptance_criteria": ["manifest 可机读", "source 可回溯"],
+        "execution_hints": ["P1 稳定后生成"]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0006",
+      "fields": {
+        "title": "声明-证据矩阵与自动验收门禁",
+        "status": "ready",
+        "progress": 0,
+        "display_order": 40,
+        "priority": 2,
+        "difficulty": "high",
+        "alignment": {
+          "user_goal": "声明有理有据可复现",
+          "fit": "aligned",
+          "fit_confidence": 0.95,
+          "why_this_task": "开发与验收共同实现",
+          "why_not_enough": "Jev 只补 L3",
+          "validation_plan": ["claims 文档", "claim_gate evidence.json"]
+        }
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0007",
+      "fields": {
+        "title": "步骤6：写声明-证据文档 claims-and-evidence",
+        "status": "ready",
+        "progress": 0,
+        "display_order": 10,
+        "priority": 2,
+        "difficulty": "medium",
+        "summary": "C1-C7 门槛/复现/source/失效边界。",
+        "acceptance_criteria": ["每条声明有 threshold+command+source"]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0008",
+      "fields": {
+        "title": "步骤7：实现 claim_gate 自动指标脚本",
+        "status": "ready",
+        "progress": 0,
+        "display_order": 20,
+        "priority": 2,
+        "difficulty": "high",
+        "summary": "字段完备率、恢复字段存在率、mock bench 比值 → eval/evidence.json。",
+        "acceptance_criteria": ["脚本可跑", "不过线 exit != 0"]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0011",
+      "fields": {
+        "title": "Jev 观察质检接入",
+        "status": "ready",
+        "progress": 0,
+        "display_order": 50,
+        "priority": 3,
+        "difficulty": "medium",
+        "alignment": {
+          "user_goal": "低方差质检少人标",
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "why_this_task": "Jev judge 可用；无 key 启发式降级",
+          "why_not_enough": "不能代替 claim_gate",
+          "validation_plan": ["离线报告可跑", "含 provenance"]
+        }
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0012",
+      "fields": {
+        "title": "步骤8：实现 jev_obs_judge 脚本",
+        "status": "ready",
+        "progress": 0,
+        "display_order": 10,
+        "priority": 3,
+        "difficulty": "medium",
+        "summary": "manifest+observations → Choice/Score/Noul 或启发式 → 质检报告。",
+        "acceptance_criteria": ["无 API key 可跑", "报告含 source"]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "plan-gate",
+      "to": "TF-0001",
+      "type": "child_of",
+      "edge": { "reason": "规划门是全局任务第一阶段" }
+    },
+    {
+      "action": "add_edge",
+      "from": "exec-discipline",
+      "to": "TF-0001",
+      "type": "child_of",
+      "edge": { "reason": "贯穿全程的执行约束" }
+    },
+    {
+      "action": "add_edge",
+      "from": "wip-note",
+      "to": "TF-0001",
+      "type": "child_of",
+      "edge": { "reason": "关键决策记录" }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0008",
+      "to": "TF-0010",
+      "type": "depends_on",
+      "edge": { "reason": "步骤7 依赖步骤5 manifest" }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0012",
+      "to": "TF-0008",
+      "type": "depends_on",
+      "edge": { "reason": "步骤8 依赖步骤7" }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0007",
+      "to": "TF-0010",
+      "type": "depends_on",
+      "edge": { "reason": "步骤6 引用步骤5 来源" }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0003",
+      "to": "plan-gate",
+      "type": "depends_on",
+      "edge": { "reason": "开发节点在规划门后执行" }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0004",
+      "to": "TF-0003",
+      "type": "depends_on",
+      "edge": { "reason": "步骤3 依赖步骤2 诊断字段" }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0005",
+      "to": "plan-gate",
+      "type": "depends_on",
+      "edge": { "reason": "与步骤2/3 并行同属规划门后" }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0010",
+      "to": "TF-0002",
+      "type": "depends_on",
+      "edge": { "reason": "步骤5 在 P1 语义稳定后" }
+    }
+  ]
+}

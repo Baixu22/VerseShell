@@ -5,6 +5,7 @@
 mod common;
 mod file;
 mod meta;
+mod process_ops;
 mod repo;
 mod runtime_ops;
 mod test_ops;
@@ -20,6 +21,7 @@ pub fn all_specs() -> Vec<OperationSpec> {
     specs.extend(tx_ops::specs());
     specs.extend(meta::specs());
     specs.extend(runtime_ops::specs());
+    specs.extend(process_ops::specs());
     specs.extend(repo::specs());
     specs.extend(test_ops::specs());
     specs

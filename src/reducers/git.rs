@@ -75,7 +75,32 @@ pub fn reduce(input: &ReduceInput<'_>) -> ReduceOutput {
         for line in text.lines() {
             let t = line.trim();
             if t.starts_with("fatal:") || t.starts_with("error:") || t.contains("CONFLICT") {
-                diagnostics.push(super::diag("git", "error", t, None, None, None));
+                let code = if t.contains("CONFLICT") {
+                    Some("CONFLICT".to_string())
+                } else if t.starts_with("fatal:") {
+                    Some("FATAL".to_string())
+                } else {
+                    Some("ERROR".to_string())
+                };
+                let fix = if t.contains("not a git repository") {
+                    Some("run inside a git work tree, or git init first".to_string())
+                } else if t.contains("CONFLICT") {
+                    Some("resolve conflicted files then git add; do not commit unresolved paths".to_string())
+                } else {
+                    None
+                };
+                diagnostics.push(super::diag_rich(
+                    "git",
+                    "error",
+                    t,
+                    None,
+                    None,
+                    None,
+                    code,
+                    None,
+                    None,
+                    fix,
+                ));
             }
             if diagnostics.len() >= 10 {
                 break;

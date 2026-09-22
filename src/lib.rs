@@ -21,6 +21,12 @@ pub mod env;
 pub mod ir;
 pub mod parser;
 pub mod plan;
+#[cfg(feature = "native")]
+pub mod process_command;
+#[cfg(feature = "native")]
+pub mod process_lifecycle;
+#[cfg(all(feature = "native", windows))]
+mod process_lifecycle_windows;
 pub mod shell_features;
 pub mod typecheck;
 pub mod types;

@@ -195,7 +195,7 @@ Use `ae -b -c "..."` to transpile bash idioms to VerseShell before execution.
 | `-c, --command CMD` | Execute a VerseShell command string |
 | `-b, --bash` | Transpile bash → VerseShell before executing |
 | `--json` | Canonical byte-stable JSON output (alias for `--deterministic`) |
-| `--compact` | Token-efficient compact protocol (50-70% savings vs JSON) |
+| `--compact` | Token-efficient compact protocol (measured: ≥40% smaller on a small response envelope — see `docs/claims-and-evidence.md` C9) |
 | `--agent` | Agent mode: deny dangerous operations by default |
 | `--workspace DIR` | Confine file write operations to DIR |
 | `--timeout SECS` | Per-operation timeout (default: 30s) |
@@ -298,9 +298,15 @@ Full catalog: [docs/1.0-aci.md](docs/1.0-aci.md).
 | Safe delete | `file.remove` → `tx.restore` |
 | Transaction | `tx.begin` / `tx.commit` / `tx.rollback` / `tx.status` |
 | Tests | `test.discover` / `test.run_target` / `test.summarize_last` |
+| Long-lived process | `process.start` / `process.poll` / `process.write` / `process.kill` / `process.list` |
 | List ops | `ops.list` |
 
-Agent-mode `exec.run` / `test.run_target` require approval (`E_NEEDS_APPROVAL` + `error.hint`). For local CI use `AETHER_APPROVE_ALL=1`.
+Agent-mode `exec.run` / `test.run_target` / `process.start` require approval (`E_NEEDS_APPROVAL` + `error.hint`). For local CI use `AETHER_APPROVE_ALL=1`.
+
+`exec.run` is one-shot; the `process.*` ops own a long-lived process with a
+monotonic output cursor and explicit lifecycle state. They are **JSON-RPC only**
+— stateful lifecycle is deliberately not exposed as MCP tools. Details:
+[docs/1.0-aci.md](docs/1.0-aci.md#process-lifecycle).
 
 ### Language builtins (secondary / scripting)
 
@@ -613,9 +619,9 @@ The response uses `verseshell.observation/v1` (Observation Budget, 0.6.1):
 - Full raw output is always recoverable via `stdout.artifact` / `stderr.artifact` with
   `result.query` (`meta`, `head`, `tail`, `slice`, `grep`, or bounded `raw`).
 
-Token efficiency is therefore **two layers**: (1) `--format compact` encoding (50–70% vs JSON), and (2) Observation Budget reducing *what* is shown.
+Token efficiency is therefore **two layers**: (1) `--format compact` encoding, and (2) Observation Budget reducing *what* is shown. The encoding layer is measured in [docs/claims-and-evidence.md](docs/claims-and-evidence.md) (C9): it saves **≥40% on a small response envelope** (measured 42.4%) but does **not** shrink observation payloads or large nested values — those are handled by the Observation Budget, not by the encoding.
 
-**Windows process contract (exec path):** Agent process runs use Windows **Job Objects** (Unix: process groups) so timeout kills the full tree; stdin is null; stdout/stderr are pipes with `CREATE_NO_WINDOW` (not ConPTY). Paths are resolved through the workspace jail / safety layer.
+**Process contract (two paths):** `exec.run` stays one-shot — stdin is null, stdout/stderr are pipes with `CREATE_NO_WINDOW`, and Windows **Job Objects** (Unix: process groups) kill the full tree on timeout. Long-lived processes use the typed `process.*` ops, which add a monotonic output cursor, explicit lifecycle state, and a Windows **ConPTY** path (`pty: true`) next to the pipe path; both paths still attach the process tree to a Job Object. Paths are resolved through the workspace jail / safety layer. See [docs/1.0-aci.md](docs/1.0-aci.md#process-lifecycle).
 
 **Legacy request (secondary):**
 
@@ -784,6 +790,10 @@ MCP names replace `.` with `_`. Examples:
 
 Full list: [docs/1.0-aci.md](docs/1.0-aci.md) or call `ops_list`.
 
+Stateful process lifecycle (`process.*`) is deliberately **not** an MCP tool: it
+stays on the host-owned JSONL transport, so only its `mcp_name` appears in the
+catalog. See [docs/1.0-aci.md](docs/1.0-aci.md#process-lifecycle).
+
 ### Helper / legacy tools
 
 | Tool | Purpose |
@@ -927,7 +937,7 @@ src/
 - **Unified IR execution** (v3): All code paths (REPL, one-shot, server, MCP) go through `IREvaluator::eval_raw` — a single 28-arm match statement. No divergent execution paths.
 - **Operation-first Agent API** (v0.6): MCP and JSON-RPC share the same typed operation and observation implementation without source-code generation or reparsing.
 - **Raw output is an artifact**: model-visible output is bounded; omitted raw bytes are stored under `.ae/results` with a 24-hour TTL and explicit handles.
-- **Process-tree safety**: Windows Job Objects and Unix process groups terminate descendants on timeout; non-interactive pipes + `CREATE_NO_WINDOW` (not ConPTY); workspace path jail via safety layer.
+- **Process-tree safety**: Windows Job Objects and Unix process groups terminate descendants on timeout. The one-shot `exec.run` path uses non-interactive pipes + `CREATE_NO_WINDOW`; the long-lived `process.*` path additionally offers a Windows ConPTY mode (`pty: true`) while attaching the same Job Object. Workspace path jail via the safety layer.
 - **Effect-aware compilation**: Every builtin node carries an `IREffect` at compile time. Capability checks happen once at dispatch, not on every argument.
 - **Pipeline fusion** (v2): `map + map` → `FusedMapMap`, `map + filter` → `FusedMapFilter` — single-pass iteration, no intermediate allocations.
 - **Session concurrency**: low-contention session lookup (`RwLock<HashMap>`) + per-session serialized mutation (`Mutex<Env>`). N agents execute in parallel.
@@ -947,7 +957,7 @@ Built-in optimizations for both throughput and latency:
 | Snapshot cache | `sys.*` cached with configurable TTL (default 5s) |
 | `par_map` | Multi-threaded array processing (Rayon, auto thread count) |
 | Work-stealing scheduler | Priority queues, per-agent CPU/memory budgets |
-| Compact protocol | 50-70% token savings vs JSON for agent communication |
+| Compact protocol | ≥40% smaller than JSON on a small response envelope (measured 42.4%, claim C9); it does not shrink observation or large nested payloads |
 | Observation Budget (0.6.1) | Content reducers: success silence, failure windows, ANSI strip, git profile, `truncated`/omitted markers, recoverable artifacts (complements compact encoding) |
 | Arc-shared modules | O(1) session creation, no deep clone overhead |
 | Panic recovery | `catch_unwind` per request — crash isolation |
@@ -977,7 +987,7 @@ Deferred items (not in v1.0 surface; no promises on schedule):
 
 - **Deeper ACI**: `repo.symbols` / `repo.references` (LSP-class indexing; out of v1)
 - **Named `run_and_summarize`**: today use `exec.run` profiles + `test.summarize_last`
-- **ConPTY vs pipe separation**: current exec path uses pipes + `CREATE_NO_WINDOW` only
+- **ConPTY/pipe policy layer**: the two paths exist and are selectable per op (`process.start pty: true` vs the pipe/`exec.run` path); automatic PTY selection and a public normalization policy are not planned yet
 - **Richer public path-normalization policy**: beyond workspace jail / resolve helpers
 - **Further plan-cache / agent-workload tuning** beyond current Compiled IR + ExecutionPlan cache
 

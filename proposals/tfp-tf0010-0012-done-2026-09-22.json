@@ -1,0 +1,162 @@
+{
+  "proposal_id": "TFP-tf0010-0012-done-2026-09-22",
+  "session_id": "ses_verseshell-tf-continue-2026-09-22",
+  "rationale": "按 depends_on 顺序接力步骤5→6→7→8：manifest 来源校验通过、claims 文档补齐（claim_gate 的 threshold_source 不再是悬空引用）、claim_gate 6/6 门禁通过（含修复 C7 的一处环境相关测试失败）、jev_obs_judge 离线可跑并出带 source 的质检报告。三个里程碑子节点全 done，故收口；TF-0001 仍留 in_progress，因为质检显示 8/13 失败类别没有可执行剧本。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0010",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "eval/manifest.json 汇总 reducer fixture / 对抗 fixture / bench 任务与结果 / 协议样本，每条含 id+kind+source+expect，无真人标注列；来源路径全部机检存在。",
+        "evidence": [
+          "eval/manifest.json: 34 条（reducer_fixture 8 / adversarial_fixture 13 / bench_task 8 / protocol_sample 2 / bench_result 2 / bench_report 1）",
+          "python tools/validate_manifest.py → OK: 34 entries, all sources exist under verseshell/（2026-09-22 复跑）",
+          "tools/validate_manifest.py 校验 REQUIRED_KEYS + source/fixture/golden 路径存在性 + id 唯一"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0007",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "docs/claims-and-evidence.md 覆盖 C1–C7：每条含主张原文/门槛数字/复现命令/source/样本量日期/失效边界/状态，并定义 已证实·实验室·未证实 三级与 README 措辞纪律。",
+        "evidence": [
+          "docs/claims-and-evidence.md: C1–C7 七行完整；C1/C2 标 实验室（mock，10 任务/条件，seed 42），C3/C4/C6/C7 已证实，C5 未证实且不设门槛",
+          "§5 口径差异：docs/v1.1-freeze.md 目标 ≤0.6 tokens/≤0.7 calls 与 claim_gate 门槛 ≤0.50/≤0.80 不一致，已登记待用户决策，未擅自改门禁",
+          "§7 登记 L3 质检报告口径（jev_obs_judge，不进 C1–C7 门禁）",
+          "tools/claim_gate.py 的 threshold_source=docs/claims-and-evidence.md 不再是悬空引用"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0008",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "tools/claim_gate.py 一条命令重算指标+跑测试+写 eval/evidence.json，不过线 exit≠0；当前 6/6 门禁通过。",
+        "evidence": [
+          "python tools/claim_gate.py → claim_gate: 6/6 gated claims pass, exit 0（2026-09-22）",
+          "eval/evidence.json: C1 0.106≤0.50、C2 0.55≤0.80、C3 1.00≥0.90、C4 1.00==1.00、C5 N/A、C6/C7 all pass；每条含 command+source",
+          "C7 计数证据：16 个 test binary / 274 passed / 0 failed / 1 ignored（新增 test_totals 字段，替代此前误导性的 result_tail）",
+          "examples/eval_metrics.rs 新增 playbook 探针（suggested_next_ops/legal/has_rerun/arg_keys_ok），供 TF-0012 质检消费",
+          "fix: tests/process_lifecycle_tests.rs full_environment 过滤 cmd 隐藏变量 =C:/=ExitCode（产品侧 E_PROCESS_ENV 合同保持不变）"
+        ]
+      }
+    },
+    {
+      "action": "record_deviation",
+      "deviation": {
+        "related_task_ids": ["TF-0008"],
+        "description": "C7（全量测试）首跑 FAILED：tests/process_lifecycle_tests.rs:220 的 direct_argv_environment_pathext_and_pipe_stdin_roundtrip 在 cmd 下失败，错误 E_PROCESS_ENV。根因：测试辅助函数 full_environment 把 std::env::vars() 原样转发，而 cmd 会注入隐藏变量 =C:/=ExitCode（键名含 '='），被 process.start 的 env 合同正确拒绝（Rust Command::env 同样无法转发这类键）。处置：只改测试辅助函数，过滤非法键值；未放宽产品合同。",
+        "impact": "C7 门禁由 FAIL 转为 PASS；产品行为未变，客户端需自行剔除 Windows 隐藏变量。",
+        "severity": "medium"
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0012",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "tools/jev_obs_judge.py 对每个失败样本问两个窄问题（diagnostic_sufficient / script_actionable），无 key 时确定性启发式离线出报告，有 key 时同问题走 TypeSafe System One（jev-latest），报告逐条带 source。",
+        "evidence": [
+          "python tools/jev_obs_judge.py → 13 samples, diagnostic_sufficient 10/13, script_actionable 5/13（actionable 5 / no_script 8，2026-09-22，启发式）",
+          "eval/jev_obs_report.json + eval/jev_obs_report.md: 每行含 id/profile/source/expect/mode/judge/理由",
+          "边界：只做窄判定，不生成修复代码、不替代正则 reducer、不设门禁门槛；有 key 时调用 https://api.typesafe.ai/v1/systemone",
+          "输入来自 eval/manifest.json + eval/metrics.json + 样本文件本身（source 可回溯）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0009",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "数据集与来源元数据收口：唯一步骤 TF-0010 已 done，manifest 每条来源可机检。",
+        "evidence": [
+          "TF-0010 done：34 条来源全部存在（python tools/validate_manifest.py → OK）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0006",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "声明-证据矩阵与自动门禁收口：TF-0007 文档 + TF-0008 claim_gate 均 done，对外数字有唯一登记处。",
+        "evidence": [
+          "TF-0007 done：docs/claims-and-evidence.md C1–C7 完整",
+          "TF-0008 done：python tools/claim_gate.py 6/6 pass，eval/evidence.json 与文档门槛一一对应"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0011",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "Jev 观察质检接入收口：唯一步骤 TF-0012 已 done，离线可跑且带 provenance。",
+        "evidence": [
+          "TF-0012 done：eval/jev_obs_report.md 13 条样本逐条 source，无 API key 亦可复现"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "playbook-coverage",
+      "node": {
+        "title": "补剧本覆盖：无 path+line 锚点的失败类别",
+        "kind": "follow_up",
+        "status": "ready",
+        "display_order": 80,
+        "priority": 2,
+        "difficulty": "medium",
+        "summary": "质检报告显示 8/13 失败样本 reducer 不产出 suggested_next（git fatal/conflict、npm ENOENT/network、cargo panic/malformed、pytest no_header），因为 suggested_from_diagnostics 要求诊断同时带 path 与 line；这些类别目前只有 message 级观察，agent 拿不到可执行下一步。",
+        "purpose": "把「失败观察直接指导修复」从 diff 类失败扩展到无锚点失败类，避免 agent 回读原始日志。",
+        "acceptance_criteria": [
+          "对无 path+line 的失败类别给出至少一条合法且可执行的 suggested_next（如 repo.search / exec.run 重跑 / 读日志片段）",
+          "jev_obs_judge 报告里 script_actionable=actionable 的比例上升，且 no_script 只保留确实无剧本可给的类别",
+          "claim_gate 与全量 cargo test 保持通过"
+        ],
+        "execution_hints": [
+          "先决定每类失败的最小可执行动作，再改 src/reducers/mod.rs suggested_from_diagnostics",
+          "改完跑 python tools/jev_obs_judge.py 对比 script_breakdown"
+        ],
+        "source_sessions": ["ses_verseshell-tf-continue-2026-09-22"],
+        "evidence": [
+          "eval/jev_obs_report.json summary.script_breakdown = {actionable:5, no_script:8}"
+        ]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "playbook-coverage",
+      "to": "TF-0001",
+      "type": "child_of",
+      "edge": { "reason": "质检暴露的剧本覆盖缺口，是全局目标下新识别的后续工作" }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0001",
+      "fields": {
+        "progress": 80.0,
+        "next_action": "决定并推进 TF-0016（补剧本覆盖）或先答复 §5 门槛口径差异",
+        "summary": "步骤5–8 全部 done（manifest/claims/claim_gate/jev_obs_judge），三条里程碑收口；全量测试 274 passed、claim_gate 6/6。仍留 in_progress：质检显示 8/13 失败类别无可执行剧本（已落 TF-0016），且 C1/C2 门槛与 v1.1-freeze 口径待统一。",
+        "evidence": [
+          "TF-0010/0007/0008/0012 均 done，各自带可复现 evidence",
+          "python tools/claim_gate.py → 6/6 gated claims pass（2026-09-22）",
+          "python tools/jev_obs_judge.py → diagnostic_sufficient 10/13、script_actionable 5/13"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "proposal_id": "TFP-p1-docs-claims-done-2026-09-22",
+  "session_id": "ses_verseshell-tf-relay-2026-09-22",
+  "rationale": "本轮三个交付节点已完成并各有可复现证据：TF-0020（文档化进程生命周期操作面）、TF-0021（登记 C8 并接入 claim_gate）、TF-0022（处置 compact 未登记数字，登记 C9）。同时发现一个新的证据链缺口：.gitignore 的 *.py 规则把 tools/claim_gate.py 等门禁脚本一并排除，第三方 clone 后无法复现验收，按根策略 §3 落成 follow_up 节点 TF-0025。TF-0019 仍留 in_progress，因为它的验收含「改动已提交」一项，提交在 TF-0024 完成。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "tooling-gap",
+      "node": {
+        "title": "缺口：验收脚本被 .gitignore 的 *.py 规则挡在版本库外",
+        "kind": "follow_up",
+        "status": "ready",
+        "display_order": 1005,
+        "priority": 2,
+        "difficulty": "low",
+        "confidence": 0.9,
+        "summary": ".gitignore 里「Python scripts (cleanup scripts from pruning)」这条规则写的是 *.py，于是连 tools/claim_gate.py、tools/jev_obs_judge.py、tools/validate_manifest.py 这些声明-证据链的门禁脚本也一起被忽略：第三方 clone 仓库后跑不了门禁，本轮的 C1–C9 验收无法复现。处置：保留 *.py 主规则，只加精确负向规则放行 tools/*.py；并在 docs/task-forest-policy.md 写明工具链边界（森林 CLI 属本地工具安装，森林数据、提案与门禁脚本进库）。",
+        "purpose": "让「证据链可被第三方只读复现」在版本库层面成立，而不只是本机成立。",
+        "acceptance_criteria": [
+          "git check-ignore tools/claim_gate.py 不再命中；git ls-files 能列出 tools/ 下三个门禁脚本",
+          "根目录一次性清理脚本仍被 *.py 规则忽略（不扩大跟踪范围）",
+          "docs/task-forest-policy.md 写明工具链边界：哪些进版本库、哪些是本地工具目录",
+          "python tools/claim_gate.py 仍退出码 0"
+        ],
+        "non_goals": ["不把 .mimocode / .trae / .ae 等本地工具与临时目录纳入版本库"],
+        "execution_hints": ["用 .gitignore 负向规则 `!tools/*.py`，不要整体放开 *.py"],
+        "alignment": {
+          "user_goal": "开发流程与证据链完整、可第三方复现",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "门禁脚本不在版本库里，等于验收只有本机证据",
+          "why_not_enough": "只解决跟踪问题，不改变门禁内容",
+          "validation_plan": ["git check-ignore / git ls-files 抽查", "claim_gate exit 0"]
+        },
+        "source_sessions": ["ses_verseshell-tf-relay-2026-09-22"],
+        "evidence": [
+          "git check-ignore -v tools/claim_gate.py → .gitignore:23:*.py（2026-09-22）",
+          "git ls-files tools eval examples proposals → 只列出 tools/__pycache__ 下的 pyc，三个门禁脚本均不在版本库"
+        ]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "tooling-gap",
+      "to": "TF-0019",
+      "type": "child_of",
+      "edge": { "reason": "它是本轮收口过程中发现的证据链缺口，与 P1 收尾同批处理", "confidence": 0.85 }
+    },
+    {
+      "action": "update_node",
+      "id": "tooling-gap",
+      "fields": { "display_order": 40 }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0020",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "进程生命周期的对外文档已落地：docs/1.0-aci.md 新增 Process lifecycle 一节（五个 op 的输入/返回、snapshot 字段、归属回声语义、cursor 与保留窗口、kill 幂等与终态、重启对账、PTY 平台限制、审批与能力、18 个错误码表，以及 env 替换、submit 追加 CR、recoverable=true、max_* 平台差异等边界说明）；README 的 Coder Agent ops 表新增长驻进程一行、进程契约段区分一次性 exec.run 与长驻 process.*、roadmap 把已实现的 ConPTY 从 deferred 改为「策略层未做」、MCP 段说明 process.* 有意不进 MCP；CHANGELOG Unreleased 记录新 op、ConPTY 后端、handshake features 与文档。",
+        "evidence": [
+          "docs/1.0-aci.md Process lifecycle 一节（含 op 表、Ownership、Snapshot fields、Cursor/output window、Termination/retention/restart、PTY、Approval and capability、Error codes、Notes and boundaries）",
+          "README.md：Coder Agent ops 表新增 `process.start`/`poll`/`write`/`kill`/`list` 行；进程契约段与 Key Design Decisions 的进程树条目改写；roadmap 的 ConPTY 条目改为「ConPTY/pipe policy layer」；MCP 段说明 process.* 不进 MCP",
+          "CHANGELOG.md Unreleased/Added：五个 op、Windows ConPTY 后端、handshake features、文档条目",
+          "逐条对照源码核验：src/ops/process_ops.rs（schema/必填/默认值）、src/process_lifecycle.rs（failure() 恒 recoverable=true:714-723；submit 追加 \\r:951-952；E_PROCESS_PTY_UNSUPPORTED:1206；MAX_WAIT_MS:31；DEFAULT_RETENTION_MS:25）、src/process_command.rs:75-76（env_clear 替换语义）、src/process_runner.rs:349-355（Job Object 应用 max_processes/max_memory_mb，Unix 仅同步 runner 报 E_LIMIT_UNSUPPORTED:96）、src/process_lifecycle_windows.rs:240（ConPTY 同样 attach Job）、src/mcp/tools.rs:134（process.* 不进 MCP）、src/ops/runtime_ops.rs:17-24（handshake features）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0021",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "进程生命周期契约登记为声明 C8 并接入机器门禁：docs/claims-and-evidence.md 新增 C8 行（六要素齐全，含「仅 Windows、Unix 进程组路径无用例覆盖」的失效边界），tools/claim_gate.py 增加 C8 门槛（>=1.00，走 --test process_lifecycle_tests）并在每条 cargo_test 证据里记录 platform。",
+        "evidence": [
+          "docs/claims-and-evidence.md §3 C8（主张/门槛/复现命令/source/样本量/失效边界/状态）与 §2 单项复现入口新增 cargo test --test process_lifecycle_tests",
+          "tools/claim_gate.py：THRESHOLDS 新增 C8，test_claim(\"C8\", [\"--test\",\"process_lifecycle_tests\"])，evidence 条目带 platform",
+          "python tools/claim_gate.py → 7/7 gated claims pass, exit 0（2026-09-22）；C8 test_totals = {suites:1, passed:3, failed:0, ignored:0}",
+          "eval/evidence.json 含 C8 条目（threshold=all pass, value=1.0, platform=win32）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0022",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "处置了 README 里唯一未登记的对外数字。新增 examples/compact_ratio.rs，按 src/server.rs 的两条真实路径（观察 O 行 / 响应 D 行）测量 compact 与 JSON 的体积，并对观察载荷做 round-trip 校验。实测：小响应信封节省 42.4%，但观察载荷合计 −3.1%（compact 反而略大，最差 −4.4%）、嵌套大响应 −2.4%——原「50–70%」不可复现。于是把结论登记为 C9（门槛：小响应信封 >=0.40 且观察载荷 round-trip 全过）并接入 claim_gate，同时把 README 三处与 src/compact.rs 模块注释改成 C9 口径，claims 文档 §6 记录处置理由。",
+        "evidence": [
+          "examples/compact_ratio.rs（5 个观察载荷：真实 ops.list + 4 个对抗 fixture 的 reducer 观察；2 个响应信封；round-trip 校验；--out 输出 verseshell.compact-ratio/v1）",
+          "cargo run --example compact_ratio -- --out eval/compact_ratio.json → 观察载荷 byte_savings=-0.0308（worst -0.0441），响应小信封 +0.4239，嵌套大响应 -0.0238，all_roundtrips_ok=true（2026-09-22）",
+          "docs/claims-and-evidence.md §3 C9 与 §6（原 50–70% 已处置：无法复现，改为 C9 实测范围）、§4 README 对应规则新增 C9 分层口径",
+          "tools/claim_gate.py 新增 C9（读 eval/compact_ratio.json，门槛 >=0.40 且 round-trip 全过）；python tools/claim_gate.py → C9 PASS value=0.4203, exit 0",
+          "README.md 三处（--compact 行、token 效率段、Performance 表）与 src/compact.rs 模块注释改为 C9 口径；CHANGELOG Unreleased/Changed 记录口径修正"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0019",
+      "fields": {
+        "progress": 80.0,
+        "summary": "文档化（TF-0020）、声明与门禁（TF-0021）、compact 数字处置（TF-0022）三项已完成并各有可复现证据；期间又发现并落成工具链跟踪缺口 TF-0025。剩余缺口：TF-0025 的版本库跟踪修正，以及 TF-0024 的提交（本节点验收含「改动已提交」，故留 in_progress）。",
+        "next_action": "完成 TF-0025（.gitignore 负向规则 + 工具链边界说明），再走 TF-0024 的森林收口与提交。",
+        "evidence": [
+          "TF-0020/TF-0021/TF-0022 三条节点的 evidence 字段（文档、C8/C9 门禁、compact 实测）",
+          "python tools/claim_gate.py → 8/8 gated claims pass, exit 0（C7: 16 suites / 277 passed / 0 failed / 1 ignored；C8: 3 passed；C9: 0.4203）",
+          "git check-ignore tools/claim_gate.py → .gitignore:23:*.py（新增缺口 TF-0025 的来源证据）"
+        ]
+      }
+    }
+  ]
+}

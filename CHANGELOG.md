@@ -1,14 +1,34 @@
-﻿# Changelog
+# Changelog
 
 ## Unreleased
 
 ### Added
+- Process lifecycle ops (`process.start` / `process.poll` / `process.write` /
+  `process.kill` / `process.list`): runtime-owned long-lived processes with a
+  monotonic byte cursor, a rolling retained output window, idempotent process-tree
+  kill, explicit lifecycle state (`running` / `exited` / `killed` / `lost`) and
+  24-hour record retention. JSON-RPC only — not registered as MCP tools.
+- Windows ConPTY backend for `process.start` with `pty: true` (single `pty`
+  stream, `cols`/`rows`, Job Object still attached); other builds return
+  `E_PROCESS_PTY_UNSUPPORTED`.
+- `runtime.handshake` feature flags: `process_lifecycle`,
+  `monotonic_process_cursor`, `windows_conpty`.
+- Docs: `docs/1.0-aci.md` "Process lifecycle" section (ownership echo, cursor and
+  retention semantics, approval/capability rules, error codes); README process
+  contract now covers both the one-shot and long-lived paths.
 - Semantic observation reducers for cargo / pytest / git / npm_install with structured diagnostics
 - Optional Diagnostic fields: code, expected, found, suggested_fix
 - Session observation ledger + ops.observation_recent / ops.observation_open_errors
 - ACI-Bench framework under bench/aci (10 tasks, GOLDEN fixtures, A/D comparison, leaderboard, REPORT)
 - Multi-model live runner stub with trajectory cache (`baselines/`) and models.json dual slots
 - docs/quickstart/aci-mcp.md and docs/v1.1-freeze.md
+
+### Changed
+- README compact-protocol claim corrected: the unverified "50-70% token savings
+  vs JSON" is replaced by the measured scope of claim C9 (`>=40%` on a small
+  response envelope; no saving on observation or large nested payloads).
+- `src/compact.rs` module docs now point at the measurement instead of repeating
+  the old number.
 
 ### Fixed
 - Match-arm guards no longer clone the entire Env (scoped with_frame)

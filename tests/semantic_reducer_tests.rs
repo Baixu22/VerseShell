@@ -57,6 +57,8 @@ fn pytest_fail_fixture() {
     let d = &out.diagnostics[0];
     assert!(d.path.as_deref().unwrap_or("").contains("test_math.py"));
     assert_eq!(d.line, Some(10));
+    assert_eq!(d.expected.as_deref(), Some("3"));
+    assert_eq!(d.found.as_deref(), Some("2"));
     assert!(out.summary.as_ref().unwrap().contains("failed"));
 }
 

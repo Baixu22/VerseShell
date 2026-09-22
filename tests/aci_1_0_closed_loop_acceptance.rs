@@ -372,9 +372,40 @@ fn coder_agent_full_closed_loop() {
 
     // 16 stale
     assert_err(r("16"), "E_STALE_HASH", "stale");
+    assert!(
+        r("16")["data"]["actual_hash"].is_string(),
+        "stale must expose actual_hash: {}",
+        r("16")
+    );
+    assert!(
+        !r("16")["suggested_next"]
+            .as_array()
+            .cloned()
+            .unwrap_or_default()
+            .is_empty(),
+        "stale must carry suggested_next: {}",
+        r("16")
+    );
 
     // 17 ambiguous
     assert_err(r("17"), "E_AMBIGUOUS", "ambiguous");
+    assert!(
+        r("17")["data"]["matches"]
+            .as_array()
+            .map(|m| !m.is_empty())
+            .unwrap_or(false),
+        "ambiguous must expose matches[]: {}",
+        r("17")
+    );
+    assert!(
+        !r("17")["suggested_next"]
+            .as_array()
+            .cloned()
+            .unwrap_or_default()
+            .is_empty(),
+        "ambiguous must carry suggested_next: {}",
+        r("17")
+    );
 
     // 18 exec success reduced
     assert_ok(r("18"), "exec success");

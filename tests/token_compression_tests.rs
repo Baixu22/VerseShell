@@ -5,7 +5,6 @@
 
 use std::fs;
 use std::path::PathBuf;
-use verseshell::operation::Diagnostic;
 use verseshell::reducers::{reduce_for_profile, ReduceOutput};
 
 fn adv_fixture(name: &str) -> String {

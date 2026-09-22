@@ -1,0 +1,358 @@
+{
+  "schema": "verseshell.eval-manifest/v1",
+  "task_set_version": "1.1.0",
+  "description": "VerseShell evaluation samples with machine-checkable provenance. Every entry has id/source/expect/kind. No human-annotation columns required.",
+  "generated_from": [
+    "tests/fixtures/reducers/**",
+    "tests/fixtures/reducers/adversarial/**",
+    "bench/aci/tasks/**",
+    "bench/aci/fixtures/**",
+    "bench/aci/results/*"
+  ],
+  "entries": [
+    {
+      "id": "fixture_cargo_ok",
+      "kind": "reducer_fixture",
+      "source": "tests/fixtures/reducers/cargo_ok.txt",
+      "expect": {
+        "profile": "cargo",
+        "success": true,
+        "must_fields": ["summary", "stats"],
+        "forbid_severity": "error"
+      }
+    },
+    {
+      "id": "fixture_cargo_e0308",
+      "kind": "reducer_fixture",
+      "source": "tests/fixtures/reducers/cargo_e0308.txt",
+      "expect": {
+        "profile": "cargo",
+        "success": false,
+        "diff_class": true,
+        "must_fields": ["path", "line", "code", "expected", "found"],
+        "diagnostic_code": "E0308"
+      }
+    },
+    {
+      "id": "fixture_pytest_ok",
+      "kind": "reducer_fixture",
+      "source": "tests/fixtures/reducers/pytest_ok.txt",
+      "expect": {
+        "profile": "pytest",
+        "success": true,
+        "must_fields": ["summary", "stats"],
+        "forbid_severity": "error"
+      }
+    },
+    {
+      "id": "fixture_pytest_fail",
+      "kind": "reducer_fixture",
+      "source": "tests/fixtures/reducers/pytest_fail.txt",
+      "expect": {
+        "profile": "pytest",
+        "success": false,
+        "diff_class": true,
+        "must_fields": ["path", "line", "expected", "found"],
+        "expected_value": "3",
+        "found_value": "2"
+      }
+    },
+    {
+      "id": "fixture_git_status",
+      "kind": "reducer_fixture",
+      "source": "tests/fixtures/reducers/git_status.txt",
+      "expect": {
+        "profile": "git",
+        "success": true,
+        "must_fields": ["summary", "stats"]
+      }
+    },
+    {
+      "id": "fixture_git_diffstat",
+      "kind": "reducer_fixture",
+      "source": "tests/fixtures/reducers/git_diffstat.txt",
+      "expect": {
+        "profile": "git",
+        "success": true,
+        "must_fields": ["summary"]
+      }
+    },
+    {
+      "id": "fixture_npm_ok",
+      "kind": "reducer_fixture",
+      "source": "tests/fixtures/reducers/npm_ok.txt",
+      "expect": {
+        "profile": "npm_install",
+        "success": true,
+        "must_fields": ["summary", "stats"]
+      }
+    },
+    {
+      "id": "fixture_npm_fail",
+      "kind": "reducer_fixture",
+      "source": "tests/fixtures/reducers/npm_fail.txt",
+      "expect": {
+        "profile": "npm_install",
+        "success": false,
+        "must_fields": ["diagnostics"]
+      }
+    },
+    {
+      "id": "adv_cargo_fail_multi_error",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/cargo_fail_multi_error.txt",
+      "expect": {
+        "profile": "cargo",
+        "success": false,
+        "min_errors": 2,
+        "must_fields": ["path", "line", "code"]
+      }
+    },
+    {
+      "id": "adv_cargo_fail_noisy",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/cargo_fail_noisy.txt",
+      "expect": {
+        "profile": "cargo",
+        "success": false,
+        "exact_errors": 1,
+        "diagnostic_code": "E0599"
+      }
+    },
+    {
+      "id": "adv_cargo_fail_panic",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/cargo_fail_panic.txt",
+      "expect": {
+        "profile": "cargo",
+        "success": false,
+        "min_diagnostics": 1
+      }
+    },
+    {
+      "id": "adv_cargo_fail_malformed",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/cargo_fail_malformed.txt",
+      "expect": {
+        "profile": "cargo",
+        "success": false,
+        "must_fields": ["summary"]
+      }
+    },
+    {
+      "id": "adv_pytest_fail_multi",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/pytest_fail_multi.txt",
+      "expect": {
+        "profile": "pytest",
+        "success": false,
+        "diff_class": true,
+        "min_diagnostics": 2,
+        "suggested_ops": ["file.view", "test.run_target"]
+      }
+    },
+    {
+      "id": "adv_pytest_ok_noisy",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/pytest_ok_noisy.txt",
+      "expect": {
+        "profile": "pytest",
+        "success": true,
+        "forbid_error_diagnostics": true
+      }
+    },
+    {
+      "id": "adv_pytest_fail_no_header",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/pytest_fail_no_header.txt",
+      "expect": {
+        "profile": "pytest",
+        "success": false,
+        "min_diagnostics": 1
+      }
+    },
+    {
+      "id": "adv_git_status_mixed",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/git_status_mixed.txt",
+      "expect": {
+        "profile": "git",
+        "success": true,
+        "stats_keys": ["modified", "added", "deleted", "untracked"]
+      }
+    },
+    {
+      "id": "adv_git_fail_not_repo",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/git_fail_not_repo.txt",
+      "expect": {
+        "profile": "git",
+        "success": false,
+        "message_contains": "fatal:"
+      }
+    },
+    {
+      "id": "adv_git_fail_conflict",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/git_fail_conflict.txt",
+      "expect": {
+        "profile": "git",
+        "success": false,
+        "message_contains": "CONFLICT"
+      }
+    },
+    {
+      "id": "adv_npm_ok_noisy",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/npm_ok_noisy.txt",
+      "expect": {
+        "profile": "npm_install",
+        "success": true,
+        "summary_max_chars": 300
+      }
+    },
+    {
+      "id": "adv_npm_fail_enoent",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/npm_fail_enoent.txt",
+      "expect": {
+        "profile": "npm_install",
+        "success": false,
+        "message_contains_any": ["ENOENT", "no such file"]
+      }
+    },
+    {
+      "id": "adv_npm_fail_network",
+      "kind": "adversarial_fixture",
+      "source": "tests/fixtures/reducers/adversarial/npm_fail_network.txt",
+      "expect": {
+        "profile": "npm_install",
+        "success": false,
+        "min_errors": 1
+      }
+    },
+    {
+      "id": "op_stale_hash_recovery",
+      "kind": "protocol_sample",
+      "source": "tests/aci_1_0_ops_tests.rs",
+      "expect": {
+        "error_code": "E_STALE_HASH",
+        "data_fields": ["actual_hash", "expected_hash", "path"],
+        "suggested_next_required": true
+      }
+    },
+    {
+      "id": "op_ambiguous_recovery",
+      "kind": "protocol_sample",
+      "source": "tests/aci_1_0_ops_tests.rs",
+      "expect": {
+        "error_code": "E_AMBIGUOUS",
+        "data_fields": ["match_count", "matches", "path"],
+        "suggested_next_required": true
+      }
+    },
+    {
+      "id": "bench_rust_fix_compile_error",
+      "kind": "bench_task",
+      "source": "bench/aci/tasks/rust_fix_compile_error.json",
+      "fixture": "bench/aci/fixtures/rust_fix_compile_error",
+      "golden": "bench/aci/fixtures/rust_fix_compile_error/GOLDEN/src/lib.rs",
+      "expect": {
+        "modes": ["raw_shell", "verseshell_aci"]
+      }
+    },
+    {
+      "id": "bench_rust_add_unit_test",
+      "kind": "bench_task",
+      "source": "bench/aci/tasks/rust_add_unit_test.json",
+      "fixture": "bench/aci/fixtures/rust_add_unit_test",
+      "golden": "bench/aci/fixtures/rust_add_unit_test/GOLDEN/src/lib.rs",
+      "expect": {
+        "modes": ["raw_shell", "verseshell_aci"]
+      }
+    },
+    {
+      "id": "bench_python_fix_pytest_fail",
+      "kind": "bench_task",
+      "source": "bench/aci/tasks/python_fix_pytest_fail.json",
+      "fixture": "bench/aci/fixtures/python_fix_pytest_fail",
+      "golden": "bench/aci/fixtures/python_fix_pytest_fail/GOLDEN/mathlib.py",
+      "expect": {
+        "modes": ["raw_shell", "verseshell_aci"]
+      }
+    },
+    {
+      "id": "bench_python_edit_and_retest",
+      "kind": "bench_task",
+      "source": "bench/aci/tasks/python_edit_and_retest.json",
+      "fixture": "bench/aci/fixtures/python_edit_and_retest",
+      "golden": "bench/aci/fixtures/python_edit_and_retest/GOLDEN/greet.py",
+      "expect": {
+        "modes": ["raw_shell", "verseshell_aci"]
+      }
+    },
+    {
+      "id": "bench_ts_fix_type_error",
+      "kind": "bench_task",
+      "source": "bench/aci/tasks/ts_fix_type_error.json",
+      "fixture": "bench/aci/fixtures/ts_fix_type_error",
+      "golden": "bench/aci/fixtures/ts_fix_type_error/GOLDEN/src/index.ts",
+      "expect": {
+        "modes": ["raw_shell", "verseshell_aci"]
+      }
+    },
+    {
+      "id": "bench_windows_batch_capture_diag",
+      "kind": "bench_task",
+      "source": "bench/aci/tasks/windows_batch_capture_diag.json",
+      "fixture": "bench/aci/fixtures/windows_batch_capture_diag",
+      "golden": "bench/aci/fixtures/windows_batch_capture_diag/GOLDEN/ERR.txt",
+      "expect": {
+        "modes": ["raw_shell", "verseshell_aci"]
+      }
+    },
+    {
+      "id": "bench_python_noisy_install_summary",
+      "kind": "bench_task",
+      "source": "bench/aci/tasks/python_noisy_install_summary.json",
+      "fixture": "bench/aci/fixtures/python_noisy_install_summary",
+      "golden": "bench/aci/fixtures/python_noisy_install_summary/GOLDEN/SUMMARY.txt",
+      "expect": {
+        "modes": ["raw_shell", "verseshell_aci"]
+      }
+    },
+    {
+      "id": "bench_rust_search_and_edit",
+      "kind": "bench_task",
+      "source": "bench/aci/tasks/rust_search_and_edit.json",
+      "fixture": "bench/aci/fixtures/rust_search_and_edit",
+      "expect": {
+        "modes": ["raw_shell", "verseshell_aci"]
+      }
+    },
+    {
+      "id": "result_primary_rust_fix_compile_error",
+      "kind": "bench_result",
+      "source": "bench/aci/baselines/sample_primary/rust_fix_compile_error__verseshell_aci.json",
+      "expect": {
+        "metric_fields": ["success", "tool_calls", "observation_tokens"]
+      }
+    },
+    {
+      "id": "result_primary_python_fix_pytest_fail",
+      "kind": "bench_result",
+      "source": "bench/aci/baselines/primary/python_fix_pytest_fail__verseshell_aci.json",
+      "expect": {
+        "metric_fields": ["success", "tool_calls", "observation_tokens"]
+      }
+    },
+    {
+      "id": "result_report_latest",
+      "kind": "bench_report",
+      "source": "bench/aci/results/latest.json",
+      "expect": {
+        "metric_fields": ["tasks"]
+      }
+    }
+  ]
+}

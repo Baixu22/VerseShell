@@ -1,0 +1,248 @@
+//! Approved argv and environment resolution shared by synchronous and lifecycle execution.
+
+use anyhow::{anyhow, Context, Result};
+use std::collections::BTreeMap;
+use std::ffi::{OsStr, OsString};
+use std::path::{Path, PathBuf};
+use std::process::Command;
+
+#[derive(Debug, Clone)]
+pub struct ResolvedProcessCommand {
+    pub executable: PathBuf,
+    pub args: Vec<String>,
+    #[cfg(windows)]
+    pub windows_raw_arg: Option<String>,
+    pub audited_executable: PathBuf,
+    pub interpreter: Option<PathBuf>,
+}
+
+pub fn resolve_process_command(
+    argv: &[String],
+    cwd: &Path,
+    env: Option<&BTreeMap<String, String>>,
+) -> Result<ResolvedProcessCommand> {
+    let program = argv
+        .first()
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| anyhow!("E_EXEC_BAD_ARG: argv must contain a program"))?;
+    if program.contains('\0') || argv.iter().any(|arg| arg.contains(['\r', '\n', '\0'])) {
+        return Err(anyhow!(
+            "E_EXEC_BAD_ARG: argv contains a forbidden control character"
+        ));
+    }
+
+    let resolved = resolve_executable(program, cwd, env)?;
+    #[cfg(windows)]
+    if is_batch_script(&resolved) {
+        let interpreter = resolve_cmd(env)?;
+        let command_line = batch_command_line(&windows_process_path(&resolved), &argv[1..])?;
+        return Ok(ResolvedProcessCommand {
+            executable: interpreter.clone(),
+            args: vec!["/D".into(), "/S".into(), "/C".into()],
+            windows_raw_arg: Some(command_line),
+            audited_executable: resolved,
+            interpreter: Some(interpreter),
+        });
+    }
+
+    Ok(ResolvedProcessCommand {
+        executable: resolved.clone(),
+        args: argv[1..].to_vec(),
+        #[cfg(windows)]
+        windows_raw_arg: None,
+        audited_executable: resolved,
+        interpreter: None,
+    })
+}
+
+#[cfg(windows)]
+pub(crate) fn windows_process_path(path: &Path) -> PathBuf {
+    let value = path.to_string_lossy();
+    if let Some(rest) = value.strip_prefix(r"\\?\UNC\") {
+        PathBuf::from(format!(r"\\{rest}"))
+    } else if let Some(rest) = value.strip_prefix(r"\\?\") {
+        PathBuf::from(rest)
+    } else {
+        path.to_path_buf()
+    }
+}
+
+pub fn configure_command_environment(
+    command: &mut Command,
+    env: Option<&BTreeMap<String, String>>,
+) {
+    if let Some(env) = env {
+        command.env_clear();
+        command.envs(env);
+    }
+}
+
+fn resolve_executable(
+    program: &str,
+    cwd: &Path,
+    env: Option<&BTreeMap<String, String>>,
+) -> Result<PathBuf> {
+    let input = Path::new(program);
+    if input.is_absolute() || has_path_separator(program) {
+        let candidate = if input.is_absolute() {
+            input.to_path_buf()
+        } else {
+            cwd.join(input)
+        };
+        return resolve_candidate(candidate, env)
+            .with_context(|| format!("E_EXEC_NOT_FOUND: executable '{program}' was not found"));
+    }
+
+    let path_value = env_value(env, "PATH")
+        .map(OsString::from)
+        .or_else(|| std::env::var_os("PATH"))
+        .unwrap_or_default();
+    for directory in std::env::split_paths(&path_value) {
+        if let Ok(candidate) = resolve_candidate(directory.join(program), env) {
+            return Ok(candidate);
+        }
+    }
+    Err(anyhow!(
+        "E_EXEC_NOT_FOUND: executable '{}' was not found on PATH",
+        program
+    ))
+}
+
+fn resolve_candidate(
+    candidate: PathBuf,
+    env: Option<&BTreeMap<String, String>>,
+) -> Result<PathBuf> {
+    if candidate.is_file() {
+        return canonical_identity(candidate);
+    }
+    #[cfg(windows)]
+    if candidate.extension().is_none() {
+        for extension in windows_extensions(env) {
+            let mut value = candidate.as_os_str().to_os_string();
+            value.push(extension);
+            let with_extension = PathBuf::from(value);
+            if with_extension.is_file() {
+                return canonical_identity(with_extension);
+            }
+        }
+    }
+    Err(anyhow!("candidate is not an executable file"))
+}
+
+fn canonical_identity(path: PathBuf) -> Result<PathBuf> {
+    path.canonicalize()
+        .with_context(|| format!("failed to canonicalize executable '{}'", path.display()))
+}
+
+fn has_path_separator(value: &str) -> bool {
+    value.contains('/') || value.contains('\\')
+}
+
+fn env_value<'a>(env: Option<&'a BTreeMap<String, String>>, key: &str) -> Option<&'a str> {
+    env?.iter()
+        .find(|(name, _)| name.eq_ignore_ascii_case(key))
+        .map(|(_, value)| value.as_str())
+}
+
+#[cfg(windows)]
+fn windows_extensions(env: Option<&BTreeMap<String, String>>) -> Vec<String> {
+    let value = env_value(env, "PATHEXT")
+        .map(str::to_owned)
+        .or_else(|| std::env::var("PATHEXT").ok())
+        .unwrap_or_else(|| ".COM;.EXE;.BAT;.CMD".into());
+    value
+        .split(';')
+        .filter_map(|extension| {
+            let extension = extension.trim();
+            if extension.is_empty() {
+                None
+            } else if extension.starts_with('.') {
+                Some(extension.to_ascii_lowercase())
+            } else {
+                Some(format!(".{extension}").to_ascii_lowercase())
+            }
+        })
+        .collect()
+}
+
+#[cfg(windows)]
+fn is_batch_script(path: &Path) -> bool {
+    path.extension()
+        .and_then(OsStr::to_str)
+        .is_some_and(|extension| matches!(extension.to_ascii_lowercase().as_str(), "cmd" | "bat"))
+}
+
+#[cfg(windows)]
+fn resolve_cmd(env: Option<&BTreeMap<String, String>>) -> Result<PathBuf> {
+    if let Some(comspec) = env_value(env, "ComSpec") {
+        let candidate = PathBuf::from(comspec);
+        if candidate.is_file() {
+            return canonical_identity(candidate);
+        }
+    }
+    let system_root = env_value(env, "SystemRoot")
+        .map(str::to_owned)
+        .or_else(|| std::env::var("SystemRoot").ok())
+        .ok_or_else(|| {
+            anyhow!("E_EXEC_NOT_FOUND: SystemRoot is unavailable for batch execution")
+        })?;
+    resolve_candidate(
+        PathBuf::from(system_root).join("System32").join("cmd.exe"),
+        env,
+    )
+}
+
+#[cfg(windows)]
+fn batch_command_line(script: &Path, args: &[String]) -> Result<String> {
+    if args.iter().any(|arg| arg.contains(['%', '!'])) {
+        return Err(anyhow!(
+            "E_EXEC_BAD_ARG: percent and delayed-expansion tokens are not accepted for batch argv"
+        ));
+    }
+    let mut tokens = Vec::with_capacity(args.len() + 1);
+    tokens.push(quote_cmd_token(&script.to_string_lossy()));
+    tokens.extend(args.iter().map(|arg| quote_cmd_token(arg)));
+    Ok(format!("\"{}\"", tokens.join(" ")))
+}
+
+#[cfg(windows)]
+fn quote_cmd_token(value: &str) -> String {
+    let escaped = value.replace('"', "\"\"");
+    format!("\"{escaped}\"")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rejects_control_characters_before_resolution() {
+        let result = resolve_process_command(&["tool\nname".into()], Path::new("."), None);
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("forbidden control"));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn resolves_pathext_case_insensitively() {
+        let root =
+            std::env::temp_dir().join(format!("verseshell-resolve-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let executable = root.join("sample.CMD");
+        std::fs::write(&executable, "@echo ok\r\n").unwrap();
+        let env = BTreeMap::from([
+            ("Path".into(), root.to_string_lossy().to_string()),
+            ("PathExt".into(), ".EXE;.CMD".into()),
+            ("SystemRoot".into(), std::env::var("SystemRoot").unwrap()),
+        ]);
+        let resolved = resolve_process_command(&["sample".into()], &root, Some(&env)).unwrap();
+        assert_eq!(
+            resolved.audited_executable,
+            executable.canonicalize().unwrap()
+        );
+        assert!(resolved.interpreter.is_some());
+        let _ = std::fs::remove_dir_all(root);
+    }
+}

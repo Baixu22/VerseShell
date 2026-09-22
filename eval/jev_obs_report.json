@@ -1,0 +1,571 @@
+{
+  "schema": "verseshell.jev-obs-report/v1",
+  "generated_at": "2026-09-22T12:45:18.876589+00:00",
+  "generator": "tools/jev_obs_judge.py",
+  "mode": "heuristic",
+  "judge": "deterministic-heuristic",
+  "inputs": {
+    "manifest": "eval\\manifest.json",
+    "metrics": "eval\\metrics.json",
+    "metrics_generated_at": "examples/eval_metrics.rs",
+    "bench": "bench/aci/results/latest.json"
+  },
+  "questions": {
+    "diagnostic_sufficient": {
+      "observation": "`sample.excerpt`",
+      "question": "Does this reduced failure observation carry enough structured anchors (file path, line, error code, and expected/found values when the failure class has such a pair) for a coding agent to locate and fix the failure without re-reading the full raw log?"
+    },
+    "script_actionable": {
+      "observation": "`sample.excerpt`",
+      "playbook": "`sample.suggested_next_ops`",
+      "question": "Given the observation and the reducer's suggested_next op sequence, can an agent run this playbook as-is (filling only the sketch values) to fix and re-verify the failure?"
+    }
+  },
+  "summary": {
+    "samples": 13,
+    "diagnostic_sufficient": 10,
+    "diagnostic_sufficient_rate": 0.7692,
+    "script_actionable": 9,
+    "script_actionable_rate": 0.6923,
+    "script_gaps": 0,
+    "script_breakdown": {
+      "actionable": 9,
+      "no_locatable_site": 4
+    }
+  },
+  "rows": [
+    {
+      "diagnostic_sufficient": {
+        "value": 1.0,
+        "answer": true,
+        "reasons": [
+          "reducer kept 1 error diagnostic(s)",
+          "raw output carries path:line anchor",
+          "expected/found extracted (1/1)"
+        ]
+      },
+      "script_actionable": {
+        "answer": "actionable",
+        "reasons": [
+          "view -> edit -> rerun with complete argument keys"
+        ],
+        "by_design": false
+      },
+      "facts": {
+        "diff_class": true,
+        "errors": 1,
+        "expected_found_complete": 1,
+        "raw_has_path_line": true,
+        "raw_has_code": true,
+        "suggested_next_ops": [
+          "file.view",
+          "file.replace_exact",
+          "exec.run"
+        ]
+      },
+      "id": "fixture_cargo_e0308",
+      "profile": "cargo",
+      "source": "tests/fixtures/reducers/cargo_e0308.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "cargo",
+        "success": false,
+        "diff_class": true,
+        "must_fields": [
+          "path",
+          "line",
+          "code",
+          "expected",
+          "found"
+        ],
+        "diagnostic_code": "E0308"
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 1.0,
+        "answer": true,
+        "reasons": [
+          "reducer kept 1 error diagnostic(s)",
+          "raw output carries path:line anchor",
+          "expected/found extracted (1/1)"
+        ]
+      },
+      "script_actionable": {
+        "answer": "actionable",
+        "reasons": [
+          "view -> edit -> rerun with complete argument keys"
+        ],
+        "by_design": false
+      },
+      "facts": {
+        "diff_class": true,
+        "errors": 1,
+        "expected_found_complete": 1,
+        "raw_has_path_line": true,
+        "raw_has_code": false,
+        "suggested_next_ops": [
+          "file.view",
+          "file.replace_exact",
+          "test.run_target"
+        ]
+      },
+      "id": "fixture_pytest_fail",
+      "profile": "pytest",
+      "source": "tests/fixtures/reducers/pytest_fail.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "pytest",
+        "success": false,
+        "diff_class": true,
+        "must_fields": [
+          "path",
+          "line",
+          "expected",
+          "found"
+        ],
+        "expected_value": "3",
+        "found_value": "2"
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 0.4,
+        "answer": false,
+        "reasons": [
+          "reducer kept 6 error diagnostic(s)",
+          "no path:line anchor in raw output",
+          "no code or diff evidence in raw output"
+        ]
+      },
+      "script_actionable": {
+        "answer": "no_locatable_site",
+        "reasons": [
+          "no locatable failure site in the observation; a file-level playbook would be fabricated"
+        ],
+        "by_design": true
+      },
+      "facts": {
+        "diff_class": false,
+        "errors": 6,
+        "expected_found_complete": 0,
+        "raw_has_path_line": false,
+        "raw_has_code": false,
+        "suggested_next_ops": []
+      },
+      "id": "fixture_npm_fail",
+      "profile": "npm_install",
+      "source": "tests/fixtures/reducers/npm_fail.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "npm_install",
+        "success": false,
+        "must_fields": [
+          "diagnostics"
+        ]
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 1.0,
+        "answer": true,
+        "reasons": [
+          "reducer kept 2 error diagnostic(s)",
+          "raw output carries path:line anchor",
+          "failure class without expected/found pair (message/code level only)"
+        ]
+      },
+      "script_actionable": {
+        "answer": "actionable",
+        "reasons": [
+          "view -> edit -> rerun with complete argument keys"
+        ],
+        "by_design": false
+      },
+      "facts": {
+        "diff_class": false,
+        "errors": 2,
+        "expected_found_complete": 1,
+        "raw_has_path_line": true,
+        "raw_has_code": true,
+        "suggested_next_ops": [
+          "file.view",
+          "file.replace_exact",
+          "exec.run",
+          "file.view",
+          "file.replace_exact"
+        ]
+      },
+      "id": "adv_cargo_fail_multi_error",
+      "profile": "cargo",
+      "source": "tests/fixtures/reducers/adversarial/cargo_fail_multi_error.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "cargo",
+        "success": false,
+        "min_errors": 2,
+        "must_fields": [
+          "path",
+          "line",
+          "code"
+        ]
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 1.0,
+        "answer": true,
+        "reasons": [
+          "reducer kept 1 error diagnostic(s)",
+          "raw output carries path:line anchor",
+          "failure class without expected/found pair (message/code level only)"
+        ]
+      },
+      "script_actionable": {
+        "answer": "actionable",
+        "reasons": [
+          "view -> edit -> rerun with complete argument keys"
+        ],
+        "by_design": false
+      },
+      "facts": {
+        "diff_class": false,
+        "errors": 1,
+        "expected_found_complete": 0,
+        "raw_has_path_line": true,
+        "raw_has_code": true,
+        "suggested_next_ops": [
+          "file.view",
+          "exec.run"
+        ]
+      },
+      "id": "adv_cargo_fail_noisy",
+      "profile": "cargo",
+      "source": "tests/fixtures/reducers/adversarial/cargo_fail_noisy.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "cargo",
+        "success": false,
+        "exact_errors": 1,
+        "diagnostic_code": "E0599"
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 0.7,
+        "answer": true,
+        "reasons": [
+          "reducer kept 1 error diagnostic(s)",
+          "raw output carries path:line anchor",
+          "no code or diff evidence in raw output"
+        ]
+      },
+      "script_actionable": {
+        "answer": "actionable",
+        "reasons": [
+          "view -> edit -> rerun with complete argument keys"
+        ],
+        "by_design": false
+      },
+      "facts": {
+        "diff_class": false,
+        "errors": 1,
+        "expected_found_complete": 0,
+        "raw_has_path_line": true,
+        "raw_has_code": false,
+        "suggested_next_ops": [
+          "file.view",
+          "exec.run"
+        ]
+      },
+      "id": "adv_cargo_fail_panic",
+      "profile": "cargo",
+      "source": "tests/fixtures/reducers/adversarial/cargo_fail_panic.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "cargo",
+        "success": false,
+        "min_diagnostics": 1
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 1.0,
+        "answer": true,
+        "reasons": [
+          "reducer kept 1 error diagnostic(s)",
+          "raw output carries path:line anchor",
+          "failure class without expected/found pair (message/code level only)"
+        ]
+      },
+      "script_actionable": {
+        "answer": "actionable",
+        "reasons": [
+          "view -> edit -> rerun with complete argument keys"
+        ],
+        "by_design": false
+      },
+      "facts": {
+        "diff_class": false,
+        "errors": 1,
+        "expected_found_complete": 1,
+        "raw_has_path_line": true,
+        "raw_has_code": true,
+        "suggested_next_ops": [
+          "file.view",
+          "file.replace_exact",
+          "exec.run"
+        ]
+      },
+      "id": "adv_cargo_fail_malformed",
+      "profile": "cargo",
+      "source": "tests/fixtures/reducers/adversarial/cargo_fail_malformed.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "cargo",
+        "success": false,
+        "must_fields": [
+          "summary"
+        ]
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 1.0,
+        "answer": true,
+        "reasons": [
+          "reducer kept 2 error diagnostic(s)",
+          "raw output carries path:line anchor",
+          "expected/found extracted (2/2)"
+        ]
+      },
+      "script_actionable": {
+        "answer": "actionable",
+        "reasons": [
+          "view -> edit -> rerun with complete argument keys"
+        ],
+        "by_design": false
+      },
+      "facts": {
+        "diff_class": true,
+        "errors": 2,
+        "expected_found_complete": 2,
+        "raw_has_path_line": true,
+        "raw_has_code": true,
+        "suggested_next_ops": [
+          "file.view",
+          "file.replace_exact",
+          "test.run_target",
+          "file.view",
+          "file.replace_exact",
+          "test.run_target"
+        ]
+      },
+      "id": "adv_pytest_fail_multi",
+      "profile": "pytest",
+      "source": "tests/fixtures/reducers/adversarial/pytest_fail_multi.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "pytest",
+        "success": false,
+        "diff_class": true,
+        "min_diagnostics": 2,
+        "suggested_ops": [
+          "file.view",
+          "test.run_target"
+        ]
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 0.7,
+        "answer": true,
+        "reasons": [
+          "reducer kept 3 error diagnostic(s)",
+          "no path:line anchor in raw output",
+          "failure class without expected/found pair (message/code level only)"
+        ]
+      },
+      "script_actionable": {
+        "answer": "actionable",
+        "reasons": [
+          "view -> edit -> rerun with complete argument keys"
+        ],
+        "by_design": false
+      },
+      "facts": {
+        "diff_class": false,
+        "errors": 3,
+        "expected_found_complete": 0,
+        "raw_has_path_line": false,
+        "raw_has_code": false,
+        "suggested_next_ops": [
+          "file.view",
+          "test.run_target",
+          "file.view",
+          "test.run_target",
+          "file.view",
+          "test.run_target"
+        ]
+      },
+      "id": "adv_pytest_fail_no_header",
+      "profile": "pytest",
+      "source": "tests/fixtures/reducers/adversarial/pytest_fail_no_header.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "pytest",
+        "success": false,
+        "min_diagnostics": 1
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 0.4,
+        "answer": false,
+        "reasons": [
+          "reducer kept 1 error diagnostic(s)",
+          "no path:line anchor in raw output",
+          "no code or diff evidence in raw output"
+        ]
+      },
+      "script_actionable": {
+        "answer": "no_locatable_site",
+        "reasons": [
+          "no locatable failure site in the observation; a file-level playbook would be fabricated"
+        ],
+        "by_design": true
+      },
+      "facts": {
+        "diff_class": false,
+        "errors": 1,
+        "expected_found_complete": 0,
+        "raw_has_path_line": false,
+        "raw_has_code": false,
+        "suggested_next_ops": []
+      },
+      "id": "adv_git_fail_not_repo",
+      "profile": "git",
+      "source": "tests/fixtures/reducers/adversarial/git_fail_not_repo.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "git",
+        "success": false,
+        "message_contains": "fatal:"
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 0.4,
+        "answer": false,
+        "reasons": [
+          "reducer kept 2 error diagnostic(s)",
+          "no path:line anchor in raw output",
+          "no code or diff evidence in raw output"
+        ]
+      },
+      "script_actionable": {
+        "answer": "actionable",
+        "reasons": [
+          "view -> edit -> rerun with complete argument keys"
+        ],
+        "by_design": false
+      },
+      "facts": {
+        "diff_class": false,
+        "errors": 2,
+        "expected_found_complete": 0,
+        "raw_has_path_line": false,
+        "raw_has_code": false,
+        "suggested_next_ops": [
+          "file.view",
+          "file.replace_exact",
+          "exec.run",
+          "file.view",
+          "file.replace_exact"
+        ]
+      },
+      "id": "adv_git_fail_conflict",
+      "profile": "git",
+      "source": "tests/fixtures/reducers/adversarial/git_fail_conflict.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "git",
+        "success": false,
+        "message_contains": "CONFLICT"
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 0.7,
+        "answer": true,
+        "reasons": [
+          "reducer kept 7 error diagnostic(s)",
+          "no path:line anchor in raw output",
+          "failure class without expected/found pair (message/code level only)"
+        ]
+      },
+      "script_actionable": {
+        "answer": "no_locatable_site",
+        "reasons": [
+          "no locatable failure site in the observation; a file-level playbook would be fabricated"
+        ],
+        "by_design": true
+      },
+      "facts": {
+        "diff_class": false,
+        "errors": 7,
+        "expected_found_complete": 0,
+        "raw_has_path_line": false,
+        "raw_has_code": true,
+        "suggested_next_ops": []
+      },
+      "id": "adv_npm_fail_enoent",
+      "profile": "npm_install",
+      "source": "tests/fixtures/reducers/adversarial/npm_fail_enoent.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "npm_install",
+        "success": false,
+        "message_contains_any": [
+          "ENOENT",
+          "no such file"
+        ]
+      }
+    },
+    {
+      "diagnostic_sufficient": {
+        "value": 0.7,
+        "answer": true,
+        "reasons": [
+          "reducer kept 5 error diagnostic(s)",
+          "no path:line anchor in raw output",
+          "failure class without expected/found pair (message/code level only)"
+        ]
+      },
+      "script_actionable": {
+        "answer": "no_locatable_site",
+        "reasons": [
+          "no locatable failure site in the observation; a file-level playbook would be fabricated"
+        ],
+        "by_design": true
+      },
+      "facts": {
+        "diff_class": false,
+        "errors": 5,
+        "expected_found_complete": 0,
+        "raw_has_path_line": false,
+        "raw_has_code": false,
+        "suggested_next_ops": []
+      },
+      "id": "adv_npm_fail_network",
+      "profile": "npm_install",
+      "source": "tests/fixtures/reducers/adversarial/npm_fail_network.txt",
+      "source_exists": true,
+      "expect": {
+        "profile": "npm_install",
+        "success": false,
+        "min_errors": 1
+      }
+    }
+  ]
+}

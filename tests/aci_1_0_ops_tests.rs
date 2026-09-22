@@ -80,6 +80,32 @@ fn file_view_replace_and_stale_hash() {
     let r2 = run_server(&bad, &workspace).remove(0);
     assert_eq!(r2["ok"], false);
     assert_eq!(r2["error"]["code"], "E_STALE_HASH");
+    // TF-0005: structured hash fields for one-step retry
+    assert!(
+        r2["data"]["actual_hash"].is_string(),
+        "E_STALE_HASH must expose actual_hash: {r2}"
+    );
+    assert!(
+        r2["data"]["expected_hash"].is_string(),
+        "E_STALE_HASH must expose expected_hash: {r2}"
+    );
+    // TF-0005: suggested_next carries one-step retry with actual_hash filled in
+    let retry_next = r2["suggested_next"].as_array().cloned().unwrap_or_default();
+    assert!(!retry_next.is_empty(), "E_STALE_HASH must expose suggested_next: {r2}");
+    let first = &retry_next[0];
+    assert_eq!(first["op"], "file.replace_exact");
+    assert_eq!(first["args"]["expected_hash"], r2["data"]["actual_hash"]);
+    // One-step retry using actual_hash from the failure — no file.view required.
+    let retry_args = first["args"].clone();
+    let r_retry = run_server(&op("2b", "file.replace_exact", retry_args), &workspace).remove(0);
+    assert_eq!(r_retry["ok"], true, "one-step retry with actual_hash must succeed: {r_retry}");
+    assert_eq!(r_retry["data"]["applied"], true);
+    let content = std::fs::read_to_string(&file).unwrap();
+    assert!(content.contains("BETA"));
+    assert!(!content.contains("beta"));
+
+    // Restore for the subsequent expected_hash=hash path.
+    std::fs::write(&file, "alpha\nbeta\ngamma\n").unwrap();
 
     let good = op(
         "3",
@@ -118,9 +144,41 @@ fn file_replace_exact_ambiguous_match() {
     .remove(0);
     assert_eq!(r["ok"], false, "{r}");
     assert_eq!(r["error"]["code"], "E_AMBIGUOUS");
+    // TF-0005: ambiguous match must expose occurrence count + candidates for one-step recovery
+    assert!(
+        r["data"]["match_count"].is_number() || r["data"]["occurrences"].is_number(),
+        "E_AMBIGUOUS must expose match_count/occurrences: {r}"
+    );
+    let matches = r["data"]["matches"].as_array().expect("matches[] required");
+    assert!(matches.len() >= 2, "expected >=2 matches: {matches:?}");
+    for m in matches {
+        assert!(m["line"].is_number(), "match.line required: {m}");
+        assert!(m["offset"].is_number(), "match.offset required: {m}");
+        assert!(m["snippet"].is_string(), "match.snippet required: {m}");
+    }
+    assert!(
+        !r["suggested_next"].as_array().cloned().unwrap_or_default().is_empty(),
+        "E_AMBIGUOUS must expose suggested_next: {r}"
+    );
     assert_eq!(
         std::fs::read_to_string(workspace.join("dup.txt")).unwrap(),
         "x foo y foo z\n"
+    );
+
+    // TF-0005: one-step retry by widening old — no file.view required.
+    let retry = run_server(
+        &op(
+            "2",
+            "file.replace_exact",
+            json!({"path": "dup.txt", "old": "x foo y", "new": "x bar y"}),
+        ),
+        &workspace,
+    )
+    .remove(0);
+    assert_eq!(retry["ok"], true, "widened old should retry in one step: {retry}");
+    assert_eq!(
+        std::fs::read_to_string(workspace.join("dup.txt")).unwrap(),
+        "x bar y foo z\n"
     );
 
     let _ = std::fs::remove_dir_all(workspace);

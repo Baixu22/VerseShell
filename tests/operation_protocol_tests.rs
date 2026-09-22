@@ -92,6 +92,10 @@ fn runtime_handshake_is_registered_and_reports_enforced_allow_list() {
     assert!(response["data"]["operation_catalog"]["digest"]
         .as_str()
         .is_some_and(|digest| digest.starts_with("sha256:")));
+    assert_eq!(response["data"]["operation_catalog"]["count"], 31);
+    assert!(response["data"]["features"]
+        .as_array()
+        .is_some_and(|features| features.contains(&json!("process_lifecycle"))));
     let _ = std::fs::remove_dir_all(workspace);
 }
 #[test]
@@ -203,6 +207,14 @@ fn nonzero_exit_keeps_structured_output_and_error_code() {
     // Failure should keep raw log recoverable via artifact.
     assert!(response["data"]["stderr"]["artifact"].as_str().is_some());
     assert!(!response["suggested_next"].as_array().unwrap().is_empty());
+    // TF-0004: suggested_next ops must stay on the 1.0 ACI whitelist
+    for action in response["suggested_next"].as_array().unwrap() {
+        let op = action["op"].as_str().unwrap_or("");
+        assert!(
+            verseshell::reducers::SUGGESTED_OP_ALLOWLIST.contains(&op),
+            "illegal suggested op {op}: {action}"
+        );
+    }
     let _ = std::fs::remove_dir_all(workspace);
 }
 

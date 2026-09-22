@@ -5,7 +5,9 @@
 //!   - Single-char type tags (S=string, N=null, T/F=bool, L=list, R=record, E=error code)
 //!   - Whitespace-delimited at the structural level; string content is length-prefixed
 //!     and escape-encoded so it can contain any character (including spaces/tabs/newlines)
-//!   - 50-70% token savings vs canonical JSON
+//!   - Measured against JSON by `examples/compact_ratio.rs` (claim C9): the encoding
+//!     saves >=40% on a small response envelope, but it does NOT shrink observation
+//!     payloads or large nested values — those are the Observation Budget's job
 //!
 //! Response format:
 //!   D <id> <ok> <value> <elapsed_ms> <cache_hit> <session_age_ms>

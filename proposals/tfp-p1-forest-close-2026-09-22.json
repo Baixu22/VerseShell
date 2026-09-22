@@ -1,0 +1,51 @@
+{
+  "proposal_id": "TFP-p1-forest-close-2026-09-22",
+  "session_id": "ses_verseshell-tf-relay-2026-09-22",
+  "rationale": "工具链缺口 TF-0025 已修复并验证（.gitignore 负向规则 + 策略文档 §7 边界），故收口。TF-0019 与 TF-0024 的验收都含「改动已提交」，而提交必须在森林写入之后发生，所以本轮先把 TF-0024 置为 in_progress 并记录收口前的门禁结果，提交完成后再用一个补丁提案回填 commit hash 并把两个节点转 done。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0025",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "已修：.gitignore 在 *.py 主规则后加精确负向规则 !tools/*.py，只放行仓库自己的门禁脚本（claim_gate / jev_obs_judge / validate_manifest），一次性清理脚本、__pycache__ 与本地工具目录仍被忽略；并在 docs/task-forest-policy.md 新增 §7「工具链边界」，逐项写明哪些内容进版本库、哪些属于本地工具。",
+        "evidence": [
+          "git check-ignore 抽查（2026-09-22）：tools/claim_gate.py、tools/jev_obs_judge.py、tools/validate_manifest.py = TRACKABLE；cleanup_builtins.py、phase2_fix.py、.mimocode/skills/task-forest/scripts/task_forest.py、tools/__pycache__/*.pyc = IGNORED",
+          ".gitignore 第 22-26 行：`*.py` 主规则 + `!tools/*.py` 负向规则",
+          "docs/task-forest-policy.md §7 工具链边界表（森林数据/提案/门禁脚本/指标进库；森林 CLI、.trae、.ae、target 不进库）+ 禁止整体放开 *.py 的说明",
+          "python tools/claim_gate.py → 8/8 gated claims pass, exit 0；python tools/validate_manifest.py → exit 0（脚本仍可运行）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0019",
+      "fields": {
+        "progress": 95.0,
+        "summary": "本轮四个交付节点全部完成并各有可复现证据：文档化（TF-0020）、C8 声明与门禁（TF-0021）、compact 数字处置与 C9 登记（TF-0022）、工具链跟踪缺口修复（TF-0025）。剩余唯一缺口是提交（TF-0024），因为本节点验收含「改动已提交，git 工作区除导出产物外无未提交改动」，故留 in_progress，提交后由补丁提案收口。",
+        "next_action": "提交 P1 WIP 与本轮文档/门禁/森林改动（TF-0024），回填 commit hash 后把 TF-0019 与 TF-0024 转 done。",
+        "evidence": [
+          "python tools/claim_gate.py → 8/8 gated claims pass, exit 0（C1 0.106、C2 0.55、C3 1.00、C4 1.00、C6 PASS、C7 16 suites/277 passed/0 failed/1 ignored、C8 3 passed、C9 0.4203；C5 N/A）",
+          "python tools/validate_manifest.py → OK（34 条来源全部存在）",
+          "TF-0020 / TF-0021 / TF-0022 / TF-0025 四条节点的 evidence 字段",
+          "docs/1.0-aci.md Process lifecycle 一节；README 进程契约与 roadmap 改写；CHANGELOG Unreleased；docs/claims-and-evidence.md C8/C9 与 §6 处置；examples/compact_ratio.rs + eval/compact_ratio.json"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0024",
+      "fields": {
+        "status": "in_progress",
+        "progress": 50.0,
+        "next_action": "提交 P1 WIP（未跟踪的进程生命周期源码与测试）与本轮文档/门禁/森林改动，然后回填 commit hash 收口。",
+        "evidence": [
+          "收口前门禁：python tools/claim_gate.py exit 0（8/8）、python tools/validate_manifest.py exit 0（2026-09-22）",
+          "待提交范围：P1 WIP（src/process_lifecycle.rs、src/process_lifecycle_windows.rs、src/process_command.rs、src/ops/process_ops.rs、tests/process_lifecycle_tests.rs 等未跟踪文件 + 21 个已跟踪文件改动）、本轮文档与门禁（docs/1.0-aci.md、README.md、CHANGELOG.md、src/compact.rs、tools/claim_gate.py、examples/compact_ratio.rs、.gitignore）、声明与证据（docs/claims-and-evidence.md、eval/）、森林（.agent-workbench/task-forest/、proposals/）"
+        ]
+      }
+    }
+  ]
+}
