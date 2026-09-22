@@ -1,0 +1,42 @@
+{
+  "proposal_id": "TFP-promise-consistency-final-2026-09-22",
+  "session_id": "ses_verseshell-tf-relay2-2026-09-22",
+  "rationale": "提交 d4ea4b2 已完成、工作区干净，回填 commit hash 并把 TF-0030 与 TF-0026 转 done，本轮收口。森林记录随第二次提交落库。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0030",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "本轮改动已提交：commit d4ea4b2「fix: repair reduce/reverse pipeline stages and gate README promises」，覆盖 src/ir.rs 与 src/runtime.rs 的算子修复、2 个回归测试、两个新工具（readme_claims_check / cross_shell_bench）、README/CHANGELOG/claims 文档、bench_final.sh 与森林数据。提交后 git status 干净。",
+        "next_action": "无。后续轮次沿用根策略 §6 的收尾动作。",
+        "evidence": [
+          "git commit d4ea4b2 → 提交信息含门禁结果",
+          "git status --porcelain 在提交后为空",
+          "提交前门禁：python tools/claim_gate.py → 10/10 gated claims pass, exit 0；python tools/readme_claims_check.py → 12/12, exit 0；cargo test --test integration_tests → 52 passed（2026-09-22）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0026",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "全部 desired_outcomes 均有可复现证据：①文档承诺的 reduce（以及同类的 reverse）在默认路径上返回正确结果，并有 2 个回归测试；②文档示例与实现类数字有一键检查入口（tools/readme_claims_check.py）并接入 claim_gate（C10，12/12）；③Cross-Shell 表用可复现 runner 重测并登记 C11（worst ratio 0.2145），旧 v0.5.1 数字作废；④全量 cargo test 与 claim_gate 全绿（10/10）；⑤evidence 已回写森林，提案 apply/validate/export 通过，改动已提交（d4ea4b2）。明确边界：C10 只覆盖脚本内显式登记的条目；C11 是本机墙钟测量且门禁读已存产物；README 中未登记的实现类数字（如 28-arm match、~50 builtins）仍不受保护。",
+        "next_action": "如需继续扩展：README 新增示例/数字时先加进 tools/readme_claims_check.py 的 registry；改动热路径后重跑 tools/cross_shell_bench.py。",
+        "evidence": [
+          "python tools/claim_gate.py → 10/10 gated claims pass, exit 0（C10 12/12、C11 0.2145）",
+          "cargo test --test integration_tests → 52 passed / 0 failed；全量 cargo test 见 C7（16 suites / 277 passed / 0 failed / 1 ignored）",
+          "python tools/readme_claims_check.py → 12/12 checks pass, exit 0",
+          "python tools/cross_shell_bench.py → worst_ratio_ae_over_pwsh=0.2145, all_commands_ok=true",
+          "docs/claims-and-evidence.md C10/C11 与 §4 规则；eval/readme_claims.json、eval/cross_shell.json",
+          "git commit d4ea4b2；git status 干净",
+          "TF-0027 / TF-0028 / TF-0029 / TF-0030 的 evidence 字段"
+        ]
+      }
+    }
+  ]
+}
