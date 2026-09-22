@@ -46,7 +46,7 @@ EVIDENCE_GLOBS = [
     "Cargo.toml",
     "bench/aci/tasks/*.json",
     "bench/aci/fixtures/**/*",
-    "bench/aci/runners/*.py",
+    "bench/aci/runners/run_suite.py",
     "bench/aci/scorers/*.py",
 ]
 

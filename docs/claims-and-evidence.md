@@ -197,14 +197,14 @@ python bench/aci/runners/live_agent_loop.py --full --model <model> --base-url <e
 
 | 维度 | 内容 |
 |------|------|
-| 主张原文 | 在一个真实函数调用模型（本地 OpenAI 兼容端点上的 `sn-glm-5-3-flash`）上跑 ACI-Bench 全量 10 任务 × 2 条件：条件 A（raw shell）与条件 D（VerseShell ACI）的成功率相同（0.6），但 D 的工具调用数与观察 token 都约为 A 的 2–2.6 倍。**在该模型与该任务集上，ACI 没有减少步骤或 token** |
+| 主张原文 | 在一个真实函数调用模型（本地 OpenAI 兼容端点上的 `sn-glm-5-3-flash`）上跑 ACI-Bench 全量 10 任务 × 2 条件、重复 3 次（temperature=0）：条件 A（raw shell）与条件 D（VerseShell ACI）的成功率基本相同（0.600 vs 0.633），但 D 的工具调用数约为 A 的 **2.12 倍**（1.94–2.32）、观察 token 约为 **2.24 倍**（2.04–2.47）。**在该模型与该任务集上，ACI 没有减少步骤或 token** |
 | 门槛数字 | 无（负向结论，只登记事实，不设通过门槛） |
-| 复现命令 | `python bench/aci/runners/live_agent_loop.py --full --model <model> --base-url <endpoint> --max-turns 8` → `bench/aci/results/latest_live.json`、`live_REPORT.md` |
-| source | `bench/aci/runners/live_agent_loop.py`、`bench/aci/results/latest_live.json`、`bench/aci/results/live_baseline_preharnessfix_2026-09-22.json`、`bench/aci/tasks/*.json` |
-| 样本量 / 日期 | 10 任务 × 2 条件 × 1 模型；修复前/后各一次完整运行；2026-09-22 |
-| 最近实测 | 修复前：A 0.6 / 2.7 tools / 151.8 tok，D 0.6 / 5.4 / 306.4（比值 2.00 / 2.02）；修复后：A 0.6 / 2.8 / 152.1，D 0.6 / 6.5 / 399.0（2.32 / 2.62）。D 仅在 `windows_path_normalize_edit` 明显更省（0.34x token） |
-| 失效边界 | ①**单模型单次**：未固定温度/种子，同一任务两次运行的 token 可差 1.5–3 倍（例：rust_fix_compile_error 187→590），因此两次全量跑的比值差异（2.02 vs 2.62）**不能**归因于 harness 修复；方向（D 更费）在两次运行中一致，量级不可外推。②观察 token 用 `len(text)//4` 估算，不是真实 tokenizer。③成功判定是任务自带的文件谓词，不要求真的跑测试（A 常常不跑测试也满足）。④本机 `tsc` 缺失、裸 `pytest` 在 Windows 上因 console-script 的 `sys.path` 行为失败（规范形式 `python -m pytest`），两条件同样受限。⑤**与 mock 的 C1/C2 不可混用**：mock 的 D 直接套 GOLDEN 补丁，0.106/0.55 是评分管线自检，不是能力测量 |
-| 状态 | 已证实（本机单模型，负向结论） |
+| 复现命令 | `python bench/aci/runners/live_agent_loop.py --full --model <model> --base-url <endpoint> --max-turns 8 --temperature 0 --seed <s> --repeat 1`（跑 3 次不同 seed 后用 `--repeat` 或合并脚本汇总）→ `bench/aci/results/latest_live.json`、`live_REPORT.md` |
+| source | `bench/aci/runners/live_agent_loop.py`、`bench/aci/results/latest_live.json`（3 次合并，含 `per_run` 与 `across_runs`）、`bench/aci/results/live_pre_slim.json`、`bench/aci/results/live_baseline_preharnessfix_2026-09-22.json`、`bench/aci/tasks/*.json` |
+| 样本量 / 日期 | 10 任务 × 2 条件 × 3 次重复（temperature=0，seeds 42/43/44），max_turns=8，共 60 行；2026-09-23 |
+| 最近实测 | A：success 0.600、tools 3.1（2.8/3.4/3.1）、obs_tok 154.6（143.4/167.9/152.5）；D：success 0.633、tools 6.53（6.5/6.6/6.5）、obs_tok 345.3（353.5/370.8/311.6）。比值：tools 2.12（σ=0.16）、tokens 2.24（σ=0.17）。逐任务只有 `windows_path_normalize_edit` 上 D 更省（0.48x），最差 `rust_fix_compile_error`（5.49x）。**观察瘦身效果**（同为 max_turns=8、单次口径）：D 的 obs_tok 399.0 → 345.3（−13.5%），A 基本不变（152.1 → 154.6），token 比 2.62 → 2.23；工具数未变（6.5 → 6.53） |
+| 失效边界 | ①**单模型**：只有一个端点与一个模型，结论不可外推到其它模型。②**名义确定性**：端点接受 `seed` 字段但不严格复现（同 seed 两次调用的 tool_call id 与 token 数仍不同），所以 3 次重复给的是经验区间而非确定性复算。③观察 token 用 `len(text)//4` 估算，不是真实 tokenizer。④成功判定是任务自带的文件谓词，不要求真的跑测试（A 常常不跑测试也满足）。⑤本机 `tsc` 缺失、裸 `pytest` 在 Windows 上因 console-script 的 `sys.path` 行为失败（规范形式 `python -m pytest`），两条件同样受限；失败 exec 占 D 的 38% token（exec 内部 75% 来自失败调用）。⑥**与 mock 的 C1/C2 不可混用**：mock 的 D 直接套 GOLDEN 补丁，0.106/0.55 是评分管线自检，不是能力测量 |
+| 状态 | 已证实（本机单模型、3 次重复，负向结论） |
 
 ## 4. 与 README 主张的对应关系
 

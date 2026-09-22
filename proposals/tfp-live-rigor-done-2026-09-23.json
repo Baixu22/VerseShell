@@ -1,0 +1,81 @@
+{
+  "proposal_id": "TFP-live-rigor-done-2026-09-23",
+  "session_id": "ses_verseshell-tf-live2-2026-09-22",
+  "rationale": "本轮四个交付节点完成并各有证据：观察瘦身（TF-0042，确定性前后对比）、确定性控制与 3 次重复跑（TF-0043）、C13 更新为带区间与瘦身 delta 的版本（TF-0044）、产品侧缺口登记为 follow_up（TF-0045）。TF-0041 与 TF-0046 的验收含「改动已提交」，先留 in_progress，提交后由补丁提案收口。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0042",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "在 harness 的观察投影层去掉两类明确冗余：①file.view 的 lines 从逐行对象 [{line,text}] 压成纯文本数组 + 单个 start_line；②失败时若 summary 的消息已被 diagnostics 覆盖且 stats 已给出计数，则不再重复输出 summary。原始观察信封未改（仍可从 artifact 取回），因此这是客户端投影选择而非产品契约变更。",
+        "evidence": [
+          "确定性前后对比（同一 fixture、同一 AE 版本，用 live 模块的 format_aci_result 与旧投影实现对照）：file.view 2 行 212→187 字符（−11.8%）；file.view 10 行 444→250 字符（−43.7%）；失败 pytest 529→399 字符（−24.6%）",
+          "信息不丢：投影后仍含 content_hash、total_lines、start_line 与全部行文本（示例：{\"ok\":true,\"content_hash\":\"sha256:...\",\"total_lines\":2,\"lines\":[\"def add(a, b):\",\"    return a * b\"],\"start_line\":1}）",
+          "失败投影仍含结构化 diagnostics（tool/severity/message/path/line）、error.code、exit_code 与 stats 计数",
+          "改动文件：bench/aci/runners/live_agent_loop.py（compact_lines 辅助 + format_aci_result 两处）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0043",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "live runner 增加 --temperature（默认 0）、--seed、--repeat N；每行记录 run_index，live_config 记录三者；用 seed 42/43/44 并行跑了 3 次全量（10 任务 × 2 条件 = 60 行），合并为一份含 per_run 与 across_runs 的产物。",
+        "evidence": [
+          "CLI 与产物：live_config 含 temperature=0 / seed / repeat / max_turns=8；每行含 run_index",
+          "3 次逐次均值：A tools 2.8/3.4/3.1、tokens 143.4/167.9/152.5；D tools 6.5/6.6/6.5、tokens 353.5/370.8/311.6",
+          "比值区间：tools 2.12（1.94–2.32，σ=0.16）、tokens 2.24（2.04–2.47，σ=0.17）；成功率 A 0.600 / D 0.633",
+          "确定性边界实测：端点接受 seed 但不严格复现——同 seed 两次调用的 tool_call 内容相同而 id 与 completion_tokens（43 vs 44）不同",
+          "产物：bench/aci/results/latest_live.json（3 次合并，60 行）、live_REPORT.md（由合并产物重生成）；修复前基线与瘦身前基线分别归档为 live_baseline_preharnessfix_2026-09-22.json、live_pre_slim.json",
+          "踩坑记录：首次并行跑漏传 --model/--base-url，退回默认端点得到全 0 结果；第二次漏传 --max-turns 8 与基线口径不一致，均已在发现后作废重跑（不进入结论）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0044",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "C13 从「单次观察」升级为「3 次重复的均值与区间 + 瘦身前后对比」：D/A 工具比 2.12（1.94–2.32）、token 比 2.24（2.04–2.47）；瘦身使 D 的 obs_tok 由 399.0 降到 345.3（−13.5%）而 A 基本不变，比值由 2.62 降到 2.23，工具数未变。失效边界补充了「单模型」与「名义确定性（seed 不被严格复现）」。",
+        "evidence": [
+          "docs/claims-and-evidence.md C13 各行更新（主张原文/复现命令/source/样本量/最近实测/失效边界/状态）",
+          "source 列表新增 live_pre_slim.json（瘦身前基线，从 git b54f554 恢复）",
+          "逐任务（3 次均值）已写入产物；最差 rust_fix_compile_error 5.49x、唯一更省 windows_path_normalize_edit 0.48x",
+          "per-op 统计（合并 3 次）：D 的 exec.run 5248（失败 3935）、file.view 3809、replace_exact 614 —— 失败 exec 仍是最大单项"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0041",
+      "fields": {
+        "progress": 85.0,
+        "summary": "四个交付节点完成并各有证据：观察瘦身（TF-0042）、确定性控制与 3 次重复（TF-0043）、C13 更新（TF-0044）、产品侧缺口登记（TF-0045）。剩余唯一缺口是提交（TF-0046），因为本节点验收含「改动已提交、工作区干净」，故留 in_progress。",
+        "next_action": "提交本轮瘦身/控制/复测/声明改动（TF-0046），回填 commit hash 后把 TF-0041 与 TF-0046 转 done。",
+        "evidence": [
+          "确定性瘦身对比：10 行 file.view −43.7%、失败观察 −24.6%",
+          "3 次重复：D/A 工具比 2.12（1.94–2.32）、token 比 2.24（2.04–2.47）；瘦身使 D 的 token −13.5%",
+          "TF-0042 / TF-0043 / TF-0044 / TF-0045 的 evidence 字段"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0046",
+      "fields": {
+        "status": "in_progress",
+        "progress": 50.0,
+        "next_action": "提交本轮改动（live runner 瘦身与控制、3 次合并产物与两份基线归档、C13 更新、CHANGELOG 与 ACI-Bench 文档），再回填 commit hash。",
+        "evidence": [
+          "收口前门禁：claim_gate 全绿（C12 覆盖合并后的 live 产物）；git grep 无 key 命中"
+        ]
+      }
+    }
+  ]
+}

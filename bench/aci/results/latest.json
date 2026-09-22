@@ -3,18 +3,18 @@
   "task_set_version": "1.1.0",
   "seed": 42,
   "mode": "mock",
-  "generated_at": "2026-09-22T15:51:17.659828+00:00",
-  "git_rev": "e694a5ae2a6364c3b559dce0e7f7b0b8de7f326b",
+  "generated_at": "2026-09-22T16:31:29.903262+00:00",
+  "git_rev": "fc52332b520c0ed342e928c32d28e5d01a44a0e2",
   "evidence": {
     "globs": [
       "src/**/*.rs",
       "Cargo.toml",
       "bench/aci/tasks/*.json",
       "bench/aci/fixtures/**/*",
-      "bench/aci/runners/*.py",
+      "bench/aci/runners/run_suite.py",
       "bench/aci/scorers/*.py"
     ],
-    "fingerprint": "0cc2a812e4cd10cb5ddadaf30cfe980029468d9845b603897b0bce8698a94502"
+    "fingerprint": "a20a612aac19e5db63f67fd72848a67226dc63dc849982ab06cc3bee34b118b9"
   },
   "rows": [
     {
@@ -25,7 +25,7 @@
       "success_reason": "file_contains src/lib.rs",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 24,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -120,7 +120,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 15,
+      "elapsed_ms": 6,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -207,7 +207,7 @@
       "success_reason": "file_contains src/lib.rs",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 6,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -302,7 +302,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 20,
+      "elapsed_ms": 6,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -389,7 +389,7 @@
       "success_reason": "file_contains src/lib.rs",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 5,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -484,7 +484,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 68,
+      "elapsed_ms": 6,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -571,7 +571,7 @@
       "success_reason": "file_contains mathlib.py",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 3,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -666,7 +666,7 @@
       "success_reason": "file_contains mathlib.py",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 12,
+      "elapsed_ms": 6,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -723,7 +723,7 @@
       "success_reason": "file_contains greet.py",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 6,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -818,7 +818,7 @@
       "success_reason": "file_contains greet.py",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 25,
+      "elapsed_ms": 6,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -875,7 +875,7 @@
       "success_reason": "missing SUMMARY.txt",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 4,
+      "elapsed_ms": 1,
       "notes": [],
       "trajectory": [
         {
@@ -970,7 +970,7 @@
       "success_reason": "file_contains SUMMARY.txt",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 12,
+      "elapsed_ms": 4,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1027,7 +1027,7 @@
       "success_reason": "file_contains src/index.ts",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 36,
+      "elapsed_ms": 4,
       "notes": [],
       "trajectory": [
         {
@@ -1122,7 +1122,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 38,
+      "elapsed_ms": 6,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1209,7 +1209,7 @@
       "success_reason": "file_contains package.json",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 2,
+      "elapsed_ms": 0,
       "notes": [],
       "trajectory": [
         {
@@ -1304,7 +1304,7 @@
       "success_reason": "file_contains package.json",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 53,
+      "elapsed_ms": 6,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1391,7 +1391,7 @@
       "success_reason": "missing out/result.txt",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 4,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -1486,7 +1486,7 @@
       "success_reason": "file_equals out/result.txt",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 11,
+      "elapsed_ms": 5,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1543,7 +1543,7 @@
       "success_reason": "missing ERR.txt",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 3,
+      "elapsed_ms": 1,
       "notes": [],
       "trajectory": [
         {
@@ -1638,7 +1638,7 @@
       "success_reason": "all ok",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 10,
+      "elapsed_ms": 5,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1697,7 +1697,7 @@
         "success_rate": 0.0,
         "avg_tool_calls": 10.0,
         "avg_observation_tokens": 3820.0,
-        "avg_elapsed_ms": 9.3
+        "avg_elapsed_ms": 1.8
       },
       {
         "model": "mock",
@@ -1706,7 +1706,7 @@
         "success_rate": 1.0,
         "avg_tool_calls": 5.5,
         "avg_observation_tokens": 405.0,
-        "avg_elapsed_ms": 26.4
+        "avg_elapsed_ms": 5.6
       }
     ],
     "n_rows": 20

@@ -1,0 +1,298 @@
+{
+  "proposal_id": "TFP-live-rigor-2026-09-22",
+  "session_id": "ses_verseshell-tf-live2-2026-09-22",
+  "rationale": "承接上一轮 live 评测的两条结论：①单次运行不足以支撑量级结论（逐任务波动 1.5–3 倍），需要固定温度/种子并重复多次；②D 的观察 token 有 60% 集中在 file.view（38%）与失败的 exec（41%），其中存在明确冗余可去掉。本轮先做 harness 侧冗余瘦身（可确定性验证），再加确定性控制与重复跑，最后用 3 次重复的均值/区间更新 C13。产品侧的更大改动（多文件读取、观察信封本身的形状）体量与破坏性都更大，落成 follow_up 节点记录而不在本轮实现。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "live-rigor",
+      "node": {
+        "title": "live 复测严谨化：观察瘦身 + 确定性控制 + 置信区间",
+        "kind": "global_task",
+        "status": "in_progress",
+        "display_order": 60,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.8,
+        "summary": "把上一轮的 live 负向结论从「单次观察」升级为「有重复、有控制、有区间」的结论：①去掉模型可见观察里的冗余（file.view 的逐行对象、失败观察里被诊断消息完全覆盖的 summary）；②给 live runner 加 temperature/seed/repeat 控制并把它们写进 live_config；③跑 3 次重复，给出均值与离散度，并与瘦身前对比。",
+        "purpose": "让「ACI 在该任务集上是否省步骤/省 token」这个判断有统计意义上的支撑，而不是靠一次运行。",
+        "desired_outcomes": [
+          "harness 侧观察冗余有确定性的前后对比（字符数/token 数）",
+          "live runner 支持 --temperature/--seed/--repeat，且产物记录这些参数与 run_index",
+          "3 次重复跑的均值/离散度与瘦身前后对比写入 C13",
+          "全量门禁与测试全绿，evidence 回写森林，改动已提交"
+        ],
+        "acceptance_criteria": [
+          "同一文件同一窗口的 file.view 投影字符数下降且信息不丢（start_line + 纯文本行）",
+          "失败观察在诊断已覆盖 summary 时不再重复输出该 summary",
+          "live 产物含 live_config.temperature/seed/repeat 与每行 run_index",
+          "C13 更新为含均值/区间与瘦身 delta 的版本，并保留原失效边界"
+        ],
+        "non_goals": [
+          "不实现多文件读取 op（产品契约变更，另立 follow_up）",
+          "不改成功判定与 token 估算口径（保持与上一轮可比）"
+        ],
+        "execution_hints": ["先瘦身并做确定性验证，再跑重复；重复跑期间不要改动被测代码"],
+        "next_action": "先做 TF-0042 的观察瘦身与确定性验证。",
+        "alignment": {
+          "user_goal": "按推荐继续：固定随机性重复跑 + 观察瘦身复测",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "这是上一轮自己写下的 next_action",
+          "why_not_enough": "仍是单模型；且只做 harness 侧投影瘦身，产品信封未变",
+          "validation_plan": ["确定性字符数对比", "3 次重复的均值/区间", "claim_gate exit 0"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live2-2026-09-22"],
+        "evidence": [
+          "上一轮：D 的 token 分布 file.view 1516 / exec.run 2025（其中 1524 为失败）/ replace 257；两次全量比值 2.02 与 2.62（模型未固定随机性）",
+          "file.view 投影实测：2 行文件的 lines 为 [{\"line\":1,\"text\":...}] 共 80 字符，其中纯文本仅 39 字符"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "slim-obs",
+      "node": {
+        "title": "步骤24：模型可见观察的冗余瘦身",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1018,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.9,
+        "summary": "在 harness 的观察投影层去掉两类明确冗余：①file.view 成功时把逐行对象 [{line,text}] 压成纯文本数组 + 单个 start_line；②失败时若 summary 的内容已被 diagnostics 的消息完全覆盖，则不再重复输出 summary。原始观察信封保持不变（仍可从 artifact 取回），因此这是「客户端选择怎么给模型看」的投影，不是产品契约变更。",
+        "purpose": "把 D 的观察体积里纯粹的结构噪声去掉，再测一次。",
+        "acceptance_criteria": [
+          "2 行与 10 行窗口的 file.view 投影字符数都有下降，且 start_line/内容/hash 信息不丢",
+          "被诊断覆盖的 summary 不再重复出现；未被覆盖时仍保留",
+          "同一失败样本（pytest ModuleNotFoundError）的投影字符数有确定性下降"
+        ],
+        "non_goals": ["不改 AE 的观察信封结构（避免破坏消费者契约）"],
+        "alignment": {
+          "user_goal": "观察瘦身",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "file.view 与失败 exec 合计占 D 的约 60% token，其中结构冗余明确",
+          "why_not_enough": "只瘦 harness 投影；产品侧形状未动（另立节点）",
+          "validation_plan": ["确定性字符数对比", "重复跑复测"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live2-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "determinism",
+      "node": {
+        "title": "步骤25：live runner 的确定性控制与重复跑",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1019,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.8,
+        "summary": "给 live runner 加 --temperature（默认 0）、--seed（可选，随请求下发）、--repeat N（整张任务×条件矩阵重复 N 次），每行记录 run_index，live_config 记录三者；然后跑 3 次重复并统计每条件均值与离散度（min/max/stddev），给出 D/A 比值的区间。",
+        "purpose": "把「方向」升级为「带区间的结论」，并让后续复测可复现。",
+        "acceptance_criteria": [
+          "CLI 支持 --temperature/--seed/--repeat 且写入 live_config",
+          "每行含 run_index；聚合能按 run 拆分",
+          "3 次重复的结果给出均值、极差与 D/A 比值区间",
+          "产物重新生成后 C12 判定 fresh"
+        ],
+        "non_goals": ["不做多模型对比"],
+        "execution_hints": ["端点可能忽略 seed；若如此要在结论里写明「名义确定性」"],
+        "alignment": {
+          "user_goal": "统计严谨性",
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "why_this_task": "单次运行的量级不可外推是上一轮自己写下的边界",
+          "why_not_enough": "仍只有一个模型与端点",
+          "validation_plan": ["3 次重复的区间", "claim_gate exit 0"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live2-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "update-c13",
+      "node": {
+        "title": "步骤26：用重复跑结果更新 C13",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1020,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.85,
+        "summary": "把 C13 从「单次观察」更新为「3 次重复的均值与区间 + 瘦身前后对比」，同时保留原有失效边界并补充新边界（端点是否真的响应 seed/temperature）。",
+        "purpose": "让对外引用的数字有重复与区间支撑。",
+        "acceptance_criteria": [
+          "C13 含重复次数、均值、极差/标准差与 D/A 比值区间",
+          "含瘦身前后同一口径的对比",
+          "mock 与 live 的分层说明保持不变"
+        ],
+        "non_goals": ["不改门槛数字（C13 仍不设通过门槛）"],
+        "alignment": {
+          "user_goal": "结论可引用",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "声明-证据矩阵是唯一对外数字登记处",
+          "why_not_enough": "仍受单模型限制",
+          "validation_plan": ["claim_gate exit 0"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live2-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "followup-obs-surface",
+      "node": {
+        "title": "缺口：产品侧观察体积与多文件读取（未实现）",
+        "kind": "follow_up",
+        "status": "ready",
+        "display_order": 1021,
+        "priority": 3,
+        "difficulty": "medium",
+        "confidence": 0.6,
+        "summary": "本轮只瘦了 harness 的投影层，没有动 AE 的观察信封与算子面。live 数据说明两处产品侧空间：①A 用一条 `type a & type b & type c` 读 3 个文件（48 token），D 需要 3 次 file.view（约 165 token）——缺少多文件读取算子，这是工具调用数 2.3 倍的直接来源；②file.view 的 lines 是逐行对象，产品信封本身也有结构冗余。两者都涉及对外契约（新增 op 会改 catalog 计数与文档、改 lines 形状会破坏消费者），需要单独设计与迁移说明，故本轮不做。",
+        "purpose": "把已知但本轮不做的产品侧改动记录下来，避免下次重新发现。",
+        "acceptance_criteria": [
+          "若实现多文件读取：新增 op 的 schema/文档/测试齐备，catalog 计数与相关断言同步更新",
+          "若改 lines 形状：给出兼容策略（版本化或双字段过渡）",
+          "实现后重跑 live 并更新 C13"
+        ],
+        "non_goals": ["不在本轮实现"],
+        "alignment": {
+          "user_goal": "ACI 真正省步骤",
+          "fit": "aligned",
+          "fit_confidence": 0.7,
+          "why_this_task": "它是 D 工具调用数与 token 的最大结构来源",
+          "why_not_enough": "契约变更需要单独的迁移设计",
+          "validation_plan": ["实现后 live 复测"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live2-2026-09-22"],
+        "evidence": [
+          "live 逐 op 统计（修复后）：file.view 1516 token、exec.run 2025（失败 1524）、replace_exact 257",
+          "A 侧读取方式：run_command `type greet.py & type tests\\test_greet.py & type TASK.md` 共 48 token"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-commit",
+      "node": {
+        "title": "步骤27：森林收口与提交",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1022,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.85,
+        "summary": "按根策略 §6 收尾：证据回写各节点，proposal-save → proposal-apply --yes → validate → export，提交本轮瘦身/控制/复测/声明改动（确认无凭据入库）。",
+        "purpose": "让本轮成果落盘可追溯。",
+        "acceptance_criteria": [
+          "各节点 evidence 已回写",
+          "proposal-save → apply --yes → validate → export 全部成功",
+          "git commit 覆盖全部改动；git grep 无 key；提交后工作区干净"
+        ],
+        "non_goals": ["不改写 git 历史、不 force push"],
+        "alignment": {
+          "user_goal": "开发流程与证据链完整",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "产物与代码必须一起落盘",
+          "why_not_enough": "提交只是载体",
+          "validation_plan": ["git log/show", "git status 干净"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live2-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "slim-obs",
+      "to": "live-rigor",
+      "type": "child_of",
+      "edge": { "reason": "瘦身是本轮第一交付", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "determinism",
+      "to": "live-rigor",
+      "type": "child_of",
+      "edge": { "reason": "确定性控制与重复是复测前提", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "update-c13",
+      "to": "live-rigor",
+      "type": "child_of",
+      "edge": { "reason": "声明更新是本轮验收交付", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "followup-obs-surface",
+      "to": "live-rigor",
+      "type": "child_of",
+      "edge": { "reason": "产品侧改动作为本轮已知缺口登记", "confidence": 0.8 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "live-rigor",
+      "type": "child_of",
+      "edge": { "reason": "收口与落盘是最后一步", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "determinism",
+      "to": "slim-obs",
+      "type": "depends_on",
+      "edge": { "reason": "先瘦身再重复跑，避免中途改被测代码", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "update-c13",
+      "to": "determinism",
+      "type": "depends_on",
+      "edge": { "reason": "C13 要用重复跑结果", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "update-c13",
+      "type": "depends_on",
+      "edge": { "reason": "收口要等声明更新完", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "live-rigor",
+      "to": "TF-0036",
+      "type": "related_to",
+      "edge": { "reason": "承接 live 评测轮，补齐其自述的统计与瘦身缺口", "confidence": 0.9 }
+    },
+    {
+      "action": "update_node",
+      "id": "slim-obs",
+      "fields": { "display_order": 10 }
+    },
+    {
+      "action": "update_node",
+      "id": "determinism",
+      "fields": { "display_order": 20 }
+    },
+    {
+      "action": "update_node",
+      "id": "update-c13",
+      "fields": { "display_order": 30 }
+    },
+    {
+      "action": "update_node",
+      "id": "followup-obs-surface",
+      "fields": { "display_order": 40 }
+    },
+    {
+      "action": "update_node",
+      "id": "close-commit",
+      "fields": { "display_order": 50 }
+    }
+  ]
+}

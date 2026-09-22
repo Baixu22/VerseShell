@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- Live runner sampling controls: `--temperature` (default 0), `--seed`, and
+  `--repeat N`; every row carries `run_index` and `live_config` records all
+  three, so a live result can be repeated and quoted with a spread instead of a
+  single sample.
 - Live ACI-Bench evaluation is actually usable: the runner now starts the AE
   server with an explicit capability set (`--cap`, overridable via `--caps`).
   Before this, condition D ran with **no** grants, so every ACI op returned
@@ -17,6 +21,13 @@
   Single-run variance is large, so the direction is the finding, not the ratio.
 
 ### Changed
+- The model-visible observation projection drops structural redundancy:
+  `file.view` lines are flattened from `[{line, text}]` to plain strings with a
+  single `start_line` (a 10-line window: 444 -> 250 chars, -43.7%), and a failure
+  `summary` is omitted when the diagnostics already carry its message and
+  `stats` carries the counts (failing pytest: 529 -> 399 chars, -24.6%). The raw
+  observation envelope is unchanged, so this is a projection choice, not a
+  contract change.
 - Fixture workspaces no longer copy `__pycache__` / `.pytest_cache`. Stale
   bytecode made pytest report the *fixture source* path
   (`../../../../Desktop/...`) instead of the workspace-relative one, which both

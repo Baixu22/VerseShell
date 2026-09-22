@@ -70,7 +70,7 @@ EVIDENCE_GLOBS = [
     "Cargo.toml",
     "bench/aci/tasks/*.json",
     "bench/aci/fixtures/**/*",
-    "bench/aci/runners/*.py",
+    "bench/aci/runners/live_agent_loop.py",
 ]
 
 
@@ -442,18 +442,19 @@ def chat_completion(
     base_url: str,
     max_tokens: int = 4096,
     temperature: float = 0.1,
+    seed: int | None = None,
 ) -> dict:
-    body = json.dumps(
-        {
-            "model": model,
-            "messages": messages,
-            "tools": tools,
-            "tool_choice": "auto",
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-        },
-        ensure_ascii=False,
-    ).encode("utf-8")
+    payload = {
+        "model": model,
+        "messages": messages,
+        "tools": tools,
+        "tool_choice": "auto",
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+    }
+    if seed is not None:
+        payload["seed"] = seed
+    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
 
     for attempt in range(3):
         try:
@@ -528,6 +529,17 @@ def execute_aci_op(op_name: str, args: dict, workspace: str,
         return {"ok": False, "error": {"code": "E_TIMEOUT", "message": f"ae op timed out after {TOOL_TIMEOUT_SEC}s"}}
 
 
+def compact_lines(lines: list) -> list:
+    """[{line, text}, ...] -> [text, ...]; the start line is carried separately."""
+    out = []
+    for entry in lines:
+        if isinstance(entry, dict):
+            out.append(entry.get("text", ""))
+        else:
+            out.append(str(entry))
+    return out
+
+
 def format_aci_result(response: dict) -> str:
     """Extract model-relevant fields from the AE observation envelope.
 
@@ -551,7 +563,13 @@ def format_aci_result(response: dict) -> str:
                 err.pop("hint", None)
             clean["error"] = err
         if "summary" in data:
-            clean["summary"] = data["summary"]
+            # The reduced summary usually restates the diagnostic message and
+            # the counts that `stats` already carries. Keep it only when it adds
+            # something the structured fields do not already say.
+            messages = [d.get("message") for d in (response.get("diagnostics") or [])]
+            subsumed = bool(messages) and all(m and m in data["summary"] for m in messages)
+            if not (subsumed and "stats" in data):
+                clean["summary"] = data["summary"]
         if "exit_code" in data:
             clean["exit_code"] = data["exit_code"]
         # Keep short text snapshots from each stream if present. A stream summary
@@ -585,11 +603,16 @@ def format_aci_result(response: dict) -> str:
     if "total_lines" in data:
         clean["total_lines"] = data["total_lines"]
 
-    # Small files: include lines so model can read without re-viewing
+    # Small files: include lines so model can read without re-viewing.
+    # `data.lines` is [{line, text}, ...]; the per-line object wrapper is pure
+    # structural overhead (a 2-line file spent 80 chars on 39 chars of text), so
+    # the projection flattens it and carries the starting line number once.
     if "lines" in data:
         lines = data["lines"]
         if isinstance(lines, list) and len(lines) <= 10:
-            clean["lines"] = lines
+            clean["lines"] = compact_lines(lines)
+            if "start_line" in data:
+                clean["start_line"] = data["start_line"]
         elif "content_hash" not in data:
             clean["total_lines"] = len(lines) if isinstance(lines, list) else 0
 
@@ -653,6 +676,9 @@ def run_agent_loop(
     base_url: str,
     max_turns: int = MAX_TURNS,
     caps: str = ACI_CAPABILITIES,
+    temperature: float = 0.0,
+    seed: int | None = None,
+    run_index: int = 0,
 ) -> dict:
     workspace = prepare_workspace(task["workspace_fixture"])
     tools = ACI_TOOLS if condition == "verseshell_aci" else RAW_SHELL_TOOLS
@@ -681,7 +707,8 @@ def run_agent_loop(
         while turn < max_turns:
             turn += 1
             try:
-                resp = chat_completion(messages, tools, model=model, api_key=api_key, base_url=base_url)
+                resp = chat_completion(messages, tools, model=model, api_key=api_key,
+                                   base_url=base_url, temperature=temperature, seed=seed)
             except Exception as e:
                 last_error = f"API error turn {turn}: {e}"
                 break
@@ -798,6 +825,7 @@ def run_agent_loop(
         "task_id": task["id"],
         "condition": condition,
         "model": model,
+        "run_index": run_index,
         "success": actual_ok,
         "success_reason": actual_reason,
         "tool_calls": tool_call_count,
@@ -984,6 +1012,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--max-turns", type=int, default=MAX_TURNS)
     ap.add_argument("--caps", default=ACI_CAPABILITIES,
                     help="capabilities granted to the AE server in condition D")
+    ap.add_argument("--temperature", type=float, default=0.0,
+                    help="sampling temperature (default 0 for reproducibility)")
+    ap.add_argument("--seed", type=int, default=None,
+                    help="sampling seed sent to the endpoint (may be ignored by it)")
+    ap.add_argument("--repeat", type=int, default=1,
+                    help="run the whole task x condition matrix N times")
     ap.add_argument("--smoke", action="store_true", help="3-task smoke validation")
     ap.add_argument("--full", action="store_true", help="All 10 tasks")
     args = ap.parse_args(argv)
@@ -1013,7 +1047,7 @@ def main(argv: list[str] | None = None) -> int:
     print("=" * 60)
 
     rows: list[dict] = []
-    total = len(task_ids) * len(conditions)
+    total = len(task_ids) * len(conditions) * args.repeat
     done = 0
 
     for tid in task_ids:
@@ -1024,29 +1058,32 @@ def main(argv: list[str] | None = None) -> int:
             continue
 
         for cond in conditions:
-            done += 1
-            print(f"\n[{done}/{total}] {tid} [{cond}] ...", flush=True)
-            t0 = time.time()
-            try:
-                row = run_agent_loop(task, cond, model=args.model, api_key=api_key,
-                                     base_url=args.base_url, max_turns=args.max_turns,
-                                     caps=args.caps)
-                rows.append(row)
-                wall = int((time.time() - t0) * 1000)
-                status = "PASS" if row["success"] else "FAIL"
-                print(f"  -> {status}: {row['tool_calls']} tools, {row['observation_tokens']} obs_tok, "
-                      f"wall={wall}ms, turns={row['turns']}")
-                if row.get("last_error"):
-                    print(f"  !! {row['last_error'][:200]}")
-            except Exception as e:
-                print(f"  -> RUNNER ERROR: {e}")
-                traceback.print_exc()
-                rows.append({
-                    "task_id": tid, "condition": cond, "model": args.model,
-                    "success": False, "success_reason": f"runner_error: {e}",
-                    "tool_calls": 0, "observation_tokens": 0, "elapsed_ms": 0,
-                    "notes": ["runner_crash"], "trajectory": [], "weight": 1.0,
-                })
+            for run_index in range(args.repeat):
+                done += 1
+                print(f"\n[{done}/{total}] {tid} [{cond}] run={run_index} ...", flush=True)
+                t0 = time.time()
+                try:
+                    row = run_agent_loop(task, cond, model=args.model, api_key=api_key,
+                                         base_url=args.base_url, max_turns=args.max_turns,
+                                         caps=args.caps, temperature=args.temperature,
+                                         seed=args.seed, run_index=run_index)
+                    rows.append(row)
+                    wall = int((time.time() - t0) * 1000)
+                    status = "PASS" if row["success"] else "FAIL"
+                    print(f"  -> {status}: {row['tool_calls']} tools, {row['observation_tokens']} obs_tok, "
+                          f"wall={wall}ms, turns={row['turns']}")
+                    if row.get("last_error"):
+                        print(f"  !! {row['last_error'][:200]}")
+                except Exception as e:
+                    print(f"  -> RUNNER ERROR: {e}")
+                    traceback.print_exc()
+                    rows.append({
+                        "task_id": tid, "condition": cond, "model": args.model,
+                        "run_index": run_index,
+                        "success": False, "success_reason": f"runner_error: {e}",
+                        "tool_calls": 0, "observation_tokens": 0, "elapsed_ms": 0,
+                        "notes": ["runner_crash"], "trajectory": [], "weight": 1.0,
+                    })
 
     comparison = compare_a_vs_d(rows)
     payload = {
@@ -1065,6 +1102,9 @@ def main(argv: list[str] | None = None) -> int:
             "api_base": args.base_url,
             "caps": args.caps,
             "max_turns": args.max_turns,
+            "temperature": args.temperature,
+            "seed": args.seed,
+            "repeat": args.repeat,
             "tasks": task_ids,
             "conditions": conditions,
         },

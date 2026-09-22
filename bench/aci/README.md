@@ -59,6 +59,12 @@ python bench/aci/runners/live_agent_loop.py --full `
 | `--tasks a,b` / `--smoke` / `--full` | task selection (smoke = 3, full = 10) |
 | `--model` / `--base-url` / `--api-key` | endpoint config (key may come from the env instead) |
 | `--caps` | capabilities granted to the AE server for condition D (default: the ACI surface set) |
+| `--temperature` / `--seed` | sampling controls (default temperature 0; the endpoint may ignore `seed`) |
+| `--repeat N` | run the whole task × condition matrix N times; each row carries `run_index` |
+
+For a reportable number, run at least 3 times and quote the spread: a single
+run varies by 1.5–3x per task on a reasoning model, so one run supports a
+*direction*, not a magnitude.
 
 Condition D starts `ae --serve --agent --cap <caps>`. **Without `--cap` the
 server grants nothing and every op fails with `E_CAPABILITY_DENY`** — a live run
