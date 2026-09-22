@@ -1,0 +1,85 @@
+{
+  "proposal_id": "TFP-dataset-feedback-done-2026-09-22",
+  "session_id": "ses_verseshell-tf-relay3-2026-09-22",
+  "rationale": "本轮三个交付节点完成并各有可复现证据：TF-0032 重跑数据集并与基线逐项对比（无回归，但暴露产物已陈旧两个月）；TF-0033 把评测产物写入确定性化（LF）并让数据集与 runner 进入版本库；TF-0034 新增证据新鲜度门禁 C12（产物指纹 + 正负双向验证）。TF-0031 与 TF-0035 的验收含「改动已提交」，先留 in_progress，提交后由补丁提案收口。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0032",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "把数据集真正跑了一遍并与提交基线逐项对比。ACI-Bench mock 重跑结果与 2026-07-27 的存量产物完全一致（success delta=1.0、tool_calls D/A=0.55、observation_tokens D/A=0.106、accept=True）；L3 观察质检 13 个失败样本的 summary 与逐行判定与基线 0 差异（diagnostic_sufficient 10/13、script_actionable 9/13、actionable 9 / no_locatable_site 4）。结论：接力几轮的代码改动没有引入评测回归；同时暴露出「产物陈旧两个月也照样给门禁绿灯」的结构性问题，已由 C12 兜住。",
+        "evidence": [
+          "重跑命令：python bench/aci/runners/run_suite.py --mode mock → compare[mock]: success delta=1.0 tools D/A=0.55 tokens D/A=0.106 accept=True（2026-09-22）",
+          "重跑命令：python tools/jev_obs_judge.py → 13 samples, diagnostic_sufficient 10/13, script_actionable 9/13, breakdown {actionable: 9, no_locatable_site: 4}",
+          "语义对比：用脚本逐行比对 eval/jev_obs_report.json 的 rows（旧提交版本 vs 重跑版本）→ semantic row diffs: 0；summary 完全一致",
+          "bench 语义对比：raw_shell 38200 tokens/100 calls/0 success、verseshell_aci 4050 tokens/55 calls/10 success（重跑前后一致）",
+          "陈旧性证据：重跑前 bench/aci/results/latest.json 的 generated_at=2026-07-27T01:22:08Z"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0033",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "两件事让「重跑数据集」变得可审：①六个写入方（run_suite / live_agent_loop / jev_obs_judge / claim_gate / cross_shell_bench / readme_claims_check）全部显式以 LF 落盘，共 14 处调用，重跑产物不再是整文件重写；②发现并修复数据集本身没进版本库的问题——.gitignore 的 *.py 规则把 bench/aci 下的 fixture 代码、runners、scorers 全挡住了，clone 后 TASK.md 引用的代码不存在、C1/C2 的复现命令也跑不起来；已加 !bench/aci/**/*.py 并在策略文档 §7 登记。README 的跨 shell 表格也改为由 C10 逐行校验与 eval/cross_shell.json 一致。",
+        "evidence": [
+          "行尾修复：6 个文件共 14 处 write_text/open 调用加 newline=\"\\n\"（run_suite 7、live_agent_loop 2、jev_obs_judge 2、claim_gate 1、cross_shell_bench 1、readme_claims_check 1）",
+          "重跑后行尾实测：bench/aci/results/latest.json、eval/jev_obs_report.json、eval/cross_shell.json 均为 CRLF=0 / LF>0（修复前 latest.json 为 1719 CRLF / 0 LF）",
+          "语义不变：重跑后 bench 比值与 jev summary 与基线一致（见 TF-0032 证据）",
+          ".gitignore 新增 !bench/aci/**/*.py；git check-ignore 实测：bench/aci/runners/run_suite.py、scorers/score.py、fixtures/**/*.py 变为可跟踪，__pycache__ 仍被忽略",
+          "docs/task-forest-policy.md §7 新增「bench/aci/**/*.py（数据集 fixture 代码、runners、scorers）进版本库」一行",
+          "README 跨 shell 表格改由 python tools/readme_claims_check.py 逐行校验（17/17 checks pass, exit 0）",
+          "边界：e2e_effect_eval.py / deep_stress_eval.py 两个历史脚本未改（不在 C1–C12 门禁内）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0034",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "证据新鲜度门禁落地。三份已存测量（bench/aci/results/latest.json、eval/jev_obs_report.json、eval/cross_shell.json）在生成时记录被测代码面的 sha256 指纹（依赖文件清单 + 内容哈希，自描述写在产物里）；claim_gate 新增 C12 重算指纹并比对，缺指纹直接判失败（fail-closed）。实现上刻意不用 git rev 比较：提交本身会改变 HEAD，用 rev 会形成「提交即陈旧」的死循环；内容指纹与 clone、脏工作区、行尾都无关。",
+        "evidence": [
+          "三个 runner 记录 evidence.globs + evidence.fingerprint（run_suite.py / jev_obs_judge.py / cross_shell_bench.py）；claim_gate.py 新增 EVIDENCE_ARTIFACTS + evidence_fingerprint() + freshness_entries()",
+          "正向：python tools/claim_gate.py → 11/11 gated claims pass, exit 0；C12 = 1.0（3/3 fresh）",
+          "负向（验收要求）：把 eval/cross_shell.json 的 fingerprint 改成全 0 后调用 freshness_entries() → bench/aci/results/latest.json=fresh、eval/jev_obs_report.json=fresh、eval/cross_shell.json=stale 且 pass=False；脚本判定 NEGATIVE TEST: OK，随后原样还原产物",
+          "docs/claims-and-evidence.md：新增 C12 六要素行、§2 复现入口、§4 规则（fail-closed）、§7 标签更新为 C1–C12",
+          "fail-closed 证据：2026-07-27 的旧产物没有 evidence 字段，C12 会判「no fingerprint recorded」失败"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0031",
+      "fields": {
+        "progress": 85.0,
+        "summary": "三个交付节点完成并各有可复现证据：数据集重跑与基线对比（TF-0032）、产物写入确定性化 + 数据集入库（TF-0033）、证据新鲜度门禁 C12（TF-0034）。剩余唯一缺口是提交（TF-0035），因为本节点验收含「改动已提交、工作区干净」，故留 in_progress。",
+        "next_action": "提交本轮产物/工具/门禁/文档改动（TF-0035），回填 commit hash 后把 TF-0031 与 TF-0035 转 done。",
+        "evidence": [
+          "python tools/claim_gate.py → 11/11 gated claims pass, exit 0（C12 fresh 3/3）",
+          "python tools/readme_claims_check.py → 17/17 checks pass, exit 0",
+          "重跑：run_suite --mode mock（0.106/0.55，accept=True）、jev_obs_judge（10/13、9/13）、cross_shell_bench（worst 0.2109，all_commands_ok=true）",
+          "TF-0032 / TF-0033 / TF-0034 三条节点的 evidence 字段"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0035",
+      "fields": {
+        "status": "in_progress",
+        "progress": 50.0,
+        "next_action": "提交本轮改动（.gitignore 数据集放行、6 个写入方 LF、三个 runner 记录指纹、claim_gate C12、readme_claims_check 表校验、README/CHANGELOG/claims 文档、重跑产物），再回填 commit hash。",
+        "evidence": [
+          "收口前门禁：claim_gate 11/11 exit 0、readme_claims_check 17/17 exit 0、数据集重跑产物与基线语义一致（2026-09-22）"
+        ]
+      }
+    }
+  ]
+}

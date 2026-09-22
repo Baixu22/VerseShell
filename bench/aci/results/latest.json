@@ -3,7 +3,19 @@
   "task_set_version": "1.1.0",
   "seed": 42,
   "mode": "mock",
-  "generated_at": "2026-07-27T01:22:08.614450+00:00",
+  "generated_at": "2026-09-22T14:27:22.955335+00:00",
+  "git_rev": "b5a4a07871b8756d714c901bc6a5f33ccd583369",
+  "evidence": {
+    "globs": [
+      "src/**/*.rs",
+      "Cargo.toml",
+      "bench/aci/tasks/*.json",
+      "bench/aci/fixtures/**/*",
+      "bench/aci/runners/*.py",
+      "bench/aci/scorers/*.py"
+    ],
+    "fingerprint": "bcc1930a782f3e2b8dbb5729108b314a39c5c7f49fc7896fb2a9d552a5e2d2cd"
+  },
   "rows": [
     {
       "task_id": "rust_fix_compile_error",
@@ -108,7 +120,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 3,
+      "elapsed_ms": 4,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -189,188 +201,6 @@
     },
     {
       "task_id": "rust_add_unit_test",
-      "condition": "raw_shell",
-      "model": "mock",
-      "success": false,
-      "success_reason": "file_contains src/lib.rs",
-      "tool_calls": 10,
-      "observation_tokens": 3820,
-      "elapsed_ms": 1,
-      "notes": [],
-      "trajectory": [
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "ls -la"
-          },
-          "observation_tokens": 150,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "cat file"
-          },
-          "observation_tokens": 200,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "grep -R TODO ."
-          },
-          "observation_tokens": 180,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "build (full log)"
-          },
-          "observation_tokens": 900,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "edit attempt 1"
-          },
-          "observation_tokens": 120,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "build (full log again)"
-          },
-          "observation_tokens": 900,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "edit attempt 2"
-          },
-          "observation_tokens": 120,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "build (full log again)"
-          },
-          "observation_tokens": 900,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "git status"
-          },
-          "observation_tokens": 100,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "git diff"
-          },
-          "observation_tokens": 250,
-          "condition": "raw_shell"
-        }
-      ],
-      "optional_verify": null,
-      "weight": 1.0
-    },
-    {
-      "task_id": "rust_add_unit_test",
-      "condition": "verseshell_aci",
-      "model": "mock",
-      "success": true,
-      "success_reason": "all ok",
-      "tool_calls": 7,
-      "observation_tokens": 520,
-      "elapsed_ms": 3,
-      "notes": [
-        "golden_applied",
-        "ae_available"
-      ],
-      "trajectory": [
-        {
-          "op": "ops.list",
-          "args": {},
-          "observation_tokens": 40,
-          "condition": "verseshell_aci"
-        },
-        {
-          "op": "file.view",
-          "args": {
-            "path": "src/lib.rs"
-          },
-          "observation_tokens": 120,
-          "condition": "verseshell_aci"
-        },
-        {
-          "op": "repo.search",
-          "args": {
-            "query": "TODO|error|assert"
-          },
-          "observation_tokens": 80,
-          "condition": "verseshell_aci"
-        },
-        {
-          "op": "exec.run",
-          "args": {
-            "argv": [
-              "cargo",
-              "check"
-            ],
-            "note": "semantic reduced"
-          },
-          "observation_tokens": 90,
-          "condition": "verseshell_aci"
-        },
-        {
-          "op": "file.replace_exact",
-          "args": {
-            "path": "(target)"
-          },
-          "observation_tokens": 60,
-          "condition": "verseshell_aci"
-        },
-        {
-          "op": "exec.run",
-          "args": {
-            "argv": [
-              "verify"
-            ],
-            "note": "reduced ok"
-          },
-          "observation_tokens": 70,
-          "condition": "verseshell_aci"
-        },
-        {
-          "op": "ops.observation_recent",
-          "args": {
-            "limit": 4
-          },
-          "observation_tokens": 50,
-          "condition": "verseshell_aci"
-        },
-        {
-          "op": "golden.apply",
-          "args": {
-            "fixture": "rust_add_unit_test"
-          },
-          "observation_tokens": 10,
-          "condition": "verseshell_aci"
-        }
-      ],
-      "optional_verify": null,
-      "weight": 1.0
-    },
-    {
-      "task_id": "rust_search_and_edit",
       "condition": "raw_shell",
       "model": "mock",
       "success": false,
@@ -465,6 +295,188 @@
       "weight": 1.0
     },
     {
+      "task_id": "rust_add_unit_test",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 7,
+      "observation_tokens": 520,
+      "elapsed_ms": 5,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "ops.list",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 120,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "repo.search",
+          "args": {
+            "query": "TODO|error|assert"
+          },
+          "observation_tokens": 80,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "check"
+            ],
+            "note": "semantic reduced"
+          },
+          "observation_tokens": 90,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 60,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "verify"
+            ],
+            "note": "reduced ok"
+          },
+          "observation_tokens": 70,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_recent",
+          "args": {
+            "limit": 4
+          },
+          "observation_tokens": 50,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "rust_add_unit_test"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 3,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
       "task_id": "rust_search_and_edit",
       "condition": "verseshell_aci",
       "model": "mock",
@@ -472,7 +484,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 3,
+      "elapsed_ms": 6,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -559,7 +571,7 @@
       "success_reason": "file_contains mathlib.py",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 3,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -654,7 +666,7 @@
       "success_reason": "file_contains mathlib.py",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 4,
+      "elapsed_ms": 9,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -806,7 +818,7 @@
       "success_reason": "file_contains greet.py",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 4,
+      "elapsed_ms": 8,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -863,7 +875,7 @@
       "success_reason": "missing SUMMARY.txt",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 1,
+      "elapsed_ms": 0,
       "notes": [],
       "trajectory": [
         {
@@ -958,7 +970,7 @@
       "success_reason": "file_contains SUMMARY.txt",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 2,
+      "elapsed_ms": 8,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1015,7 +1027,7 @@
       "success_reason": "file_contains src/index.ts",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 2,
+      "elapsed_ms": 4,
       "notes": [],
       "trajectory": [
         {
@@ -1110,7 +1122,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 4,
+      "elapsed_ms": 7,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1197,7 +1209,7 @@
       "success_reason": "file_contains package.json",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 1,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -1292,7 +1304,7 @@
       "success_reason": "file_contains package.json",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 1,
+      "elapsed_ms": 5,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1379,7 +1391,7 @@
       "success_reason": "missing out/result.txt",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 1,
+      "elapsed_ms": 0,
       "notes": [],
       "trajectory": [
         {
@@ -1474,7 +1486,7 @@
       "success_reason": "file_equals out/result.txt",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 2,
+      "elapsed_ms": 7,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1531,7 +1543,7 @@
       "success_reason": "missing ERR.txt",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 0,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -1626,7 +1638,7 @@
       "success_reason": "all ok",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 1,
+      "elapsed_ms": 6,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1685,7 +1697,7 @@
         "success_rate": 0.0,
         "avg_tool_calls": 10.0,
         "avg_observation_tokens": 3820.0,
-        "avg_elapsed_ms": 1.6
+        "avg_elapsed_ms": 2.0
       },
       {
         "model": "mock",
@@ -1694,7 +1706,7 @@
         "success_rate": 1.0,
         "avg_tool_calls": 5.5,
         "avg_observation_tokens": 405.0,
-        "avg_elapsed_ms": 2.7
+        "avg_elapsed_ms": 6.5
       }
     ],
     "n_rows": 20

@@ -3,9 +3,18 @@
 ## Unreleased
 
 ### Added
+- Claim C12 (evidence freshness): the three stored measurements (ACI-Bench
+  results, L3 observation report, cross-shell bench) record the sha256
+  fingerprint of the surface they measured, and `claim_gate` fails when that
+  fingerprint no longer matches the code — a stale artifact can no longer pass
+  the gate.
+- The ACI-Bench dataset and its tooling are now tracked: `.gitignore` no longer
+  hides `bench/aci/**/*.py`, so a fresh clone has the fixture code, runners and
+  scorers that the task descriptions and the C1/C2 reproduction command need.
 - `tools/readme_claims_check.py` + claim C10: every documented README example is
   executed against the real binary and every README implementation number is
-  re-derived from its source of truth.
+  re-derived from its source of truth. It also verifies the README cross-shell
+  table row by row against `eval/cross_shell.json`.
 - `tools/cross_shell_bench.py` + claim C11: reproducible wall-clock comparison
   for the five advertised operations, with raw per-iteration samples in
   `eval/cross_shell.json`.
@@ -30,6 +39,9 @@
 - docs/quickstart/aci-mcp.md and docs/v1.1-freeze.md
 
 ### Changed
+- Evaluation artifacts (`bench/aci/results/*`, `eval/*.json`) are written with
+  LF newlines, so re-running a dataset produces a minimal, reviewable diff
+  instead of a whole-file rewrite on Windows.
 - README compact-protocol claim corrected: the unverified "50-70% token savings
   vs JSON" is replaced by the measured scope of claim C9 (`>=40%` on a small
   response envelope; no saving on observation or large nested payloads).

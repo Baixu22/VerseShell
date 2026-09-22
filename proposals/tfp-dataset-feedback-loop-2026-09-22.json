@@ -1,0 +1,250 @@
+{
+  "proposal_id": "TFP-dataset-feedback-loop-2026-09-22",
+  "session_id": "ses_verseshell-tf-relay3-2026-09-22",
+  "rationale": "用户追问「数据集跑了吗、有没有沉淀数据反馈、反馈后有没有修短板」。核对后发现：C1/C2 门禁读的 bench/aci/results/latest.json 是 2026-07-27 的产物，接力两轮都没有重跑；本轮补跑 ACI-Bench mock 与 L3 观察质检，结果与基线逐项一致（0.106/0.55、10/13、9/13），说明代码改动没有引入回归。但重跑同时暴露两个工程短板：①Python 工具在 Windows 上按平台默认写 CRLF，重跑产物与仓库 LF 不一致，diff 变成整文件重写、不可审；②没有任何机制阻止证据陈旧（数据集产物躺了两个月也没人发现）。按根策略 §3 落成节点。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "feedback-loop",
+      "node": {
+        "title": "数据集反馈闭环：重跑可复现、证据不陈旧",
+        "kind": "global_task",
+        "status": "in_progress",
+        "display_order": 40,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.85,
+        "summary": "让「跑数据集 → 看反馈 → 修短板」这条链在仓库里可复现且不会悄悄断掉：①三类数据集产物（ACI-Bench mock、L3 观察质检、reducer 指标）在同一代码版本上重跑，与基线逐项对比并沉淀结论；②产物写入确定性化（LF 行尾），使重跑的 diff 最小可审；③新增证据新鲜度门禁：数据集产物必须记录生成时的 git 版本，代码改动后未重跑即门禁失败。",
+        "purpose": "证据不只要存在，还要能证明它对应的是当前代码；否则门禁会在陈旧数字上绿灯。",
+        "desired_outcomes": [
+          "ACI-Bench mock、L3 观察质检、reducer 指标重跑结果与基线有明确对比结论",
+          "重跑产物 diff 最小可审（行尾与格式确定，不随平台变化）",
+          "证据新鲜度可机检：代码改动后未重跑的数据集产物会让 claim_gate 失败",
+          "门禁与测试全绿，evidence 回写森林，改动已提交"
+        ],
+        "acceptance_criteria": [
+          "bench/aci/results/latest.json 重跑后 tokens/calls 比值与基线一致（0.106 / 0.55）且为 LF",
+          "eval/jev_obs_report.json 逐行语义与基线一致（10/13、9/13、no_locatable_site 4）",
+          "连续重跑两次同一数据集，产物 diff 只含时间戳/耗时类字段",
+          "claim_gate 新增新鲜度声明，在当前版本 exit 0"
+        ],
+        "non_goals": ["不跑 live 模式（需要真实模型与付费 API）", "不改评测口径或门槛数字"],
+        "execution_hints": ["先做写入确定性化，再重跑产物，最后加新鲜度门禁"],
+        "next_action": "先做 TF-0032 的对比沉淀，再做 TF-0033 的 LF 修复与重跑。",
+        "alignment": {
+          "user_goal": "确认数据集是否真的跑了、反馈是否沉淀、短板是否修复",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "门禁读的是数据集产物，而产物可能长期陈旧；这是证据链的结构性风险",
+          "why_not_enough": "只覆盖仓库内三类产物，不覆盖 live 模型评测",
+          "validation_plan": ["重跑两次比对 diff", "claim_gate exit 0", "git status 干净"]
+        },
+        "source_sessions": ["ses_verseshell-tf-relay3-2026-09-22"],
+        "evidence": [
+          "bench/aci/results/latest.json generated_at=2026-07-27T01:22:08Z（重跑前），接力两轮未重跑",
+          "重跑（2026-09-22）：compare[mock]: success delta=1.0 tools D/A=0.55 tokens D/A=0.106 accept=True；jev_obs_judge 13 samples → diagnostic_sufficient 10/13、script_actionable 9/13、no_locatable_site 4（与基线逐行一致）",
+          "行尾实测：重跑产物 CRLF（latest.json 1719 CRLF / 0 LF），仓库提交版本为 LF；src/ir.rs 为 LF"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "rerun-compare",
+      "node": {
+        "title": "步骤16：数据集重跑与基线对比",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1010,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.9,
+        "summary": "重跑 ACI-Bench mock 套件与 L3 观察质检，逐项与提交基线对比，给出「有无回归」的明确结论，并把对比方法固化成可重复的命令序列（不是一次性手跑）。",
+        "purpose": "回答「数据集到底跑了没有」，并留下可复核的对比结论。",
+        "acceptance_criteria": [
+          "给出重跑前后 tokens/calls/success 三项比值的逐项对比",
+          "给出 jev 质检 summary 与逐行差异计数",
+          "对比命令写进 claims 文档或节点 evidence，可被第三方重放"
+        ],
+        "non_goals": ["不引入新的评测任务集"],
+        "alignment": {
+          "user_goal": "数据集反馈沉淀",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "这是用户直接问的问题",
+          "why_not_enough": "只回答当前版本，不防止将来再次陈旧（由 TF-0034 兜底）",
+          "validation_plan": ["重跑并 diff"]
+        },
+        "source_sessions": ["ses_verseshell-tf-relay3-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "lf-determinism",
+      "node": {
+        "title": "步骤17：评测产物写入确定性化（LF）",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1011,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.9,
+        "summary": "Python 工具在 Windows 上按平台默认写出 CRLF，而仓库是 LF，于是「重跑数据集」表现为整文件重写（latest.json 3438 行、REPORT.md 全文件），diff 不可审、也无法用 diff 判断反馈是否变化。修法：所有写评测产物的工具显式以 newline=\"\\n\" 落盘（run_suite / jev_obs_judge / claim_gate / cross_shell_bench / readme_claims_check / compact_ratio 的 --out 路径），然后用修复后的工具重跑一次产物，使仓库里的产物与生成方式一致。",
+        "purpose": "让「重跑数据集」的 diff 只剩真实变化，反馈才看得见。",
+        "acceptance_criteria": [
+          "重跑后的产物为 LF（0 个 CRLF）",
+          "连续重跑两次，diff 只含时间戳/耗时字段",
+          "评测产物的内容与重跑前语义一致（无数字漂移）"
+        ],
+        "non_goals": ["不改评测逻辑或指标口径"],
+        "execution_hints": ["Path.write_text(..., newline=\"\\n\")（Python 3.10 支持）"],
+        "alignment": {
+          "user_goal": "反馈可审",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "整文件 diff 会掩盖真实反馈变化",
+          "why_not_enough": "只解决格式问题，不解决陈旧问题",
+          "validation_plan": ["行尾计数 + 二次重跑 diff"]
+        },
+        "source_sessions": ["ses_verseshell-tf-relay3-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "freshness-gate",
+      "node": {
+        "title": "步骤18：证据新鲜度门禁（C12）",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1012,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.8,
+        "summary": "让「证据对应当前代码」变成机器可检：评测产物在生成时记录当时的 git 版本（git_rev / dirty），claim_gate 新增 C12——对每份产物跑 git diff --name-only <产物记录版本>..HEAD -- <该产物的依赖路径>，只要依赖代码在产物生成后改过就判失败并列出改动文件。这样 bench/aci/results/latest.json 那种「躺两个月还在给门禁绿灯」的情况会直接暴露。",
+        "purpose": "把「记得重跑」从人的自觉变成门禁的硬约束。",
+        "acceptance_criteria": [
+          "三类数据集产物都记录 git_rev（run_suite / jev_obs_judge / cross_shell_bench）",
+          "claim_gate 的 C12 在当前版本 exit 0；把产物 git_rev 改成旧提交时 C12 能失败并列出改动文件（做一次负向验证）",
+          "C12 的失效边界写进 claims 文档（例如：产物未记录版本时判失败）"
+        ],
+        "non_goals": ["不做产物自动重跑（只做检测，重跑仍由人/agent 触发）"],
+        "execution_hints": ["用 git rev-parse HEAD 与 git diff --name-only <rev>..HEAD -- <paths>"],
+        "alignment": {
+          "user_goal": "反馈不陈旧",
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "why_this_task": "这是本次追问暴露出的结构性风险",
+          "why_not_enough": "只覆盖登记过的产物路径",
+          "validation_plan": ["正负两次验证", "claim_gate exit 0"]
+        },
+        "source_sessions": ["ses_verseshell-tf-relay3-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-commit",
+      "node": {
+        "title": "步骤19：森林收口与提交",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1013,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.85,
+        "summary": "按根策略 §6 收尾：证据回写各节点，proposal-save → proposal-apply --yes → validate → export，并提交本轮产物、工具与门禁改动。",
+        "purpose": "让本轮成果落盘可追溯。",
+        "acceptance_criteria": [
+          "各节点 evidence 已回写",
+          "proposal-save → apply --yes → validate → export 全部成功",
+          "git commit 覆盖产物/工具/门禁/文档改动，提交后工作区干净"
+        ],
+        "non_goals": ["不改写 git 历史、不 force push"],
+        "alignment": {
+          "user_goal": "开发流程与证据链完整",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "未提交的产物无法被第三方复核",
+          "why_not_enough": "提交只是载体",
+          "validation_plan": ["git log/show 核对", "git status 干净"]
+        },
+        "source_sessions": ["ses_verseshell-tf-relay3-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "rerun-compare",
+      "to": "feedback-loop",
+      "type": "child_of",
+      "edge": { "reason": "重跑对比是本轮起点", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "lf-determinism",
+      "to": "feedback-loop",
+      "type": "child_of",
+      "edge": { "reason": "写入确定性是反馈可审的前提", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "freshness-gate",
+      "to": "feedback-loop",
+      "type": "child_of",
+      "edge": { "reason": "新鲜度门禁是本轮的结构性修复", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "feedback-loop",
+      "type": "child_of",
+      "edge": { "reason": "收口与落盘是最后一步", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "lf-determinism",
+      "to": "rerun-compare",
+      "type": "depends_on",
+      "edge": { "reason": "先确定写入方式，重跑产物才可审", "confidence": 0.85 }
+    },
+    {
+      "action": "add_edge",
+      "from": "freshness-gate",
+      "to": "lf-determinism",
+      "type": "depends_on",
+      "edge": { "reason": "新鲜度门禁要在产物格式稳定后接入", "confidence": 0.85 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "freshness-gate",
+      "type": "depends_on",
+      "edge": { "reason": "收口要等门禁跑通", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "feedback-loop",
+      "to": "TF-0026",
+      "type": "related_to",
+      "edge": { "reason": "承接承诺一致性轮，同样属于证据链的自我校验", "confidence": 0.85 }
+    },
+    {
+      "action": "update_node",
+      "id": "rerun-compare",
+      "fields": { "display_order": 10 }
+    },
+    {
+      "action": "update_node",
+      "id": "lf-determinism",
+      "fields": { "display_order": 20 }
+    },
+    {
+      "action": "update_node",
+      "id": "freshness-gate",
+      "fields": { "display_order": 30 }
+    },
+    {
+      "action": "update_node",
+      "id": "close-commit",
+      "fields": { "display_order": 40 }
+    }
+  ]
+}

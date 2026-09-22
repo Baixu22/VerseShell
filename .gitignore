@@ -23,6 +23,9 @@ Thumbs.db
 *.py
 # ...except the repo's own evidence gates: claim_gate / jev_obs_judge / validate_manifest
 !tools/*.py
+# ...and the ACI-Bench dataset itself: fixture code, runners and scorers.
+# Without these a fresh clone has the task descriptions but not the code they edit.
+!bench/aci/**/*.py
 **/__pycache__/
 *.py[cod]
 

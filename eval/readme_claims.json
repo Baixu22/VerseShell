@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.readme-claims/v1",
-  "generated_at": "2026-09-22T14:01:22.544957+00:00",
+  "generated_at": "2026-09-22T14:30:42.344764+00:00",
   "generator": "tools/readme_claims_check.py",
   "ae_binary": "target\\debug\\ae.exe",
   "all_pass": true,
@@ -122,6 +122,46 @@
         52
       ],
       "note": "README states the size of the integration suite",
+      "pass": true
+    },
+    {
+      "kind": "cross_shell",
+      "name": "CPU info",
+      "source": "README.md vs eval/cross_shell.json",
+      "expected": "| CPU info | **261.2ms** | 1238.2ms | 361.3ms | **4.7x faster** |",
+      "actual": "present",
+      "pass": true
+    },
+    {
+      "kind": "cross_shell",
+      "name": "Disk info",
+      "source": "README.md vs eval/cross_shell.json",
+      "expected": "| Disk info | **11.5ms** | 327.8ms | N/A | **28.6x faster** |",
+      "actual": "present",
+      "pass": true
+    },
+    {
+      "kind": "cross_shell",
+      "name": "List dir",
+      "source": "README.md vs eval/cross_shell.json",
+      "expected": "| List dir | **10.2ms** | 249.6ms | 363.1ms | **24.6x faster** |",
+      "actual": "present",
+      "pass": true
+    },
+    {
+      "kind": "cross_shell",
+      "name": "Read file",
+      "source": "README.md vs eval/cross_shell.json",
+      "expected": "| Read file | **11.5ms** | 141.2ms | 347.4ms | **12.2x faster** |",
+      "actual": "present",
+      "pass": true
+    },
+    {
+      "kind": "cross_shell",
+      "name": "Pipeline 1K",
+      "source": "README.md vs eval/cross_shell.json",
+      "expected": "| Pipeline 1K | **11.0ms** | 171.0ms | 356.2ms | **15.5x faster** |",
+      "actual": "present",
       "pass": true
     }
   ]

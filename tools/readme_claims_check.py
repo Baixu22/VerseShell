@@ -158,6 +158,42 @@ def check_numbers(readme: str) -> list[dict]:
     return results
 
 
+def check_cross_shell(readme: str) -> list[dict]:
+    """The README cross-shell table must equal the measured artifact, row by row.
+
+    Wall-clock numbers drift on every re-measurement, so the table is pinned to
+    `eval/cross_shell.json` instead of to a hand-copied value: re-running the
+    bench requires updating the table, and this check makes that coupling
+    explicit instead of silent.
+    """
+    artifact = ROOT / "eval/cross_shell.json"
+    if not artifact.exists():
+        return [{
+            "kind": "cross_shell", "name": "eval/cross_shell.json present",
+            "source": "eval/cross_shell.json", "expected": "exists", "actual": "missing",
+            "pass": False,
+        }]
+    data = json.loads(artifact.read_text(encoding="utf-8"))
+    results = []
+    for row in data.get("operations", []):
+        shells = row["shells"]
+        ae = round(shells["ae"]["median_ms"], 1)
+        pwsh = round(shells["pwsh"]["median_ms"], 1)
+        bash_ms = shells["bash"].get("median_ms")
+        bash = "N/A" if bash_ms is None else f"{round(bash_ms, 1)}ms"
+        speedup = round(shells["pwsh"]["median_ms"] / shells["ae"]["median_ms"], 1)
+        expected = f"| {row['name']} | **{ae}ms** | {pwsh}ms | {bash} | **{speedup}x faster** |"
+        results.append({
+            "kind": "cross_shell",
+            "name": row["name"],
+            "source": "README.md vs eval/cross_shell.json",
+            "expected": expected,
+            "actual": "present" if expected in readme else "missing or outdated",
+            "pass": expected in readme,
+        })
+    return results
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--ae", default=None, help="path to the ae binary")
@@ -167,7 +203,7 @@ def main(argv: list[str] | None = None) -> int:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     ae = pick_binary(args.ae)
 
-    checks = check_examples(ae, readme) + check_numbers(readme)
+    checks = check_examples(ae, readme) + check_numbers(readme) + check_cross_shell(readme)
     passed = sum(1 for c in checks if c["pass"])
     all_pass = passed == len(checks)
 
@@ -179,6 +215,10 @@ def main(argv: list[str] | None = None) -> int:
             if not check["pass"]:
                 print(f"           expected={check['expected']!r} actual={check['actual']!r} "
                       f"documented={check['documented_in_readme']}")
+        elif check["kind"] == "cross_shell":
+            print(f"  [{status}] table    {check['name']}: {check['actual']}")
+            if not check["pass"]:
+                print(f"           README should contain: {check['expected']}")
         else:
             print(f"  [{status}] number   {check['name']}: readme={check['actual']} "
                   f"source={check['expected']} ({check['source']})")
@@ -193,7 +233,7 @@ def main(argv: list[str] | None = None) -> int:
     }
     if args.json:
         args.json.parent.mkdir(parents=True, exist_ok=True)
-        args.json.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        args.json.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
         print(f"report written: {args.json}")
     return 0 if all_pass else 1
 

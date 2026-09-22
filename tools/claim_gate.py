@@ -15,6 +15,7 @@ Gated claims (thresholds mirror docs/claims-and-evidence.md exactly):
   C9  compact encoding saves >= 0.40 on a small response envelope (lossless)
   C10 every documented README example runs and every README implementation number matches its source
   C11 cross-shell wall-clock: worst VerseShell/PowerShell median ratio <= 0.50 (stored measurement)
+  C12 stored evidence freshness: each artifact's recorded fingerprint still matches the code
 C5 (learning cost) has no deterministic metric yet: status-only in evidence.json.
 
 Usage:
@@ -25,6 +26,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -45,7 +47,17 @@ THRESHOLDS = {
     "C9": {"desc": "compact encoding savings on a small response envelope", "op": ">=", "value": 0.40},
     "C10": {"desc": "README examples run and README numbers match source", "op": ">=", "value": 1.00},
     "C11": {"desc": "cross-shell worst VerseShell/PowerShell median ratio", "op": "<=", "value": 0.50},
+    "C12": {"desc": "stored evidence freshness (recorded fingerprint matches the code)", "op": ">=", "value": 1.00},
 }
+
+# Stored measurements the gate relies on. Each must record the content fingerprint
+# of the surface it measured, or the gate cannot tell whether the number still
+# describes the current code.
+EVIDENCE_ARTIFACTS = [
+    "bench/aci/results/latest.json",
+    "eval/jev_obs_report.json",
+    "eval/cross_shell.json",
+]
 
 
 def bench_ratios(bench_path: Path) -> tuple[float, float, int, dict]:
@@ -99,6 +111,56 @@ def recovery_rate(metrics: dict) -> tuple[float, dict]:
 
 def run(cmd: list[str], **kw) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, **kw)
+
+
+def evidence_fingerprint(globs: list[str]) -> str:
+    """Content hash of a measured surface (same recipe the generators use)."""
+    digest = hashlib.sha256()
+    paths = sorted(
+        p for pat in globs for p in ROOT.glob(pat)
+        if p.is_file() and "__pycache__" not in p.parts
+    )
+    for path in paths:
+        digest.update(path.relative_to(ROOT).as_posix().encode())
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+    return digest.hexdigest()
+
+
+def freshness_entries() -> list[dict]:
+    """C12: compare each stored artifact's recorded fingerprint with the code now."""
+    entries: list[dict] = []
+    for rel in EVIDENCE_ARTIFACTS:
+        path = ROOT / rel
+        entry: dict = {"artifact": rel}
+        if not path.exists():
+            entry.update({"status": "missing", "pass": False})
+            entries.append(entry)
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as error:
+            entry.update({"status": f"unreadable: {error}", "pass": False})
+            entries.append(entry)
+            continue
+        entry["generated_at"] = data.get("generated_at")
+        evidence = data.get("evidence") or {}
+        globs = evidence.get("globs")
+        recorded = evidence.get("fingerprint")
+        if not globs or not recorded:
+            entry.update({
+                "status": "no fingerprint recorded (regenerate the artifact)",
+                "pass": False,
+            })
+        else:
+            current = evidence_fingerprint(globs)
+            entry.update({
+                "status": "fresh" if current == recorded else "stale",
+                "fingerprint_recorded": recorded[:16],
+                "fingerprint_current": current[:16],
+                "pass": current == recorded,
+            })
+        entries.append(entry)
+    return entries
 
 
 def compact_ratio_claim(report: dict) -> dict:
@@ -367,6 +429,22 @@ def main(argv: list[str] | None = None) -> int:
                  "tools/cross_shell_bench.py after changing the hot path",
     })
 
+    # ── C12: stored evidence must still describe the current code ──
+    freshness = freshness_entries()
+    stale = [f["artifact"] for f in freshness if not f["pass"]]
+    claims.append({
+        "id": "C12", "claim": THRESHOLDS["C12"]["desc"],
+        "threshold": "all artifacts fresh", "value": 1.0 if not stale else 0.0,
+        "pass": not stale, "mode": "content_fingerprint",
+        "sample_size": len(freshness), "measured_at": now,
+        "command": "python tools/claim_gate.py",
+        "source": EVIDENCE_ARTIFACTS + ["tools/claim_gate.py"],
+        "detail": {"artifacts": freshness, "stale": stale},
+        "notes": "each stored measurement records the sha256 fingerprint of the surface it measured; "
+                 "if the code changed since, the evidence is stale and must be regenerated "
+                 "(run_suite / jev_obs_judge / cross_shell_bench)",
+    })
+
     gated = [c for c in claims if c["pass"] is not None]
     all_pass = all(c["pass"] for c in gated)
 
@@ -384,7 +462,7 @@ def main(argv: list[str] | None = None) -> int:
     }
     args.evidence.parent.mkdir(parents=True, exist_ok=True)
     args.evidence.write_text(json.dumps(evidence, indent=2, ensure_ascii=False) + "\n",
-                             encoding="utf-8")
+                             encoding="utf-8", newline="\n")
 
     print(f"claim_gate: {sum(1 for c in gated if c['pass'])}/{len(gated)} gated claims pass")
     for c in claims:

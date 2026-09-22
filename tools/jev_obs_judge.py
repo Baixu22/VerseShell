@@ -33,9 +33,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -43,6 +45,40 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+# The measured surface. Recorded into the artifact so claim_gate (C12) can tell
+# whether the stored numbers still describe the current code.
+EVIDENCE_GLOBS = [
+    "src/**/*.rs",
+    "tests/fixtures/reducers/**/*",
+    "eval/manifest.json",
+    "examples/eval_metrics.rs",
+    "tools/jev_obs_judge.py",
+]
+
+
+def evidence_fingerprint(globs: list[str]) -> str:
+    """Content hash of the measured surface; claim_gate (C12) recomputes it."""
+    digest = hashlib.sha256()
+    paths = sorted(
+        p for pat in globs for p in ROOT.glob(pat)
+        if p.is_file() and "__pycache__" not in p.parts
+    )
+    for path in paths:
+        digest.update(path.relative_to(ROOT).as_posix().encode())
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+    return digest.hexdigest()
+
+
+def current_git_rev() -> str | None:
+    """HEAD at generation time; claim_gate (C12) uses it to detect stale evidence."""
+    try:
+        proc = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT,
+                              capture_output=True, text=True)
+    except OSError:
+        return None
+    return proc.stdout.strip() if proc.returncode == 0 else None
+
 API_URL = "https://api.typesafe.ai/v1/systemone"
 API_MODEL = "jev-latest"
 EXCERPT_CHARS = 1200
@@ -348,6 +384,11 @@ def main(argv: list[str] | None = None) -> int:
     report = {
         "schema": "verseshell.jev-obs-report/v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "git_rev": current_git_rev(),
+        "evidence": {
+            "globs": EVIDENCE_GLOBS,
+            "fingerprint": evidence_fingerprint(EVIDENCE_GLOBS),
+        },
         "generator": "tools/jev_obs_judge.py",
         "mode": mode,
         "judge": API_MODEL if mode == "jev" else "deterministic-heuristic",
@@ -380,8 +421,8 @@ def main(argv: list[str] | None = None) -> int:
     }
 
     args.report.parent.mkdir(parents=True, exist_ok=True)
-    args.report.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    args.markdown.write_text(render_markdown(report), encoding="utf-8")
+    args.report.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    args.markdown.write_text(render_markdown(report), encoding="utf-8", newline="\n")
 
     print(f"jev_obs_judge [{mode}]: {len(report_rows)} samples")
     print(f"  diagnostic_sufficient: {sufficient}/{len(report_rows)}")

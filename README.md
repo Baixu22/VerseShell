@@ -971,18 +971,20 @@ cargo bench -- --quick            # Quick mode (fewer samples)
 
 | Operation | VerseShell | PowerShell | Bash | AE vs PWsh |
 |-----------|-----------|------------|------|------------|
-| CPU info | **266.1ms** | 1240.8ms | 366.8ms | **4.7x faster** |
-| Disk info | **10.6ms** | 327.3ms | N/A | **31.0x faster** |
-| List dir | **10.3ms** | 239.1ms | 353.1ms | **23.1x faster** |
-| Read file | **10.8ms** | 136.3ms | 336.9ms | **12.6x faster** |
-| Pipeline 1K | **11.0ms** | 166.6ms | 367.5ms | **15.1x faster** |
+| CPU info | **261.2ms** | 1238.2ms | 361.3ms | **4.7x faster** |
+| Disk info | **11.5ms** | 327.8ms | N/A | **28.6x faster** |
+| List dir | **10.2ms** | 249.6ms | 363.1ms | **24.6x faster** |
+| Read file | **11.5ms** | 141.2ms | 347.4ms | **12.2x faster** |
+| Pipeline 1K | **11.0ms** | 171.0ms | 356.2ms | **15.5x faster** |
 
 Median of 20 runs after 3 warm-up runs on an AMD Ryzen 7 7745HX; each number is a
 real process spawn with stdout/stderr discarded, so process startup is included.
 VerseShell = `target/release/ae.exe`, PowerShell = Windows PowerShell 5.1
 (`-NoProfile`), Bash = Git Bash. Reproduce with `python tools/cross_shell_bench.py`
 (raw per-iteration samples: `eval/cross_shell.json`); the numbers are wall-clock
-measurements on one machine, not a portable guarantee.
+measurements on one machine, not a portable guarantee. This table is checked
+against that artifact by `python tools/readme_claims_check.py` (claim C10), so a
+re-measurement must update both together.
 
 ---
 

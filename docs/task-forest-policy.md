@@ -59,6 +59,7 @@
 | `.agent-workbench/task-forest/`（图、事件流、快照、提案、导出） | 是 | 第三方审计与回放需要 |
 | `proposals/`（提案可读副本） | 是 | 与森林内提案一一对应 |
 | `tools/*.py`（`claim_gate` / `jev_obs_judge` / `validate_manifest`） | 是 | 验收门禁必须能被 clone 后直接跑 |
+| `bench/aci/**/*.py`（数据集 fixture 代码、`runners/`、`scorers/`） | 是 | 数据集与 runner 是 C1/C2 的 source；缺了它们复现命令跑不起来 |
 | `eval/`、`examples/`（指标、探针、复现入口） | 是 | 声明的 source 与复现命令 |
 | `.mimocode/skills/task-forest/`（森林 CLI 本体） | 否 | 本地工具安装，可重装；规则源以本文件为准 |
 | `.trae/`、`.ae/`、`target/`（编辑器笔记、运行期产物） | 否 | 本地草稿与缓存 |
