@@ -1,0 +1,42 @@
+{
+  "proposal_id": "TFP-dataset-feedback-final-2026-09-22",
+  "session_id": "ses_verseshell-tf-relay3-2026-09-22",
+  "rationale": "提交 96818d1 已完成，回填 commit hash 并把 TF-0035 与 TF-0031 转 done，本轮收口。森林记录随第二次提交落库。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0035",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "本轮改动已提交：commit 96818d1「chore(evidence): re-run the dataset, make re-runs reviewable, gate stale evidence」，44 个文件，覆盖数据集重跑产物、6 个写入方的 LF 修复、数据集入库（.gitignore + 策略文档）、C12 指纹机制与门禁、README 表校验、CHANGELOG/claims 文档与森林数据。",
+        "next_action": "无。后续轮次沿用根策略 §6 的收尾动作；改动被测代码后先重跑对应 runner 再跑门禁（C12 会拦截陈旧产物）。",
+        "evidence": [
+          "git commit 96818d1（44 files changed）",
+          "提交前门禁：python tools/claim_gate.py → 11/11 gated claims pass, exit 0（C12 3/3 fresh）；python tools/readme_claims_check.py → 17/17, exit 0",
+          "提交后复核：C12 只比对文件内容指纹，提交不改内容，故仍为 fresh（见收口复核记录）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0031",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "全部 desired_outcomes 均有可复现证据：①三类数据集产物在同一代码版本上重跑并与基线逐项对比（bench 0.106/0.55 一致、jev 10/13 与 9/13 一致，逐行 0 差异）；②重跑产物 diff 最小可审（6 个写入方改 LF，重跑产物 CRLF=0，语义不变）；③证据新鲜度可机检（C12：产物记录被测代码面 sha256 指纹，缺指纹或指纹过期即失败，正负双向验证通过）；④门禁与测试全绿（claim_gate 11/11、readme_claims_check 17/17）、evidence 回写森林、提案 apply/validate/export 通过、改动已提交（96818d1）。附带修复：数据集与 runner 之前被 .gitignore 挡住、未进版本库。明确边界：C12 只覆盖登记的三份产物，指纹不含运行环境，跨机器可比性仍受 C11 限制；live 模式未跑（需真实模型与付费 API）。",
+        "next_action": "如需继续扩展：新增评测产物时把它登记进 claim_gate 的 EVIDENCE_ARTIFACTS 并在生成器里记录指纹；改动 reducers/热路径后先重跑 run_suite / jev_obs_judge / cross_shell_bench。",
+        "evidence": [
+          "python tools/claim_gate.py → 11/11 gated claims pass, exit 0（C1 0.106、C2 0.55、C3 1.00、C4 1.00、C6/C7/C8 PASS、C9 0.4203、C10 PASS、C11 0.2109、C12 1.0；C5 N/A）",
+          "python tools/readme_claims_check.py → 17/17 checks pass, exit 0",
+          "重跑与对比：run_suite --mode mock（accept=True）、jev_obs_judge（0 行语义差异）、cross_shell_bench（worst 0.2109，all_commands_ok=true）",
+          "C12 负向验证：篡改 eval/cross_shell.json 指纹 → 该产物判 stale、pass=False，其余两份 fresh；还原后恢复",
+          "行尾证据：重跑产物 CRLF=0；修复前 bench/aci/results/latest.json 为 1719 CRLF / 0 LF",
+          ".gitignore + docs/task-forest-policy.md §7：bench/aci/**/*.py 进版本库，数据集可 clone 复现",
+          "git commit 96818d1；TF-0032 / TF-0033 / TF-0034 / TF-0035 的 evidence 字段"
+        ]
+      }
+    }
+  ]
+}
