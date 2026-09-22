@@ -928,8 +928,8 @@ src/
 │   ├── bash.rs       # Core transpiler (line-oriented, 70+ builtin mappings)
 │   └── explain.rs    # Bash → MCP tool call translator (21 patterns)
 │
-├── benches/          # 4 Criterion benchmark suites
-└── tests/            # 50 integration tests + concurrency stress tests
+├── benches/          # 5 Criterion benchmark suites
+└── tests/            # 52 integration tests + concurrency stress tests
 ```
 
 ### Key Design Decisions
@@ -967,17 +967,22 @@ cargo bench                       # 4 benchmark suites
 cargo bench -- --quick            # Quick mode (fewer samples)
 ```
 
-### Cross-Shell Comparison (v0.5.1 benchmark, Ryzen 7 7745HX)
+### Cross-Shell Comparison (measured on this machine — claim C11)
 
 | Operation | VerseShell | PowerShell | Bash | AE vs PWsh |
 |-----------|-----------|------------|------|------------|
-| CPU info | 362ms* | 1326ms* | 443ms* | **3.7x faster** |
-| Disk info | **28ms** | 403ms | N/A | **14.4x faster** |
-| List dir | **26ms** | 315ms | 405ms | **12.1x faster** |
-| Read file | **29ms** | 198ms | 428ms | **6.8x faster** |
-| Pipeline 1K | **67ms** | 256ms | 426ms | **3.8x faster** |
+| CPU info | **266.1ms** | 1240.8ms | 366.8ms | **4.7x faster** |
+| Disk info | **10.6ms** | 327.3ms | N/A | **31.0x faster** |
+| List dir | **10.3ms** | 239.1ms | 353.1ms | **23.1x faster** |
+| Read file | **10.8ms** | 136.3ms | 336.9ms | **12.6x faster** |
+| Pipeline 1K | **11.0ms** | 166.6ms | 367.5ms | **15.1x faster** |
 
-\* 20-iteration total; includes process spawn overhead for bash/pwsh
+Median of 20 runs after 3 warm-up runs on an AMD Ryzen 7 7745HX; each number is a
+real process spawn with stdout/stderr discarded, so process startup is included.
+VerseShell = `target/release/ae.exe`, PowerShell = Windows PowerShell 5.1
+(`-NoProfile`), Bash = Git Bash. Reproduce with `python tools/cross_shell_bench.py`
+(raw per-iteration samples: `eval/cross_shell.json`); the numbers are wall-clock
+measurements on one machine, not a portable guarantee.
 
 ---
 

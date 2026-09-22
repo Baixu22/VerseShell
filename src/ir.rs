@@ -72,6 +72,8 @@ pub enum IRNode {
     Reduce(Vec<String>, Box<crate::ast::Expr>, Box<IRNode>),
     /// Take first N: count IRNode
     Take(Box<IRNode>),
+    /// Reverse the pipeline input (array or string)
+    Reverse,
 
     // ── Fused Pipeline Stages ──
     /// map + map fused: single-pass double transform
@@ -403,6 +405,9 @@ fn hash_node<H: Hasher>(node: &IRNode, h: &mut H) {
             22u8.hash(h);
             hash_node(n, h);
         }
+        Reverse => {
+            30u8.hash(h);
+        }
         FusedMapMap(a, b) => {
             27u8.hash(h);
             hash_node(a, h);
@@ -543,6 +548,7 @@ impl IROptimizer {
             | IRNode::Filter(_, _)
             | IRNode::Sort(_)
             | IRNode::Take(_)
+            | IRNode::Reverse
             | IRNode::Reduce(_, _, _) => {
                 node // Pipeline stages pass through without constant folding
             }
@@ -926,7 +932,15 @@ impl IRCompiler {
                     )
                 };
                 let (params, body) = lam?;
-                return Some(IRNode::Reduce(params, body, Box::new(init)));
+                // The fold reads its array from the pipeline input, so the
+                // source has to stay part of the lowered pipeline — same shape
+                // as map/where/sort/take. Returning the bare Reduce node
+                // dropped the source, so every `... | reduce ...` failed at
+                // eval time with "expected array".
+                return Some(IRNode::Pipeline(vec![
+                    source.clone(),
+                    IRNode::Reduce(params, body, Box::new(init)),
+                ]));
             }
             "take" => {
                 let n = args
@@ -939,12 +953,11 @@ impl IRCompiler {
                 ]));
             }
             "reverse" => {
-                // Lower to Call(Var("arr.reverse"), [source]) which routes
-                // through the builtin dispatch and uses the pipeline input.
-                return Some(IRNode::Call(
-                    Box::new(IRNode::Var("arr.reverse".to_string())),
-                    vec![source.clone()],
-                ));
+                // A real pipeline stage: it reads the upstream value from
+                // `env.input()`, exactly like Take. Lowering it to a Call (or
+                // to the unregistered name "arr.reverse") broke both the
+                // standalone and the chained form.
+                return Some(IRNode::Pipeline(vec![source.clone(), IRNode::Reverse]));
             }
             _ => None,
         }
@@ -1295,6 +1308,20 @@ impl IREvaluator {
                     Err(anyhow!("expected array, got {}", input.type_name()))
                 }
             }
+            IRNode::Reverse => {
+                let input = env.input().cloned().unwrap_or(Value::Null);
+                match input {
+                    Value::Array(mut arr) => {
+                        arr.reverse();
+                        Ok(Value::Array(arr))
+                    }
+                    Value::Str(s) => Ok(Value::Str(s.chars().rev().collect())),
+                    other => Err(anyhow!(
+                        "reverse requires array or string input, got {}",
+                        other.type_name()
+                    )),
+                }
+            }
             // Builtin dispatch
             IRNode::Builtin(name, args, effect) => {
                 // Check capability
@@ -1411,6 +1438,7 @@ fn node_type_name(node: &IRNode) -> &'static str {
         IRNode::Sort(..) => "Sort",
         IRNode::Reduce(..) => "Reduce",
         IRNode::Take(..) => "Take",
+        IRNode::Reverse => "Reverse",
         IRNode::FusedMapMap(..) => "FusedMapMap",
         IRNode::FusedMapFilter(..) => "FusedMapFilter",
         IRNode::FusedFilterMap(..) => "FusedFilterMap",

@@ -1,0 +1,268 @@
+{
+  "proposal_id": "TFP-promise-consistency-2026-09-22",
+  "session_id": "ses_verseshell-tf-relay2-2026-09-22",
+  "rationale": "接力轮把 compact 数字按声明纪律处置后，继续巡检「README 承诺 ↔ 实际行为」的一致性，发现两类真实缺口：①文档承诺的核心算子 reduce 在默认编译路径上必然失败（src/ir.rs 的 reduce 降级忘了把 source 包进 Pipeline，env.input() 为 None → error: expected array；README 第 146/277 行的示例因此跑不通），且没有任何测试覆盖；②README 的 Cross-Shell 对比表（3.7x/14.4x/12.1x/6.8x/3.8x）是唯一未登记的对外测量数字，原始输出也不在库里。按根策略 §3 把两者落成节点：先修缺陷并补回归测试，再把文档示例与实现数字变成可机检的门禁，最后处置跨 shell 数字。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "consistency",
+      "node": {
+        "title": "承诺一致性收尾：对外数字可登记、文档示例可执行",
+        "kind": "global_task",
+        "status": "in_progress",
+        "display_order": 30,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.85,
+        "summary": "README 同时承担两种承诺：可执行的示例（`[1,2,3,4] | reduce fn(acc,x)=>acc+x 0 → 10`）与可测量的数字（跨 shell 加速比）。本轮把两者都变成「可被机器复现」：修掉 reduce 在编译路径上丢管道输入的真实缺陷并补测试；把文档里的示例与实现类数字做成可机检的检查脚本并接入 claim_gate；把跨 shell 对比表用可复现 runner 重新测量后登记为声明。",
+        "purpose": "让 README 的每一句话都能被第三方用仓库内的命令验证，而不是靠信任。",
+        "desired_outcomes": [
+          "文档承诺的 reduce 管道示例在默认路径上返回正确结果，并有回归测试防止再次回归",
+          "文档中的可执行示例与实现类数字有一键可跑的检查入口，且接入 claim_gate 门槛",
+          "Cross-Shell 对比表：要么有可复现 runner + 登记声明 + 实测数字，要么显式降级为历史测量并写明失效边界",
+          "全量 cargo test 与 claim_gate 全绿",
+          "本轮节点 evidence 回写森林，提案 apply/validate/export 通过，改动已提交"
+        ],
+        "acceptance_criteria": [
+          "cargo test 覆盖 reduce（管道形式与直接调用形式），全绿",
+          "tools/ 下的一致性检查脚本可一键运行并给出逐条判定，接入 claim_gate 后 exit 0",
+          "README 的跨 shell 数字能追到 eval/ 下的原始测量产物与声明行",
+          "proposal-apply --yes、validate、export 成功；git 工作区干净"
+        ],
+        "non_goals": [
+          "不重写 IR 或引入新算子",
+          "不做跨平台（Unix）进程生命周期覆盖（本轮不涉及）",
+          "不为凑门槛改测试阈值"
+        ],
+        "execution_hints": ["先修 reduce 与回归测试，再做检查器，最后处置跨 shell 数字"],
+        "next_action": "先做 TF-0027：修 src/ir.rs 的 reduce 降级并补测试。",
+        "alignment": {
+          "user_goal": "继续接力开发，保持开发流程与证据链完整",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "巡检发现 README 有两处承诺无法被复现（一个示例、一组数字），这正是根策略 §4「自圆其说」的适用面",
+          "why_not_enough": "只覆盖文档承诺这一面，不新增产品能力",
+          "validation_plan": ["cargo test 全绿", "claim_gate exit 0", "README 示例逐条可跑"]
+        },
+        "source_sessions": ["ses_verseshell-tf-relay2-2026-09-22"],
+        "evidence": [
+          "target/debug/ae.exe -c \"[1,2,3,4] | reduce fn(acc,x)=>acc+x 0\" → error: expected array（exit 1，2026-09-22）；README.md:146 与 :277 正是该示例",
+          "README.md:972-978 Cross-Shell 对比表（3.7x/14.4x/12.1x/6.8x/3.8x）；docs/claims-and-evidence.md §6 记为「无未登记数字」，即该表未被登记；仓库内无原始测量输出"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "fix-reduce",
+      "node": {
+        "title": "步骤12：修复 reduce 管道降级丢 source 的缺陷",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1006,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.9,
+        "summary": "src/ir.rs 的 try_lower_builtin 在 \"reduce\" 分支直接返回 IRNode::Reduce(...)，没有像 map/where/sort/take 那样包成 IRNode::Pipeline(vec![source, ...])，于是管道左侧的数组从未被求值并写入 env.input()，求值期读到的输入是 Null，必然报 error: expected array。修复：把 Reduce 包进 Pipeline；并补回归测试覆盖管道形式与直接调用形式。",
+        "purpose": "恢复 README 承诺的 reduce 语义，并让它在默认编译路径上不再静默失效。",
+        "acceptance_criteria": [
+          "target/debug/ae.exe -c \"[1,2,3,4] | reduce fn(acc,x)=>acc+x 0\" 输出 10",
+          "直接调用形式 reduce([1,2,3,4], fn(acc,x)=>acc+x, 0) 同样返回 10",
+          "新增回归测试（含带初始值与索引参数的形态），cargo test 全绿",
+          "不改变 map/where/sort/take 等既有算子的行为"
+        ],
+        "non_goals": ["不重构 IR 降级框架"],
+        "execution_hints": ["对照同文件 map/where 的写法：IRNode::Pipeline(vec![source.clone(), IRNode::Reduce(...)])"],
+        "alignment": {
+          "user_goal": "文档承诺可执行",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "这是文档示例直接失效的根因，且无测试覆盖",
+          "why_not_enough": "只修一个算子，不代表其它算子都被覆盖（由 TF-0028 兜底）",
+          "validation_plan": ["cargo test", "手工跑 README 示例"]
+        },
+        "source_sessions": ["ses_verseshell-tf-relay2-2026-09-22"],
+        "evidence": [
+          "src/ir.rs:916-930 reduce 分支返回 IRNode::Reduce(...) 而未包 Pipeline；src/ir.rs:1271-1273 求值期读 env.input() 后 expect_array",
+          "target/debug/ae.exe -c \"[1,2,3,4] | reduce fn(acc,x)=>acc+x 0\" → error: expected array（exit 1）",
+          "tests/ 与 benches/ 中 grep \"reduce fn\" 无命中：该算子没有测试"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "doc-check",
+      "node": {
+        "title": "步骤13：文档示例与实现数字的一致性检查器",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1007,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.8,
+        "summary": "把「README 说了什么」变成可机检：新增 tools/readme_claims_check.py，①执行文档里声明了期望输出的 REPL 示例（如 `[1,2,3,4] | reduce fn(acc,x)=>acc+x 0 → 10`）并比对真实输出；②校验 README 里的实现类数字（缓存条目数、TTL 默认值、Criterion 套件数、测试文件数等）与源码/配置一致；③接入 claim_gate，任一条不符即失败。",
+        "purpose": "文档漂移（示例失效、数字过期）以前只能靠人眼发现，本轮改成门禁。",
+        "acceptance_criteria": [
+          "脚本对每条检查给出 期望/实际/source 三列，退出码反映是否全部通过",
+          "至少覆盖 README 中的 5 个可执行示例与 4 个实现类数字",
+          "发现的过期数字（若有）要么改正 README，要么在脚本里显式标注为「不设门槛 + 失效边界」",
+          "claim_gate 新增对应声明并 exit 0"
+        ],
+        "non_goals": ["不做通用 Markdown 解析器；只覆盖显式登记的条目"],
+        "execution_hints": ["示例用 target/release/ae.exe 或 debug 二进制跑，避免依赖 cargo 运行期"],
+        "alignment": {
+          "user_goal": "文档承诺可被机器复现",
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "why_this_task": "reduce 这类失效之所以长期存在，就是因为没有机检",
+          "why_not_enough": "只覆盖显式登记条目，不覆盖自由散文",
+          "validation_plan": ["运行脚本", "claim_gate exit 0"]
+        },
+        "source_sessions": ["ses_verseshell-tf-relay2-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "cross-shell",
+      "node": {
+        "title": "步骤14：Cross-Shell 对比表的可复现处置",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1008,
+        "priority": 2,
+        "difficulty": "medium",
+        "confidence": 0.8,
+        "summary": "README 的 Cross-Shell 对比表（CPU/Disk/List/Read/Pipeline 五项，3.7x–14.4x）是唯一未登记的对外测量数字，原始输出不在库里，且 bench_final.sh 的 Pipeline 命令用的是已失效的旧语法。处置：写 tools/cross_shell_bench.py 复现同样五项（AE vs PowerShell vs Git Bash，含预热与多次采样，输出 eval/cross_shell.json 原始样本），登记为声明并给出门槛；若某项无法公平复现（如 Bash 无对应命令），在表里显式标注而不是留一个好看的数字。",
+        "purpose": "让性能主张要么有原始样本与门槛，要么被降级，而不是停留在口头。",
+        "acceptance_criteria": [
+          "eval/cross_shell.json 含每项每 shell 的逐次样本、中位数与机器信息",
+          "README 表格数字与实测产物一致，并指向声明行",
+          "claim_gate 新增对应声明（门槛取保守值，且写明机器与测量方式的失效边界）",
+          "bench_final.sh 中已失效的 Pipeline 命令被修正或标注为历史脚本"
+        ],
+        "non_goals": ["不追求与历史数字完全一致（机器与时序不同）"],
+        "execution_hints": ["release 二进制已重建；Git Bash 位于 C:\\Program Files\\Git\\bin\\bash.exe"],
+        "alignment": {
+          "user_goal": "对外数字可登记",
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "why_this_task": "根策略 §4 要求任何对外数字都能追到复现命令与 source",
+          "why_not_enough": "墙钟测量受机器影响，门槛只能取保守值",
+          "validation_plan": ["重跑 runner 两次看稳定性", "claim_gate exit 0"]
+        },
+        "source_sessions": ["ses_verseshell-tf-relay2-2026-09-22"],
+        "evidence": [
+          "README.md:972-978 表格；docs/claims-and-evidence.md §6 显示该数字未登记",
+          "bench_final.sh:94 的 AE Pipeline 命令 `range(1,1000) | map fn(x)=>x*2 | where fn(x)=>x>500 | reduce fn(acc,x)=>acc+x 0` 在当前二进制上报 error: expected array"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-commit",
+      "node": {
+        "title": "步骤15：森林收口与提交",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1009,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.85,
+        "summary": "按根策略 §6 收尾：证据回写各节点，proposal-save → proposal-apply --yes → validate → export，并把本轮修复、检查器与声明改动提交，留下可追溯 commit。",
+        "purpose": "让本轮成果落盘可追溯。",
+        "acceptance_criteria": [
+          "各节点 evidence 已回写（不是只写在对话里）",
+          "proposal-save → apply --yes → validate → export 全部成功",
+          "git commit 覆盖本轮修复/检查器/声明/README 改动",
+          "报告给出提案路径、HTML 路径、节点状态变化、门禁命令与结果"
+        ],
+        "non_goals": ["不改写 git 历史、不 force push"],
+        "alignment": {
+          "user_goal": "开发流程与证据链完整",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "未提交的改动无法被第三方复现",
+          "why_not_enough": "提交只是载体，验收仍靠测试与门禁",
+          "validation_plan": ["git log/show 核对", "git status 干净"]
+        },
+        "source_sessions": ["ses_verseshell-tf-relay2-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "fix-reduce",
+      "to": "consistency",
+      "type": "child_of",
+      "edge": { "reason": "修缺陷是本轮第一交付", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "doc-check",
+      "to": "consistency",
+      "type": "child_of",
+      "edge": { "reason": "把文档承诺变成机检是本轮主线", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "cross-shell",
+      "to": "consistency",
+      "type": "child_of",
+      "edge": { "reason": "跨 shell 数字属于同一类未登记承诺", "confidence": 0.85 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "consistency",
+      "type": "child_of",
+      "edge": { "reason": "收口与落盘是最后一步", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "fix-reduce",
+      "type": "depends_on",
+      "edge": { "reason": "先修再收口", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "doc-check",
+      "type": "depends_on",
+      "edge": { "reason": "检查器要能跑通再收口", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "cross-shell",
+      "type": "depends_on",
+      "edge": { "reason": "声明与实测产物要先落地", "confidence": 0.85 }
+    },
+    {
+      "action": "add_edge",
+      "from": "consistency",
+      "to": "TF-0019",
+      "type": "related_to",
+      "edge": { "reason": "承接接力轮的声明纪律处置，同一套门禁与证据规则", "confidence": 0.85 }
+    },
+    {
+      "action": "update_node",
+      "id": "fix-reduce",
+      "fields": { "display_order": 10 }
+    },
+    {
+      "action": "update_node",
+      "id": "doc-check",
+      "fields": { "display_order": 20 }
+    },
+    {
+      "action": "update_node",
+      "id": "cross-shell",
+      "fields": { "display_order": 30 }
+    },
+    {
+      "action": "update_node",
+      "id": "close-commit",
+      "fields": { "display_order": 40 }
+    }
+  ]
+}

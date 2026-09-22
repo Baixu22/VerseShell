@@ -142,9 +142,38 @@ fn test_pipeline_reduce() {
     );
 }
 
+/// Regression: an *inline* lambda used to be lowered into a bare `Reduce` IR
+/// node without its source, so `... | reduce fn(..) 0` failed with
+/// "expected array" while the `let`-bound form above still passed.
+#[test]
+fn test_pipeline_reduce_inline_lambda() {
+    // Documented in README: "[1,2,3,4] | reduce fn(acc,x)=>acc+x 0 → 10"
+    assert_eq!(run("[1,2,3,4] | reduce fn(acc,x)=>acc+x 0"), "10");
+    // Direct call form (no pipeline input)
+    assert_eq!(run("reduce([1,2,3,4], fn(acc,x)=>acc+x, 0)"), "10");
+    // Documented chain: range | map | reduce
+    assert_eq!(
+        run("range(1,11) | map fn(x)=>x*x | reduce fn(a,b)=>a+b 0"),
+        "385"
+    );
+    // Optional third lambda parameter carries the element index
+    assert_eq!(run("[1,2,3,4] | reduce fn(acc,x,i)=>acc+x 0"), "10");
+}
+
 #[test]
 fn test_pipeline_take() {
     assert_eq!(run("[1,2,3,4,5] | take 3"), "[1, 2, 3]");
+}
+
+/// Regression: `reverse` used to be lowered to the unregistered builtin name
+/// "arr.reverse", so every form (piped, direct, chained) failed with
+/// "unknown builtin: arr.reverse" while README documented the chained form.
+#[test]
+fn test_pipeline_reverse() {
+    assert_eq!(run("[3,1,4,1,5] | sort | reverse | take(3)"), "[5, 4, 3]");
+    assert_eq!(run("[1,2,3] | reverse"), "[3, 2, 1]");
+    assert_eq!(run("reverse([1,2,3])"), "[3, 2, 1]");
+    assert_eq!(run("reverse(\"abc\")"), "cba");
 }
 
 #[test]

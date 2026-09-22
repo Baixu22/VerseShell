@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- `tools/readme_claims_check.py` + claim C10: every documented README example is
+  executed against the real binary and every README implementation number is
+  re-derived from its source of truth.
+- `tools/cross_shell_bench.py` + claim C11: reproducible wall-clock comparison
+  for the five advertised operations, with raw per-iteration samples in
+  `eval/cross_shell.json`.
 - Process lifecycle ops (`process.start` / `process.poll` / `process.write` /
   `process.kill` / `process.list`): runtime-owned long-lived processes with a
   monotonic byte cursor, a rolling retained output window, idempotent process-tree
@@ -31,6 +37,16 @@
   the old number.
 
 ### Fixed
+- `reduce` pipeline stage: the IR lowering returned a bare `Reduce` node and
+  dropped the pipeline source, so every `... | reduce fn(..) 0` (the form README
+  documents) failed with `expected array`. The `let`-bound form hid the bug
+  because it never took the lowering path.
+- `reverse` pipeline stage: it was lowered to the unregistered builtin name
+  `arr.reverse` and to a `Call` instead of a pipeline stage, so standalone,
+  direct and chained forms all failed. It is now a real `IRNode::Reverse` stage
+  that reads the upstream value like `Take`.
+- README numbers corrected against their sources: 5 Criterion benchmark suites
+  (was 4) and 52 integration tests (was 50).
 - Match-arm guards no longer clone the entire Env (scoped with_frame)
 
 ## 1.0.0 — Agent-Computer Interface surface

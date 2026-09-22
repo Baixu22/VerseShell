@@ -1,0 +1,551 @@
+{
+  "schema": "verseshell.cross-shell/v1",
+  "generated_at": "2026-09-22T13:59:01.955489+00:00",
+  "generator": "tools/cross_shell_bench.py",
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "python": "3.10.3",
+    "ae_binary": "target\\release\\ae.exe",
+    "bash_binary": "C:\\Program Files\\Git\\bin\\bash.exe"
+  },
+  "method": {
+    "iterations": 20,
+    "warmup": 3,
+    "clock": "time.perf_counter around a real process spawn; process startup included",
+    "io": "stdout/stderr to DEVNULL in every shell",
+    "payload_alignment": "VerseShell range(1,1001) == 1000 elements == seq 1 1000"
+  },
+  "operations": [
+    {
+      "name": "CPU info",
+      "shells": {
+        "ae": {
+          "command": [
+            "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\target\\release\\ae.exe",
+            "--json",
+            "-c",
+            "sys.cpu_info()"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            266.822,
+            261.824,
+            281.439,
+            270.418,
+            271.603,
+            265.382,
+            262.5,
+            268.039,
+            266.188,
+            263.767,
+            279.227,
+            261.35,
+            260.863,
+            276.546,
+            263.192,
+            266.228,
+            259.683,
+            269.744,
+            266.021,
+            257.421
+          ],
+          "median_ms": 266.105,
+          "mean_ms": 266.913,
+          "min_ms": 257.421
+        },
+        "pwsh": {
+          "command": [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            "Get-CimInstance Win32_Processor | ConvertTo-Json -Compress"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            1238.547,
+            1235.99,
+            1250.819,
+            1243.172,
+            1234.828,
+            1240.872,
+            1245.305,
+            1241.304,
+            1244.021,
+            1238.272,
+            1233.501,
+            1241.163,
+            1240.811,
+            1236.951,
+            1247.305,
+            1231.678,
+            1242.644,
+            1235.277,
+            1242.686,
+            1229.564
+          ],
+          "median_ms": 1240.841,
+          "mean_ms": 1239.736,
+          "min_ms": 1229.564
+        },
+        "bash": {
+          "command": [
+            "C:\\Program Files\\Git\\bin\\bash.exe",
+            "-lc",
+            "cat /proc/cpuinfo 2>/dev/null | head -5"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            375.725,
+            363.023,
+            373.74,
+            363.565,
+            377.89,
+            368.166,
+            343.832,
+            368.648,
+            366.849,
+            348.825,
+            382.328,
+            408.922,
+            344.212,
+            328.634,
+            363.84,
+            351.778,
+            399.931,
+            346.493,
+            368.336,
+            366.768
+          ],
+          "median_ms": 366.809,
+          "mean_ms": 365.575,
+          "min_ms": 328.634
+        }
+      },
+      "ratio_ae_over_pwsh": 0.2145,
+      "ratio_ae_over_bash": 0.7255
+    },
+    {
+      "name": "Disk info",
+      "shells": {
+        "ae": {
+          "command": [
+            "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\target\\release\\ae.exe",
+            "--json",
+            "-c",
+            "sys.disk_info()"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            10.701,
+            10.867,
+            10.596,
+            11.102,
+            19.443,
+            10.21,
+            10.083,
+            10.414,
+            10.393,
+            10.714,
+            10.398,
+            10.048,
+            10.01,
+            21.182,
+            10.58,
+            10.48,
+            10.633,
+            10.659,
+            11.675,
+            10.463
+          ],
+          "median_ms": 10.588,
+          "mean_ms": 11.533,
+          "min_ms": 10.01
+        },
+        "pwsh": {
+          "command": [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            "Get-PSDrive -PSProvider FileSystem | Where-Object Used -gt 0 | ConvertTo-Json -Compress"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            332.09,
+            331.21,
+            326.066,
+            333.91,
+            334.89,
+            330.857,
+            327.611,
+            324.181,
+            334.068,
+            325.199,
+            323.88,
+            336.057,
+            335.74,
+            329.074,
+            316.662,
+            324.654,
+            327.052,
+            320.58,
+            322.837,
+            322.965
+          ],
+          "median_ms": 327.331,
+          "mean_ms": 327.979,
+          "min_ms": 316.662
+        },
+        "bash": {
+          "ok": false,
+          "skipped": "no equivalent command"
+        }
+      },
+      "ratio_ae_over_pwsh": 0.0323,
+      "ratio_ae_over_bash": null
+    },
+    {
+      "name": "List dir",
+      "shells": {
+        "ae": {
+          "command": [
+            "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\target\\release\\ae.exe",
+            "--json",
+            "-c",
+            "file.ls(\"src\")"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            11.089,
+            11.228,
+            10.32,
+            10.15,
+            9.799,
+            9.809,
+            11.108,
+            29.04,
+            10.357,
+            10.428,
+            10.008,
+            10.154,
+            10.2,
+            9.68,
+            9.649,
+            10.345,
+            21.711,
+            10.384,
+            10.34,
+            10.036
+          ],
+          "median_ms": 10.33,
+          "mean_ms": 11.792,
+          "min_ms": 9.649
+        },
+        "pwsh": {
+          "command": [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            "Get-ChildItem src -File | ConvertTo-Json -Compress"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            232.256,
+            235.935,
+            244.279,
+            236.293,
+            237.036,
+            235.961,
+            237.168,
+            240.516,
+            236.13,
+            245.744,
+            239.652,
+            244.229,
+            240.797,
+            236.85,
+            241.782,
+            243.113,
+            245.728,
+            248.781,
+            236.759,
+            238.542
+          ],
+          "median_ms": 239.097,
+          "mean_ms": 239.878,
+          "min_ms": 232.256
+        },
+        "bash": {
+          "command": [
+            "C:\\Program Files\\Git\\bin\\bash.exe",
+            "-lc",
+            "ls -la src"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            365.227,
+            384.548,
+            329.321,
+            385.258,
+            342.994,
+            374.958,
+            357.55,
+            398.099,
+            347.652,
+            327.43,
+            334.797,
+            340.597,
+            343.512,
+            332.438,
+            356.167,
+            336.509,
+            375.037,
+            371.084,
+            351.514,
+            354.599
+          ],
+          "median_ms": 353.056,
+          "mean_ms": 355.464,
+          "min_ms": 327.43
+        }
+      },
+      "ratio_ae_over_pwsh": 0.0432,
+      "ratio_ae_over_bash": 0.0293
+    },
+    {
+      "name": "Read file",
+      "shells": {
+        "ae": {
+          "command": [
+            "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\target\\release\\ae.exe",
+            "--json",
+            "-c",
+            "file.read(\"README.md\")"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            10.679,
+            10.246,
+            10.321,
+            10.017,
+            10.047,
+            10.836,
+            9.784,
+            21.028,
+            11.158,
+            11.396,
+            11.299,
+            10.897,
+            11.158,
+            10.395,
+            10.836,
+            23.543,
+            11.195,
+            10.019,
+            10.362,
+            27.977
+          ],
+          "median_ms": 10.836,
+          "mean_ms": 12.66,
+          "min_ms": 9.784
+        },
+        "pwsh": {
+          "command": [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            "Get-Content README.md -Raw"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            133.726,
+            135.132,
+            140.288,
+            138.334,
+            136.052,
+            138.26,
+            135.829,
+            135.544,
+            135.798,
+            159.821,
+            136.575,
+            138.969,
+            137.904,
+            136.077,
+            135.921,
+            134.53,
+            141.178,
+            139.068,
+            136.693,
+            135.312
+          ],
+          "median_ms": 136.326,
+          "mean_ms": 138.051,
+          "min_ms": 133.726
+        },
+        "bash": {
+          "command": [
+            "C:\\Program Files\\Git\\bin\\bash.exe",
+            "-lc",
+            "cat README.md"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            326.598,
+            375.765,
+            363.971,
+            334.515,
+            337.715,
+            356.903,
+            354.461,
+            307.756,
+            320.102,
+            327.742,
+            325.668,
+            344.389,
+            361.473,
+            338.369,
+            356.705,
+            335.971,
+            335.995,
+            323.863,
+            345.268,
+            335.223
+          ],
+          "median_ms": 336.855,
+          "mean_ms": 340.423,
+          "min_ms": 307.756
+        }
+      },
+      "ratio_ae_over_pwsh": 0.0795,
+      "ratio_ae_over_bash": 0.0322
+    },
+    {
+      "name": "Pipeline 1K",
+      "shells": {
+        "ae": {
+          "command": [
+            "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\target\\release\\ae.exe",
+            "-c",
+            "range(1,1001) | map fn(x)=>x*2 | where fn(x)=>x>500 | reduce fn(acc,x)=>acc+x 0"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            10.665,
+            10.341,
+            11.243,
+            11.583,
+            11.034,
+            10.843,
+            10.628,
+            25.88,
+            11.704,
+            10.98,
+            10.41,
+            10.905,
+            10.5,
+            10.307,
+            10.623,
+            25.219,
+            11.331,
+            28.484,
+            11.652,
+            12.132
+          ],
+          "median_ms": 11.007,
+          "mean_ms": 13.323,
+          "min_ms": 10.307
+        },
+        "pwsh": {
+          "command": [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            "(1..1000 | ForEach-Object { $_ * 2 } | Where-Object { $_ -gt 500 } | Measure-Object -Sum).Sum"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            175.794,
+            166.846,
+            165.513,
+            178.246,
+            161.753,
+            163.99,
+            166.194,
+            169.695,
+            173.595,
+            161.312,
+            160.562,
+            166.365,
+            163.959,
+            170.829,
+            174.672,
+            165.646,
+            160.669,
+            166.911,
+            167.055,
+            180.906
+          ],
+          "median_ms": 166.606,
+          "mean_ms": 168.026,
+          "min_ms": 160.562
+        },
+        "bash": {
+          "command": [
+            "C:\\Program Files\\Git\\bin\\bash.exe",
+            "-lc",
+            "seq 1 1000 | awk '{v=$1*2; if (v>500) s+=v} END{print s}'"
+          ],
+          "exit_code": 0,
+          "ok": true,
+          "samples_ms": [
+            375.929,
+            389.292,
+            376.668,
+            339.199,
+            361.206,
+            357.17,
+            361.467,
+            343.195,
+            373.591,
+            345.214,
+            382.628,
+            327.191,
+            419.552,
+            403.699,
+            404.45,
+            341.907,
+            389.624,
+            376.302,
+            358.064,
+            360.744
+          ],
+          "median_ms": 367.529,
+          "mean_ms": 369.355,
+          "min_ms": 327.191
+        }
+      },
+      "ratio_ae_over_pwsh": 0.0661,
+      "ratio_ae_over_bash": 0.0299
+    }
+  ],
+  "aggregate": {
+    "worst_ratio_ae_over_pwsh": 0.2145,
+    "all_commands_ok": true,
+    "failed_commands": [],
+    "gated_operations": 5
+  }
+}

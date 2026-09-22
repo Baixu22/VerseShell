@@ -25,9 +25,11 @@ python tools/claim_gate.py --skip-tests
 python tools/validate_manifest.py                        # 样本来源路径存在性（步骤5）
 cargo run --example eval_metrics -- --out eval/metrics.json   # 诊断完备率 + 一步恢复探针 + 剧本探针
 python bench/aci/runners/run_suite.py --mode mock        # 重新生成 bench/aci/results/latest.json
-python tools/jev_obs_judge.py                            # L3 观察质检报告（不进 C1–C9 门禁）
+python tools/jev_obs_judge.py                            # L3 观察质检报告（不进 C1–C11 门禁）
 cargo test --test process_lifecycle_tests                # C8：进程生命周期契约（Windows）
 cargo run --example compact_ratio -- --out eval/compact_ratio.json   # C9：compact 编码 vs JSON
+python tools/readme_claims_check.py                      # C10：README 示例与实现数字
+python tools/cross_shell_bench.py                        # C11：跨 shell 墙钟对比（写 eval/cross_shell.json）
 ```
 
 ## 3. 声明表（C1–C7）
@@ -149,11 +151,39 @@ cargo run --example compact_ratio -- --out eval/compact_ratio.json   # C9：comp
 | 失效边界 | 字节数与 `ceil(len/4)` 是 token 代理，不是真实 tokenizer；样本是仓库内 fixture 加一次真实 `ops.list`，不代表真实模型负载；响应行没有解码器，未做 round-trip；只覆盖 `--format compact` 的**编码层**，Observation Budget 是另一层（见 C1） |
 | 状态 | 已证实（含负向结论：大载荷不节省） |
 
+### C10 · 文档承诺可执行 / 实现类数字与源码一致
+
+| 维度 | 内容 |
+|------|------|
+| 主张原文 | README 里登记的可执行示例都能跑出文档写的输出；README 里关于代码库的实现类数字都等于其源码真值 |
+| 门槛数字 | `python tools/readme_claims_check.py` 全部通过（7 个示例 + 5 个数字 = 12 项） |
+| 复现命令 | `python tools/readme_claims_check.py`，再 `python tools/claim_gate.py` |
+| source | `README.md`、`tools/readme_claims_check.py`、`tests/integration_tests.rs`、`src/runtime.rs`、`src/main.rs`、`src/artifact.rs`、`Cargo.toml` |
+| 样本量 / 日期 | 12 项检查（7 示例 + 5 数字），确定性复算 |
+| 最近实测 | 12/12 PASS（2026-09-22）。修复前 9/12：`reduce`、`reverse` 两个文档示例跑不通；README 的「4 Criterion 套件 / 50 integration tests」与源码真值（5 / 52）不一致 |
+| 失效边界 | 只覆盖脚本内**显式登记**的条目，不覆盖自由散文；README 中未登记的实现类数字（例如「28-arm match」「~50 builtins」「26 modules」）需先加进 registry 才会被检查 |
+| 状态 | 已证实 |
+
+### C11 · 跨 shell 墙钟对比（本机）
+
+| 维度 | 内容 |
+|------|------|
+| 主张原文 | 在同一台机器上，用各 shell 最廉价的等价命令各跑 20 次（丢弃 3 次预热、丢弃 stdout/stderr）后，VerseShell 五项常用操作的中位耗时都不高于 PowerShell 的 0.5 倍 |
+| 门槛数字 | `worst_ratio_ae_over_pwsh <= 0.50` 且所有命令退出码为 0 |
+| 复现命令 | `python tools/cross_shell_bench.py`（写 `eval/cross_shell.json`），再 `python tools/claim_gate.py` |
+| source | `tools/cross_shell_bench.py`、`eval/cross_shell.json`、`README.md`、`bench_final.sh` |
+| 样本量 / 日期 | 5 项操作 × 3 shell（Bash 无 Disk 等价命令，故 4 项）× 20 次 + 3 次预热；2026-09-22 |
+| 最近实测 | worst 0.2145（CPU info，4.7x）；Disk 0.0323（31.0x）、List 0.0432（23.1x）、Read 0.0795（12.6x）、Pipeline 0.0661（15.1x）；`all_commands_ok=true` |
+| 失效边界 | 墙钟测量，含进程启动开销，只代表本机与当前工具链（AMD Ryzen 7 7745HX / Windows PowerShell 5.1 `-NoProfile` / Git Bash）；不测吞吐、内存、并发；门禁读的是**已存产物** `eval/cross_shell.json`，改动热路径后必须重跑 runner 才会更新；README 里旧的 v0.5.1 数字（3.7x / 14.4x / …）已作废并被本声明取代 |
+| 状态 | 已证实（本机单次测量） |
+
 ## 4. 与 README 主张的对应关系
 
 - README 若出现 C1/C2 类数字，必须写成「mock bench，10 任务/条件，seed 42」并指向 `eval/evidence.json`，不得写成真实模型实测。
 - C9 是**分层**声明：可以说「小响应信封 ≥40% 节省（实测 42.4%）」，不得把它写成「compact 整体省 50–70%」或「观察载荷省一半」——后者实测为负。
 - C5 未证实：README 不得出现「上手成本低」「零学习成本」这类肯定句。
+- C10 是**兜底**声明：README 新增任何可执行示例或实现类数字时，先在 `tools/readme_claims_check.py` 的 registry 里加一条，否则它不受门禁保护。
+- C11 是**本机**声明：README 的跨 shell 表格必须与 `eval/cross_shell.json` 的实测一致，不得写成跨机器保证；改动热路径后必须重跑 `tools/cross_shell_bench.py`。
 - 新增任何对外数字时：先在本文件加一行，再在 `tools/claim_gate.py` 加对应门槛（或显式标注不设门槛），最后跑 `python tools/claim_gate.py`。
 
 ## 5. 口径统一规则（已按根策略裁决）
@@ -173,7 +203,7 @@ mock 实测值（0.106 / 0.55）在两侧都过线。今后新增对外数字一
 |------|------|------|
 | （无） | — | 2026-09-22：原「compact 协议 50–70% token 节省 vs JSON」已处置。该数字**无法复现**（实测小响应信封 42.4%、观察载荷合计 −3.1%），已按 §4 登记为 C9，并把 README 口径改成 C9 的实测范围。当前没有已知的「已进 README 但未登记」对外数字 |
 
-## 7. L3 观察质检（不进 C1–C9 门禁）
+## 7. L3 观察质检（不进 C1–C11 门禁）
 
 `tools/jev_obs_judge.py`（TF-0012）对每个失败样本问两个窄问题，产出 `eval/jev_obs_report.json` + `eval/jev_obs_report.md`：
 

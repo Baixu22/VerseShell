@@ -1,0 +1,128 @@
+{
+  "schema": "verseshell.readme-claims/v1",
+  "generated_at": "2026-09-22T14:01:22.544957+00:00",
+  "generator": "tools/readme_claims_check.py",
+  "ae_binary": "target\\debug\\ae.exe",
+  "all_pass": true,
+  "checks": [
+    {
+      "kind": "example",
+      "name": "[1,2,3] | map fn(x) => x * 2",
+      "source": "README.md",
+      "expected": "[2, 4, 6]",
+      "actual": "[2, 4, 6]",
+      "documented_in_readme": true,
+      "pass": true
+    },
+    {
+      "kind": "example",
+      "name": "[1,2,3,4,5] | where fn(x) => x > 3",
+      "source": "README.md",
+      "expected": "[4, 5]",
+      "actual": "[4, 5]",
+      "documented_in_readme": true,
+      "pass": true
+    },
+    {
+      "kind": "example",
+      "name": "[3,1,4,1,5] | sort",
+      "source": "README.md",
+      "expected": "[1, 1, 3, 4, 5]",
+      "actual": "[1, 1, 3, 4, 5]",
+      "documented_in_readme": true,
+      "pass": true
+    },
+    {
+      "kind": "example",
+      "name": "[5,2,4,1,3] | sort | where fn(x)=>x>2 | map fn(x)=>x*10",
+      "source": "README.md",
+      "expected": "[30, 40, 50]",
+      "actual": "[30, 40, 50]",
+      "documented_in_readme": true,
+      "pass": true
+    },
+    {
+      "kind": "example",
+      "name": "[1,2,3,4] | reduce fn(acc,x)=>acc+x 0",
+      "source": "README.md",
+      "expected": "10",
+      "actual": "10",
+      "documented_in_readme": true,
+      "pass": true
+    },
+    {
+      "kind": "example",
+      "name": "[3,1,4,1,5] | sort | reverse | take(3)",
+      "source": "README.md",
+      "expected": "[5, 4, 3]",
+      "actual": "[5, 4, 3]",
+      "documented_in_readme": true,
+      "pass": true
+    },
+    {
+      "kind": "example",
+      "name": "[1,2,3] | any fn(x) => x > 2",
+      "source": "README.md",
+      "expected": "true",
+      "actual": "true",
+      "documented_in_readme": true,
+      "pass": true
+    },
+    {
+      "kind": "number",
+      "name": "AST cache entries",
+      "source": "src/runtime.rs (max_ast_entries)",
+      "expected": 1024,
+      "actual": [
+        1024,
+        1024
+      ],
+      "note": "README says how many entries the AST cache holds",
+      "pass": true
+    },
+    {
+      "kind": "number",
+      "name": "snapshot cache TTL (ms)",
+      "source": "src/main.rs (--cache-ttl-ms default)",
+      "expected": 5000,
+      "actual": [
+        5000
+      ],
+      "note": "README documents the CLI default",
+      "pass": true
+    },
+    {
+      "kind": "number",
+      "name": "artifact TTL (hours)",
+      "source": "src/artifact.rs (DEFAULT_TTL)",
+      "expected": 24,
+      "actual": [
+        24
+      ],
+      "note": "README states the artifact retention window",
+      "pass": true
+    },
+    {
+      "kind": "number",
+      "name": "Criterion benchmark suites",
+      "source": "Cargo.toml ([[bench]] entries)",
+      "expected": 5,
+      "actual": [
+        5
+      ],
+      "note": "README states how many Criterion suites ship",
+      "pass": true
+    },
+    {
+      "kind": "number",
+      "name": "integration tests",
+      "source": "tests/integration_tests.rs (#[test] functions)",
+      "expected": 52,
+      "actual": [
+        52
+      ],
+      "note": "README states the size of the integration suite",
+      "pass": true
+    }
+  ]
+}

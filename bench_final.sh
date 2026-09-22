@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 # Cross-Shell Quantitative Benchmark: VerseShell vs PowerShell vs Git Bash
+#
+# NOTE (2026-09-22): this is the raw historical harness. The gated, reproducible
+# measurement is `python tools/cross_shell_bench.py` -> eval/cross_shell.json
+# (claim C11). That runner also fixes two problems here: the pipeline payload
+# mismatch (VerseShell range(1,1001) is 1000 elements, matching `seq 1 1000`)
+# and the `bc` dependency, which Git Bash does not ship.
 set -o pipefail
 
 AE="./target/release/ae"
@@ -90,14 +96,14 @@ echo "=== 3. DATA PIPELINES ==="
 echo ""
 
 echo "[3a] Map+Filter+Sum (1K items)"
-for i in 1 2 3; do $AE -c "range(1,1000) | map fn(x)=>x*2 | where fn(x)=>x>500 | reduce fn(acc,x)=>acc+x 0" > /dev/null 2>&1; done
-echo -n "  AE:   "; time for i in $(seq 1 20); do $AE -c "range(1,1000) | map fn(x)=>x*2 | where fn(x)=>x>500 | reduce fn(acc,x)=>acc+x 0" > /dev/null 2>&1; done
+for i in 1 2 3; do $AE -c "range(1,1001) | map fn(x)=>x*2 | where fn(x)=>x>500 | reduce fn(acc,x)=>acc+x 0" > /dev/null 2>&1; done
+echo -n "  AE:   "; time for i in $(seq 1 20); do $AE -c "range(1,1001) | map fn(x)=>x*2 | where fn(x)=>x>500 | reduce fn(acc,x)=>acc+x 0" > /dev/null 2>&1; done
 echo ""
 for i in 1 2 3; do powershell -NoProfile -Command "(1..1000 | ForEach-Object { $_ * 2 } | Where-Object { $_ -gt 500 } | Measure-Object -Sum).Sum" > /dev/null 2>&1; done
 echo -n "  PWsh: "; time for i in $(seq 1 20); do powershell -NoProfile -Command "(1..1000 | ForEach-Object { $_ * 2 } | Where-Object { $_ -gt 500 } | Measure-Object -Sum).Sum" > /dev/null 2>&1; done
 echo ""
-for i in 1 2 3; do bash -lc "seq 1 1000 | awk '{print \$1*2}' | awk '\$1>500' | paste -sd+ | bc" > /dev/null 2>&1; done
-echo -n "  Bash: "; time for i in $(seq 1 20); do bash -lc "seq 1 1000 | awk '{print \$1*2}' | awk '\$1>500' | paste -sd+ | bc" > /dev/null 2>&1; done
+for i in 1 2 3; do bash -lc "seq 1 1000 | awk '{v=\$1*2; if (v>500) s+=v} END{print s}'" > /dev/null 2>&1; done
+echo -n "  Bash: "; time for i in $(seq 1 20); do bash -lc "seq 1 1000 | awk '{v=\$1*2; if (v>500) s+=v} END{print s}'" > /dev/null 2>&1; done
 echo ""
 
 echo "[3b] Sort+Reverse+Take (500 items)"

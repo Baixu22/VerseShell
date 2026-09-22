@@ -1137,6 +1137,7 @@ fn collect_builtins(node: &IRNode, out: &mut Vec<(String, IREffect)>, count: &mu
         IRNode::Take(n) => {
             collect_builtins(n, out, count);
         }
+        IRNode::Reverse => {}
         IRNode::FusedMapMap(a, b) | IRNode::FusedMapFilter(a, b) | IRNode::FusedFilterMap(a, b) => {
             collect_builtins(a, out, count);
             collect_builtins(b, out, count);

@@ -13,6 +13,8 @@ Gated claims (thresholds mirror docs/claims-and-evidence.md exactly):
   C7  full cargo test suite passes
   C8  process lifecycle contract tests pass (Windows-only test file)
   C9  compact encoding saves >= 0.40 on a small response envelope (lossless)
+  C10 every documented README example runs and every README implementation number matches its source
+  C11 cross-shell wall-clock: worst VerseShell/PowerShell median ratio <= 0.50 (stored measurement)
 C5 (learning cost) has no deterministic metric yet: status-only in evidence.json.
 
 Usage:
@@ -41,6 +43,8 @@ THRESHOLDS = {
     "C7": {"desc": "full cargo test suite green", "op": ">=", "value": 1.00},
     "C8": {"desc": "process lifecycle contract tests", "op": ">=", "value": 1.00},
     "C9": {"desc": "compact encoding savings on a small response envelope", "op": ">=", "value": 0.40},
+    "C10": {"desc": "README examples run and README numbers match source", "op": ">=", "value": 1.00},
+    "C11": {"desc": "cross-shell worst VerseShell/PowerShell median ratio", "op": "<=", "value": 0.50},
 }
 
 
@@ -151,6 +155,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--bench", type=Path, default=ROOT / "bench/aci/results/latest.json")
     ap.add_argument("--compact-ratio", type=Path, default=None,
                     help="reuse an existing eval/compact_ratio.json instead of regenerating")
+    ap.add_argument("--cross-shell", type=Path, default=None,
+                    help="path to a stored eval/cross_shell.json (regenerate with tools/cross_shell_bench.py)")
     ap.add_argument("--evidence", type=Path, default=ROOT / "eval/evidence.json")
     ap.add_argument("--skip-tests", action="store_true",
                     help="skip cargo test; C6/C7 become stale and fail the gate")
@@ -302,6 +308,64 @@ def main(argv: list[str] | None = None) -> int:
                "process lifecycle contract: ownership echo, monotonic cursor, idempotent kill, "
                "tree termination, ConPTY + restart reconciliation; test file is #![cfg(windows)], "
                "so a pass only proves the contract on Windows")
+
+    # ── C10: README promises (runs after the test targets so the ae binary exists) ──
+    readme_path = ROOT / "eval/readme_claims.json"
+    proc = run([sys.executable, "tools/readme_claims_check.py", "--json", "eval/readme_claims.json"])
+    readme_ok = proc.returncode == 0
+    readme_checks: list[dict] = []
+    if readme_path.exists():
+        try:
+            readme_checks = json.loads(readme_path.read_text(encoding="utf-8")).get("checks", [])
+        except json.JSONDecodeError:
+            readme_checks = []
+    claims.append({
+        "id": "C10", "claim": THRESHOLDS["C10"]["desc"],
+        "threshold": "all pass", "value": 1.0 if readme_ok else 0.0, "pass": readme_ok,
+        "mode": "deterministic", "sample_size": len(readme_checks), "measured_at": now,
+        "platform": sys.platform,
+        "command": "python tools/readme_claims_check.py",
+        "source": ["README.md", "tools/readme_claims_check.py", "tests/integration_tests.rs"],
+        "detail": {
+            "checks": len(readme_checks),
+            "failed": [c.get("name") for c in readme_checks if not c.get("pass")],
+        },
+        "notes": "documented REPL examples must run and match their documented output, and README "
+                 "implementation numbers must equal their source of truth; coverage is the explicit "
+                 "registry in tools/readme_claims_check.py, not free-form prose",
+    })
+
+    # ── C11: cross-shell ratios from a stored measurement ──
+    cross_path = args.cross_shell.resolve() if args.cross_shell else ROOT / "eval/cross_shell.json"
+    cross = json.loads(cross_path.read_text(encoding="utf-8"))
+    cross_agg = cross.get("aggregate", {})
+    worst_ratio = cross_agg.get("worst_ratio_ae_over_pwsh")
+    cross_ok = (
+        bool(cross_agg.get("all_commands_ok"))
+        and worst_ratio is not None
+        and worst_ratio <= THRESHOLDS["C11"]["value"]
+    )
+    claims.append({
+        "id": "C11", "claim": THRESHOLDS["C11"]["desc"],
+        "threshold": "<= 0.50", "value": worst_ratio, "pass": cross_ok,
+        "mode": "wall_clock", "sample_size": cross_agg.get("gated_operations"),
+        "measured_at": cross.get("generated_at"),
+        "platform": sys.platform,
+        "command": "python tools/cross_shell_bench.py",
+        "source": ["tools/cross_shell_bench.py", "eval/cross_shell.json", "README.md"],
+        "detail": {
+            "per_operation_ratio": {
+                row.get("name"): row.get("ratio_ae_over_pwsh") for row in cross.get("operations", [])
+            },
+            "all_commands_ok": cross_agg.get("all_commands_ok"),
+            "failed_commands": cross_agg.get("failed_commands"),
+            "machine": cross.get("machine", {}).get("processor"),
+            "iterations": cross.get("method", {}).get("iterations"),
+        },
+        "notes": "stored wall-clock measurement (20 runs + 3 warm-up, process startup included, "
+                 "single machine); the gate re-checks the stored artifact, so re-run "
+                 "tools/cross_shell_bench.py after changing the hot path",
+    })
 
     gated = [c for c in claims if c["pass"] is not None]
     all_pass = all(c["pass"] for c in gated)

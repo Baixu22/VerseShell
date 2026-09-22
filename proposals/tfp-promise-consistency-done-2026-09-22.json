@@ -1,0 +1,87 @@
+{
+  "proposal_id": "TFP-promise-consistency-done-2026-09-22",
+  "session_id": "ses_verseshell-tf-relay2-2026-09-22",
+  "rationale": "本轮三个交付节点完成并各有可复现证据：TF-0027 修掉两个文档承诺算子的缺陷（reduce 丢 source、reverse 未注册/非阶段）并补回归测试；TF-0028 新增 README 承诺一致性检查器并接入 claim_gate（C10）；TF-0029 用可复现 runner 重测跨 shell 并登记 C11、作废旧数字。TF-0026 与 TF-0030 的验收含「改动已提交」，故先留 in_progress，提交后由补丁提案收口。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0027",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "修复了两个「文档承诺但默认编译路径跑不通」的管线算子。①reduce：src/ir.rs 的降级分支直接返回 IRNode::Reduce，丢掉了管道左侧的 source，求值期 env.input() 为 Null → 必然 error: expected array；改为包成 IRNode::Pipeline(vec![source, Reduce])。②reverse：原来降级成 IRNode::Call(Var(\"arr.reverse\"))，既用了未注册的 builtin 名，又不是 Pipeline 阶段（链会断、直接调用也报错）；改为新增真正的 IRNode::Reverse 阶段（枚举/hash/constant_fold/求值/describe + runtime.rs 的 collect_builtins），像 Take 一样读上游值。补两个回归测试覆盖内联 lambda 管道、直接调用、链式与带索引参数形态。",
+        "evidence": [
+          "src/ir.rs:916-935 reduce 降级改为 Pipeline(vec![source.clone(), IRNode::Reduce(...)])；src/ir.rs:1265-1295 求值读 env.input()",
+          "src/ir.rs 新增 IRNode::Reverse（枚举:76、hash_node:30u8、constant_fold、求值:1296-1310、describe）与 src/runtime.rs collect_builtins 分支",
+          "tests/integration_tests.rs::test_pipeline_reduce_inline_lambda 与 ::test_pipeline_reverse（2026-09-22 新增）",
+          "cargo test --test integration_tests → 52 passed / 0 failed（原 50）",
+          "target/debug/ae.exe -c \"[1,2,3,4] | reduce fn(acc,x)=>acc+x 0\" → 10；\"[3,1,4,1,5] | sort | reverse | take(3)\" → [5, 4, 3]",
+          "python tools/readme_claims_check.py 的 7 项 example 检查全 PASS（修复前 reduce/reverse 两项 FAIL）",
+          "根因说明：已有的 test_pipeline_reduce 用 `let f = fn...` 绑定，不经过降级路径（extract_lam 只认 IRNode::Lambda），因此缺陷长期未被测试发现"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0028",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "新增 tools/readme_claims_check.py，把「README 承诺」变成可机检：A 部分执行 7 个文档示例并比对文档输出，B 部分把 5 个实现类数字（AST 缓存 1024、--cache-ttl-ms 默认 5000ms、artifact 24h TTL、Criterion 套件数、integration 测试数）回溯到各自源码真值。首次运行 9/12，暴露出两个示例失效与两处过期数字；修正后 12/12。已接入 claim_gate 为 C10，并在声明文档里写成兜底规则。",
+        "evidence": [
+          "tools/readme_claims_check.py（示例 registry + 数字 registry，逐条输出 期望/实际/source，退出码反映结果，--json 出机器可读报告）",
+          "首次运行：readme_claims_check: 9/12（reduce/reverse 示例 FAIL；Criterion 4 vs 源码 5；integration 50 vs 源码 52）",
+          "修正 README（5 Criterion / 52 integration）后：12/12 checks pass, exit 0（2026-09-22）",
+          "eval/readme_claims.json（verseshell.readme-claims/v1）",
+          "tools/claim_gate.py 新增 C10（读 eval/readme_claims.json 的 all_pass）；python tools/claim_gate.py → 9/9 gated claims pass, exit 0",
+          "docs/claims-and-evidence.md 新增 C10（六要素）+ §4 兜底规则 + §2 复现入口"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0029",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "把 README 唯一未登记的对外测量数字（Cross-Shell 对比表）改成可复现声明。新增 tools/cross_shell_bench.py：五项操作 × AE/PowerShell/Git Bash，3 次预热 + 20 次计时，逐次样本、中位数与机器信息写入 eval/cross_shell.json。实测最差比值 0.2145（CPU info，4.7x），最好 0.0323（Disk info，31.0x），所有命令退出码 0。README 表格替换为本次实测值并写明方法与单机边界，旧 v0.5.1 数字作废；bench_final.sh 的失效 Pipeline 命令与 bc 依赖一并修正并标注为历史脚本。登记为 C11 并接入门禁。",
+        "evidence": [
+          "tools/cross_shell_bench.py + eval/cross_shell.json（verseshell.cross-shell/v1，含 samples_ms/median_ms/machine/method）",
+          "实测（2026-09-22，release 二进制，AMD Ryzen 7 7745HX）：CPU 266.1/1240.8/366.8ms（0.2145）、Disk 10.6/327.3/N/A（0.0323）、List 10.3/239.1/353.1（0.0432）、Read 10.8/136.3/336.9（0.0795）、Pipeline 11.0/166.6/367.5（0.0661）；worst_ratio_ae_over_pwsh=0.2145，all_commands_ok=true",
+          "README.md Cross-Shell 段落改为本次实测数字 + 方法说明（20 次中位数、含进程启动、单机边界）+ 指向 runner 与 C11",
+          "bench_final.sh：AE 载荷 range(1,1001)（与 seq 1 1000 对齐 1000 元素）、Bash 管道去掉 bc 依赖、头部注明历史脚本并指向新 runner",
+          "tools/claim_gate.py 新增 C11（门槛 worst_ratio <= 0.50 且 all_commands_ok）；docs/claims-and-evidence.md C11（六要素 + 失效边界：单机/墙钟/读已存产物）+ §4 规则"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0026",
+      "fields": {
+        "progress": 85.0,
+        "summary": "三个交付节点完成并各有可复现证据：算子缺陷修复（TF-0027）、README 承诺一致性检查器与 C10（TF-0028）、跨 shell 可复现重测与 C11（TF-0029）。剩余唯一缺口是提交（TF-0030），因为本节点验收含「改动已提交、git 工作区干净」，故留 in_progress。",
+        "next_action": "提交本轮修复/检查器/声明/README 改动（TF-0030），回填 commit hash 后把 TF-0026 与 TF-0030 转 done。",
+        "evidence": [
+          "python tools/claim_gate.py → 9/9 gated claims pass, exit 0（C1–C4/C6–C11；C5 N/A）",
+          "cargo test --test integration_tests → 52 passed / 0 failed",
+          "python tools/readme_claims_check.py → 12/12 checks pass, exit 0",
+          "python tools/cross_shell_bench.py → worst ratio 0.2145, all_commands_ok=true",
+          "TF-0027 / TF-0028 / TF-0029 三条节点的 evidence 字段"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0030",
+      "fields": {
+        "status": "in_progress",
+        "progress": 50.0,
+        "next_action": "提交本轮改动（ir.rs 两处算子修复、回归测试、两个新工具、README/CHANGELOG/claims 文档、bench_final.sh），再回填 commit hash。",
+        "evidence": [
+          "收口前门禁：python tools/claim_gate.py exit 0（9/9）、python tools/readme_claims_check.py exit 0（12/12）、cargo test --test integration_tests 52 passed（2026-09-22）"
+        ]
+      }
+    }
+  ]
+}
