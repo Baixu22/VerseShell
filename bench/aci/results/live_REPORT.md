@@ -1,335 +1,280 @@
 # ACI-Bench LIVE Report
 
-- Generated: 2026-07-19T16:09:44.189836+00:00
+- Generated: 2026-09-22T15:45:49.158797+00:00
 - Task set: 1.1.0
 - Mode: **LIVE** (real LLM multi-turn tool-calling)
-- Model: `deepseek-v4-flash`
+- Model: `sn-glm-5-3-flash`
 
 ## Leaderboard
 
 | model | condition | tasks | success_rate | avg_tool_calls | avg_observation_tokens |
 |---|---|---:|---:|---:|---:|
-| deepseek-v4-flash | raw_shell | 10 | 0.6 | 9.3 | 454.6 |
-| deepseek-v4-flash | verseshell_aci | 10 | 0.7 | 5.4 | 293.7 |
+| sn-glm-5-3-flash | raw_shell | 10 | 0.6 | 2.8 | 152.1 |
+| sn-glm-5-3-flash | verseshell_aci | 10 | 0.6 | 6.5 | 399.0 |
 
 ## Condition A vs D
 
-### deepseek-v4-flash → **PASS** (ACI advantage detected)
+### sn-glm-5-3-flash → **PARTIAL** (no clear advantage)
 
 | Metric | Raw Shell (A) | VerseShell ACI (D) | Ratio (D/A) |
 |---|---|---:|---:|
-| Success rate | 0.6 | 0.7 | — |
-| Avg tool calls | 9.3 | 5.4 | 0.5806 |
-| Avg observation tokens | 454.6 | 293.7 | 0.6461 |
-| Gate | — | — | **PASS** |
+| Success rate | 0.6 | 0.6 | — |
+| Avg tool calls | 2.8 | 6.5 | 2.3214 |
+| Avg observation tokens | 152.1 | 399.0 | 2.6233 |
+| Gate | — | — | **PARTIAL** |
 
 ## Per-Task Trajectories
 
 ### rust_fix_compile_error [raw_shell] → PASS
 - Reason: all ok
-- Tool calls: 9, Observation tokens: 362
-- Turns: 10, Elapsed: 170645ms
-- LLM: 15177 prompt + 972 completion tokens
+- Tool calls: 2, Observation tokens: 103
+- Turns: 3, Elapsed: 27239ms
+- LLM: 1181 prompt + 222 completion tokens
 - Trajectory:
-  1. `run_command` — {"command": "dir"}
-  1. `run_command` — {"command": "type src\\lib.rs"}
-  1. `run_command` — {"command": "python -c \"\nwith open('src/lib.rs', 'w') as f:\n    f.write('pub fn add(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\n\""}
-  1. `run_command` — {"command": "cargo check"}
-  1. `run_command` — {"command": "type src\\lib.rs"}
-  1. `run_command` — {"command": "python -c \"\nwith open('src/lib.rs', 'w', newline='\\r\\n') as f:\n    f.write('pub fn add(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\n\" && type src\\lib.rs"}
-  1. `run_command` — {"command": "python -c \"open('src/lib.rs', 'w').write('pub fn add(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\""}
-  1. `run_command` — {"command": "type src\\lib.rs"}
-  1. `run_command` — {"command": "cargo check"}
-  1. `task_complete` — {"success": true, "summary": "Fixed compile error by changing the return type of `add` from `String` to `i32` to match the body expression `a + b`."}
+  1. `run_command` — {"command": "type Cargo.toml & type src\\lib.rs & type TASK.md"}
+  1. `run_command` — {"command": "python -c \"open('src/lib.rs','w').write('pub fn add(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\" && cargo check"}
+  1. `task_complete` — {"success": true, "summary": "Fixed src/lib.rs return type from String to i32; cargo check succeeds."}
 
 ### rust_fix_compile_error [verseshell_aci] → PASS
 - Reason: all ok
-- Tool calls: 3, Observation tokens: 113
-- Turns: 4, Elapsed: 69289ms
-- LLM: 6744 prompt + 430 completion tokens
+- Tool calls: 9, Observation tokens: 590
+- Turns: 8, Elapsed: 244884ms
+- LLM: 7578 prompt + 617 completion tokens
 - Trajectory:
   1. `file.view` — {"path": "src/lib.rs"} aci_ok=True
-  1. `file.replace_exact` — {"path": "src/lib.rs", "old": "pub fn add(a: i32, b: i32) -> String {", "new": "pub fn add(a: i32, b: i32) -> i32 {", "expected_hash": "sha256:9fe8852b20a9b6770f58bb12e24d55cb8760ad35ebfeaa92e08d808bb aci_ok=True
-  1. `exec.run` — {"argv": ["cargo", "check"]} aci_ok=True
-  1. `task_complete` — {"success": true, "summary": "Fixed return type of `add` function from `String` to `i32` in src/lib.rs to match the body expression `a + b`."}
+  1. `file.view` — {"path": "Cargo.toml"} aci_ok=True
+  1. `file.replace_exact` — {"expected_hash": "sha256:471dfab5b79f216a7cf835a2ef71456800a904f5155774e2a333408ae14a9f51", "new": "pub fn add(a: i32, b: i32) -> i32 {", "old": "pub fn add(a: i32, b: i32) -> String {", "path": "src aci_ok=True
+  1. `exec.run` — {"argv": ["cargo", "check"]} aci_ok=False
+  1. `exec.run` — {"argv": ["cargo", "--version"], "profile": "none"} aci_ok=True
+  1. `exec.run` — {"argv": ["cargo", "check"], "profile": "none"} aci_ok=False
+  1. `exec.run` — {"argv": ["cargo", "+stable-x86_64-pc-windows-msvc", "check"], "profile": "none"} aci_ok=False
+  1. `exec.run` — {"argv": ["rustc", "--version", "--verbose"], "profile": "none"} aci_ok=True
+  1. `exec.run` — {"argv": ["cmd", "/c", "set RUSTUP"], "profile": "none"} aci_ok=True
 
 ### rust_add_unit_test [raw_shell] → FAIL
 - Reason: file_contains src/lib.rs
-- Tool calls: 10, Observation tokens: 500
-- Turns: 9, Elapsed: 156109ms
-- LLM: 14237 prompt + 1000 completion tokens
+- Tool calls: 3, Observation tokens: 196
+- Turns: 4, Elapsed: 36814ms
+- LLM: 1839 prompt + 384 completion tokens
 - Trajectory:
-  1. `run_command` — {"command": "dir /B /S"}
-  1. `run_command` — {"command": "type src\\lib.rs"}
-  1. `run_command` — {"command": "type Cargo.toml"}
-  1. `run_command` — {"command": "type TASK.md"}
-  1. `run_command` — {"command": "python -c \"\ncontent = '''pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_add() {\n        assert_eq!(add(2,
+  1. `run_command` — {"command": "type Cargo.toml & type src\\lib.rs & type TASK.md"}
+  1. `run_command` — {"command": "python -c \"open(r'src\\lib.rs','a').write('\\n#[cfg(test)]\\nmod tests {\\n    use super::*;\\n\\n    #[test]\\n    fn test_add() {\\n        assert_eq!(add(2, 3), 5);\\n        assert_e
   1. `run_command` — {"command": "cargo test"}
-  1. `run_command` — {"command": "type src\\lib.rs"}
-  1. `run_command` — {"command": "python -c \"content = open('src/lib.rs').read() + '\\n\\n#[cfg(test)]\\nmod tests {\\n    use super::*;\\n\\n    #[test]\\n    fn test_add() {\\n        assert_eq!(add(2, 3), 5);\\n      
-  1. `run_command` — {"command": "type src\\lib.rs"}
-  1. `run_command` — {"command": "cargo test"}
-  1. `task_complete` — {"success": true, "summary": "Added a unit test module to src/lib.rs with the test_add function covering positive, negative, and zero cases for the add() function. All tests pass with cargo test."}
+  1. `task_complete` — {"success": true, "summary": "Added a unit test for add() in src/lib.rs; cargo test passes (1 passed, 0 failed)."}
 
 ### rust_add_unit_test [verseshell_aci] → FAIL
 - Reason: file_contains src/lib.rs
-- Tool calls: 4, Observation tokens: 187
-- Turns: 4, Elapsed: 71403ms
-- LLM: 7419 prompt + 601 completion tokens
+- Tool calls: 9, Observation tokens: 692
+- Turns: 8, Elapsed: 109286ms
+- LLM: 8912 prompt + 1008 completion tokens
 - Trajectory:
   1. `file.view` — {"path": "src/lib.rs"} aci_ok=True
   1. `file.view` — {"path": "Cargo.toml"} aci_ok=True
-  1. `file.replace_exact` — {"path": "src/lib.rs", "old": "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}", "new": "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[te aci_ok=True
-  1. `exec.run` — {"argv": ["cargo", "test"]} aci_ok=True
-  1. `task_complete` — {"success": true, "summary": "Added unit test for add() in src/lib.rs with 4 assertions (positive, negative, zero, both negative) — cargo test passes (1 test, 0 failures)."}
+  1. `file.replace_exact` — {"expected_hash": "sha256:2551a0f2f738405daa1340ba7e0507f1843dc101231f37ac55b6a31203c28fb6", "new": "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::add; aci_ok=False
+  1. `file.replace_exact` — {"expected_hash": "sha256:2551a0f2f738405daa1340ba7e0507f1843dc101231f37ac55b6a31203c28fb6", "new": "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::add; aci_ok=False
+  1. `file.write` — {"content": "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::add;\n\n    #[test]\n    fn test_add() {\n        assert_eq!(add(2, 3), 5);\n        assert_ aci_ok=True
+  1. `exec.run` — {"argv": ["cargo", "test"]} aci_ok=False
+  1. `exec.run` — {"argv": ["cargo", "--version"]} aci_ok=True
+  1. `exec.run` — {"argv": ["rustc", "--version"]} aci_ok=True
+  1. `exec.run` — {"argv": ["rustup", "run", "stable", "cargo", "test"]} aci_ok=True
+  1. `task_complete` — {"success": true, "summary": "Added a #[cfg(test)] unit test module for add() in src/lib.rs (covering positive, negative, and zero cases); cargo test passes (1 passed, 0 failed)."}
 
 ### rust_search_and_edit [raw_shell] → FAIL
 - Reason: file_contains src/lib.rs
-- Tool calls: 19, Observation tokens: 653
-- Turns: 15, Elapsed: 258199ms
-- LLM: 33502 prompt + 1657 completion tokens
+- Tool calls: 3, Observation tokens: 294
+- Turns: 3, Elapsed: 12182ms
+- LLM: 1641 prompt + 313 completion tokens
 - Trajectory:
-  1. `run_command` — {"command": "dir /s /b"}
-  1. `run_command` — {"command": "type Cargo.toml"}
-  1. `run_command` — {"command": "type src\\lib.rs"}
-  1. `run_command` — {"command": "type TASK.md"}
-  1. `run_command` — {"command": "python -c \"\nimport re\nwith open('src/lib.rs', 'r') as f:\n    content = f.read()\ncontent = content.replace('// TODO(fix-me)\\n    0', 'a + b')\nwith open('src/lib.rs', 'w') as f:\n   
-  1. `run_command` — {"command": "type src\\lib.rs"}
-  1. `run_command` — {"command": "cd C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-rust_search_and_edit-mqu9gqv3 && cargo check 2>&1"}
-  1. `run_command` — {"command": "python -c \"\nwith open('src/lib.rs', 'w') as f:\n    f.write('pub fn sum(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\n\""}
-  1. `run_command` — {"command": "type src\\lib.rs"}
-  1. `run_command` — {"command": "cd C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-rust_search_and_edit-mqu9gqv3 && cargo check 2>&1"}
-  1. `run_command` — {"command": "echo pub fn sum(a: i32, b: i32) -> i32 { a + b } > src\\lib.rs"}
-  1. `run_command` — {"command": "type src\\lib.rs"}
-  1. `run_command` — {"command": "python -c \"\nwith open('src/lib.rs', 'w') as f:\n    data = 'pub fn sum(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n'\n    f.write(data)\n    print('Wrote:', repr(data))\n\""}
-  1. `run_command` — {"command": "python --version"}
-  1. `run_command` — {"command": "type src\\lib.rs"}
-  1. `run_command` — {"command": "del src\\lib.rs && python -c \"\nwith open('src/lib.rs', 'w') as f:\n    f.write('pub fn sum(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\nprint('done')\n\" && type src\\lib.rs"}
-  1. `run_command` — {"command": "del src\\lib.rs"}
-  1. `run_command` — {"command": "python -c \"open('src/lib.rs','w').write('pub fn sum(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\""}
-  1. `run_command` — {"command": "dir src\\lib.rs"}
+  1. `run_command` — {"command": "dir /s /b && type Cargo.toml && type src\\lib.rs && type TASK.md"}
+  1. `run_command` — {"command": "findstr /s /n \"TODO\" src\\*.*"}
+  1. `run_command` — {"command": "python -c \"open(r'src\\lib.rs','w').write('pub fn sum(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\" && type src\\lib.rs && cargo test"}
+  1. `task_complete` — {"success": true, "summary": "Implemented sum(a, b) in src/lib.rs to return a + b, replacing the TODO(fix-me) stub; cargo test passes."}
 
 ### rust_search_and_edit [verseshell_aci] → FAIL
 - Reason: file_contains src/lib.rs
-- Tool calls: 7, Observation tokens: 337
-- Turns: 6, Elapsed: 105300ms
-- LLM: 11572 prompt + 681 completion tokens
+- Tool calls: 11, Observation tokens: 854
+- Turns: 8, Elapsed: 104065ms
+- LLM: 9150 prompt + 938 completion tokens
 - Trajectory:
   1. `repo.summary` — {} aci_ok=True
-  1. `exec.run` — {"argv": ["dir", ".", "/b", "/s"], "cwd": ".", "profile": "none"} aci_ok=False
-  1. `file.view` — {"path": "Cargo.toml"} aci_ok=True
-  1. `file.view` — {"path": "src/lib.rs"} aci_ok=True
   1. `file.view` — {"path": "TASK.md"} aci_ok=True
-  1. `file.replace_exact` — {"path": "src/lib.rs", "old": "pub fn sum(a: i32, b: i32) -> i32 {\n    // TODO(fix-me)\n    0\n}", "new": "pub fn sum(a: i32, b: i32) -> i32 {\n    a + b\n}", "expected_hash": "sha256:b1082c89bc558ea aci_ok=True
-  1. `exec.run` — {"argv": ["cargo", "check"], "cwd": ".", "profile": "auto"} aci_ok=True
-  1. `task_complete` — {"success": true, "summary": "Implemented sum(a, b) in src/lib.rs to return a + b instead of 0."}
+  1. `file.view` — {"path": "src/lib.rs"} aci_ok=True
+  1. `file.view` — {"path": "Cargo.toml"} aci_ok=True
+  1. `file.replace_exact` — {"expected_hash": "sha256:9e7e6da826ccd2c01e7f734d0e68fc9da196b8f6e8f2bcb43b09dd98f91fb2c6", "new": "pub fn sum(a: i32, b: i32) -> i32 {\n    a + b\n}", "old": "pub fn sum(a: i32, b: i32) -> i32 {\n   aci_ok=False
+  1. `file.replace_exact` — {"new": "pub fn sum(a: i32, b: i32) -> i32 {\n    a + b\n}", "old": "pub fn sum(a: i32, b: i32) -> i32 {\n    // TODO(fix-me)\n    0\n}", "path": "src/lib.rs"} aci_ok=False
+  1. `file.replace_exact` — {"new": "    a + b", "old": "    // TODO(fix-me)\n    0", "path": "src/lib.rs"} aci_ok=False
+  1. `file.write` — {"content": "pub fn sum(a: i32, b: i32) -> i32 {\n    a + b\n}\n", "path": "src/lib.rs"} aci_ok=True
+  1. `exec.run` — {"argv": ["cargo", "test"], "profile": "cargo"} aci_ok=False
+  1. `exec.run` — {"argv": ["cargo", "build"], "profile": "cargo"} aci_ok=False
+  1. `exec.run` — {"argv": ["rustc", "--edition=2021", "--crate-type=lib", "src/lib.rs", "--emit=metadata", "-o", "libcheck.rmeta"], "profile": "none"} aci_ok=False
 
 ### python_fix_pytest_fail [raw_shell] → PASS
 - Reason: file_contains mathlib.py
-- Tool calls: 11, Observation tokens: 881
-- Turns: 10, Elapsed: 175794ms
-- LLM: 18157 prompt + 977 completion tokens
+- Tool calls: 2, Observation tokens: 72
+- Turns: 3, Elapsed: 17956ms
+- LLM: 1048 prompt + 191 completion tokens
 - Trajectory:
-  1. `run_command` — {"command": "dir"}
-  1. `run_command` — {"command": "type mathlib.py"}
-  1. `run_command` — {"command": "type TASK.md"}
-  1. `run_command` — {"command": "type tests\\test_math.py"}
-  1. `run_command` — {"command": "python -c \"\nwith open('mathlib.py', 'w') as f:\n    f.write('def add(a, b):\\n    return a + b\\n')\n\""}
-  1. `run_command` — {"command": "pytest"}
-  1. `run_command` — {"command": "python -m pytest -v"}
-  1. `run_command` — {"command": "type mathlib.py"}
-  1. `run_command` — {"command": "python -c \"open('mathlib.py', 'w').write('def add(a, b):\\n    return a + b\\n')\""}
-  1. `run_command` — {"command": "type mathlib.py"}
-  1. `run_command` — {"command": "python -m pytest -v"}
-  1. `task_complete` — {"success": true, "summary": "Fixed mathlib.py: changed add(a,b) return from a * b to a + b. All tests pass."}
+  1. `run_command` — {"command": "type mathlib.py & type TASK.md & type tests\\test_math.py"}
+  1. `run_command` — {"command": "python -c \"open('mathlib.py','w').write('def add(a, b):\\n    return a + b\\n')\" && python -m pytest -q"}
+  1. `task_complete` — {"success": true, "summary": "Fixed mathlib.add to return a+b instead of a*b; pytest passes (1 passed)."}
 
 ### python_fix_pytest_fail [verseshell_aci] → PASS
 - Reason: file_contains mathlib.py
-- Tool calls: 5, Observation tokens: 349
-- Turns: 5, Elapsed: 90422ms
-- LLM: 9816 prompt + 579 completion tokens
+- Tool calls: 5, Observation tokens: 302
+- Turns: 5, Elapsed: 54024ms
+- LLM: 3338 prompt + 398 completion tokens
 - Trajectory:
   1. `file.view` — {"path": "mathlib.py"} aci_ok=True
   1. `file.view` — {"path": "tests/test_math.py"} aci_ok=True
-  1. `file.replace_exact` — {"path": "mathlib.py", "old": "    return a * b", "new": "    return a + b", "expected_hash": "sha256:4fb46b3507c096aece05e92b88ce528ab2ee3c2c42657ba218d09dfdf5c02418"} aci_ok=True
+  1. `file.replace_exact` — {"expected_hash": "sha256:4fb46b3507c096aece05e92b88ce528ab2ee3c2c42657ba218d09dfdf5c02418", "new": "    return a + b", "old": "    return a * b", "path": "mathlib.py"} aci_ok=True
   1. `exec.run` — {"argv": ["pytest", "-q"]} aci_ok=False
-  1. `exec.run` — {"argv": ["python", "-m", "pytest", "-q"], "cwd": "."} aci_ok=True
-  1. `task_complete` — {"success": true, "summary": "Fixed mathlib.py add(a,b) to return a+b instead of a*b; verified with pytest (1 passed)."}
+  1. `exec.run` — {"argv": ["python", "-m", "pytest", "-q"]} aci_ok=True
+  1. `task_complete` — {"success": true, "summary": "Fixed mathlib.add to return a+b instead of a*b; pytest passes (1 passed) via python -m pytest."}
 
 ### python_edit_and_retest [raw_shell] → PASS
 - Reason: file_contains greet.py
-- Tool calls: 11, Observation tokens: 851
-- Turns: 10, Elapsed: 174581ms
-- LLM: 16382 prompt + 832 completion tokens
+- Tool calls: 2, Observation tokens: 83
+- Turns: 3, Elapsed: 39252ms
+- LLM: 1055 prompt + 204 completion tokens
 - Trajectory:
-  1. `run_command` — {"command": "dir /b"}
-  1. `run_command` — {"command": "type greet.py"}
-  1. `run_command` — {"command": "type tests\\test_greet.py"}
-  1. `run_command` — {"command": "type TASK.md"}
-  1. `run_command` — {"command": "python -c \"\nwith open('greet.py', 'w') as f:\n    f.write('def greet(name):\\n    return f\\\"Hello, {name}!\\\"\\n')\n\""}
-  1. `run_command` — {"command": "cd tests && python -m pytest test_greet.py -v"}
-  1. `run_command` — {"command": "python -m pytest tests\\test_greet.py -v"}
-  1. `run_command` — {"command": "type greet.py"}
-  1. `run_command` — {"command": "python -c \"content = 'def greet(name):\\n    return f\\\"Hello, {name}!\\\"\\n'; open('greet.py', 'w').write(content)\""}
-  1. `run_command` — {"command": "type greet.py"}
-  1. `run_command` — {"command": "python -m pytest tests\\test_greet.py -v"}
-  1. `task_complete` — {"success": true, "summary": "Updated greet() to return 'Hello, {name}!' and all tests pass."}
+  1. `run_command` — {"command": "type greet.py & type TASK.md & type tests\\test_greet.py"}
+  1. `run_command` — {"command": "python -c \"open('greet.py','w').write('def greet(name):\\n    return f\\\"Hello, {name}!\\\"\\n')\" && python -m pytest tests -q"}
+  1. `task_complete` — {"success": true, "summary": "Updated greet() to return 'Hello, {name}!' and all tests pass (1 passed)."}
 
 ### python_edit_and_retest [verseshell_aci] → PASS
 - Reason: file_contains greet.py
-- Tool calls: 7, Observation tokens: 589
-- Turns: 7, Elapsed: 127952ms
-- LLM: 15906 prompt + 768 completion tokens
+- Tool calls: 5, Observation tokens: 310
+- Turns: 5, Elapsed: 22911ms
+- LLM: 3332 prompt + 424 completion tokens
 - Trajectory:
   1. `file.view` — {"path": "greet.py"} aci_ok=True
   1. `file.view` — {"path": "tests/test_greet.py"} aci_ok=True
-  1. `file.replace_exact` — {"path": "greet.py", "old": "    return f\"Hi {name}\"", "new": "    return f\"Hello, {name}!\"", "expected_hash": "sha256:3ab4a6cd647afe331b3f14443f8e612f820d5ac9aa50380f608306859defb964"} aci_ok=True
-  1. `exec.run` — {"argv": ["pytest", "-q", "tests/"]} aci_ok=False
-  1. `exec.run` — {"argv": ["pytest", "-q", "--rootdir=.", "tests/"], "cwd": "."} aci_ok=False
-  1. `exec.run` — {"argv": ["python", "-m", "pytest", "-q", "tests/"], "cwd": "."} aci_ok=True
-  1. `file.view` — {"path": "greet.py"} aci_ok=True
-  1. `task_complete` — {"success": true, "summary": "Updated greet() to return 'Hello, {name}!' instead of 'Hi {name}'. Tests pass."}
+  1. `file.replace_exact` — {"new": "def greet(name):\n    return f\"Hello, {name}!\"", "old": "def greet(name):\n    return f\"Hi {name}\"", "path": "greet.py"} aci_ok=True
+  1. `exec.run` — {"argv": ["pytest", "-q"], "profile": "pytest"} aci_ok=False
+  1. `exec.run` — {"argv": ["python", "-m", "pytest", "-q"], "profile": "pytest"} aci_ok=True
+  1. `task_complete` — {"success": true, "summary": "Updated greet() in greet.py to return \"Hello, {name}!\" and verified with pytest (1 passed)."}
 
 ### python_noisy_install_summary [raw_shell] → FAIL
 - Reason: file_contains SUMMARY.txt
-- Tool calls: 6, Observation tokens: 244
-- Turns: 6, Elapsed: 106171ms
-- LLM: 6966 prompt + 526 completion tokens
+- Tool calls: 3, Observation tokens: 176
+- Turns: 4, Elapsed: 32458ms
+- LLM: 1846 prompt + 261 completion tokens
 - Trajectory:
-  1. `run_command` — {"command": "dir"}
-  1. `run_command` — {"command": "type requirements.txt"}
-  1. `run_command` — {"command": "type TASK.md"}
-  1. `run_command` — {"command": "pip install -r requirements.txt"}
-  1. `run_command` — {"command": "python -c \"with open('SUMMARY.txt', 'w') as f: f.write('1 package installed/verified: six==1.16.0\\n')\""}
-  1. `run_command` — {"command": "type SUMMARY.txt"}
-  1. `task_complete` — {"success": true, "summary": "Installed requirements (1 package: six==1.16.0) and wrote one-line dependency summary to SUMMARY.txt"}
+  1. `run_command` — {"command": "type requirements.txt & type TASK.md & dir"}
+  1. `run_command` — {"command": "pip install -r requirements.txt --quiet --no-input && python -c \"import six; print(six.__version__)\""}
+  1. `run_command` — {"command": "python -c \"open('SUMMARY.txt','w').write('Installed 1 package from requirements.txt (six==1.16.0) via pip; import verified successfully.')\" & type SUMMARY.txt"}
+  1. `task_complete` — {"success": true, "summary": "Installed requirements (1 package: six==1.16.0), verified import, and wrote one-line dependency summary to SUMMARY.txt."}
 
 ### python_noisy_install_summary [verseshell_aci] → FAIL
 - Reason: file_contains SUMMARY.txt
-- Tool calls: 5, Observation tokens: 164
-- Turns: 4, Elapsed: 74318ms
-- LLM: 6979 prompt + 475 completion tokens
+- Tool calls: 6, Observation tokens: 173
+- Turns: 5, Elapsed: 17888ms
+- LLM: 2906 prompt + 464 completion tokens
 - Trajectory:
   1. `repo.summary` — {} aci_ok=True
-  1. `file.view` — {"path": "requirements.txt"} aci_ok=True
   1. `file.view` — {"path": "TASK.md"} aci_ok=True
+  1. `file.view` — {"path": "requirements.txt"} aci_ok=True
   1. `exec.run` — {"argv": ["pip", "install", "-r", "requirements.txt"], "profile": "npm_install"} aci_ok=True
-  1. `file.write` — {"path": "SUMMARY.txt", "content": "Installed 1 dependency from requirements.txt (six==1.16.0)."} aci_ok=True
-  1. `task_complete` — {"success": true, "summary": "Installed 1 dependency (six==1.16.0) from requirements.txt and wrote one-line summary to SUMMARY.txt."}
+  1. `file.write` — {"content": "Installed 1 package from requirements.txt: six 1.16.0 (pure-Python Python 2/3 compatibility utilities; no transitive dependencies).\n", "path": "SUMMARY.txt"} aci_ok=True
+  1. `exec.run` — {"argv": ["python", "-c", "import six; print(six.__version__)"]} aci_ok=True
+  1. `task_complete` — {"success": true, "summary": "Installed requirements (1 package: six 1.16.0, verified importable) and wrote one-line dependency summary to SUMMARY.txt."}
 
 ### ts_fix_type_error [raw_shell] → FAIL
 - Reason: file_contains src/index.ts
-- Tool calls: 13, Observation tokens: 721
-- Turns: 11, Elapsed: 207209ms
-- LLM: 25491 prompt + 1801 completion tokens
+- Tool calls: 5, Observation tokens: 290
+- Turns: 4, Elapsed: 57752ms
+- LLM: 2579 prompt + 452 completion tokens
 - Trajectory:
-  1. `run_command` — {"command": "cd c:\\Users\\szhao\\cursor\\new_workspace_2 & dir /s"}
-  1. `run_command` — {"command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\src\\index.ts\""}
-  1. `run_command` — {"command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\tsconfig.json\""}
-  1. `run_command` — {"command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\package.json\""}
-  1. `run_command` — {"command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\TASK.md\""}
-  1. `run_command` — {"command": "cd \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && python -c \"\ncontent = '''export function add(a: number, b: number): number {\n  const x: number = a
-  1. `run_command` — {"command": "cd \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && npx tsc --noEmit"}
-  1. `run_command` — {"command": "cd \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && npm install"}
-  1. `run_command` — {"command": "cd \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && npx tsc --noEmit"}
-  1. `run_command` — {"command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\src\\index.ts\""}
-  1. `run_command` — {"command": "cd /d \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && echo export function add(a: number, b: number): number { > src\\index.ts && echo   const x: number
-  1. `run_command` — {"command": "type \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\\src\\index.ts\""}
-  1. `run_command` — {"command": "cd /d \"C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-ts_fix_type_error-ydqbk8xh\" && npx tsc --noEmit"}
-  1. `task_complete` — {"success": true, "summary": "Fixed type error in src/index.ts: changed `const x: string = a + b;` to `const x: number = a + b;` since `a + b` produces a number, not a string."}
+  1. `run_command` — {"command": "type TASK.md & type package.json & type tsconfig.json & type src\\index.ts"}
+  1. `run_command` — {"command": "npx tsc --noEmit"}
+  1. `run_command` — {"command": "npm install"}
+  1. `run_command` — {"command": "python -c \"open('src/index.ts','w').write('export function add(a: number, b: number): number {\\n  const x: number = a + b;\\n  return x;\\n}\\n')\""}
+  1. `run_command` — {"command": "npx tsc --noEmit"}
+  1. `task_complete` — {"success": true, "summary": "Fixed type error in src/index.ts (changed `const x: string` to `const x: number`) so tsc --noEmit succeeds."}
 
-### ts_fix_type_error [verseshell_aci] → PASS
-- Reason: all ok
-- Tool calls: 11, Observation tokens: 633
-- Turns: 9, Elapsed: 162919ms
-- LLM: 23520 prompt + 1226 completion tokens
+### ts_fix_type_error [verseshell_aci] → FAIL
+- Reason: file_contains src/index.ts
+- Tool calls: 10, Observation tokens: 535
+- Turns: 8, Elapsed: 163182ms
+- LLM: 9169 prompt + 767 completion tokens
 - Trajectory:
   1. `file.view` — {"path": "src/index.ts"} aci_ok=True
-  1. `file.view` — {"path": "tsconfig.json"} aci_ok=True
   1. `file.view` — {"path": "package.json"} aci_ok=True
+  1. `file.view` — {"path": "tsconfig.json"} aci_ok=True
   1. `file.view` — {"path": "TASK.md"} aci_ok=True
-  1. `file.replace_exact` — {"path": "src/index.ts", "old": "export function add(a: number, b: number): number {\n  const x: string = a + b;\n  return x;\n}", "new": "export function add(a: number, b: number): number {\n  return aci_ok=True
+  1. `file.replace_exact` — {"expected_hash": "sha256:d99b13deba072b7fd4b5907edec8b5cab9e3e744888d8dcb1ed7573d41de55bc", "new": "  const x: number = a + b;", "old": "  const x: string = a + b;", "path": "src/index.ts"} aci_ok=True
   1. `exec.run` — {"argv": ["npx", "tsc", "--noEmit"]} aci_ok=False
-  1. `exec.run` — {"argv": ["tsc", "--noEmit"]} aci_ok=False
-  1. `exec.run` — {"argv": ["dir", ".", "/b"]} aci_ok=False
-  1. `exec.run` — {"argv": ["npm", "install"]} aci_ok=False
-  1. `exec.run` — {"argv": ["which", "tsc"]} aci_ok=False
-  1. `file.view` — {"path": "src/index.ts"} aci_ok=True
-  1. `task_complete` — {"success": true, "summary": "Fixed TypeScript type error in src/index.ts by removing the incorrect string-typed variable and returning a + b directly as a number."}
+  1. `exec.run` — {"argv": ["npx.cmd", "tsc", "--noEmit"]} aci_ok=False
+  1. `exec.run` — {"argv": ["npm", "install", "--save-dev", "typescript"]} aci_ok=False
+  1. `exec.run` — {"argv": ["npm.cmd", "install", "--save-dev", "typescript"]} aci_ok=True
+  1. `exec.run` — {"argv": ["npx.cmd", "tsc", "--noEmit"]} aci_ok=True
+  1. `task_complete` — {"success": true, "summary": "Fixed type error in src/index.ts (string→number annotation) and installed typescript; tsc --noEmit passes."}
 
 ### ts_package_script_fail [raw_shell] → PASS
 - Reason: file_contains package.json
-- Tool calls: 9, Observation tokens: 261
-- Turns: 8, Elapsed: 138938ms
-- LLM: 10783 prompt + 835 completion tokens
+- Tool calls: 2, Observation tokens: 71
+- Turns: 3, Elapsed: 19046ms
+- LLM: 1006 prompt + 237 completion tokens
 - Trajectory:
-  1. `run_command` — {"command": "dir"}
-  1. `run_command` — {"command": "type package.json"}
-  1. `run_command` — {"command": "type TASK.md"}
-  1. `run_command` — {"command": "python -c \"\nimport json\nwith open('package.json', 'r') as f:\n    data = json.load(f)\ndata['scripts']['test'] = 'node -e \\\"process.exit(0)\\\"'\nwith open('package.json', 'w') as f:
-  1. `run_command` — {"command": "type package.json"}
-  1. `run_command` — {"command": "npm test"}
-  1. `run_command` — {"command": "python -c \"import json; d=json.load(open('package.json')); d['scripts']['test']='node -e \\\"process.exit(0)\\\"'; open('package.json','w').write(json.dumps(d,indent=2)+'\\n')\""}
-  1. `run_command` — {"command": "type package.json"}
-  1. `run_command` — {"command": "npm test"}
-  1. `task_complete` — {"success": true, "summary": "Fixed package.json test script: changed process.exit(1) to process.exit(0), so npm test exits with code 0."}
+  1. `run_command` — {"command": "type package.json & type TASK.md"}
+  1. `run_command` — {"command": "node -e \"const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.scripts.test='node -e \\\"process.exit(0)\\\"';fs.writeFileSync('package.json',JSON.stringify
+  1. `task_complete` — {"success": true, "summary": "Changed package.json test script from `node -e \"process.exit(1)\"` to `node -e \"process.exit(0)\"`; npm test exits 0."}
 
 ### ts_package_script_fail [verseshell_aci] → PASS
 - Reason: file_contains package.json
-- Tool calls: 7, Observation tokens: 322
-- Turns: 7, Elapsed: 123770ms
-- LLM: 14181 prompt + 803 completion tokens
+- Tool calls: 5, Observation tokens: 271
+- Turns: 5, Elapsed: 164138ms
+- LLM: 3136 prompt + 378 completion tokens
 - Trajectory:
   1. `file.view` — {"path": "package.json"} aci_ok=True
-  1. `repo.summary` — {} aci_ok=True
-  1. `file.replace_exact` — {"path": "package.json", "old": "    \"test\": \"node -e \\\"process.exit(1)\\\"\"", "new": "    \"test\": \"node -e \\\"process.exit(0)\\\"\"", "expected_hash": "sha256:3c340a008ea26464ad97fee11dfd8e aci_ok=True
+  1. `file.view` — {"path": "TASK.md"} aci_ok=True
+  1. `file.replace_exact` — {"new": "    \"test\": \"node -e \\\"process.exit(0)\\\"\"", "old": "    \"test\": \"node -e \\\"process.exit(1)\\\"\"", "path": "package.json"} aci_ok=True
   1. `exec.run` — {"argv": ["npm", "test"]} aci_ok=False
-  1. `exec.run` — {"argv": ["node", "-e", "console.log('ok')"]} aci_ok=True
-  1. `exec.run` — {"argv": ["node", "-e", "process.exit(0)"]} aci_ok=True
-  1. `file.view` — {"path": "package.json"} aci_ok=True
-  1. `task_complete` — {"success": true, "summary": "Changed test script from process.exit(1) to process.exit(0) so npm test exits with code 0"}
+  1. `exec.run` — {"argv": ["npm.cmd", "test"]} aci_ok=True
+  1. `task_complete` — {"success": true, "summary": "Changed test script from `node -e \"process.exit(1)\"` to `node -e \"process.exit(0)\"`; verified npm test exits 0."}
 
 ### windows_path_normalize_edit [raw_shell] → PASS
 - Reason: file_equals out/result.txt
-- Tool calls: 2, Observation tokens: 13
-- Turns: 3, Elapsed: 51397ms
-- LLM: 2450 prompt + 250 completion tokens
+- Tool calls: 2, Observation tokens: 146
+- Turns: 3, Elapsed: 24416ms
+- LLM: 1278 prompt + 203 completion tokens
 - Trajectory:
-  1. `run_command` — {"command": "python -c \"from pathlib import Path; Path('out').mkdir(parents=True, exist_ok=True); Path('out/result.txt').write_text('OK')\""}
-  1. `run_command` — {"command": "type out\\result.txt"}
-  1. `task_complete` — {"success": true, "summary": "Created out/result.txt with content 'OK'"}
+  1. `run_command` — {"command": "type README.md & type TASK.md & dir"}
+  1. `run_command` — {"command": "python -c \"from pathlib import Path; p = Path('out') / 'result.txt'; p.parent.mkdir(parents=True, exist_ok=True); p.write_text('OK'); print(p.read_text())\""}
+  1. `task_complete` — {"success": true, "summary": "Created out/result.txt containing 'OK' and verified its contents."}
 
 ### windows_path_normalize_edit [verseshell_aci] → PASS
 - Reason: file_equals out/result.txt
 - Tool calls: 2, Observation tokens: 50
-- Turns: 3, Elapsed: 51599ms
-- LLM: 4553 prompt + 253 completion tokens
+- Turns: 3, Elapsed: 45801ms
+- LLM: 1039 prompt + 212 completion tokens
 - Trajectory:
-  1. `exec.run` — {"argv": ["python", "-c", "from pathlib import Path; Path('out').mkdir(parents=True, exist_ok=True); Path('out/result.txt').write_text('OK')"]} aci_ok=True
+  1. `exec.run` — {"argv": ["python", "-c", "from pathlib import Path; p = Path('out'); p.mkdir(parents=True, exist_ok=True); (p / 'result.txt').write_text('OK')"]} aci_ok=True
   1. `file.view` — {"path": "out/result.txt"} aci_ok=True
-  1. `task_complete` — {"success": true, "summary": "Created out/result.txt with content 'OK'"}
+  1. `task_complete` — {"success": true, "summary": "Created out/ directory and wrote out/result.txt containing 'OK'"}
 
 ### windows_batch_capture_diag [raw_shell] → PASS
 - Reason: all ok
-- Tool calls: 3, Observation tokens: 60
-- Turns: 4, Elapsed: 68083ms
-- LLM: 3442 prompt + 322 completion tokens
+- Tool calls: 4, Observation tokens: 90
+- Turns: 4, Elapsed: 37077ms
+- LLM: 1567 prompt + 264 completion tokens
 - Trajectory:
   1. `run_command` — {"command": "type broken_build.log"}
-  1. `run_command` — {"command": "echo src\\main.rs:12 > ERR.txt"}
-  1. `run_command` — {"command": "type ERR.txt"}
-  1. `task_complete` — {"success": true, "summary": "Extracted first error location src\\main.rs:12 from broken_build.log and wrote it to ERR.txt"}
+  1. `run_command` — {"command": "type TASK.md"}
+  1. `run_command` — {"command": "echo src/main.rs:12> ERR.txt && type ERR.txt"}
+  1. `run_command` — {"command": "python -c \"open('ERR.txt','w').write('src/main.rs:12')\" && type ERR.txt"}
+  1. `task_complete` — {"success": true, "summary": "Extracted first error location from broken_build.log (src/main.rs:12) and wrote it to ERR.txt"}
 
 ### windows_batch_capture_diag [verseshell_aci] → PASS
 - Reason: all ok
-- Tool calls: 3, Observation tokens: 193
-- Turns: 4, Elapsed: 71015ms
-- LLM: 7115 prompt + 557 completion tokens
+- Tool calls: 3, Observation tokens: 213
+- Turns: 3, Elapsed: 64378ms
+- LLM: 1529 prompt + 237 completion tokens
 - Trajectory:
   1. `file.view` — {"path": "broken_build.log"} aci_ok=True
-  1. `file.write` — {"path": "ERR.txt", "content": "src\\main.rs:12"} aci_ok=True
-  1. `file.view` — {"path": "ERR.txt"} aci_ok=True
-  1. `task_complete` — {"success": true, "summary": "Extracted first error location `src\\main.rs:12` from broken_build.log and wrote it to ERR.txt."}
+  1. `file.view` — {"path": "TASK.md"} aci_ok=True
+  1. `file.write` — {"content": "src\\main.rs:12\n", "path": "ERR.txt"} aci_ok=True
+  1. `task_complete` — {"success": true, "summary": "Extracted first error location 'src\\main.rs:12' from broken_build.log and wrote it to ERR.txt."}
 
 ---
 

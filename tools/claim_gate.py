@@ -55,6 +55,7 @@ THRESHOLDS = {
 # describes the current code.
 EVIDENCE_ARTIFACTS = [
     "bench/aci/results/latest.json",
+    "bench/aci/results/latest_live.json",
     "eval/jev_obs_report.json",
     "eval/cross_shell.json",
 ]

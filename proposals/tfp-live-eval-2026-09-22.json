@@ -1,0 +1,270 @@
+{
+  "proposal_id": "TFP-live-eval-2026-09-22",
+  "session_id": "ses_verseshell-tf-live-2026-09-22",
+  "rationale": "用户提供了一个本地 OpenAI 兼容端点与模型（凭据只经环境变量传入，不落库），使上一轮标为「未跑」的 live 模式可以真正执行。试点立刻暴露一个结构性缺陷：live agent 循环拉起 AE 时没有传 --cap，导致条件 D 的每个 op 都返回 E_CAPABILITY_DENY——D 条件从来没有真正跑起来过，此前的 live 数字测的是一个坏掉的 harness。修复后 D 从 FAIL 变 PASS。按根策略 §3 把这条链落成节点：接入与试点、修 harness、全量跑并登记 live 声明（与 mock C1/C2 分层，不得混用）。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "live-eval",
+      "node": {
+        "title": "live 评测接入：真实模型下的 A/D 对比与 harness 修复",
+        "kind": "global_task",
+        "status": "in_progress",
+        "display_order": 50,
+        "priority": 1,
+        "difficulty": "high",
+        "confidence": 0.8,
+        "summary": "把 ACI-Bench 从 mock 轨迹推进到真实模型：用用户提供的本地 OpenAI 兼容端点跑 A（raw shell）与 D（VerseShell ACI）对比，核实模型能力与端点形状，修掉 live harness 里让 D 条件失效的能力授权缺陷，跑全量 10 任务并把 live 结果登记为独立声明（与 mock 的 C1/C2 分层，禁止混用）。",
+        "purpose": "mock 数字是种子轨迹，只有真实模型跑出来的对比才能回答「ACI 到底有没有减少步骤与 token」。",
+        "desired_outcomes": [
+          "live 通路可用：端点形状与模型能力有实测记录，凭据只经环境变量传入且不落库",
+          "live harness 的 D 条件真实生效（不再因缺少能力授权而全量 E_CAPABILITY_DENY）",
+          "全量 10 任务 × 2 条件的 live 结果与原始轨迹入库，并登记为独立声明 C13",
+          "mock 与 live 的口径边界写清楚，README/claims 不得用 mock 数字冒充真实模型实测",
+          "门禁与测试全绿，evidence 回写森林，改动已提交"
+        ],
+        "acceptance_criteria": [
+          "run_suite/live 产物的 live_config 记录 model / api_base / caps / max_turns",
+          "修复前后各有一份可对比的试点证据（D 由全量 E_CAPABILITY_DENY 变为可执行）",
+          "live 产物登记进 C12 的指纹机制，且 claim_gate exit 0",
+          "仓库内不出现任何 API key（git grep 抽查）"
+        ],
+        "non_goals": [
+          "不做模型微调或提示词工程竞赛",
+          "不为了好看修改成功判定或 token 计数口径",
+          "不把 live 结果与 mock 的 C1/C2 混为一个数字"
+        ],
+        "execution_hints": ["先试点验证通路，再修 harness，最后全量跑并登记"],
+        "next_action": "TF-0037 已完成接入与试点；继续 TF-0038 的 harness 修复验证与 TF-0039 的全量跑。",
+        "alignment": {
+          "user_goal": "用真实模型测试 ACI 的实际效果",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "上一轮明确把 live 标为未跑（缺模型凭据），用户现在提供了端点",
+          "why_not_enough": "单个本地模型 + 单次运行，不能替代多模型/多次统计",
+          "validation_plan": ["试点对比", "全量跑", "claim_gate exit 0", "key 不入库"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live-2026-09-22"],
+        "evidence": [
+          "端点探测：GET /v1/models 200；POST /v1/responses 200；POST /v1/chat/completions 200（2026-09-22）",
+          "模型能力：sn-glm-5-3-flash 在 /v1/models 里标 tools=False，但实测能正确返回 tool_calls（finish_reason=tool_calls）",
+          "试点 1（修复前）：python_fix_pytest_fail D=FAIL，轨迹里每个 op 都 aci_ok=false，模型收尾自述 E_CAPABILITY_DENY",
+          "试点 2（修复后）：同一任务 D=PASS（5 tools / 412 obs_tok），A=PASS（2 tools / 72 obs_tok）"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "live-wire",
+      "node": {
+        "title": "步骤20：live 通路接入与试点",
+        "kind": "task",
+        "status": "done",
+        "display_order": 1014,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.9,
+        "summary": "确认端点形状（同时支持 Responses API 与 chat/completions）、核实目标模型的工具调用能力（/v1/models 标 tools=False 但实测可用）、并用单任务试点跑通 live agent 循环、量出单次模型调用延迟（约 20s）以估算全量成本。",
+        "purpose": "在花掉全量时间之前，先证明通路真的能跑。",
+        "acceptance_criteria": [
+          "端点三种形状的实测结果有记录",
+          "目标模型的 tool_calls 行为有实测证据",
+          "试点跑通并给出单任务耗时与延迟",
+          "凭据只经环境变量传入"
+        ],
+        "non_goals": ["不在此步骤做全量跑"],
+        "alignment": {
+          "user_goal": "用真实模型测试",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "通路不通就谈不上评测",
+          "why_not_enough": "试点 n=1，不足以形成结论",
+          "validation_plan": ["探测脚本输出", "试点报告"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live-2026-09-22"],
+        "evidence": [
+          "GET /v1/models → 200，列出 hy3 / deepseek-v4.1-flash / sn-glm-5-3-flash 等，sn-* 系列标 supports_tool_call=false",
+          "POST /v1/chat/completions（带 tools）→ finish_reason=tool_calls，返回 run_command({\"command\":\"ls -la\"})",
+          "单次调用延迟实测 20.1s（含 reasoning tokens）",
+          "试点 1：python_fix_pytest_fail 两条件跑完（A PASS 3 tools/192 tok，D FAIL 7 tools/399 tok）"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "live-caps-fix",
+      "node": {
+        "title": "步骤21：修复 D 条件的能力授权缺陷",
+        "kind": "task",
+        "status": "done",
+        "display_order": 1015,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.95,
+        "summary": "live agent 循环用 `ae --serve --agent` 拉起 AE 时没有传 --cap，agent 模式下等价于零授权，于是条件 D 的每个 op 都返回 E_CAPABILITY_DENY——D 条件此前从未真正执行过。修复：新增显式能力集常量 ACI_CAPABILITIES（sys.read/file.read/file.write/file.delete/shell.exec/git.read/git.write/proc.list/proc.spawn/proc.kill/crypto.hash）并通过 --cap 传入，同时加 --caps 便于覆盖。",
+        "purpose": "让 D 条件测的是 ACI 本身，而不是「没有权限的 ACI」。",
+        "acceptance_criteria": [
+          "AE 直接实测：无 --cap → E_CAPABILITY_DENY；--cap shell.exec → 仍 DENY；--cap all → ok",
+          "修复后同一试点任务 D 由 FAIL 变 PASS",
+          "能力集写死为常量且可被 --caps 覆盖"
+        ],
+        "non_goals": ["不放宽 AE 默认策略（只改 harness 的启动参数）"],
+        "alignment": {
+          "user_goal": "真实反映 ACI 效果",
+          "fit": "aligned",
+          "fit_confidence": 0.95,
+          "why_this_task": "harness 缺陷会让评测结论完全反向",
+          "why_not_enough": "只修启动参数，不改变 ACI 本身的观察质量（那是 TF-0039 的分析面）",
+          "validation_plan": ["AE 直接探测", "修复前后试点对比"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live-2026-09-22"],
+        "evidence": [
+          "直接探测（临时工作区，agent 模式，file.view）：无 --cap → E_CAPABILITY_DENY；--cap shell.exec → E_CAPABILITY_DENY；--cap all → ok=True",
+          "试点 1 轨迹：7 个 op 全部 aci_ok=false，模型收尾消息自述 \"E_CAPABILITY_DENY no capabilities granted\"",
+          "修复：bench/aci/runners/live_agent_loop.py 新增 ACI_CAPABILITIES 常量 + --caps 参数，Popen 参数加入 --cap caps",
+          "试点 2（修复后）：python_fix_pytest_fail D=PASS（5 tools / 412 obs_tok / 5 turns）"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "live-full-run",
+      "node": {
+        "title": "步骤22：全量 live 跑与 live 声明登记",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1016,
+        "priority": 1,
+        "difficulty": "high",
+        "confidence": 0.7,
+        "summary": "跑全量 10 任务 × 2 条件的 live 对比，把结果与轨迹写入 bench/aci/results/latest_live.json + live_REPORT.md，并把 live 结果登记为独立声明（与 mock 的 C1/C2 分层）。live 产物同时记录 model / api_base / caps / max_turns 与代码指纹，纳入 C12。",
+        "purpose": "用真实模型的 n=10 结果回答 ACI 到底有没有减少步骤与 token。",
+        "acceptance_criteria": [
+          "live 产物含 live_config（model/api_base/caps/max_turns）与 evidence 指纹",
+          "C13 声明写清样本量、成功判定、token 计数口径与失效边界（单模型、单次、本机工具链）",
+          "README/claims 明确 mock 与 live 不得混用",
+          "claim_gate 覆盖 live 产物新鲜度并 exit 0"
+        ],
+        "non_goals": ["不做多模型横向对比（本轮只有用户提供的一个端点）"],
+        "execution_hints": ["--full --max-turns 8；失败任务要保留轨迹以便归因"],
+        "alignment": {
+          "user_goal": "真实反馈",
+          "fit": "aligned",
+          "fit_confidence": 0.8,
+          "why_this_task": "n=1 的试点已经与 mock 结论相反，必须扩大样本",
+          "why_not_enough": "单模型单次，仍不能外推",
+          "validation_plan": ["全量产物 + 逐任务归因", "claim_gate exit 0"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-commit",
+      "node": {
+        "title": "步骤23：森林收口与提交",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1017,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.85,
+        "summary": "按根策略 §6 收尾：证据回写各节点，proposal-save → proposal-apply --yes → validate → export，提交本轮 harness 修复、live 产物与声明改动（并确认仓库内不含任何 API key）。",
+        "purpose": "让本轮成果落盘可追溯且不泄密。",
+        "acceptance_criteria": [
+          "各节点 evidence 已回写",
+          "proposal-save → apply --yes → validate → export 全部成功",
+          "git commit 覆盖修复/产物/声明/文档；git grep 抽查无 key",
+          "提交后工作区干净"
+        ],
+        "non_goals": ["不改写 git 历史、不 force push"],
+        "alignment": {
+          "user_goal": "开发流程与证据链完整",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "live 产物与 harness 修复必须落盘",
+          "why_not_enough": "提交只是载体",
+          "validation_plan": ["git log/show", "key 抽查", "git status 干净"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live-2026-09-22"]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "live-wire",
+      "to": "live-eval",
+      "type": "child_of",
+      "edge": { "reason": "通路接入是前提", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "live-caps-fix",
+      "to": "live-eval",
+      "type": "child_of",
+      "edge": { "reason": "harness 修复是结论有效性的前提", "confidence": 0.95 }
+    },
+    {
+      "action": "add_edge",
+      "from": "live-full-run",
+      "to": "live-eval",
+      "type": "child_of",
+      "edge": { "reason": "全量跑与声明登记是主交付", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "live-eval",
+      "type": "child_of",
+      "edge": { "reason": "收口与落盘是最后一步", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "live-caps-fix",
+      "to": "live-wire",
+      "type": "depends_on",
+      "edge": { "reason": "先接入试点才能发现 harness 缺陷", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "live-full-run",
+      "to": "live-caps-fix",
+      "type": "depends_on",
+      "edge": { "reason": "缺陷未修则全量数字无意义", "confidence": 0.95 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "live-full-run",
+      "type": "depends_on",
+      "edge": { "reason": "收口要等全量产物落地", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "live-eval",
+      "to": "TF-0031",
+      "type": "related_to",
+      "edge": { "reason": "承接数据集反馈闭环轮：把 mock 未覆盖的 live 面补上", "confidence": 0.85 }
+    },
+    {
+      "action": "update_node",
+      "id": "live-wire",
+      "fields": { "display_order": 10 }
+    },
+    {
+      "action": "update_node",
+      "id": "live-caps-fix",
+      "fields": { "display_order": 20 }
+    },
+    {
+      "action": "update_node",
+      "id": "live-full-run",
+      "fields": { "display_order": 30 }
+    },
+    {
+      "action": "update_node",
+      "id": "close-commit",
+      "fields": { "display_order": 40 }
+    }
+  ]
+}

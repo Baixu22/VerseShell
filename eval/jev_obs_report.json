@@ -1,7 +1,7 @@
 {
   "schema": "verseshell.jev-obs-report/v1",
-  "generated_at": "2026-09-22T14:27:23.102335+00:00",
-  "git_rev": "b5a4a07871b8756d714c901bc6a5f33ccd583369",
+  "generated_at": "2026-09-22T15:51:18.877225+00:00",
+  "git_rev": "e694a5ae2a6364c3b559dce0e7f7b0b8de7f326b",
   "evidence": {
     "globs": [
       "src/**/*.rs",

@@ -138,7 +138,8 @@ def prepare_workspace(fixture_name: str) -> Path:
                 continue
             dest = td / item.name
             if item.is_dir():
-                shutil.copytree(item, dest)
+                shutil.copytree(item, dest,
+                                ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache"))
             else:
                 shutil.copy2(item, dest)
     return td

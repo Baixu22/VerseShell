@@ -3,6 +3,28 @@
 ## Unreleased
 
 ### Added
+- Live ACI-Bench evaluation is actually usable: the runner now starts the AE
+  server with an explicit capability set (`--cap`, overridable via `--caps`).
+  Before this, condition D ran with **no** grants, so every ACI op returned
+  `E_CAPABILITY_DENY` and the D condition never executed a single operation.
+- Live artifacts (`bench/aci/results/latest_live.json`) record `live_config`
+  (model / api_base / caps / max_turns / tasks / conditions) plus the code
+  fingerprint, and are covered by claim C12.
+- Claim C13 registers the live A-vs-D result separately from the mock C1/C2:
+  on one real model (10 tasks x 2 conditions, two full runs) condition D used
+  ~2.0-2.6x the tool calls and ~2.0-2.6x the observation tokens of raw shell at
+  the same 0.6 success rate — the ACI did not reduce steps or tokens there.
+  Single-run variance is large, so the direction is the finding, not the ratio.
+
+### Changed
+- Fixture workspaces no longer copy `__pycache__` / `.pytest_cache`. Stale
+  bytecode made pytest report the *fixture source* path
+  (`../../../../Desktop/...`) instead of the workspace-relative one, which both
+  wasted tokens and misled the agent.
+- Failure observations no longer carry fields that merely repeat each other: a
+  stream summary byte-identical to `summary`, and an `error.hint` that
+  duplicates a diagnostic message. Reproduced failing-pytest observation:
+  958 -> 689 chars (-28%).
 - Claim C12 (evidence freshness): the three stored measurements (ACI-Bench
   results, L3 observation report, cross-shell bench) record the sha256
   fingerprint of the surface they measured, and `claim_gate` fails when that

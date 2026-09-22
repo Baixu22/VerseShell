@@ -25,15 +25,17 @@ python tools/claim_gate.py --skip-tests
 python tools/validate_manifest.py                        # 样本来源路径存在性（步骤5）
 cargo run --example eval_metrics -- --out eval/metrics.json   # 诊断完备率 + 一步恢复探针 + 剧本探针
 python bench/aci/runners/run_suite.py --mode mock        # 重新生成 bench/aci/results/latest.json（C1/C2 产物）
-python tools/jev_obs_judge.py                            # L3 观察质检报告（不进 C1–C12 门禁，但是 C12 的产物之一）
+python tools/jev_obs_judge.py                            # L3 观察质检报告（不进 C1–C13 门禁，但是 C12 的产物之一）
 cargo test --test process_lifecycle_tests                # C8：进程生命周期契约（Windows）
 cargo run --example compact_ratio -- --out eval/compact_ratio.json   # C9：compact 编码 vs JSON
 python tools/readme_claims_check.py                      # C10：README 示例、实现数字与跨 shell 表
 python tools/cross_shell_bench.py                        # C11：跨 shell 墙钟对比（写 eval/cross_shell.json）
 # C12 会在上面三份产物缺少指纹或指纹过期时失败；按提示重跑对应 runner 即可
+# C13：live A/D 对比（真实模型，凭据只经环境变量）
+python bench/aci/runners/live_agent_loop.py --full --model <model> --base-url <endpoint> --max-turns 8
 ```
 
-## 3. 声明表（C1–C7）
+## 3. 声明表（C1–C13）
 
 ### C1 · 观察 token 比（mock bench）
 
@@ -191,6 +193,19 @@ python tools/cross_shell_bench.py                        # C11：跨 shell 墙�
 | 失效边界 | 只覆盖登记在 `tools/claim_gate.py::EVIDENCE_ARTIFACTS` 的三份产物；指纹是**文件内容哈希**，不含运行环境（OS / 工具链 / CPU），所以换机器重跑不会因环境不同被判陈旧——跨机器可比性仍受 C11 的边界限制；产物未记录指纹时判失败（fail-closed） |
 | 状态 | 已证实 |
 
+### C13 · live A/D 对比（真实模型，单机单模型）
+
+| 维度 | 内容 |
+|------|------|
+| 主张原文 | 在一个真实函数调用模型（本地 OpenAI 兼容端点上的 `sn-glm-5-3-flash`）上跑 ACI-Bench 全量 10 任务 × 2 条件：条件 A（raw shell）与条件 D（VerseShell ACI）的成功率相同（0.6），但 D 的工具调用数与观察 token 都约为 A 的 2–2.6 倍。**在该模型与该任务集上，ACI 没有减少步骤或 token** |
+| 门槛数字 | 无（负向结论，只登记事实，不设通过门槛） |
+| 复现命令 | `python bench/aci/runners/live_agent_loop.py --full --model <model> --base-url <endpoint> --max-turns 8` → `bench/aci/results/latest_live.json`、`live_REPORT.md` |
+| source | `bench/aci/runners/live_agent_loop.py`、`bench/aci/results/latest_live.json`、`bench/aci/results/live_baseline_preharnessfix_2026-09-22.json`、`bench/aci/tasks/*.json` |
+| 样本量 / 日期 | 10 任务 × 2 条件 × 1 模型；修复前/后各一次完整运行；2026-09-22 |
+| 最近实测 | 修复前：A 0.6 / 2.7 tools / 151.8 tok，D 0.6 / 5.4 / 306.4（比值 2.00 / 2.02）；修复后：A 0.6 / 2.8 / 152.1，D 0.6 / 6.5 / 399.0（2.32 / 2.62）。D 仅在 `windows_path_normalize_edit` 明显更省（0.34x token） |
+| 失效边界 | ①**单模型单次**：未固定温度/种子，同一任务两次运行的 token 可差 1.5–3 倍（例：rust_fix_compile_error 187→590），因此两次全量跑的比值差异（2.02 vs 2.62）**不能**归因于 harness 修复；方向（D 更费）在两次运行中一致，量级不可外推。②观察 token 用 `len(text)//4` 估算，不是真实 tokenizer。③成功判定是任务自带的文件谓词，不要求真的跑测试（A 常常不跑测试也满足）。④本机 `tsc` 缺失、裸 `pytest` 在 Windows 上因 console-script 的 `sys.path` 行为失败（规范形式 `python -m pytest`），两条件同样受限。⑤**与 mock 的 C1/C2 不可混用**：mock 的 D 直接套 GOLDEN 补丁，0.106/0.55 是评分管线自检，不是能力测量 |
+| 状态 | 已证实（本机单模型，负向结论） |
+
 ## 4. 与 README 主张的对应关系
 
 - README 若出现 C1/C2 类数字，必须写成「mock bench，10 任务/条件，seed 42」并指向 `eval/evidence.json`，不得写成真实模型实测。
@@ -198,7 +213,8 @@ python tools/cross_shell_bench.py                        # C11：跨 shell 墙�
 - C5 未证实：README 不得出现「上手成本低」「零学习成本」这类肯定句。
 - C10 是**兜底**声明：README 新增任何可执行示例或实现类数字时，先在 `tools/readme_claims_check.py` 的 registry 里加一条，否则它不受门禁保护。它也逐行校验 README 的跨 shell 表格与 `eval/cross_shell.json` 一致——重跑 `tools/cross_shell_bench.py` 后必须同步更新 README 表格。
 - C11 是**本机**声明：README 的跨 shell 表格必须与 `eval/cross_shell.json` 的实测一致，不得写成跨机器保证；改动热路径后必须重跑 `tools/cross_shell_bench.py`。
-- C12 是**证据新鲜度**声明：改动被测代码后先重跑对应 runner（`run_suite.py` / `jev_obs_judge.py` / `cross_shell_bench.py`）再跑门禁；产物缺少指纹时直接判失败（fail-closed），不允许用旧数字过门禁。
+- C12 是**证据新鲜度**声明：改动被测代码后先重跑对应 runner（`run_suite.py` / `jev_obs_judge.py` / `cross_shell_bench.py` / `live_agent_loop.py`）再跑门禁；产物缺少指纹时直接判失败（fail-closed），不允许用旧数字过门禁。
+- C13 是 **live** 声明：引用真实模型结果时必须同时给出模型、端点、运行次数与方差边界；不得把 mock 的 C1/C2 数字写成真实模型实测，也不得用 live 的负向结论否定 mock 的管线自检作用（两者口径不同）。
 - 新增任何对外数字时：先在本文件加一行，再在 `tools/claim_gate.py` 加对应门槛（或显式标注不设门槛），最后跑 `python tools/claim_gate.py`。
 
 ## 5. 口径统一规则（已按根策略裁决）
@@ -218,7 +234,7 @@ mock 实测值（0.106 / 0.55）在两侧都过线。今后新增对外数字一
 |------|------|------|
 | （无） | — | 2026-09-22：原「compact 协议 50–70% token 节省 vs JSON」已处置。该数字**无法复现**（实测小响应信封 42.4%、观察载荷合计 −3.1%），已按 §4 登记为 C9，并把 README 口径改成 C9 的实测范围。当前没有已知的「已进 README 但未登记」对外数字 |
 
-## 7. L3 观察质检（不进 C1–C12 门禁）
+## 7. L3 观察质检（不进 C1–C13 门禁）
 
 `tools/jev_obs_judge.py`（TF-0012）对每个失败样本问两个窄问题，产出 `eval/jev_obs_report.json` + `eval/jev_obs_report.md`：
 

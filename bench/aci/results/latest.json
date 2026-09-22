@@ -3,8 +3,8 @@
   "task_set_version": "1.1.0",
   "seed": 42,
   "mode": "mock",
-  "generated_at": "2026-09-22T14:27:22.955335+00:00",
-  "git_rev": "b5a4a07871b8756d714c901bc6a5f33ccd583369",
+  "generated_at": "2026-09-22T15:51:17.659828+00:00",
+  "git_rev": "e694a5ae2a6364c3b559dce0e7f7b0b8de7f326b",
   "evidence": {
     "globs": [
       "src/**/*.rs",
@@ -14,7 +14,7 @@
       "bench/aci/runners/*.py",
       "bench/aci/scorers/*.py"
     ],
-    "fingerprint": "bcc1930a782f3e2b8dbb5729108b314a39c5c7f49fc7896fb2a9d552a5e2d2cd"
+    "fingerprint": "0cc2a812e4cd10cb5ddadaf30cfe980029468d9845b603897b0bce8698a94502"
   },
   "rows": [
     {
@@ -25,7 +25,7 @@
       "success_reason": "file_contains src/lib.rs",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 2,
+      "elapsed_ms": 24,
       "notes": [],
       "trajectory": [
         {
@@ -120,7 +120,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 4,
+      "elapsed_ms": 15,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -207,7 +207,7 @@
       "success_reason": "file_contains src/lib.rs",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 2,
+      "elapsed_ms": 6,
       "notes": [],
       "trajectory": [
         {
@@ -302,7 +302,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 5,
+      "elapsed_ms": 20,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -389,7 +389,7 @@
       "success_reason": "file_contains src/lib.rs",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 3,
+      "elapsed_ms": 5,
       "notes": [],
       "trajectory": [
         {
@@ -484,7 +484,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 6,
+      "elapsed_ms": 68,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -569,158 +569,6 @@
       "model": "mock",
       "success": false,
       "success_reason": "file_contains mathlib.py",
-      "tool_calls": 10,
-      "observation_tokens": 3820,
-      "elapsed_ms": 2,
-      "notes": [],
-      "trajectory": [
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "ls -la"
-          },
-          "observation_tokens": 150,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "cat file"
-          },
-          "observation_tokens": 200,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "grep -R TODO ."
-          },
-          "observation_tokens": 180,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "build (full log)"
-          },
-          "observation_tokens": 900,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "edit attempt 1"
-          },
-          "observation_tokens": 120,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "build (full log again)"
-          },
-          "observation_tokens": 900,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "edit attempt 2"
-          },
-          "observation_tokens": 120,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "build (full log again)"
-          },
-          "observation_tokens": 900,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "git status"
-          },
-          "observation_tokens": 100,
-          "condition": "raw_shell"
-        },
-        {
-          "op": "shell",
-          "args": {
-            "cmd": "git diff"
-          },
-          "observation_tokens": 250,
-          "condition": "raw_shell"
-        }
-      ],
-      "optional_verify": null,
-      "weight": 1.0
-    },
-    {
-      "task_id": "python_fix_pytest_fail",
-      "condition": "verseshell_aci",
-      "model": "mock",
-      "success": true,
-      "success_reason": "file_contains mathlib.py",
-      "tool_calls": 4,
-      "observation_tokens": 290,
-      "elapsed_ms": 9,
-      "notes": [
-        "golden_applied",
-        "ae_available"
-      ],
-      "trajectory": [
-        {
-          "op": "file.view",
-          "args": {
-            "path": "(entry)"
-          },
-          "observation_tokens": 100,
-          "condition": "verseshell_aci"
-        },
-        {
-          "op": "exec.run",
-          "args": {
-            "profile": "auto",
-            "note": "semantic diagnostics"
-          },
-          "observation_tokens": 85,
-          "condition": "verseshell_aci"
-        },
-        {
-          "op": "file.replace_exact",
-          "args": {
-            "path": "(target)"
-          },
-          "observation_tokens": 55,
-          "condition": "verseshell_aci"
-        },
-        {
-          "op": "ops.observation_open_errors",
-          "args": {},
-          "observation_tokens": 40,
-          "condition": "verseshell_aci"
-        },
-        {
-          "op": "golden.apply",
-          "args": {
-            "fixture": "python_fix_pytest_fail"
-          },
-          "observation_tokens": 10,
-          "condition": "verseshell_aci"
-        }
-      ],
-      "optional_verify": null,
-      "weight": 1.0
-    },
-    {
-      "task_id": "python_edit_and_retest",
-      "condition": "raw_shell",
-      "model": "mock",
-      "success": false,
-      "success_reason": "file_contains greet.py",
       "tool_calls": 10,
       "observation_tokens": 3820,
       "elapsed_ms": 3,
@@ -811,6 +659,158 @@
       "weight": 1.0
     },
     {
+      "task_id": "python_fix_pytest_fail",
+      "condition": "verseshell_aci",
+      "model": "mock",
+      "success": true,
+      "success_reason": "file_contains mathlib.py",
+      "tool_calls": 4,
+      "observation_tokens": 290,
+      "elapsed_ms": 12,
+      "notes": [
+        "golden_applied",
+        "ae_available"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "(entry)"
+          },
+          "observation_tokens": 100,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "profile": "auto",
+            "note": "semantic diagnostics"
+          },
+          "observation_tokens": 85,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "(target)"
+          },
+          "observation_tokens": 55,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "ops.observation_open_errors",
+          "args": {},
+          "observation_tokens": 40,
+          "condition": "verseshell_aci"
+        },
+        {
+          "op": "golden.apply",
+          "args": {
+            "fixture": "python_fix_pytest_fail"
+          },
+          "observation_tokens": 10,
+          "condition": "verseshell_aci"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
+      "task_id": "python_edit_and_retest",
+      "condition": "raw_shell",
+      "model": "mock",
+      "success": false,
+      "success_reason": "file_contains greet.py",
+      "tool_calls": 10,
+      "observation_tokens": 3820,
+      "elapsed_ms": 6,
+      "notes": [],
+      "trajectory": [
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "ls -la"
+          },
+          "observation_tokens": 150,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "cat file"
+          },
+          "observation_tokens": 200,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "grep -R TODO ."
+          },
+          "observation_tokens": 180,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 1"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "edit attempt 2"
+          },
+          "observation_tokens": 120,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "build (full log again)"
+          },
+          "observation_tokens": 900,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git status"
+          },
+          "observation_tokens": 100,
+          "condition": "raw_shell"
+        },
+        {
+          "op": "shell",
+          "args": {
+            "cmd": "git diff"
+          },
+          "observation_tokens": 250,
+          "condition": "raw_shell"
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0
+    },
+    {
       "task_id": "python_edit_and_retest",
       "condition": "verseshell_aci",
       "model": "mock",
@@ -818,7 +818,7 @@
       "success_reason": "file_contains greet.py",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 8,
+      "elapsed_ms": 25,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -875,7 +875,7 @@
       "success_reason": "missing SUMMARY.txt",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 0,
+      "elapsed_ms": 4,
       "notes": [],
       "trajectory": [
         {
@@ -970,7 +970,7 @@
       "success_reason": "file_contains SUMMARY.txt",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 8,
+      "elapsed_ms": 12,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1027,7 +1027,7 @@
       "success_reason": "file_contains src/index.ts",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 4,
+      "elapsed_ms": 36,
       "notes": [],
       "trajectory": [
         {
@@ -1122,7 +1122,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 7,
+      "elapsed_ms": 38,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1304,7 +1304,7 @@
       "success_reason": "file_contains package.json",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 5,
+      "elapsed_ms": 53,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1391,7 +1391,7 @@
       "success_reason": "missing out/result.txt",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 0,
+      "elapsed_ms": 4,
       "notes": [],
       "trajectory": [
         {
@@ -1486,7 +1486,7 @@
       "success_reason": "file_equals out/result.txt",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 7,
+      "elapsed_ms": 11,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1543,7 +1543,7 @@
       "success_reason": "missing ERR.txt",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 2,
+      "elapsed_ms": 3,
       "notes": [],
       "trajectory": [
         {
@@ -1638,7 +1638,7 @@
       "success_reason": "all ok",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 6,
+      "elapsed_ms": 10,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1697,7 +1697,7 @@
         "success_rate": 0.0,
         "avg_tool_calls": 10.0,
         "avg_observation_tokens": 3820.0,
-        "avg_elapsed_ms": 2.0
+        "avg_elapsed_ms": 9.3
       },
       {
         "model": "mock",
@@ -1706,7 +1706,7 @@
         "success_rate": 1.0,
         "avg_tool_calls": 5.5,
         "avg_observation_tokens": 405.0,
-        "avg_elapsed_ms": 6.5
+        "avg_elapsed_ms": 26.4
       }
     ],
     "n_rows": 20

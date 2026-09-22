@@ -1,0 +1,68 @@
+{
+  "proposal_id": "TFP-live-eval-done-2026-09-22",
+  "session_id": "ses_verseshell-tf-live-2026-09-22",
+  "rationale": "本轮四个交付节点完成并各有证据：通路接入与试点（TF-0037）、harness 三处修复（TF-0038：能力授权、夹具 __pycache__ 路径污染、失败观察字段重复）、全量 live 跑与 C13 登记（TF-0039）。TF-0036 与 TF-0040 的验收含「改动已提交」，先留 in_progress，提交后由补丁提案收口。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0038",
+      "fields": {
+        "summary": "修掉 live harness 的三处缺陷。①能力授权：`ae --serve --agent` 未传 --cap 时等价零授权，条件 D 的每个 op 都返回 E_CAPABILITY_DENY——D 从未真正执行过；新增显式能力集 ACI_CAPABILITIES 并经 --cap 传入（--caps 可覆盖）。②夹具污染：工作区拷贝夹具时带进了陈旧 __pycache__，导致 pytest 报出的是夹具源路径（../../../../Desktop/...）而非工作区相对路径，既浪费 token 又误导 agent；两处 copytree 加 ignore=__pycache__/.pytest_cache。③失败观察重复：格式化后的失败观察里 stdout_summary 与 summary 字节级相同、error.hint 重复首条诊断消息；改为去重后同一失败样本 958→689 字符（−28%）。",
+        "evidence": [
+          "能力授权：AE 直接探测 file.view → 无 --cap = E_CAPABILITY_DENY；--cap shell.exec = 仍 DENY；--cap all = ok；修复后试点 python_fix_pytest_fail 的 D 由 FAIL 变 PASS",
+          "夹具污染：直接探测对比——带 __pycache__ 时诊断 path=../../../../Desktop/verseshell/verseshell/bench/aci/fixtures/python_edit_and_retest/tests/test_greet.py；忽略 __pycache__ 后 path=tests/test_greet.py",
+          "失败观察去重：同一 E_PROCESS_EXIT(pytest ModuleNotFoundError) 的格式化文本 958→689 字符（约 239→172 token）；stdout_summary 与 summary 完全相同、error.hint 与 diagnostics[0].message 相同",
+          "定向复跑 python_edit_and_retest：D 观察 token 658→363（−45%），wall 82903ms→15173ms；工具数仍为 6（裸 pytest 在 Windows 上的 sys.path 行为属环境事实，非 harness 缺陷）",
+          "改动文件：bench/aci/runners/live_agent_loop.py（ACI_CAPABILITIES/--caps/execute_aci_op/copytree/format_aci_result）、bench/aci/runners/run_suite.py（copytree 同样忽略 __pycache__）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0039",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "全量 live 跑完成并登记为独立声明 C13。10 任务 × 2 条件跑了两遍（harness 修复前/后）：两遍的结论方向一致——成功率相同（A=0.6、D=0.6），而 D 的工具调用数与观察 token 都是 A 的 2–2.6 倍；修复前 2.00/2.02，修复后 2.32/2.62。也就是说在该模型与该任务集上，ACI 没有减少步骤或 token。D 只在 windows_path_normalize_edit 上明显更省（0.34x token）。模型未固定温度/种子，逐任务波动可达 1.5–3 倍，因此两次全量的比值差异不能归因于 harness 修复，只有方向是结论。",
+        "evidence": [
+          "产物：bench/aci/results/latest_live.json（含 live_config：model/api_base/caps/max_turns/tasks/conditions + evidence 指纹）、bench/aci/results/live_REPORT.md、bench/aci/results/live_baseline_preharnessfix_2026-09-22.json（修复前基线归档）",
+          "修复前全量：A 0.6 / 2.7 tools / 151.8 tok；D 0.6 / 5.4 / 306.4（比值 2.00 / 2.02）",
+          "修复后全量：A 0.6 / 2.8 tools / 152.1 tok；D 0.6 / 6.5 / 399.0（比值 2.32 / 2.62）",
+          "逐任务波动例：rust_fix_compile_error D 187→590 tok；windows_path_normalize_edit D 16→50 tok（仍优于 A 的 146）",
+          "D 的 token 去向（修复后）：file.view 1516、exec.run 2025（其中 1524 来自失败 exec）、file.replace_exact 257；失败 op 占总 41.5%",
+          "docs/claims-and-evidence.md 新增 C13（六要素 + 五条失效边界：单模型单次/方差、token 估算口径、成功判定不要求跑测试、tsc 缺失与裸 pytest 陷阱、与 mock C1/C2 不可混用）",
+          "bench/aci/README.md 明确：mock 的 D 直接套 GOLDEN，0.106/0.55 是评分管线自检而非能力测量；live 用法与 --cap 必要性",
+          "凭据安全：git grep \"sk-a2a\" 无命中（key 只经环境变量传入）"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0036",
+      "fields": {
+        "progress": 85.0,
+        "summary": "四个交付节点完成并各有证据：live 通路接入与试点（TF-0037）、harness 三处修复（TF-0038）、全量 live 跑与 C13 登记（TF-0039）。剩余唯一缺口是提交（TF-0040），因为本节点验收含「改动已提交、工作区干净」，故留 in_progress。",
+        "next_action": "提交本轮 harness 修复、live 产物、声明与文档（TF-0040），回填 commit hash 后把 TF-0036 与 TF-0040 转 done。",
+        "evidence": [
+          "python tools/claim_gate.py → 见收口复核（含 C12 覆盖 live 产物）",
+          "全量 live 两次运行：A/D 成功率均 0.6，D 的 tools/tokens 约为 A 的 2–2.6 倍",
+          "harness 修复前后试点与定向复跑对比（D 由全量 E_CAPABILITY_DENY 变为可执行；最差任务 token 658→363）",
+          "TF-0037 / TF-0038 / TF-0039 的 evidence 字段"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0040",
+      "fields": {
+        "status": "in_progress",
+        "progress": 50.0,
+        "next_action": "提交本轮改动（live harness 修复、live 产物与基线归档、C13 与文档、C12 扩展），再回填 commit hash。",
+        "evidence": [
+          "收口前：claim_gate 全绿（含 C12 的 4 份产物）；git grep 无 key 命中；live 产物含 live_config 与指纹"
+        ]
+      }
+    }
+  ]
+}

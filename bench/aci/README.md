@@ -37,7 +37,34 @@ Outputs:
 | `raw_shell` | Noisy multi-step shell trajectory; **does not** apply GOLDEN → task usually fails |
 | `verseshell_aci` | Short typed-op trajectory; **applies GOLDEN** → task succeeds |
 
-This encodes the product claim: structured ACI + reduced observations reach a correct fix with fewer tools/tokens.
+**Read this before quoting the mock numbers.** Mock condition D applies the
+GOLDEN patch directly, so the mock ratio (tokens 0.106, calls 0.55) is a
+harness self-test: it checks the scoring pipeline, it is **not** a measurement
+of what a real agent achieves. For a real-model measurement use the live agent
+loop below and quote claim C13 — never mix the two.
+
+## Live agent loop (real model)
+
+`runners/live_agent_loop.py` drives a real function-calling model through the
+same tasks and conditions:
+
+```powershell
+$env:DEEPSEEK_API_KEY = "<key>"   # credentials stay in the environment, never in the repo
+python bench/aci/runners/live_agent_loop.py --full `
+  --model <model> --base-url http://127.0.0.1:3065/v1 --max-turns 8
+```
+
+| Flag | Meaning |
+|------|---------|
+| `--tasks a,b` / `--smoke` / `--full` | task selection (smoke = 3, full = 10) |
+| `--model` / `--base-url` / `--api-key` | endpoint config (key may come from the env instead) |
+| `--caps` | capabilities granted to the AE server for condition D (default: the ACI surface set) |
+
+Condition D starts `ae --serve --agent --cap <caps>`. **Without `--cap` the
+server grants nothing and every op fails with `E_CAPABILITY_DENY`** — a live run
+made that way measures nothing, so the flag is mandatory in practice.
+
+Outputs: `results/latest_live.json`, `results/live_REPORT.md`.
 
 ## Task schema
 

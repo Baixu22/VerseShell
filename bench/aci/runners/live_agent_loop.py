@@ -16,6 +16,7 @@ Outputs: bench/aci/results/latest_live.json (rows + aggregate + comparison)
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -50,6 +51,50 @@ MAX_OUTPUT_CHARS = 64000
 TOOL_TIMEOUT_SEC = 120
 API_TIMEOUT_SEC = 180
 AE_OP_TIMEOUT_MS = 120000  # cargo check/build can be slow
+
+# Condition D exercises the ACI surface inside the task workspace, so the AE
+# server needs the capabilities those ops require. Without this flag the server
+# starts with no grants and denies every op with E_CAPABILITY_DENY, which makes
+# the D condition measure nothing at all (that is exactly what the first live
+# pilot showed). Kept explicit rather than `all` so the benchmark still runs
+# under a policy that looks like a real agent's.
+ACI_CAPABILITIES = (
+    "sys.read,file.read,file.write,file.delete,shell.exec,"
+    "git.read,git.write,proc.list,proc.spawn,proc.kill,crypto.hash"
+)
+
+# The measured surface, recorded into the artifact so claim_gate (C12) can tell
+# whether a stored live run still describes the current code.
+EVIDENCE_GLOBS = [
+    "src/**/*.rs",
+    "Cargo.toml",
+    "bench/aci/tasks/*.json",
+    "bench/aci/fixtures/**/*",
+    "bench/aci/runners/*.py",
+]
+
+
+def evidence_fingerprint(globs: list[str]) -> str:
+    """Content hash of the measured surface; claim_gate (C12) recomputes it."""
+    digest = hashlib.sha256()
+    paths = sorted(
+        p for pat in globs for p in ROOT.glob(pat)
+        if p.is_file() and "__pycache__" not in p.parts
+    )
+    for path in paths:
+        digest.update(path.relative_to(ROOT).as_posix().encode())
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+    return digest.hexdigest()
+
+
+def current_git_rev() -> str | None:
+    """HEAD at generation time; kept for provenance alongside the fingerprint."""
+    try:
+        proc = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT,
+                              capture_output=True, text=True)
+    except OSError:
+        return None
+    return proc.stdout.strip() if proc.returncode == 0 else None
 
 # ── ACI tool schemas ──
 # LLM tool names use underscores (DeepSeek API rejects dots in function names).
@@ -379,7 +424,8 @@ def prepare_workspace(fixture_name: str) -> Path:
                 continue
             dest = td / item.name
             if item.is_dir():
-                shutil.copytree(item, dest)
+                shutil.copytree(item, dest,
+                                ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache"))
             else:
                 shutil.copy2(item, dest)
     return td
@@ -433,7 +479,8 @@ def chat_completion(
 
 # ── Tool execution ──
 
-def execute_aci_op(op_name: str, args: dict, workspace: str) -> dict:
+def execute_aci_op(op_name: str, args: dict, workspace: str,
+                   caps: str = ACI_CAPABILITIES) -> dict:
     """Run a single ACI op via ae --serve --agent."""
     op = {
         "id": uuid.uuid4().hex[:12],
@@ -454,7 +501,7 @@ def execute_aci_op(op_name: str, args: dict, workspace: str) -> dict:
 
     try:
         proc = subprocess.Popen(
-            [str(AE), "--serve", "--agent"],
+            [str(AE), "--serve", "--agent", "--cap", caps],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -497,23 +544,30 @@ def format_aci_result(response: dict) -> str:
         if "diagnostics" in response and response["diagnostics"]:
             clean["diagnostics"] = response["diagnostics"][:5]
         if "error" in response and response["error"]:
-            clean["error"] = response["error"]
+            err = dict(response["error"])
+            # `hint` usually repeats the first diagnostic message verbatim.
+            diag_messages = {d.get("message") for d in (response.get("diagnostics") or [])}
+            if err.get("hint") in diag_messages:
+                err.pop("hint", None)
+            clean["error"] = err
         if "summary" in data:
             clean["summary"] = data["summary"]
         if "exit_code" in data:
             clean["exit_code"] = data["exit_code"]
-        # Keep short text snapshots from each stream if present
+        # Keep short text snapshots from each stream if present. A stream summary
+        # that is byte-identical to `summary` (the common case for pytest) is
+        # pure duplication and is dropped.
         if "stdout" in data:
             s = data["stdout"]
             if s.get("text"):
                 clean["stdout_text"] = s["text"][:200]
-            elif s.get("summary"):
+            elif s.get("summary") and s["summary"] != data.get("summary"):
                 clean["stdout_summary"] = s["summary"]
         if "stderr" in data:
             s = data["stderr"]
             if s.get("text"):
                 clean["stderr_text"] = s["text"][:200]
-            elif s.get("summary"):
+            elif s.get("summary") and s["summary"] != data.get("summary"):
                 clean["stderr_summary"] = s["summary"]
         if "content_hash" in data:
             clean["content_hash"] = data["content_hash"]
@@ -598,6 +652,7 @@ def run_agent_loop(
     api_key: str,
     base_url: str,
     max_turns: int = MAX_TURNS,
+    caps: str = ACI_CAPABILITIES,
 ) -> dict:
     workspace = prepare_workspace(task["workspace_fixture"])
     tools = ACI_TOOLS if condition == "verseshell_aci" else RAW_SHELL_TOOLS
@@ -689,7 +744,7 @@ def run_agent_loop(
                 elif condition == "verseshell_aci":
                     # Map LLM tool name (underscore) → AE operation name (dot)
                     ae_op = ACI_OP_MAP.get(fn_name, fn_name)
-                    aci_response = execute_aci_op(ae_op, fn_args, str(workspace))
+                    aci_response = execute_aci_op(ae_op, fn_args, str(workspace), caps)
                     result_text = format_aci_result(aci_response)
                     obs_tok = estimate_tokens(result_text)
                     messages.append({"role": "tool", "tool_call_id": fn_id, "content": result_text})
@@ -927,6 +982,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--base-url", default=DEFAULT_BASE_URL)
     ap.add_argument("--out", default=str(RESULTS / "latest_live.json"))
     ap.add_argument("--max-turns", type=int, default=MAX_TURNS)
+    ap.add_argument("--caps", default=ACI_CAPABILITIES,
+                    help="capabilities granted to the AE server in condition D")
     ap.add_argument("--smoke", action="store_true", help="3-task smoke validation")
     ap.add_argument("--full", action="store_true", help="All 10 tasks")
     args = ap.parse_args(argv)
@@ -972,7 +1029,8 @@ def main(argv: list[str] | None = None) -> int:
             t0 = time.time()
             try:
                 row = run_agent_loop(task, cond, model=args.model, api_key=api_key,
-                                     base_url=args.base_url, max_turns=args.max_turns)
+                                     base_url=args.base_url, max_turns=args.max_turns,
+                                     caps=args.caps)
                 rows.append(row)
                 wall = int((time.time() - t0) * 1000)
                 status = "PASS" if row["success"] else "FAIL"
@@ -997,6 +1055,19 @@ def main(argv: list[str] | None = None) -> int:
         "seed": manifest.get("seed"),
         "mode": "live",
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "git_rev": current_git_rev(),
+        "evidence": {
+            "globs": EVIDENCE_GLOBS,
+            "fingerprint": evidence_fingerprint(EVIDENCE_GLOBS),
+        },
+        "live_config": {
+            "model": args.model,
+            "api_base": args.base_url,
+            "caps": args.caps,
+            "max_turns": args.max_turns,
+            "tasks": task_ids,
+            "conditions": conditions,
+        },
         "rows": rows,
         "aggregate": aggregate(rows),
         "comparison": comparison,
