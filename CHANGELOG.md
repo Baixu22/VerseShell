@@ -29,6 +29,12 @@
   Single-run variance is large, so the direction is the finding, not the ratio.
 
 ### Changed
+- Measured effect of `file.read_many` (live A/B: same model `sn-glm-5-3-flash`,
+  same seeds 42/43/44, 10 tasks x 2 conditions x 2 arms): condition D's tool calls
+  drop from 6.03 to 5.50 (-8.8%) and the D/A tool ratio from 1.95 to 1.75, while
+  observation tokens rise from 300.2 to 411.1 (+36.9%) because one call now pulls
+  more file content. Fewer steps, not fewer tokens — ACI still costs ~1.75x the
+  steps and ~2.4x the tokens of raw shell here (claim C13).
 - The model-visible observation projection drops structural redundancy:
   `file.view` lines are flattened from `[{line, text}]` to plain strings with a
   single `start_line` (a 10-line window: 444 -> 250 chars, -43.7%), and a failure

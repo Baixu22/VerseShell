@@ -193,18 +193,18 @@ python bench/aci/runners/live_agent_loop.py --full --model <model> --base-url <e
 | 失效边界 | 只覆盖登记在 `tools/claim_gate.py::EVIDENCE_ARTIFACTS` 的三份产物；指纹是**文件内容哈希**，不含运行环境（OS / 工具链 / CPU），所以换机器重跑不会因环境不同被判陈旧——跨机器可比性仍受 C11 的边界限制；产物未记录指纹时判失败（fail-closed） |
 | 状态 | 已证实 |
 
-### C13 · live A/D 对比（真实模型；**历史测量，复测被上游阻塞**）
+### C13 · live A/D 对比与 read_files A/B（真实模型）
 
 | 维度 | 内容 |
 |------|------|
-| 主张原文 | 在一个真实函数调用模型（本地 OpenAI 兼容端点上的 `sn-glm-5-3-flash`）上跑 ACI-Bench 全量 10 任务 × 2 条件、重复 3 次（temperature=0）：条件 A（raw shell）与条件 D（VerseShell ACI）的成功率基本相同（0.600 vs 0.633），但 D 的工具调用数约为 A 的 **2.12 倍**（1.94–2.32）、观察 token 约为 **2.24 倍**（2.04–2.47）。**在该模型与该任务集上，ACI 没有减少步骤或 token** |
-| 门槛数字 | 无（负向结论，只登记事实，不设通过门槛） |
-| 复现命令 | `python bench/aci/runners/live_agent_loop.py --full --model <model> --base-url <endpoint> --max-turns 8 --temperature 0 --seed <s> --repeat 1`（跑 3 次不同 seed 后用 `--repeat` 或合并脚本汇总）→ `bench/aci/results/latest_live.json`、`live_REPORT.md` |
-| source | `bench/aci/runners/live_agent_loop.py`、`bench/aci/results/live_baseline_no_read_many.json`（3 次合并，含 `per_run` 与 `across_runs`）、`bench/aci/results/live_pre_slim.json`、`bench/aci/results/live_baseline_preharnessfix_2026-09-22.json`、`bench/aci/tasks/*.json` |
-| 样本量 / 日期 | 10 任务 × 2 条件 × 3 次重复（temperature=0，seeds 42/43/44），max_turns=8，共 60 行；测于 commit `3639cdd`；2026-09-23 |
-| 最近实测 | A：success 0.600、tools 3.1（2.8/3.4/3.1）、obs_tok 154.6（143.4/167.9/152.5）；D：success 0.633、tools 6.53（6.5/6.6/6.5）、obs_tok 345.3（353.5/370.8/311.6）。比值：tools 2.12（σ=0.16）、tokens 2.24（σ=0.17）。逐任务只有 `windows_path_normalize_edit` 上 D 更省（0.48x），最差 `rust_fix_compile_error`（5.49x）。**观察瘦身效果**（同为 max_turns=8、单次口径）：D 的 obs_tok 399.0 → 345.3（−13.5%），A 基本不变（152.1 → 154.6），token 比 2.62 → 2.23；工具数未变（6.5 → 6.53） |
-| 失效边界 | ①**单模型**：只有一个端点与一个模型，结论不可外推到其它模型。②**名义确定性**：端点接受 `seed` 字段但不严格复现（同 seed 两次调用的 tool_call id 与 token 数仍不同），所以 3 次重复给的是经验区间而非确定性复算。③观察 token 用 `len(text)//4` 估算，不是真实 tokenizer。④成功判定是任务自带的文件谓词，不要求真的跑测试（A 常常不跑测试也满足）。⑤本机 `tsc` 缺失、裸 `pytest` 在 Windows 上因 console-script 的 `sys.path` 行为失败（规范形式 `python -m pytest`），两条件同样受限；失败 exec 占 D 的 38% token（exec 内部 75% 来自失败调用）。⑥**与 mock 的 C1/C2 不可混用**：mock 的 D 直接套 GOLDEN 补丁，0.106/0.55 是评分管线自检，不是能力测量。⑦**本声明是历史测量**：数字描述 commit `3639cdd` 的代码与已被端点下架的 `sn-glm-5-3-flash`；此后端点把该模型换成 `glm-5.3-flash`，且上游对多轮工具调用会话持续返回 500（`parse response failed`）——单次请求可通、持续会话必失败，因此**复测未能完成**，本行不得当作当前代码/当前模型的结果引用。新算子 `file.read_many` 的效果因此尚无 live 数据（实现与单测见 TF-0048） |
-| 状态 | 历史（待复测；不作为当前证据，故不参与 C12 新鲜度门禁） |
+| 主张原文 | 在真实函数调用模型 `sn-glm-5-3-flash`（本地 OpenAI 兼容端点）上跑 ACI-Bench 全量 10 任务 × 2 条件 × 3 次重复（temperature=0，seeds 42/43/44），并做**同期 A/B**（同模型同 seeds，仅隐藏 `read_files` 工具）：①成功率 A 与 D 基本相同（0.6）；②D 的工具调用数与观察 token 都高于 A——有 `read_files` 时 D/A 工具比 **1.75**、token 比 **2.44**；③新增 `file.read_many` 使 D 的工具调用数由 6.03 降到 **5.50**（−8.8%），D/A 工具比由 1.95 降到 1.75，但观察 token 由 300.2 升到 **411.1**（+36.9%，一次读到更多内容），D/A token 比由 1.98 升到 2.44。**结论：批量读取确实减少步骤，但没有减少 token；ACI 在该模型与该任务集上仍比 raw shell 贵** |
+| 门槛数字 | 无（中性/负向结论，只登记事实，不设通过门槛） |
+| 复现命令 | with：`python bench/aci/runners/live_agent_loop.py --full --model sn-glm-5-3-flash --base-url <endpoint> --max-turns 8 --temperature 0 --seed <s>`；without：同命令再加 `--exclude-tools read_files`；各跑 seeds 42/43/44 后合并 |
+| source | `bench/aci/runners/live_agent_loop.py`、`bench/aci/results/latest_live.json`（with，3 次合并）、`bench/aci/results/live_ab_without_read_files.json`（同期对照，3 次合并）、`bench/aci/results/live_baseline_no_read_many.json`（上一轮历史基线）、`bench/aci/tasks/*.json` |
+| 样本量 / 日期 | 10 任务 × 2 条件 × 3 seeds × 2 臂 = 120 行；2026-09-23 |
+| 最近实测 | 有 `read_files`：A success 0.6 / tools 3.17 / obs_tok 168.6；D 0.6 / **5.50** / **411.1**（D/A 1.748 / 2.443）。无 `read_files`（同期对照）：A 0.6 / 3.10 / 154.6；D 0.6 / 6.03 / 300.2（D/A 1.947 / 1.982）。`read_many` 在 27/30 次 D 运行中被采用。逐任务：D 工具数在 6/10 任务下降（`ts_fix_type_error` 10.33→8.67、`rust_add_unit_test` 7.33→6.00、`python_edit_and_retest` 5.00→3.33），2 个任务上升。与上一轮历史基线（无 read_files，6.53/345.3）对比，工具数下降方向一致（6.53→5.50） |
+| 失效边界 | ①**单模型**（`sn-glm-5-3-flash`），不可外推；该模型曾被端点下架又恢复，说明端点会轮换模型，复测前必须先核对 `/v1/models`。②**名义确定性**：端点接受 `seed` 但不严格复现（同 seed 的 tool_call id 与 token 数仍不同），3 次重复给的是经验区间而非确定性复算。③观察 token 用 `len(text)//4` 估算，不是真实 tokenizer。④成功判定是任务自带的文件谓词，不要求真的跑测试（A 常常不跑测试也满足）。⑤本机 `tsc` 缺失、裸 `pytest` 在 Windows 上因 console-script 的 `sys.path` 行为失败（规范形式 `python -m pytest`），两条件同样受限；失败 exec 仍是 D 的最大单项开销。⑥**与 mock 的 C1/C2 不可混用**：mock 的 D 直接套 GOLDEN 补丁，0.106/0.55 是评分管线自检，不是能力测量。⑦上游会间歇性 500（`parse response failed`）：本轮 with 臂 3 次运行各有 1 行受影响，已按 (task, seed) 补跑后拼接；`api_error` 行会被合并脚本拒绝，不会进入统计 |
+| 状态 | 已证实（本机单模型、3 次重复 × 2 臂，中性/负向结论） |
 
 ## 4. 与 README 主张的对应关系
 
