@@ -19,8 +19,9 @@ Gated claims (thresholds mirror docs/claims-and-evidence.md exactly):
   C14 batch-read envelope: compact digest + batch budget hold on a frozen-trajectory replay
   C16 compact read projection: it actually shrinks the model-visible read observation
 C5 (learning cost) has no deterministic metric yet: status-only in evidence.json.
-C13 (live A/D) and C15 (where D's extra tokens come from) are registered in
-docs/claims-and-evidence.md without a pass threshold: they record measurements, not goals.
+C13 (live A/D), C15 (where D's extra tokens come from) and C17 (what the reads are
+for) are registered in docs/claims-and-evidence.md without a pass threshold: they
+record measurements, not goals.
 
 Usage:
     python tools/claim_gate.py                 # regenerate metrics + run tests
@@ -74,6 +75,7 @@ EVIDENCE_ARTIFACTS = [
     "eval/tf45_envelope_replay.json",
     "eval/exec_token_breakdown.json",
     "eval/read_path_breakdown.json",
+    "eval/read_usage_audit.json",
 ]
 
 

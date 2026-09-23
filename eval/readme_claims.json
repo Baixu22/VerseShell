@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.readme-claims/v1",
-  "generated_at": "2026-09-23T14:46:14.801639+00:00",
+  "generated_at": "2026-09-23T17:02:11.816621+00:00",
   "generator": "tools/readme_claims_check.py",
   "ae_binary": "target\\debug\\ae.exe",
   "all_pass": true,

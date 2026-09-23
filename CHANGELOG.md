@@ -49,6 +49,25 @@
   Single-run variance is large, so the direction is the finding, not the ratio.
 
 ### Changed
+- Read-usage audit (claim C17, `tools/read_usage_audit.py`): of condition D's 85
+  read paths in the with arm, **33.4% of the read tokens go to `TASK.md`**, whose
+  text the system prompt already carries in a strictly more detailed form
+  (compared fixture by fixture). Raw shell shows the same redundancy at 17.6%, so
+  it is a prompt/fixture duplication rather than an ACI defect. The
+  `unreferenced` bucket (24.8%) is *not* waste: `Cargo.toml` and the failing test
+  file land there and reading them is reasonable.
+- The agent prompt now says `TASK.md` restates the task and should not be read
+  (rule 8). A three-task smoke obeyed it (0 `TASK.md` reads, 3/3 pass), and the
+  full A/B confirms it at scale: D's `TASK.md` reads fall from 27 paths / 1064.5
+  tokens to **3 / 115.3**, the read bucket drops **30.8%** (3183 -> 2203 tokens),
+  and the success rate does not move (A 0.60 / D 0.60).
+- **D's total tokens did not fall**, though: 296.5 -> 303.5 per run. `exec.run`
+  rose from 4442 to 5585 tokens in the same round — inside its own round-to-round
+  range (4442-5585) and equally consistent with the freed budget being spent on
+  commands, which this sample cannot separate. What did change is where the gap
+  lives: read 52.6% -> 22.3%, exec 21.6% -> **49.4%**, and `read_files` now
+  *reduces* D's tokens slightly (-3.5%, the first negative reading in four
+  rounds). 81.7% of D's exec tokens still come from failed commands.
 - Re-measured the live A/B with the compact projection (same model, endpoint,
   seeds 42/43/44, both arms, 120 rows, `api_error` 0 after one upstream 500 was
   re-run by `splice_live_cells.py`). Condition D now spends **296.5 observation

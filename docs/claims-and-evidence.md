@@ -40,9 +40,11 @@ python tools/tf45_envelope_replay.py --out eval/tf45_envelope_replay.json
 python tools/exec_token_breakdown.py --out eval/exec_token_breakdown.json
 # C16：读取桶的紧凑投影（同一信封两种投影，确定性，无 API 调用）
 python tools/read_path_breakdown.py --out eval/read_path_breakdown.json
+# C17：读取用途审计（读了但之后从未引用的是什么，确定性，无 API 调用）
+python tools/read_usage_audit.py --out eval/read_usage_audit.json
 ```
 
-## 3. 声明表（C1–C16）
+## 3. 声明表（C1–C17）
 
 ### C1 · 观察 token 比（mock bench）
 
@@ -191,26 +193,26 @@ python tools/read_path_breakdown.py --out eval/read_path_breakdown.json
 
 | 维度 | 内容 |
 |------|------|
-| 主张原文 | 门禁依赖的七份已存测量（ACI-Bench mock 结果、live A/D 结果、L3 观察质检报告、跨 shell 基准、批量读取信封复算、exec token 分解、读取桶紧凑投影）都记录了生成时被测代码面的 sha256 指纹，且该指纹与当前代码重算结果一致——也就是说这些数字描述的仍是当前实现，而不是两个月前的实现 |
-| 门槛数字 | 七份产物的记录指纹与重算指纹全部一致（`>= 1.00`） |
-| 复现命令 | `python tools/claim_gate.py`；重跑产物用 `python bench/aci/runners/run_suite.py --mode mock`、`python tools/jev_obs_judge.py`、`python tools/cross_shell_bench.py`、`python bench/aci/runners/live_agent_loop.py`（再 `merge_live_runs.py`）、`python tools/tf45_envelope_replay.py`、`python tools/exec_token_breakdown.py`、`python tools/read_path_breakdown.py` |
-| source | `bench/aci/results/latest.json`、`bench/aci/results/latest_live.json`、`eval/jev_obs_report.json`、`eval/cross_shell.json`、`eval/tf45_envelope_replay.json`、`eval/exec_token_breakdown.json`、`eval/read_path_breakdown.json`、`tools/claim_gate.py` |
-| 样本量 / 日期 | 7 份产物；2026-09-23 |
-| 最近实测 | 7/7 fresh（PASS）。引入本声明前的产物（如 2026-07-27 的 bench 结果）没有指纹字段，会被直接判失败 |
-| 失效边界 | 只覆盖登记在 `tools/claim_gate.py::EVIDENCE_ARTIFACTS` 的七份产物；`live_ab_without_read_files.json` 是配对对照臂，按设计不进 C12（重跑时机由 C13 记录），但它是 `eval/exec_token_breakdown.json` 的输入，所以那份产物会随它一起更新。指纹是**文件内容哈希**，不含运行环境（OS / 工具链 / CPU），所以换机器重跑不会因环境不同被判陈旧——跨机器可比性仍受 C11 的边界限制；产物未记录指纹时判失败（fail-closed） |
+| 主张原文 | 门禁依赖的八份已存测量（ACI-Bench mock 结果、live A/D 结果、L3 观察质检报告、跨 shell 基准、批量读取信封复算、exec token 分解、读取桶紧凑投影、读取用途审计）都记录了生成时被测代码面的 sha256 指纹，且该指纹与当前代码重算结果一致——也就是说这些数字描述的仍是当前实现，而不是两个月前的实现 |
+| 门槛数字 | 八份产物的记录指纹与重算指纹全部一致（`>= 1.00`） |
+| 复现命令 | `python tools/claim_gate.py`；重跑产物用 `python bench/aci/runners/run_suite.py --mode mock`、`python tools/jev_obs_judge.py`、`python tools/cross_shell_bench.py`、`python bench/aci/runners/live_agent_loop.py`（再 `merge_live_runs.py`）、`python tools/tf45_envelope_replay.py`、`python tools/exec_token_breakdown.py`、`python tools/read_path_breakdown.py`、`python tools/read_usage_audit.py` |
+| source | `bench/aci/results/latest.json`、`bench/aci/results/latest_live.json`、`eval/jev_obs_report.json`、`eval/cross_shell.json`、`eval/tf45_envelope_replay.json`、`eval/exec_token_breakdown.json`、`eval/read_path_breakdown.json`、`eval/read_usage_audit.json`、`tools/claim_gate.py` |
+| 样本量 / 日期 | 8 份产物；2026-09-23 |
+| 最近实测 | 8/8 fresh（PASS）。引入本声明前的产物（如 2026-07-27 的 bench 结果）没有指纹字段，会被直接判失败 |
+| 失效边界 | 只覆盖登记在 `tools/claim_gate.py::EVIDENCE_ARTIFACTS` 的八份产物；`live_ab_without_read_files.json` 是配对对照臂，按设计不进 C12（重跑时机由 C13 记录），但它是 `eval/exec_token_breakdown.json` 与 `eval/read_usage_audit.json` 的输入，所以那两份产物会随它一起更新。指纹是**文件内容哈希**，不含运行环境（OS / 工具链 / CPU），所以换机器重跑不会因环境不同被判陈旧——跨机器可比性仍受 C11 的边界限制；产物未记录指纹时判失败（fail-closed） |
 | 状态 | 已证实 |
 
 ### C13 · live A/D 对比与 read_files A/B（真实模型）
 
 | 维度 | 内容 |
 |------|------|
-| 主张原文 | 在真实函数调用模型 `sn-glm-5-3-flash`（本地 OpenAI 兼容端点）上跑 ACI-Bench 全量 10 任务 × 2 条件 × 3 次重复（temperature=0，seeds 42/43/44），并做**同期 A/B**（同模型同 seeds，仅隐藏 `read_files` 工具）。**本轮（紧凑投影客户端）**：①成功率 A 0.60 / D 0.6333；②D 的工具调用数与观察 token 仍高于 A——D/A 工具比 **1.86**、token 比 **1.74**；③`file.read_many` 使 D 的工具调用数由 6.47 降到 **5.20**（−19.6%）、D/A 工具比由 2.09 降到 1.86，观察 token 由 277.5 升到 **296.5**（+6.8%，一次读到更多内容），D/A token 比由 1.56 升到 1.74。**结论：批量读取减少步骤、仍略增 token；ACI 在该模型与该任务集上仍比 raw shell 贵，但两轮信封优化后 D 的绝对开销与「批量读取的 token 代价」都在下降** |
+| 主张原文 | 在真实函数调用模型 `sn-glm-5-3-flash`（本地 OpenAI 兼容端点）上跑 ACI-Bench 全量 10 任务 × 2 条件 × 3 次重复（temperature=0，seeds 42/43/44），并做**同期 A/B**（同模型同 seeds，仅隐藏 `read_files` 工具）。**本轮（紧凑投影 + 提示规则 8「不要读 TASK.md」）**：①成功率 A 0.60 / D 0.60；②D 的工具调用数与观察 token 仍高于 A——D/A 工具比 **1.76**、token 比 **1.80**；③`file.read_many` 使 D 的工具调用数由 6.13 降到 **5.33**（−13.1%）、观察 token 由 314.53 降到 **303.53**（**−3.5%**，四轮来首次为负）——批量读取现在同时省步骤与 token。**结论：ACI 在该模型与该任务集上仍比 raw shell 贵，但读取侧已被压到不再是差距主因（见 C15 与 C17）** |
 | 门槛数字 | 无（中性/负向结论，只登记事实，不设通过门槛） |
 | 复现命令 | with：`python bench/aci/runners/live_agent_loop.py --full --model sn-glm-5-3-flash --base-url <endpoint> --max-turns 8 --temperature 0 --seed <s>`；without：同命令再加 `--exclude-tools read_files`；各跑 seeds 42/43/44 后合并：`python bench/aci/runners/merge_live_runs.py --out <artifact> <per-seed runs...>`（任一行带 `api_error` 即 exit 2，拒绝合并） |
-| source | `bench/aci/runners/live_agent_loop.py`、`bench/aci/runners/merge_live_runs.py`、`bench/aci/runners/splice_live_cells.py`、`bench/aci/results/latest_live.json`（with，3 次合并）、`bench/aci/results/live_ab_without_read_files.json`（同期对照，3 次合并）、`bench/aci/results/tf62/with_seed*.json`、`bench/aci/results/tf62/without_seed*.json`（逐 seed 原始行）、`bench/aci/tasks/*.json` |
-| 样本量 / 日期 | 10 任务 × 2 条件 × 3 seeds × 2 臂 = 120 行，`api_error` 0（1 格上游 500 已用 `splice_live_cells.py` 补跑）；2026-09-23（第三次复测） |
-| 最近实测 | **本轮（紧凑投影）** with：A 0.60 / 2.80 / 170.53；D 0.6333 / **5.20** / **296.47**（D/A 1.8571 / 1.7385）。without：A 0.60 / 3.10 / 177.73；D 0.60 / **6.47** / **277.50**（D/A 2.0871 / 1.5614）。`read_files` 净效应：工具 **−19.6%**、观察 token **+6.8%**。**逐轮趋势（with 臂绝对开销）**：D 411.1 → 333.4 → **296.5**；A 168.6 → 197.4 → 170.5（A 代码三轮未动）。**批量读取的 token 代价**：+36.9% → +22.7% → **+6.8%**。**上一轮（紧凑摘要、非紧凑投影，已被取代）**：with D 5.23 / 333.37（D/A 1.6354 / 1.6888）；without D 5.93 / 271.80（D/A 1.9348 / 1.4223） |
-| 失效边界 | ①**单模型**（`sn-glm-5-3-flash`），不可外推；该模型曾被端点下架又恢复，说明端点会轮换模型，复测前必须先核对 `/v1/models`。②**名义确定性**：端点接受 `seed` 但不严格复现（同 seed 的 tool_call id 与 token 数仍不同），3 次重复给的是经验区间而非确定性复算。③**D/A 比值受 A 侧漂移主导，不要当趋势读**：A 的代码三轮完全未动，其 with 臂 obs_tok 却在 168.6 / 197.4 / 170.5 之间摆动（约 ±8%），所以「D/A token 比 2.44 → 1.69 → 1.74」里的起伏主要是采样；可读的是 D 的**绝对**开销单调下降（411.1 → 333.4 → 296.5）以及确定性复算给出的信封效应（C14 / C16）。④观察 token 用 `len(text)//4` 估算，不是真实 tokenizer。⑤成功判定是任务自带的文件谓词，不要求真的跑测试（A 常常不跑测试也满足）。⑥本机 `tsc` 缺失、裸 `pytest` 在 Windows 上因 console-script 的 `sys.path` 行为失败（规范形式 `python -m pytest`），两条件同样受限。⑦**与 mock 的 C1/C2 不可混用**：mock 的 D 直接套 GOLDEN 补丁，0.106/0.55 是评分管线自检，不是能力测量。⑧上游会间歇性 500（`parse response failed`）：本轮 6 次运行有 1 格受影响，已用 `splice_live_cells.py` 按 (task, condition, seed) 补跑后合并；合并脚本遇到 `api_error` 即 exit 2，不会把故障平均成 0 工具/0 token。⑨**逐 op 分解纠正了一个直觉**：`exec.run` 是 D 的单项最大开销，但**不是** D 比 A 贵的原因（本轮 read 占差距 52.6%、exec 21.6%）。详见 C15 |
+| source | `bench/aci/runners/live_agent_loop.py`、`bench/aci/runners/merge_live_runs.py`、`bench/aci/runners/splice_live_cells.py`、`bench/aci/results/latest_live.json`（with，3 次合并）、`bench/aci/results/live_ab_without_read_files.json`（同期对照，3 次合并）、`bench/aci/results/tf67/with_seed*.json`、`bench/aci/results/tf67/without_seed*.json`（逐 seed 原始行）、`bench/aci/tasks/*.json` |
+| 样本量 / 日期 | 10 任务 × 2 条件 × 3 seeds × 2 臂 = 120 行，`api_error` 0（2 格上游 500 已用 `splice_live_cells.py` 补跑）；2026-09-24（第四次复测） |
+| 最近实测 | **本轮（紧凑投影 + 提示规则 8）** with：A 0.60 / 3.03 / 168.87；D 0.60 / **5.33** / **303.53**（D/A 1.7591 / 1.7974）。without：A 0.60 / 3.10 / 169.87；D 0.5667 / **6.13** / **314.53**（D/A 1.9774 / 1.8516）。`read_files` 净效应：工具 **−13.1%**、观察 token **−3.5%**。**逐轮趋势（with 臂绝对开销）**：D 411.1 → 333.4 → 296.5 → **303.5**；A 168.6 → 197.4 → 170.5 → **168.9**（A 代码四轮未动）。**批量读取的 token 代价**：+36.9% → +22.7% → +6.8% → **−3.5%**。**规则效果**：D 的 `TASK.md` 读取由 27 条路径 / 1064.5 tok 降到 3 条 / 115.3 tok，读取桶 3183 → 2203 tok（−30.8%），成功率未掉。**上一轮（紧凑投影、无规则，已被取代）**：with D 5.20 / 296.47（D/A 1.8571 / 1.7385）；without D 6.47 / 277.50（D/A 2.0871 / 1.5614） |
+| 失效边界 | ①**单模型**（`sn-glm-5-3-flash`），不可外推；该模型曾被端点下架又恢复，说明端点会轮换模型，复测前必须先核对 `/v1/models`。②**名义确定性**：端点接受 `seed` 但不严格复现（同 seed 的 tool_call id 与 token 数仍不同），3 次重复给的是经验区间而非确定性复算。③**D/A 比值受 A 侧漂移主导，不要当趋势读**：A 的代码四轮完全未动，其 with 臂 obs_tok 却在 168.6 / 197.4 / 170.5 / 168.9 之间摆动（约 ±8%），所以「D/A token 比 2.44 → 1.69 → 1.74 → 1.80」里的起伏主要是采样；可读的是 D 的**绝对**开销与确定性复算给出的信封效应（C14 / C16）。④观察 token 用 `len(text)//4` 估算，不是真实 tokenizer。⑤成功判定是任务自带的文件谓词，不要求真的跑测试（A 常常不跑测试也满足）。⑥本机 `tsc` 缺失、裸 `pytest` 在 Windows 上因 console-script 的 `sys.path` 行为失败（规范形式 `python -m pytest`），两条件同样受限。⑦**与 mock 的 C1/C2 不可混用**：mock 的 D 直接套 GOLDEN 补丁，0.106/0.55 是评分管线自检，不是能力测量。⑧上游会间歇性 500（`parse response failed`）：本轮 6 次运行有 2 格受影响，已用 `splice_live_cells.py` 按 (task, condition, seed) 补跑后合并；合并脚本遇到 `api_error` 即 exit 2。⑨**提示规则 8 的净效果必须分开说**：它按预期消除了冗余读取（`TASK.md` 读取 −89%，读取桶 −30.8%）且没有降低成功率，但 **D 的总 token 没有下降**（296.5 → 303.5）：同一轮 `exec.run` 从 4442 升到 5585 tok，这个幅度既落在它自身的逐轮波动区间（4442–5585）内，也与「省下的预算被花到命令上」一致——本样本无法把两者分开，不得写成「规则省了 token」。⑩**差距构成随轮次变化**：本轮 read 22.3%、exec 49.4%、edit 20.1%、meta 2.6%（上一轮 read 52.6%、exec 21.6%），引用 C15 时必须带轮次 |
 | 状态 | 已证实（本机单模型、3 次重复 × 2 臂，中性/负向结论） |
 
 ### C14 · 批量读取信封（紧凑摘要 + 批量预算，固定轨迹复算）
@@ -230,12 +232,12 @@ python tools/read_path_breakdown.py --out eval/read_path_breakdown.json
 
 | 维度 | 内容 |
 |------|------|
-| 主张原文 | 用已存 live 产物做逐 op 分解（不调用 API）：①`exec.run` 占条件 D 的 observation token **49.9%**（4442/8894，148.07 tok/run，62.56 tok/次）；②其中 **85.0% 的 exec token 来自失败的命令**（41 次失败 @92.15 tok，只占 57.8% 的调用）；③with/without `read_files` 的 exec 增量 **−13.67 tok/run** 拆成次数效应 78% / 单次效应 22% / 交互，即加了批量读取后 D 反而**少跑命令**；④**关键纠正**：`exec.run` 不是 D 比 A 贵的原因——+133.93 tok/run 的差距分桶为 read +70.47（52.6%）、exec +28.87（21.6%）、edit +23.80（17.8%）、meta +2.80（2.1%）；D 每个文件引用 37.45 tok（A 的 `type` 是 23.24），且读的文件引用数多约 1.55× |
+| 主张原文 | 用已存 live 产物做逐 op 分解（不调用 API）：①`exec.run` 占条件 D 的 observation token **61.3%**（5585/9106，186.17 tok/run，73.49 tok/次）；②其中 **81.7% 的 exec token 来自失败的命令**（45 次失败 @101.44 tok，只占 59.2% 的调用）；③with/without `read_files` 的 exec 增量 **+22.5 tok/run** 拆成次数效应 40% / 单次效应 60%；④**差距构成随轮次翻转**：本轮 +142.67 tok/run 的差距分桶为 exec +70.43（**49.4%**）、read +31.83（22.3%）、edit +28.67（20.1%）、meta +3.73（2.6%）——上一轮 read 还占 52.6%、exec 21.6%，读取侧被压下去之后 exec 成了最大项；⑤D 每个文件引用 37.98 tok（A 的 `type` 是 33.73） |
 | 门槛数字 | 无（诊断性测量，只登记事实，不设通过门槛） |
 | 复现命令 | `python tools/exec_token_breakdown.py --out eval/exec_token_breakdown.json`，再 `python tools/claim_gate.py` |
 | source | `tools/exec_token_breakdown.py`、`bench/aci/results/latest_live.json`、`bench/aci/results/live_ab_without_read_files.json`、`eval/exec_token_breakdown.json` |
-| 样本量 / 日期 | with 臂 30 次 D 运行（10 任务 × 3 seeds）/ 71 次 `exec.run`；对照臂 30 次 / 76 次；2026-09-23（第二次复测） |
-| 最近实测 | with：D 296.47 tok/run，`exec.run` 71 次 / 4442 tok（49.9%，148.07/run，62.56/次），成功 30 次 @22.13、失败 41 次 @92.15（**失败占 85.0% 的 exec token，只占 57.8% 的调用**）。without：D 277.5 tok/run，`exec.run` 76 次 / 4852 tok（58.3%，161.73/run，63.84/次），成功 32 次 @30.50、失败 44 次 @88.09。**exec 增量（with − without）：−13.67 tok/run** = 次数效应 −10.64（78%）+ 单次效应 −3.03（22%）+ 交互 0.21——加了批量读取之后 D 的 exec 反而更少（命令更少），与上一轮的 +29.2/run 反向。差距分桶（总 +133.93 tok/run）：read +70.47（52.6%）、exec +28.87（21.6%）、edit +23.80（17.8%）、meta +2.80（2.1%）。读取形状：D 38 次读取 / 3183 tok / 每次 2.24 个文件引用 / **每引用 37.45**；A 32 次读取命令 / 1069 tok / 1.44 / 23.24 |
+| 样本量 / 日期 | with 臂 30 次 D 运行（10 任务 × 3 seeds）/ 76 次 `exec.run`；对照臂 30 次 / 72 次；2026-09-24（第三次复测） |
+| 最近实测 | with：D 303.53 tok/run，`exec.run` 76 次 / 5585 tok（61.3%，186.17/run，73.49/次），成功 31 次 @32.90、失败 45 次 @101.44（**失败占 81.7% 的 exec token，只占 59.2% 的调用**）。without：D 314.53 tok/run，`exec.run` 72 次 / 4910 tok（52.0%，163.67/run，68.19/次），成功 30 次 @32.93、失败 42 次 @93.38。**exec 增量（with − without）：+22.5 tok/run** = 次数效应 +9.09（40%）+ 单次效应 +13.41（60%）+ 交互 0.71。差距分桶（总 +142.67 tok/run）：exec +70.43（**49.4%**）、read +31.83（22.3%）、edit +28.67（20.1%）、meta +3.73（2.6%）。读取形状：D 34 次读取 / 2203 tok / 每次 1.71 个文件引用 / **每引用 37.98**；A 31 次读取命令 / 1248 tok / 1.19 / 33.73 |
 | 失效边界 | ①**纯诊断**，不是对外主张，也不能反过来当作「ACI 省 token」的证据。②A 侧分桶是**启发式**：按命令字符串关键词分成 build_or_test / read_file / write_or_mkdir / other，优先级 build > read > write；一条命令可能同时读和构建，残差进 other（本轮 other 仅 5 次 / 318 tok），所以 A 的桶是近似值。③A 的 trajectory 不记录单次命令成败（只有 D 记 `aci_ok`），因此无法对 A 做成功/失败拆分。④「每个文件引用」在 D 侧由 `file.read_many.paths` 精确计数、在 A 侧由 `type`/`cat` 出现次数近似，两者不是同一种计数单位。⑤token 仍是 `len(text)//4` 估算。⑥结论只对**本模型、本任务集、本轮 120 行**成立；换模型或换任务集必须重跑 |
 | 状态 | 已证实（本机单模型、诊断性） |
 
@@ -243,14 +245,27 @@ python tools/read_path_breakdown.py --out eval/read_path_breakdown.json
 
 | 维度 | 内容 |
 |------|------|
-| 主张原文 | 把 live 运行里模型**真实发出**的读取调用固定下来，对**同一份**观察信封用真实投影器做两次投影（`format_aci_result(compact=False)` 是改动前的渲染，`compact=True` 是当前），模型可见的读取桶 observation token 下降 **20.8%**（3886 → 3079，33 次可复现调用）。紧凑投影做三件事：完整窗口的 `lines` 数组改为单个换行连接的 `text`；窗口从第 1 行开始且覆盖整文件时丢掉 `start_line`；窗口覆盖整文件时丢掉 `total_lines`（此时它等于 `text` 的行数） |
+| 主张原文 | 把 live 运行里模型**真实发出**的读取调用固定下来，对**同一份**观察信封用真实投影器做两次投影（`format_aci_result(compact=False)` 是改动前的渲染，`compact=True` 是当前），模型可见的读取桶 observation token 下降 **20.5%**（2715 → 2158，31 次可复现调用）。紧凑投影做三件事：完整窗口的 `lines` 数组改为单个换行连接的 `text`；窗口从第 1 行开始且覆盖整文件时丢掉 `start_line`；窗口覆盖整文件时丢掉 `total_lines`（此时它等于 `text` 的行数） |
 | 门槛数字 | `token_savings >= 0.10`（实测 0.2076）；且 `calls > 0`、至少一次调用的投影与 stored live 记录一致 |
 | 复现命令 | `python tools/read_path_breakdown.py --out eval/read_path_breakdown.json`，再 `python tools/claim_gate.py` |
 | source | `tools/read_path_breakdown.py`、`bench/aci/runners/live_agent_loop.py`、`tools/tf45_envelope_replay.py`、`eval/read_path_breakdown.json` |
-| 样本量 / 日期 | 33 次可复现读取调用（26 次 `file.read_many` + 7 次 `file.view`），另有 5 次读运行期自产状态的调用被排除；2026-09-23（第二次复测后） |
-| 最近实测 | 合计 15601 → 12363 字符（−20.8%）、**3886 → 3079 tokens（−20.8%）**；`file.read_many` 26 次 3573 → 2839（−20.5%）、`file.view` 7 次 313 → 240（−23.3%）。改动前归因：content 36.2%、counts 18.0%、digest 16.9%、residual 11.7%、path 10.4%、line_wrapper 6.8%；改动后：content 45.7%、digest 21.3%、residual 14.7%、path 13.2%、line_wrapper 4.3%、counts 0.9%。live 侧独立印证：`read_many` 单次开销 135.6 → 109.3 tok（−19.4%，逐 seed 42 对照），与复算的 −20.5% 一致 |
+| 样本量 / 日期 | 31 次可复现读取调用（19 次 `file.read_many` + 12 次 `file.view`），另有 3 次读运行期自产状态的调用被排除；2026-09-24（第三次复测后） |
+| 最近实测 | 合计 10913 → 8671 字符（−20.5%）、**2715 → 2158 tokens（−20.5%）**；`file.read_many` 19 次 2151 → 1718（−20.1%）、`file.view` 12 次 564 → 440（−22.0%）。改动前归因：content 38.5%、counts 17.5%、digest 14.2%、residual 11.5%、path 9.2%、line_wrapper 9.0%；改动后：content 48.5%、digest 17.8%、residual 14.9%、path 11.6%、line_wrapper 5.7%、counts 1.5% |
 | 失效边界 | ①这是**客户端渲染**改动，不是产品契约改动：`compact=False` 与改动前的投影**逐字节一致**（用 git 上一版的投影器对同一批 37 次冻结调用逐条比对，37/37 identical），所以没有任何消费者需要迁移——兼容策略就是「不动契约」。②丢 `total_lines` **只在客户端展示内容时才成立**：>10 行的窗口不展示内容，此时 `total_lines` 是唯一信息、必须保留（改动后 counts 仍占 0.8% 正是这部分）。这也是该优化不能放进产品信封的原因。③作用域是 `file.view` / `file.read_many`；`file.read_range` 在本轮 live 调用集中未被使用，未纳入测量。④只测读取桶，不代表 D 的总 token 变化——总变化由 live 复测给出（C13）。⑤token 仍是 `len(text)//4` 估算。⑥两项更激进的改动被**评估后否决**：摘要从 16 位降到 8 位（约再省 4%，但碰撞界从 2^-64 降到 2^-32），以及让 `start_line > 1` 的完整窗口也丢 `total_lines`（空文件/尾换行边界下推导不可靠） |
 | 状态 | 已证实（确定性复算） |
+
+### C17 · 读取用途审计（D 的读取到底用在哪，TF-0067）
+
+| 维度 | 内容 |
+|------|------|
+| 主张原文 | 对已存 live 产物做读取用途审计（不调用 API），按**代码里定义**的规则给每条读取路径分类：`referenced_in_run`（同一 run 里被编辑、或在 exec 命令里被点名）、`task_subject`（任务 prompt 或成功谓词里点名）、`task_file`（fixture 自带的 `TASK.md`，其内容系统提示已以更详细的版本携带）、`unreferenced`（以上都不是）。**with 臂 D：85 条路径中 referenced 31（35.0%）、task_subject 6（6.8%）、TASK.md 27（33.4%）、unreferenced 21（24.8%）**；同期 A：78 条文件引用中 referenced 34（55.0%）、task_subject 20（19.5%）、TASK.md 16（17.6%）、unreferenced 8（7.9%）。逐条比对 10 个 fixture 的 `TASK.md` 与注入提示：**提示词每条都更详细，`TASK.md` 没有独有信息**，所以「读 `TASK.md`」是可证明的冗余——而且它在两个臂里都存在。据此加了提示规则 8（「`TASK.md` 只是重复上面的任务，不要为它花一次工具调用」），并用 live 复测验证：**改动后 D 的 `TASK.md` 读取从 27 条 / 1064.5 tok 降到 3 条 / 115.3 tok（−89%），读取桶 3183 → 2203 tok（−30.8%），成功率没有下降（A 0.60 / D 0.60）** |
+| 门槛数字 | 无（诊断性测量，只登记事实，不设通过门槛） |
+| 复现命令 | `python tools/read_usage_audit.py --out eval/read_usage_audit.json`，再 `python tools/claim_gate.py` |
+| source | `tools/read_usage_audit.py`、`bench/aci/tasks/*.json`、`bench/aci/runners/live_agent_loop.py`、`bench/aci/results/latest_live.json`、`bench/aci/results/live_ab_without_read_files.json`、`eval/read_usage_audit.json` |
+| 样本量 / 日期 | 改动前（上一轮产物）：with 臂 38 次 D 读取调用 / 85 条路径、78 条 A 文件引用；改动后（本轮）：34 次 / 58 条、64 条；2026-09-23 → 2026-09-24 |
+| 最近实测 | **改动前（发现问题的依据）** with：D 3183 tok（referenced 1114.5 / task_subject 216 / `TASK.md` **1064.5** / unreferenced 788）；A 2315 tok（referenced 1274.5 / task_subject 450.67 / `TASK.md` 406.67 / unreferenced 183.17）。两臂里被读最多的路径都是 `TASK.md`（D 27 次、A 24 次）。**改动后（提示规则 8）** with：D 58 条路径中 `TASK.md` 只剩 **3 条 / 115.3 tok（5.2%）**，读取桶 3183 → 2203 tok（−30.8%）；A 的 `TASK.md` 从 31% 降到 9.9%（4 条 / 241 tok）。`unreferenced` 份额升到 38.6%（22 条 / 850.5 tok），其中主要是 `Cargo.toml`（9 次）与 `package.json`（4 次）——工程上下文，不是浪费 |
+| 失效边界 | ①**`unreferenced` ≠ 无用**：它只表示「本 run 里没有留下可观察的下游使用」。`Cargo.toml`（9 次）与 `tests/test_math.py`（3 次）都落在这个桶里，但它们分别是工程上下文与失败测试的所在文件——读它们是合理的。能证明冗余的只有 `TASK.md`，因为提示词是它的严格超集。②分类规则是**代码里的启发式**：`referenced_in_run` 靠命令字符串里的路径 token 匹配，路径写法不一致（相对/绝对、反斜杠）会漏判，所以 `unreferenced` 是上界而非精确值。③**批量调用的 token 按路径数均摊**，不是逐文件实测；一次 3 文件 `read_many` 的信封开销也会摊到 `TASK.md` 头上，所以 33.4% 这个份额里含信封开销。④A 侧必须排除「读取命令自身」的自指（A 用 `type` 读文件，命令里自然出现该路径），否则 A 会 100% 落在 `referenced_in_run`；本工具对此有专门处理。⑤结论只对本模型、本任务集、本轮 120 行成立 |
+| 状态 | 已证实（本机单模型、诊断性） |
 
 ## 4. 与 README 主张的对应关系
 
@@ -264,6 +279,7 @@ python tools/read_path_breakdown.py --out eval/read_path_breakdown.json
 - C14 是**信封**声明：它测的是观察面（同一信封两种投影的 token 差）与批量预算的硬上限，不是模型能力；引用时必须带上 `coverage`（哪些调用无法复现、为什么），不得把它写成「ACI 整体省 22%」或「D/A 比值已降到 X」。
 - C15 是**诊断**声明：它回答「D 的额外 token 从哪来」，用来决定下一步该改哪里，不是对外主张。引用时必须带上它的启发式边界（A 侧分桶、A 无成败标记、文件引用计数口径不同），不得写成「ACI 的 exec 更省」这类结论。
 - C16 是**客户端渲染**声明：它测的是参考客户端把读取信封渲染给模型时的体积，不是产品契约，也不是模型能力；引用时必须带上「产品信封未变」与「>10 行窗口仍保留 `total_lines`」两条边界。
+- C17 是**诊断**声明：它说明 D 的读取用在哪，用来决定该不该动提示词或工作区清单。引用时必须带上「`unreferenced` 不等于无用」与「token 是按路径均摊」两条边界，不得写成「D 有 25% 的读取是浪费」。
 - 新增任何对外数字时：先在本文件加一行，再在 `tools/claim_gate.py` 加对应门槛（或显式标注不设门槛），最后跑 `python tools/claim_gate.py`。
 
 ## 5. 口径统一规则（已按根策略裁决）
@@ -283,7 +299,7 @@ mock 实测值（0.106 / 0.55）在两侧都过线。今后新增对外数字一
 |------|------|------|
 | （无） | — | 2026-09-22：原「compact 协议 50–70% token 节省 vs JSON」已处置。该数字**无法复现**（实测小响应信封 42.4%、观察载荷合计 −3.1%），已按 §4 登记为 C9，并把 README 口径改成 C9 的实测范围。当前没有已知的「已进 README 但未登记」对外数字 |
 
-## 7. L3 观察质检（不进 C1–C16 门禁）
+## 7. L3 观察质检（不进 C1–C17 门禁）
 
 `tools/jev_obs_judge.py`（TF-0012）对每个失败样本问两个窄问题，产出 `eval/jev_obs_report.json` + `eval/jev_obs_report.md`：
 

@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.tf45-envelope-replay/v1",
-  "generated_at": "2026-09-23T14:43:19.604581+00:00",
+  "generated_at": "2026-09-23T16:58:18.181617+00:00",
   "method": {
     "frozen_call_source": "bench/aci/results/latest_live.json (condition D read ops)",
     "legacy_projection": "format_aci_result on the envelope with the compact `hash` removed (== the pre-TF-0045 client projection)",
@@ -18,15 +18,15 @@
       "bench/aci/results/latest_live.json",
       "tools/tf45_envelope_replay.py"
     ],
-    "fingerprint": "278182622bc8454130477ac2c54646fea24df1e11176b154702a8fabab3ee37b"
+    "fingerprint": "bf888f8025012ba698be7bc29e6bf6425ecb93319b3869bbb58639b4ef9eb067"
   },
   "totals": {
-    "calls": 38,
-    "calls_replayed": 33,
-    "calls_excluded": 5,
-    "coverage": 0.8684,
+    "calls": 34,
+    "calls_replayed": 31,
+    "calls_excluded": 3,
+    "coverage": 0.9118,
     "stored_projection_matched": {
-      "current": 33
+      "current": 31
     },
     "excluded": [
       {
@@ -38,26 +38,6 @@
         "stored_tokens": 15,
         "legacy_tokens": 56,
         "reason": "file did not exist in the pristine fixture (created by the live run)"
-      },
-      {
-        "task_id": "rust_fix_compile_error",
-        "op": "file.view",
-        "args": {
-          "path": "src/lib.rs"
-        },
-        "stored_tokens": 27,
-        "legacy_tokens": 41,
-        "reason": "content depends on live-run history: current projection 28 tok / legacy projection 41 tok vs 27 tok recorded live"
-      },
-      {
-        "task_id": "rust_search_and_edit",
-        "op": "file.view",
-        "args": {
-          "path": "src/lib.rs"
-        },
-        "stored_tokens": 32,
-        "legacy_tokens": 45,
-        "reason": "content depends on live-run history: current projection 31 tok / legacy projection 45 tok vs 32 tok recorded live"
       },
       {
         "task_id": "windows_path_normalize_edit",
@@ -80,30 +60,30 @@
         "reason": "file did not exist in the pristine fixture (created by the live run)"
       }
     ],
-    "legacy_tokens": 4181,
-    "current_tokens": 3079,
-    "token_savings": 0.2636,
-    "legacy_chars": 16763,
-    "current_chars": 12363,
+    "legacy_tokens": 2910,
+    "current_tokens": 2158,
+    "token_savings": 0.2584,
+    "legacy_chars": 11696,
+    "current_chars": 8671,
     "legacy_comparison_exact": true
   },
   "by_op": {
     "file.read_many": {
-      "calls": 26,
-      "legacy_tokens": 3844,
-      "current_tokens": 2839,
-      "savings": 0.2614
+      "calls": 19,
+      "legacy_tokens": 2302,
+      "current_tokens": 1718,
+      "savings": 0.2537
     },
     "file.view": {
-      "calls": 7,
-      "legacy_tokens": 337,
-      "current_tokens": 240,
-      "savings": 0.2878
+      "calls": 12,
+      "legacy_tokens": 608,
+      "current_tokens": 440,
+      "savings": 0.2763
     }
   },
   "stored_calls_by_op": {
-    "file.read_many": 26,
-    "file.view": 12
+    "file.read_many": 19,
+    "file.view": 15
   },
   "budget": {
     "files": 8,
@@ -140,58 +120,41 @@
       "op": "file.read_many",
       "args": {
         "paths": [
-          "src/lib.rs",
           "Cargo.toml",
-          "TASK.md"
+          "src/lib.rs"
         ]
       },
       "ok": true,
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 108,
-      "legacy_chars": 598,
-      "current_chars": 433,
-      "legacy_tokens": 149,
-      "current_tokens": 108,
+      "stored_tokens": 76,
+      "legacy_chars": 414,
+      "current_chars": 304,
+      "legacy_tokens": 103,
+      "current_tokens": 76,
       "truncated_entries": 0
     },
     {
       "task_id": "rust_add_unit_test",
       "op": "file.read_many",
       "args": {
+        "max_total_lines": 80,
         "paths": [
           "Cargo.toml",
-          "src/lib.rs",
-          "TASK.md"
-        ]
+          "src/lib.rs"
+        ],
+        "window": 40
       },
       "ok": true,
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 108,
-      "legacy_chars": 600,
-      "current_chars": 435,
-      "legacy_tokens": 150,
-      "current_tokens": 108,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_add_unit_test",
-      "op": "file.view",
-      "args": {
-        "path": "src/lib.rs"
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 27,
-      "legacy_chars": 164,
-      "current_chars": 109,
-      "legacy_tokens": 41,
-      "current_tokens": 27,
+      "stored_tokens": 75,
+      "legacy_chars": 411,
+      "current_chars": 301,
+      "legacy_tokens": 102,
+      "current_tokens": 75,
       "truncated_entries": 0
     },
     {
@@ -200,19 +163,18 @@
       "args": {
         "paths": [
           "Cargo.toml",
-          "src/lib.rs",
-          "TASK.md"
+          "src/lib.rs"
         ]
       },
       "ok": true,
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 110,
-      "legacy_chars": 605,
-      "current_chars": 440,
-      "legacy_tokens": 151,
-      "current_tokens": 110,
+      "stored_tokens": 80,
+      "legacy_chars": 431,
+      "current_chars": 321,
+      "legacy_tokens": 107,
+      "current_tokens": 80,
       "truncated_entries": 0
     },
     {
@@ -238,7 +200,6 @@
       "args": {
         "paths": [
           "mathlib.py",
-          "TASK.md",
           "tests/test_math.py"
         ]
       },
@@ -246,514 +207,19 @@
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 99,
-      "legacy_chars": 564,
-      "current_chars": 399,
-      "legacy_tokens": 141,
-      "current_tokens": 99,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "python_edit_and_retest",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "greet.py",
-          "tests/test_greet.py",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 111,
-      "legacy_chars": 611,
-      "current_chars": 446,
-      "legacy_tokens": 152,
-      "current_tokens": 111,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "python_noisy_install_summary",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "requirements.txt",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
       "stored_tokens": 72,
-      "legacy_chars": 400,
-      "current_chars": 290,
-      "legacy_tokens": 100,
+      "legacy_chars": 399,
+      "current_chars": 289,
+      "legacy_tokens": 99,
       "current_tokens": 72,
       "truncated_entries": 0
     },
     {
-      "task_id": "ts_fix_type_error",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "package.json",
-          "tsconfig.json",
-          "src/index.ts",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 168,
-      "legacy_chars": 894,
-      "current_chars": 674,
-      "legacy_tokens": 223,
-      "current_tokens": 168,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "ts_package_script_fail",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "package.json",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 95,
-      "legacy_chars": 490,
-      "current_chars": 380,
-      "legacy_tokens": 122,
-      "current_tokens": 95,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "windows_path_normalize_edit",
-      "op": "file.view",
-      "args": {
-        "path": "out/result.txt"
-      },
-      "ok": false,
-      "reproducible": false,
-      "unreproducible_reason": "file did not exist in the pristine fixture (created by the live run)",
-      "matched_projection": null,
-      "stored_tokens": 15,
-      "legacy_chars": 225,
-      "current_chars": 225,
-      "legacy_tokens": 56,
-      "current_tokens": 56,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "windows_batch_capture_diag",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "broken_build.log",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 113,
-      "legacy_chars": 562,
-      "current_chars": 452,
-      "legacy_tokens": 140,
-      "current_tokens": 113,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_fix_compile_error",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "src/lib.rs",
-          "Cargo.toml",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 108,
-      "legacy_chars": 598,
-      "current_chars": 433,
-      "legacy_tokens": 149,
-      "current_tokens": 108,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_fix_compile_error",
-      "op": "file.view",
-      "args": {
-        "path": "src/lib.rs"
-      },
-      "ok": true,
-      "reproducible": false,
-      "unreproducible_reason": "content depends on live-run history: current projection 28 tok / legacy projection 41 tok vs 27 tok recorded live",
-      "matched_projection": null,
-      "stored_tokens": 27,
-      "legacy_chars": 167,
-      "current_chars": 112,
-      "legacy_tokens": 41,
-      "current_tokens": 28,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_add_unit_test",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 108,
-      "legacy_chars": 600,
-      "current_chars": 435,
-      "legacy_tokens": 150,
-      "current_tokens": 108,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_add_unit_test",
-      "op": "file.view",
-      "args": {
-        "path": "src/lib.rs"
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 27,
-      "legacy_chars": 164,
-      "current_chars": 109,
-      "legacy_tokens": 41,
-      "current_tokens": 27,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_search_and_edit",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 110,
-      "legacy_chars": 605,
-      "current_chars": 440,
-      "legacy_tokens": 151,
-      "current_tokens": 110,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_search_and_edit",
-      "op": "file.view",
-      "args": {
-        "path": "src/lib.rs"
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 31,
-      "legacy_chars": 181,
-      "current_chars": 126,
-      "legacy_tokens": 45,
-      "current_tokens": 31,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_search_and_edit",
-      "op": "file.view",
-      "args": {
-        "path": "src/lib.rs"
-      },
-      "ok": true,
-      "reproducible": false,
-      "unreproducible_reason": "content depends on live-run history: current projection 31 tok / legacy projection 45 tok vs 32 tok recorded live",
-      "matched_projection": null,
-      "stored_tokens": 32,
-      "legacy_chars": 181,
-      "current_chars": 126,
-      "legacy_tokens": 45,
-      "current_tokens": 31,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "python_fix_pytest_fail",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "mathlib.py",
-          "tests/test_math.py",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 99,
-      "legacy_chars": 564,
-      "current_chars": 399,
-      "legacy_tokens": 141,
-      "current_tokens": 99,
-      "truncated_entries": 0
-    },
-    {
       "task_id": "python_edit_and_retest",
       "op": "file.read_many",
       "args": {
         "paths": [
           "greet.py",
-          "tests/test_greet.py",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 111,
-      "legacy_chars": 611,
-      "current_chars": 446,
-      "legacy_tokens": 152,
-      "current_tokens": 111,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "python_noisy_install_summary",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "requirements.txt",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 72,
-      "legacy_chars": 400,
-      "current_chars": 290,
-      "legacy_tokens": 100,
-      "current_tokens": 72,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "ts_fix_type_error",
-      "op": "file.read_many",
-      "args": {
-        "max_total_lines": 120,
-        "paths": [
-          "package.json",
-          "tsconfig.json",
-          "src/index.ts",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 168,
-      "legacy_chars": 894,
-      "current_chars": 674,
-      "legacy_tokens": 223,
-      "current_tokens": 168,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "ts_package_script_fail",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "package.json",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 95,
-      "legacy_chars": 490,
-      "current_chars": 380,
-      "legacy_tokens": 122,
-      "current_tokens": 95,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "windows_path_normalize_edit",
-      "op": "file.view",
-      "args": {
-        "path": "out/result.txt"
-      },
-      "ok": false,
-      "reproducible": false,
-      "unreproducible_reason": "file did not exist in the pristine fixture (created by the live run)",
-      "matched_projection": null,
-      "stored_tokens": 15,
-      "legacy_chars": 225,
-      "current_chars": 225,
-      "legacy_tokens": 56,
-      "current_tokens": 56,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "windows_batch_capture_diag",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "broken_build.log",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 113,
-      "legacy_chars": 562,
-      "current_chars": 452,
-      "legacy_tokens": 140,
-      "current_tokens": 113,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_fix_compile_error",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "src/lib.rs",
-          "Cargo.toml",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 108,
-      "legacy_chars": 598,
-      "current_chars": 433,
-      "legacy_tokens": 149,
-      "current_tokens": 108,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_add_unit_test",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 108,
-      "legacy_chars": 600,
-      "current_chars": 435,
-      "legacy_tokens": 150,
-      "current_tokens": 108,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_add_unit_test",
-      "op": "file.view",
-      "args": {
-        "path": "src/lib.rs"
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 27,
-      "legacy_chars": 164,
-      "current_chars": 109,
-      "legacy_tokens": 41,
-      "current_tokens": 27,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_search_and_edit",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 110,
-      "legacy_chars": 605,
-      "current_chars": 440,
-      "legacy_tokens": 151,
-      "current_tokens": 110,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "python_fix_pytest_fail",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "mathlib.py",
-          "TASK.md",
-          "tests/test_math.py"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 99,
-      "legacy_chars": 564,
-      "current_chars": 399,
-      "legacy_tokens": 141,
-      "current_tokens": 99,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "python_edit_and_retest",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "greet.py",
-          "TASK.md",
           "tests/test_greet.py"
         ]
       },
@@ -761,32 +227,28 @@
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 111,
-      "legacy_chars": 611,
-      "current_chars": 446,
-      "legacy_tokens": 152,
-      "current_tokens": 111,
+      "stored_tokens": 80,
+      "legacy_chars": 430,
+      "current_chars": 320,
+      "legacy_tokens": 107,
+      "current_tokens": 80,
       "truncated_entries": 0
     },
     {
       "task_id": "python_noisy_install_summary",
-      "op": "file.read_many",
+      "op": "file.view",
       "args": {
-        "max_total_lines": 40,
-        "paths": [
-          "requirements.txt",
-          "TASK.md"
-        ]
+        "path": "requirements.txt"
       },
       "ok": true,
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 72,
-      "legacy_chars": 400,
-      "current_chars": 290,
-      "legacy_tokens": 100,
-      "current_tokens": 72,
+      "stored_tokens": 17,
+      "legacy_chars": 126,
+      "current_chars": 71,
+      "legacy_tokens": 31,
+      "current_tokens": 17,
       "truncated_entries": 0
     },
     {
@@ -796,19 +258,18 @@
         "paths": [
           "package.json",
           "tsconfig.json",
-          "src/index.ts",
-          "TASK.md"
+          "src/index.ts"
         ]
       },
       "ok": true,
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 168,
-      "legacy_chars": 894,
-      "current_chars": 674,
-      "legacy_tokens": 223,
-      "current_tokens": 168,
+      "stored_tokens": 137,
+      "legacy_chars": 715,
+      "current_chars": 550,
+      "legacy_tokens": 178,
+      "current_tokens": 137,
       "truncated_entries": 0
     },
     {
@@ -816,19 +277,18 @@
       "op": "file.read_many",
       "args": {
         "paths": [
-          "package.json",
-          "TASK.md"
+          "package.json"
         ]
       },
       "ok": true,
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 95,
-      "legacy_chars": 490,
-      "current_chars": 380,
-      "legacy_tokens": 122,
-      "current_tokens": 95,
+      "stored_tokens": 67,
+      "legacy_chars": 326,
+      "current_chars": 271,
+      "legacy_tokens": 81,
+      "current_tokens": 67,
       "truncated_entries": 0
     },
     {
@@ -866,20 +326,436 @@
       "truncated_entries": 0
     },
     {
-      "task_id": "windows_batch_capture_diag",
-      "op": "file.view",
+      "task_id": "rust_fix_compile_error",
+      "op": "file.read_many",
       "args": {
-        "path": "TASK.md"
+        "paths": [
+          "src/lib.rs",
+          "Cargo.toml"
+        ]
       },
       "ok": true,
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 39,
-      "legacy_chars": 211,
-      "current_chars": 156,
-      "legacy_tokens": 52,
-      "current_tokens": 39,
+      "stored_tokens": 76,
+      "legacy_chars": 414,
+      "current_chars": 304,
+      "legacy_tokens": 103,
+      "current_tokens": 76,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 75,
+      "legacy_chars": 411,
+      "current_chars": 301,
+      "legacy_tokens": 102,
+      "current_tokens": 75,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs",
+          "TASK.md"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 110,
+      "legacy_chars": 605,
+      "current_chars": 440,
+      "legacy_tokens": 151,
+      "current_tokens": 110,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 31,
+      "legacy_chars": 181,
+      "current_chars": 126,
+      "legacy_tokens": 45,
+      "current_tokens": 31,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_fix_pytest_fail",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "mathlib.py",
+          "tests/test_math.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 72,
+      "legacy_chars": 399,
+      "current_chars": 289,
+      "legacy_tokens": 99,
+      "current_tokens": 72,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_edit_and_retest",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "greet.py",
+          "tests/test_greet.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 80,
+      "legacy_chars": 430,
+      "current_chars": 320,
+      "legacy_tokens": 107,
+      "current_tokens": 80,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_noisy_install_summary",
+      "op": "file.view",
+      "args": {
+        "path": "requirements.txt"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 17,
+      "legacy_chars": 126,
+      "current_chars": 71,
+      "legacy_tokens": 31,
+      "current_tokens": 17,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_fix_type_error",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "src/index.ts",
+          "package.json",
+          "tsconfig.json"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 137,
+      "legacy_chars": 715,
+      "current_chars": 550,
+      "legacy_tokens": 178,
+      "current_tokens": 137,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_fix_type_error",
+      "op": "file.view",
+      "args": {
+        "path": "package.json"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 16,
+      "legacy_chars": 122,
+      "current_chars": 67,
+      "legacy_tokens": 30,
+      "current_tokens": 16,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_package_script_fail",
+      "op": "file.view",
+      "args": {
+        "path": "package.json"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 55,
+      "legacy_chars": 276,
+      "current_chars": 221,
+      "legacy_tokens": 69,
+      "current_tokens": 55,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "windows_path_normalize_edit",
+      "op": "file.view",
+      "args": {
+        "path": "out/result.txt"
+      },
+      "ok": false,
+      "reproducible": false,
+      "unreproducible_reason": "file did not exist in the pristine fixture (created by the live run)",
+      "matched_projection": null,
+      "stored_tokens": 15,
+      "legacy_chars": 225,
+      "current_chars": 225,
+      "legacy_tokens": 56,
+      "current_tokens": 56,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "windows_batch_capture_diag",
+      "op": "file.view",
+      "args": {
+        "path": "broken_build.log"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 58,
+      "legacy_chars": 288,
+      "current_chars": 233,
+      "legacy_tokens": 72,
+      "current_tokens": 58,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_fix_compile_error",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "src/lib.rs",
+          "Cargo.toml"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 76,
+      "legacy_chars": 414,
+      "current_chars": 304,
+      "legacy_tokens": 103,
+      "current_tokens": 76,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 75,
+      "legacy_chars": 411,
+      "current_chars": 301,
+      "legacy_tokens": 102,
+      "current_tokens": 75,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 27,
+      "legacy_chars": 164,
+      "current_chars": 109,
+      "legacy_tokens": 41,
+      "current_tokens": 27,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "op": "file.read_many",
+      "args": {
+        "max_total_lines": 240,
+        "paths": [
+          "Cargo.toml",
+          "src\\lib.rs",
+          "TASK.md"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 110,
+      "legacy_chars": 606,
+      "current_chars": 441,
+      "legacy_tokens": 151,
+      "current_tokens": 110,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_fix_pytest_fail",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "mathlib.py",
+          "tests/test_math.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 72,
+      "legacy_chars": 399,
+      "current_chars": 289,
+      "legacy_tokens": 99,
+      "current_tokens": 72,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_edit_and_retest",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "greet.py",
+          "tests/test_greet.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 80,
+      "legacy_chars": 430,
+      "current_chars": 320,
+      "legacy_tokens": 107,
+      "current_tokens": 80,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_noisy_install_summary",
+      "op": "file.view",
+      "args": {
+        "path": "requirements.txt"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 17,
+      "legacy_chars": 126,
+      "current_chars": 71,
+      "legacy_tokens": 31,
+      "current_tokens": 17,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_fix_type_error",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "package.json",
+          "tsconfig.json",
+          "src/index.ts",
+          "TASK.md"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 168,
+      "legacy_chars": 894,
+      "current_chars": 674,
+      "legacy_tokens": 223,
+      "current_tokens": 168,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_package_script_fail",
+      "op": "file.view",
+      "args": {
+        "path": "package.json"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 55,
+      "legacy_chars": 276,
+      "current_chars": 221,
+      "legacy_tokens": 69,
+      "current_tokens": 55,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "windows_path_normalize_edit",
+      "op": "file.view",
+      "args": {
+        "path": "out/result.txt"
+      },
+      "ok": false,
+      "reproducible": false,
+      "unreproducible_reason": "file did not exist in the pristine fixture (created by the live run)",
+      "matched_projection": null,
+      "stored_tokens": 15,
+      "legacy_chars": 225,
+      "current_chars": 225,
+      "legacy_tokens": 56,
+      "current_tokens": 56,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "windows_batch_capture_diag",
+      "op": "file.view",
+      "args": {
+        "path": "broken_build.log"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 58,
+      "legacy_chars": 288,
+      "current_chars": 233,
+      "legacy_tokens": 72,
+      "current_tokens": 58,
       "truncated_entries": 0
     }
   ]

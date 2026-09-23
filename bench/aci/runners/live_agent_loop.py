@@ -422,7 +422,9 @@ CRITICAL RULES:
 5. If you get errors, debug — don't give up immediately. Check the error's
    "fix" field for suggested corrective actions.
 6. Max {max_turns} tool calls total — be efficient
-7. run_command is for BUILD/TEST/INSTALL only. Use read_file to read files."""
+7. run_command is for BUILD/TEST/INSTALL only. Use read_file to read files.
+8. TASK.md only restates the task given above, in less detail — do not spend a
+   tool call reading it. Read the source and test files instead."""
 
 
 # ── Success checking ──
