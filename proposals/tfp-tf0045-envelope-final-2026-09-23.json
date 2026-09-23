@@ -1,0 +1,54 @@
+{
+  "applied_at": "2026-09-23T08:49:23.322566Z",
+  "base_graph_hash": "7bb4d55379b2af4172ac45907c51fd9fc181db0c655ac37cd75f73c7fea6531e",
+  "base_summary": {
+    "edge_count": 92,
+    "node_count": 58,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "组成测量：一次 3 文件 read_many 的模型可见字符中 content 28.4% / sha256 28.0% / JSON 结构 38.3% / path 4.1% / counts 1.2%（27 次真实调用复算）",
+          "固定轨迹复算：37 次冻结读取调用中 33 次忠实复现，4738 → 3690 tokens（−22.1%）；read_many 24/24，4176 → 3254，且新口径合计与 live 实测合计逐位相同",
+          "分页复原：250 行文件按 window=100 逐页读回，3 页 250/250 行逐行一致",
+          "批量预算：8 个 300 行文件默认返回 240 行（上限 240）、max_total_lines=40 返回 40 行（上限 40），两次都可续读",
+          "live 复测：两臂 × 3 seeds 共 120 行、api_error 0；D/A 工具比 1.6354、token 比 1.6888（上一轮 1.748 / 2.443）",
+          "收口门禁：python tools/claim_gate.py → 12/12 gated claims pass，exit 0（C12 5/5 fresh，C14 value=0.2212 ≥ 0.15）",
+          "收口门禁：python tools/readme_claims_check.py → 17/17；cargo test → exit 0（282 passed）",
+          "提交：commit 675af39（44 文件）。注：本轮内容实际落在单个提交里，其 message 只描述了 ops 改动；按根策略 §5 不改写 git 历史，故未拆分/amend，bench 与 claim 细节由本森林记录、CHANGELOG 与 docs/claims-and-evidence.md 承载"
+        ],
+        "next_action": "无。剩余 token 缺口见 TF-0058。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "本轮完成：用固定轨迹复算定位信封开销构成，据此实现按需窗口 + 批量预算 + 紧凑摘要（双字段过渡、前缀可匹配），把信封差做成确定性门禁 C14，保留 lines 形状；随后按上一轮同口径完成 live 两臂 × 3 seeds 复测（120 行、api_error 0）。结论：D/A 工具比 1.64、token 比 1.69；read_files 净效应为步骤 −11.8%、token +22.7%（仍是少步骤、多 token，但读取侧 token 代价比上一轮小）；确定性复算给出读取调用 −22.1%，live 侧 read_many 单次 175.6 → 135.6 与之吻合。三项门禁全绿。"
+      },
+      "id": "TF-0052"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "claim_gate：12/12 gated claims pass，exit 0（C1 0.106、C2 0.55、C3 1.0、C4 1.0、C6/C7/C8 all pass、C9 0.4203、C10 1.0、C11 0.2207、C12 1.0（5/5 fresh）、C14 0.2212）",
+          "readme_claims_check：17/17 pass",
+          "cargo test：exit 0（16 个 test binary，282 passed / 0 failed）",
+          "森林：proposal-save → proposal-apply --yes → validate（校验通过）→ export（task-forest.html）",
+          "提交：commit 675af39；提交前 git status 与提交后工作区均为干净",
+          "凭据自查：git diff --cached 无 sk- 形式密钥命中；本轮 key 仅从本机注册表 LOCAL3065_API_KEY 读入环境变量，未写入仓库"
+        ],
+        "next_action": "无。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "收口完成：三项门禁全绿、森林校验通过并导出、本轮改动提交为 commit 675af39、工作区干净、无凭据入库。"
+      },
+      "id": "TF-0057"
+    }
+  ],
+  "created_at": "2026-09-23T08:49:23.215268Z",
+  "proposal_id": "TFP-tf0045-envelope-final-2026-09-23",
+  "rationale": "本轮交付已完成并提交（commit 675af39）：产品侧信封与按需窗口落地、C14 门禁接入、同口径 live 两臂 × 3 seeds 复测完成、C13/C11/C12 更新、三项门禁全绿。收口 TF-0045 与本轮 global_task/收尾节点，并留下剩余缺口 TF-0058（exec.run 仍是 D 的 token 主因）。",
+  "session_id": "ses_verseshell-tf0045-envelope-2026-09-23",
+  "status": "applied"
+}
