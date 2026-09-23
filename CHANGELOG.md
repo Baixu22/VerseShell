@@ -49,6 +49,31 @@
   Single-run variance is large, so the direction is the finding, not the ratio.
 
 ### Changed
+- Re-measured the live A/B with the compact projection (same model, endpoint,
+  seeds 42/43/44, both arms, 120 rows, `api_error` 0 after one upstream 500 was
+  re-run by `splice_live_cells.py`). Condition D now spends **296.5 observation
+  tokens per run** (was 333.4, and 411.1 two rounds ago), and hiding `read_files`
+  moves D by **-19.6% tool calls / +6.8% observation tokens** — the token penalty
+  of batch reading has fallen from +36.9% to +22.7% to +6.8% across the two
+  envelope rounds. The D/A ratio is *not* the headline: raw shell is untouched
+  code yet its own average swung 168.6 -> 197.4 -> 170.5, so the ratio moved
+  2.44 -> 1.69 -> 1.74 mostly on sampling while D's absolute cost fell
+  monotonically (claim C13).
+- `bench/aci/runners/splice_live_cells.py`: re-runs the (task, condition, seed)
+  cells that carry `api_error` and patches them into their run file, recomputing
+  the aggregate and comparison — the per-cell retry the handoff used to do by hand.
+- The reference client's read projection is compact now (claim C16,
+  `tools/read_path_breakdown.py`): a complete window is carried as one
+  newline-joined `text` string, and the counts the caller can derive are dropped
+  — `start_line` when the window starts at 1, `total_lines` when it covers the
+  whole file. Measured on the frozen live trajectory, the read bucket drops
+  **20.8%** of its model-visible tokens (3690 -> 2924; `file.read_many` -20.8%,
+  `file.view` -20.2%). The product envelope is untouched: with
+  `compact=False` the projection is byte-identical to the previous revision
+  (37/37 frozen calls compared against the projector from git), so no consumer
+  has to migrate. A window longer than the 10-line display gate still keeps
+  `total_lines`, because for such a file that count is the only thing the model
+  can see.
 - Decomposed condition D's extra observation tokens with stored artifacts only
   (claim C15, `tools/exec_token_breakdown.py`). `exec.run` is D's biggest single
   line item (50.4% of D, 63.1 tokens/call) but it is **not** why D costs more

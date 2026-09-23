@@ -17,6 +17,7 @@ Gated claims (thresholds mirror docs/claims-and-evidence.md exactly):
   C11 cross-shell wall-clock: worst VerseShell/PowerShell median ratio <= 0.50 (stored measurement)
   C12 stored evidence freshness: each artifact's recorded fingerprint still matches the code
   C14 batch-read envelope: compact digest + batch budget hold on a frozen-trajectory replay
+  C16 compact read projection: it actually shrinks the model-visible read observation
 C5 (learning cost) has no deterministic metric yet: status-only in evidence.json.
 C13 (live A/D) and C15 (where D's extra tokens come from) are registered in
 docs/claims-and-evidence.md without a pass threshold: they record measurements, not goals.
@@ -52,6 +53,7 @@ THRESHOLDS = {
     "C11": {"desc": "cross-shell worst VerseShell/PowerShell median ratio", "op": "<=", "value": 0.50},
     "C12": {"desc": "stored evidence freshness (recorded fingerprint matches the code)", "op": ">=", "value": 1.00},
     "C14": {"desc": "batch-read envelope replay: compact digest saving + bounded batch budget", "op": ">=", "value": 0.15},
+    "C16": {"desc": "compact read projection saving on a frozen trajectory", "op": ">=", "value": 0.10},
 }
 
 # Stored measurements the gate relies on. Each must record the content fingerprint
@@ -71,6 +73,7 @@ EVIDENCE_ARTIFACTS = [
     "eval/cross_shell.json",
     "eval/tf45_envelope_replay.json",
     "eval/exec_token_breakdown.json",
+    "eval/read_path_breakdown.json",
 ]
 
 
@@ -250,6 +253,35 @@ def batch_envelope_claim(report: dict) -> dict:
     }
 
 
+def compact_read_claim(report: dict) -> dict:
+    """C16 reads the read-path breakdown: the compact projection must actually
+    shrink the model-visible read observation on calls the model really issued.
+
+    Both projections come from the real projector (`compact=False` vs `True`), so
+    the delta is measured rather than re-implemented, and the claim also requires
+    that at least one call was matched against the stored live run.
+    """
+    totals = report.get("totals", {})
+    savings = float(totals.get("token_savings") or 0.0)
+    calls = int(totals.get("calls") or 0)
+    matched = totals.get("matched_projection") or {}
+    return {
+        "value": round(savings, 4),
+        "pass": savings >= THRESHOLDS["C16"]["value"] and calls > 0 and bool(matched),
+        "detail": {
+            "calls": calls,
+            "excluded_calls": totals.get("excluded_calls"),
+            "matched_projection": matched,
+            "legacy_tokens": totals.get("legacy_tokens"),
+            "current_tokens": totals.get("current_tokens"),
+            "char_savings": totals.get("char_savings"),
+            "legacy_parts": totals.get("legacy_parts"),
+            "current_parts": totals.get("current_parts"),
+            "by_op": report.get("by_op"),
+        },
+    }
+
+
 def summarize_test_output(stdout: str) -> dict:
     """Aggregate every `test result:` line so the evidence carries real counts
     instead of whichever suite happened to print last."""
@@ -276,6 +308,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--envelope-replay", type=Path, default=None,
                     help="path to a stored eval/tf45_envelope_replay.json "
                          "(regenerate with tools/tf45_envelope_replay.py)")
+    ap.add_argument("--read-path-breakdown", type=Path, default=None,
+                    help="path to a stored eval/read_path_breakdown.json "
+                         "(regenerate with tools/read_path_breakdown.py)")
     ap.add_argument("--evidence", type=Path, default=ROOT / "eval/evidence.json")
     ap.add_argument("--skip-tests", action="store_true",
                     help="skip cargo test; C6/C7 become stale and fail the gate")
@@ -519,6 +554,38 @@ def main(argv: list[str] | None = None) -> int:
             "command": "python tools/tf45_envelope_replay.py --out eval/tf45_envelope_replay.json",
             "source": ["tools/tf45_envelope_replay.py"],
             "notes": f"missing evidence artifact: {replay_path}",
+        })
+
+    # ── C16: compact read projection on a frozen trajectory ──
+    read_path = (args.read_path_breakdown.resolve() if args.read_path_breakdown
+                 else ROOT / "eval/read_path_breakdown.json")
+    if read_path.exists():
+        read_report = json.loads(read_path.read_text(encoding="utf-8"))
+        c16 = compact_read_claim(read_report)
+        claims.append({
+            "id": "C16", "claim": THRESHOLDS["C16"]["desc"],
+            "threshold": ">= 0.10", "value": c16["value"], "pass": c16["pass"],
+            "mode": "deterministic", "sample_size": c16["detail"]["calls"],
+            "measured_at": read_report.get("generated_at"),
+            "command": "python tools/read_path_breakdown.py --out eval/read_path_breakdown.json",
+            "source": ["tools/read_path_breakdown.py", "bench/aci/runners/live_agent_loop.py",
+                       "tools/tf45_envelope_replay.py", "eval/read_path_breakdown.json"],
+            "detail": c16["detail"],
+            "notes": "the same envelope is projected twice with the real projector "
+                     "(format_aci_result(compact=False) is the pre-change rendering, compact=True is "
+                     "current), so the delta is measured rather than re-implemented. Scope is the "
+                     "reference client's rendering of the read ops, NOT the product envelope: dropping "
+                     "`total_lines` is only sound when the client shows the text, which is why the "
+                     "product contract is untouched. It says nothing about model behaviour",
+        })
+    else:
+        claims.append({
+            "id": "C16", "claim": THRESHOLDS["C16"]["desc"],
+            "threshold": ">= 0.10", "value": None, "pass": False,
+            "mode": "deterministic", "measured_at": now,
+            "command": "python tools/read_path_breakdown.py --out eval/read_path_breakdown.json",
+            "source": ["tools/read_path_breakdown.py"],
+            "notes": f"missing evidence artifact: {read_path}",
         })
 
     # ── C12: stored evidence must still describe the current code ──

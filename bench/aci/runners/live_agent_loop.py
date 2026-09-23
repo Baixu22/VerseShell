@@ -611,12 +611,21 @@ def digest_of(payload: dict) -> str | None:
     return payload.get("hash") or payload.get("content_hash")
 
 
-def format_aci_result(response: dict) -> str:
+def format_aci_result(response: dict, *, compact: bool = True) -> str:
     """Extract model-relevant fields from the AE observation envelope.
 
     On SUCCESS: minimal output — ok + content essentials. The model
     only needs to confirm the op worked; verbose metadata wastes tokens.
     On FAILURE: top 5 diagnostics + summary + error code — trim noise.
+
+    `compact` selects the read-window rendering. With it (the default) a window
+    is carried as one newline-joined `text` string, and the counts the caller can
+    derive are dropped: `start_line` when the window starts at 1, and
+    `total_lines` when the window covers the whole file. Dropping `total_lines`
+    is only sound *because* the text is shown — a client that hides long windows
+    must keep it, which is why this lives in the projection and not in the
+    product envelope. Passing `compact=False` reproduces the previous rendering,
+    which is what makes the change measurable on a frozen call set.
     """
     ok = response.get("ok")
     clean: dict[str, Any] = {"ok": ok}
@@ -682,16 +691,26 @@ def format_aci_result(response: dict) -> str:
     if "lines" in data:
         lines = data["lines"]
         if isinstance(lines, list) and len(lines) <= 10:
-            clean["lines"] = compact_lines(lines)
-            if "start_line" in data:
-                clean["start_line"] = data["start_line"]
+            if compact:
+                clean["text"] = "\n".join(compact_lines(lines))
+                start = data.get("start_line") or 1
+                total = data.get("total_lines")
+                if isinstance(total, int) and start <= 1 and len(lines) >= total:
+                    # Complete window: `total_lines` is just len(lines).
+                    clean.pop("total_lines", None)
+                if start > 1:
+                    clean["start_line"] = start
+            else:
+                clean["lines"] = compact_lines(lines)
+                if "start_line" in data:
+                    clean["start_line"] = data["start_line"]
         elif "content_hash" not in data:
             clean["total_lines"] = len(lines) if isinstance(lines, list) else 0
 
     # file.read_many: per-file projection, same flattening as file.view, plus
     # per-file errors so a missing path does not hide the readable ones.
     if "files" in data and isinstance(data["files"], list):
-        compact: list[dict] = []
+        entries: list[dict] = []
         for entry in data["files"]:
             if not isinstance(entry, dict):
                 continue
@@ -703,8 +722,20 @@ def format_aci_result(response: dict) -> str:
             entry_digest = digest_of(entry)
             if entry_digest:
                 item["content_hash"] = entry_digest
-            if isinstance(entry.get("lines"), list) and len(entry["lines"]) <= 10:
-                item["lines"] = compact_lines(entry["lines"])
+            shown = entry.get("lines")
+            if isinstance(shown, list) and len(shown) <= 10:
+                if compact:
+                    item["text"] = "\n".join(compact_lines(shown))
+                    start = entry.get("start_line") or 1
+                    total = entry.get("total_lines")
+                    if isinstance(total, int) and start <= 1 and len(shown) >= total:
+                        item.pop("total_lines", None)
+                    if start > 1:
+                        item["start_line"] = start
+                    else:
+                        item.pop("start_line", None)
+                else:
+                    item["lines"] = compact_lines(shown)
             # Pagination is only surfaced when the entry was actually cut, so a
             # complete read stays exactly as small as before.
             if entry.get("deferred"):
@@ -713,8 +744,8 @@ def format_aci_result(response: dict) -> str:
                 item["truncated"] = True
             if (entry.get("truncated") or entry.get("deferred")) and entry.get("next_start_line") is not None:
                 item["next_start_line"] = entry["next_start_line"]
-            compact.append(item)
-        clean["files"] = compact
+            entries.append(item)
+        clean["files"] = entries
         if "errors" in data:
             clean["errors"] = data["errors"]
 
