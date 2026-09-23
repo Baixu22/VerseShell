@@ -1,0 +1,388 @@
+{
+  "applied_at": "2026-09-23T17:03:30.838503Z",
+  "base_graph_hash": "c3596192104c9d0b64c352b1ab0d46f5eaa19ec5fff3b7d81ca2bbe4ca86338f",
+  "base_summary": {
+    "edge_count": 106,
+    "node_count": 67,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "readusage-round",
+      "node": {
+        "acceptance_criteria": [
+          "把「读了但之后从未引用」严格分类为任务输入 / 与提示重复 / 真正多余，并给出各自 token 量",
+          "若改动提示或清单，必须用 live 实验证明成功率不掉、token 下降",
+          "结论登记进声明矩阵（C17）并收口",
+          "门禁全绿、森林收口、改动提交"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "继续缩小 D/A token 比",
+          "validation_plan": [
+            "读取用途审计",
+            "提示规则 + 冒烟",
+            "live 两臂 × 3 seeds",
+            "claim_gate exit 0"
+          ],
+          "why_not_enough": "规则消除了冗余读取但没降低 D 的总 token；瓶颈已转到 exec.run",
+          "why_this_task": "结构性开销已用尽，读取侧只剩行为面可动"
+        },
+        "confidence": 0.8,
+        "desired_outcomes": [
+          "读取用途有可复现分类，且明确区分「冗余」与「未观察到下游使用」",
+          "冗余被消除且成功率不受影响",
+          "如实记录「读取省了但总 token 没省」这一结果与它的两种解释",
+          "下一步的瓶颈位置被数据指出来"
+        ],
+        "difficulty": "medium",
+        "display_order": 1601,
+        "evidence": [
+          "审计（改动前）：with 臂 D 85 条读取路径中 TASK.md 27 条（33.4% 的读取 token 份额）；同期 A 78 条中 16 条（17.6%）——两臂都有，不是 ACI 缺陷",
+          "冗余可证明：逐条比对 10 个 fixture 的 TASK.md 与注入提示，提示词每条都更详细，TASK.md 无独有信息",
+          "unreferenced 桶（24.8%）不等于浪费：主要是 Cargo.toml（9 次）与失败测试文件（tests/test_math.py 3 次）",
+          "规则 8 冒烟：3 任务 0 次读 TASK.md、3/3 PASS",
+          "live 复测（两臂 × 3 seeds，120 行，api_error 0）：D 的 TASK.md 读取 27→3 条、1064.5→115.3 tok；读取桶 3183→2203 tok（−30.8%）；成功率 A 0.60 / D 0.60 未掉",
+          "但 D 总 token 296.47→303.53：同轮 exec.run 4442→5585 tok（落在其逐轮区间 4442–5585 内，也与「省下的预算花到命令上」一致，本样本分不开）",
+          "差距构成翻转：read 52.6%→22.3%、exec 21.6%→49.4%、edit 17.8%→20.1%、meta 2.1%→2.6%",
+          "门禁：claim_gate 13/13 exit 0（C12 8/8 fresh）、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "execution_hints": [
+          "先证明「冗余」再动手：unreferenced ≠ 无用",
+          "提示改动必须两臂对称，否则 A/B 失效"
+        ],
+        "kind": "global_task",
+        "next_action": "无。下一个瓶颈见 exec-failure-gap 节点。",
+        "non_goals": [
+          "不把 unreferenced 当成浪费去删文件",
+          "不在没有成功率证据前继续改提示"
+        ],
+        "priority": 3,
+        "purpose": "回答「D 是不是读了没用的东西」，并把读取侧的行为面做掉，让下一个瓶颈显形。",
+        "source_sessions": [
+          "ses_verseshell-tf0067-readusage-2026-09-24"
+        ],
+        "status": "in_progress",
+        "summary": "读取用途审计完成：唯一可证明的冗余是 TASK.md（提示词是它的严格超集，且两臂都在读）；unreferenced 桶里是工程上下文而非浪费。加提示规则 8 后 live 复测：TASK.md 读取 −89%、读取桶 −30.8%、成功率未掉——但 D 总 token 没降（exec.run 同轮上升）。差距构成翻转到 exec.run 49.4%。",
+        "title": "TF-0067 收口：读取用途审计与 TASK.md 冗余消除"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "usage-audit",
+      "node": {
+        "acceptance_criteria": [
+          "tools/read_usage_audit.py 只用已存产物、按代码里定义的规则分类读取用途",
+          "A 侧必须排除读取命令自身的自指，否则 A 会 100% 落在 referenced_in_run",
+          "产物 eval/read_usage_audit.json 带指纹并纳入 C12（8 份）",
+          "docs/claims-and-evidence.md 新增 C17 并同步 C12"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "可复现证据",
+          "validation_plan": [
+            "python tools/read_usage_audit.py",
+            "claim_gate exit 0"
+          ],
+          "why_not_enough": "分类是启发式，token 按路径均摊",
+          "why_this_task": "没有分类就无法区分冗余与合法上下文"
+        },
+        "confidence": 0.85,
+        "difficulty": "medium",
+        "display_order": 1602,
+        "evidence": [
+          "tools/read_usage_audit.py：四类定义（referenced_in_run / task_subject / task_file / unreferenced）+ 任务 prompt 与 success 谓词的路径抽取 + A 侧自指排除 + 逐路径计数与 token 均摊",
+          "eval/read_usage_audit.json：改动前 D TASK.md 27 条 / 1064.5 tok；改动后 3 条 / 115.3 tok",
+          "tools/claim_gate.py：EVIDENCE_ARTIFACTS 扩到 8 份；docs 新增 C17（含 5 条失效边界）"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不把 unreferenced 当作「无用」的同义词"
+        ],
+        "priority": 3,
+        "purpose": "把「读了没用」从直觉变成有定义、可复现的分类。",
+        "source_sessions": [
+          "ses_verseshell-tf0067-readusage-2026-09-24"
+        ],
+        "status": "done",
+        "summary": "新增 tools/read_usage_audit.py：按代码里定义的四类给每条读取路径分类，并特别处理 A 侧的自指问题（A 用 type 读文件，命令里自然出现该路径，不排除会让 A 100% 落在 referenced_in_run）。结论：唯一可证明的冗余是 TASK.md。C17 入声明矩阵，产物入 C12。",
+        "title": "步骤42：读取用途审计与 C17 登记"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "prompt-rule",
+      "node": {
+        "acceptance_criteria": [
+          "提示规则对两个臂对称生效",
+          "冒烟确认模型遵守（否则如实记录「模型不遵守」）",
+          "live 复测给出成功率与 token 的前后对比",
+          "无论结果是正是负都如实登记"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "消除冗余读取",
+          "validation_plan": [
+            "冒烟看轨迹",
+            "live 两臂 × 3 seeds"
+          ],
+          "why_not_enough": "规则只影响读取；省下的预算可能被花到别处",
+          "why_this_task": "TASK.md 与系统提示重复，是唯一可证明的冗余"
+        },
+        "confidence": 0.75,
+        "difficulty": "low",
+        "display_order": 1603,
+        "evidence": [
+          "bench/aci/runners/live_agent_loop.py：SYSTEM_PROMPT 增加规则 8「TASK.md only restates the task given above, in less detail — do not spend a tool call reading it」",
+          "冒烟（3 任务）：0 次读 TASK.md、3/3 PASS",
+          "live 复测：D 的 TASK.md 读取 27→3 条（−89%）、读取桶 3183→2203 tok（−30.8%）；A 的 TASK.md 从 31% 降到 9.9%",
+          "成功率未掉：A 0.60 / D 0.60（上一轮 A 0.60 / D 0.6333）",
+          "但 D 总 token 296.47→303.53：同轮 exec.run 4442→5585，两种解释（自身波动 / 预算转移）本样本分不开，已写进 C13 失效边界 ⑨"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不改任务集（不删 fixture 里的 TASK.md）——那会破坏与前几轮的可比性"
+        ],
+        "priority": 3,
+        "purpose": "用最小、对称、可测的改动消除可证明的冗余读取。",
+        "source_sessions": [
+          "ses_verseshell-tf0067-readusage-2026-09-24"
+        ],
+        "status": "done",
+        "summary": "在 SYSTEM_PROMPT 增加规则 8：TASK.md 只是重复上面的任务，不要为它花一次工具调用。冒烟与全量都确认模型遵守（D 的 TASK.md 读取 −89%），读取桶 −30.8%，成功率不变。但 D 的总 token 没有下降，因为同轮 exec.run 上升——该结果按「两种解释分不开」如实登记，没有写成「规则省了 token」。",
+        "title": "步骤43：TASK.md 提示规则与 live 验证"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-commit",
+      "node": {
+        "acceptance_criteria": [
+          "claim_gate exit 0（C12 8/8 fresh）、readme_claims_check 17/17、cargo test exit 0",
+          "森林记录与提交完成，工作区干净"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "收口",
+          "validation_plan": [
+            "三项门禁",
+            "git status 为空"
+          ],
+          "why_not_enough": "无",
+          "why_this_task": "根策略 §6 的固定收尾动作"
+        },
+        "confidence": 0.9,
+        "difficulty": "low",
+        "display_order": 1604,
+        "evidence": [
+          "收口前门禁：claim_gate 13/13 exit 0、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "kind": "task",
+        "next_action": "提交审计工具、提示规则、C17 登记与森林记录，再回填 commit hash。",
+        "non_goals": [
+          "不改写 git 历史"
+        ],
+        "priority": 3,
+        "purpose": "按根策略 §6 完成 proposal-save → apply → validate → export 与提交。",
+        "source_sessions": [
+          "ses_verseshell-tf0067-readusage-2026-09-24"
+        ],
+        "status": "in_progress",
+        "summary": "收口：重跑三项门禁、回填证据、导出森林并提交。",
+        "title": "步骤44：森林收口与提交"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "exec-failure-gap",
+      "node": {
+        "acceptance_criteria": [
+          "给出失败 exec 的逐任务 / 逐 profile 分解，并区分「任务本身要求看到失败」与「模型选错命令」",
+          "若改失败投影或提示，必须用 live 实验证明成功率不掉、token 下降",
+          "结论写进 C15 或新声明"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "继续缩小 D/A token 比",
+          "validation_plan": [
+            "失败 exec 分解",
+            "live 实验验证成功率"
+          ],
+          "why_not_enough": "还没做过失败分解，也不知道哪些失败是任务固有",
+          "why_this_task": "读取侧被压下去后，exec 成为差距最大项（49.4%），其中 81.7% 的 token 来自失败命令"
+        },
+        "confidence": 0.7,
+        "difficulty": "medium",
+        "display_order": 1701,
+        "evidence": [
+          "exec.run 占 D 的 61.3%（5585/9106，186.17 tok/run，73.49 tok/次）",
+          "失败结构：45 次失败 @101.44 tok = 81.7% 的 exec token，只占 59.2% 的调用；成功 31 次 @32.90 tok",
+          "差距分桶（总 +142.67 tok/run）：exec +70.43（49.4%）、read +31.83（22.3%）、edit +28.67（20.1%）、meta +3.73（2.6%）",
+          "对照臂 exec.run：72 次 / 4910 tok（52.0%，163.67/run，68.19/次），失败 42 次 @93.38",
+          "A 侧 build_or_test：38 次 / 2892 tok（76.1 tok/次）——D 的单次 exec（73.49）并不比 A 贵，差距在失败次数与失败时的输出"
+        ],
+        "kind": "follow_up",
+        "next_action": "先做失败 exec 的逐任务/逐 profile 分解（哪些任务、哪些 profile、失败是否任务固有），再决定是改 reducer 的失败投影、还是改提示让模型少试错。",
+        "non_goals": [
+          "不在没有分解数据前改 reducer",
+          "不为了让数字好看而隐藏失败"
+        ],
+        "priority": 3,
+        "purpose": "读取侧已压到 22.3%，把剩下的最大项（exec 的失败命令）变成可执行的下一步。",
+        "source_sessions": [
+          "ses_verseshell-tf0067-readusage-2026-09-24"
+        ],
+        "status": "ready",
+        "summary": "读取侧被压下去之后，D/A 差距的最大项变成 exec.run（49.4%），而其中 81.7% 的 token 来自失败命令（45/76 次、101.44 tok/次，成功只要 32.90）。D 的单次 exec 并不比 A 的 build_or_test 贵（73.49 vs 76.1），所以差距不在单次输出大小，而在失败次数与失败时的输出体积。下一步先分解失败来自哪些任务与 profile、是否任务固有，再决定改投影还是改提示。",
+        "title": "缺口：exec.run 的失败命令占 D/A 差距 49.4%，45/76 次失败吃掉 81.7% 的 exec token"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "审计是本轮的诊断交付"
+      },
+      "from": "usage-audit",
+      "to": "readusage-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "提示规则是本轮的干预交付"
+      },
+      "from": "prompt-rule",
+      "to": "readusage-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口是最后一步"
+      },
+      "from": "close-commit",
+      "to": "readusage-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "规则由审计结论驱动"
+      },
+      "from": "prompt-rule",
+      "to": "usage-audit",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口要等规则验证完成"
+      },
+      "from": "close-commit",
+      "to": "prompt-rule",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "本轮收口的正是 TF-0067"
+      },
+      "from": "readusage-round",
+      "to": "TF-0067",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "exec 失败缺口由本轮复测暴露（读取被压下去后它成为最大项）"
+      },
+      "from": "exec-failure-gap",
+      "to": "TF-0067",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "承接 C15 的逐 op 分解结论，但差距构成已翻转"
+      },
+      "from": "exec-failure-gap",
+      "to": "TF-0058",
+      "type": "related_to"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 160
+      },
+      "id": "readusage-round"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 10
+      },
+      "id": "usage-audit"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 20
+      },
+      "id": "prompt-rule"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 30
+      },
+      "id": "close-commit"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 170
+      },
+      "id": "exec-failure-gap"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "严格分类：with 臂 D 85 条读取路径中 referenced_in_run 31（35.0%）、task_subject 6（6.8%）、TASK.md 27（33.4%）、unreferenced 21（24.8%）；同期 A 78 条中 TASK.md 16（17.6%）——两臂都读，不是 ACI 缺陷",
+          "冗余可证明：逐条比对 10 个 fixture 的 TASK.md 与注入提示，提示词每条都更详细，TASK.md 无独有信息",
+          "unreferenced ≠ 无用：该桶主要是 Cargo.toml（9 次）与失败测试文件（tests/test_math.py 3 次）",
+          "规则 8 冒烟：3 任务 0 次读 TASK.md、3/3 PASS",
+          "live 复测（两臂 × 3 seeds，120 行，api_error 0）：D 的 TASK.md 读取 27→3 条、1064.5→115.3 tok（−89%）；读取桶 3183→2203 tok（−30.8%）；成功率 A 0.60 / D 0.60 未掉",
+          "但 D 总 token 296.47→303.53：同轮 exec.run 4442→5585 tok，两种解释（自身波动 4442–5585 / 预算转移）本样本分不开，已如实写进 C13 失效边界 ⑨",
+          "差距构成翻转：read 52.6%→22.3%、exec 21.6%→49.4%",
+          "登记：docs/claims-and-evidence.md 新增 C17；C12 覆盖 8 份产物；C13/C15/C16 同步更新",
+          "门禁：claim_gate 13/13 exit 0（C12 8/8 fresh）、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "next_action": "无。下一个瓶颈见 exec-failure-gap 节点（exec 占差距 49.4%，其中 81.7% 来自失败命令）。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "TF-0067 完成：严格分类显示 D 的读取里唯一可证明冗余的是 TASK.md（27/85 条路径、33.4% 的读取 token 份额），因为 10 个 fixture 的 TASK.md 逐条比对都只是注入提示的精简版；unreferenced 桶（24.8%）里主要是 Cargo.toml 与失败测试文件，读它们合理。据此加提示规则 8 并做 live 复测：TASK.md 读取 27→3 条（−89%）、读取桶 3183→2203 tok（−30.8%）、成功率未掉（A 0.60 / D 0.60）——但 D 的总 token 没降（296.5→303.5），同轮 exec.run 从 4442 升到 5585。差距构成因此翻转：read 52.6%→22.3%、exec 21.6%→49.4%，下一个瓶颈明确落在 exec.run 的失败命令上（45/76 次、81.7% 的 exec token）。"
+      },
+      "id": "TF-0067"
+    }
+  ],
+  "created_at": "2026-09-23T17:03:30.710066Z",
+  "proposal_id": "TFP-tf0067-read-usage-2026-09-24",
+  "rationale": "TF-0067 的验收是「严格分类读取用途，若改动则用 live 实验证明成功率不掉」。分类做出来了：唯一可证明的冗余是 TASK.md（10 个 fixture 逐条比对都只是注入提示的精简版），unreferenced 桶里主要是工程上下文。据此加提示规则 8 并完成 live 两臂 × 3 seeds 复测：TASK.md 读取 −89%、读取桶 −30.8%、成功率未掉，但 D 的总 token 没降（同轮 exec.run 上升）。差距构成因此翻转到 exec.run（49.4%），故把它开成新的 follow_up。",
+  "session_id": "ses_verseshell-tf0067-readusage-2026-09-24",
+  "status": "applied"
+}
