@@ -1,0 +1,52 @@
+{
+  "applied_at": "2026-09-23T14:48:56.470324Z",
+  "base_graph_hash": "224fa783f101bbcecfe9d29283da969bc893599765bd0dfb0557e8910debc56d",
+  "base_summary": {
+    "edge_count": 106,
+    "node_count": 67,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "读取桶结构账（改动前，33 次冻结调用 / 15601 字符）：content 36.2%、counts 18.0%、digest 16.9%、residual 11.7%、path 10.4%、line_wrapper 6.8%；改动后（12363 字符）：content 45.7%、digest 21.3%、residual 14.7%、path 13.2%、line_wrapper 4.3%、counts 0.9%",
+          "紧凑投影实测：15601 → 12363 字符（−20.8%）、3886 → 3079 tokens（−20.8%）；file.read_many −20.5%、file.view −23.3%",
+          "兼容性实证：compact=False 与 git 上一版投影器对同一批 37 次冻结调用逐条比对，37/37 逐字节一致",
+          "live 复测（两臂 × 3 seeds，120 行，api_error 0）：D 333.37 → 296.47 tok/run；read_files 净效应 工具 −19.6% / token +6.8%",
+          "门禁：claim_gate 13/13 exit 0（C12 7/7 fresh、C16 0.2077 ≥ 0.10）、readme_claims_check 17/17、cargo test exit 0",
+          "提交：commit 615f67d（内容 20 文件）+ 64e23cc（森林记录）；工作区干净"
+        ],
+        "next_action": "无。下一个杠杆见 TF-0067（行为面）。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "本轮完成：用同一套固定轨迹方法给读取桶做内部归因，据此把参考客户端读取投影改成紧凑形态（实测 −20.8%），兼容策略是「不动产品契约」（compact=False 逐字节一致，37/37）；live 两臂 × 3 seeds 复测显示 D 从 333.4 降到 296.5 tok/run、批量读取的 token 代价从 +22.7% 降到 +6.8%。剩余结构项已论证不可动，下一个杠杆在行为面。三项门禁全绿。"
+      },
+      "id": "TF-0063"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "claim_gate：13/13 gated claims pass，exit 0（C12 由 6 份扩到 7 份，全部 fresh；C16 0.2077）",
+          "readme_claims_check：17/17 pass",
+          "cargo test：exit 0",
+          "森林：proposal-save → proposal-apply --yes → validate（校验通过）→ export",
+          "提交：commit 615f67d（内容）+ 64e23cc（森林记录）；提交前后工作区均干净",
+          "凭据自查：本轮无新增密钥材料（git grep 里仅有的 sk- 命中是 src/safety.rs 中测试脱敏函数的假字面量）"
+        ],
+        "next_action": "无。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "收口完成：三项门禁全绿、森林校验通过并导出、内容提交 615f67d、森林记录 64e23cc、工作区干净。"
+      },
+      "id": "TF-0066"
+    }
+  ],
+  "created_at": "2026-09-23T14:48:56.352359Z",
+  "proposal_id": "TFP-tf0062-read-path-final-2026-09-23",
+  "rationale": "本轮交付完成并提交（commit 615f67d）：读取桶结构账、紧凑投影、C16 登记、live 两臂 × 3 seeds 复测、补跑工具、C12 扩到 7 份产物，三项门禁全绿。收口 TF-0063 与 TF-0066，保留 TF-0067（行为面缺口）为 ready。",
+  "session_id": "ses_verseshell-tf0062-readpath-2026-09-23",
+  "status": "applied"
+}
