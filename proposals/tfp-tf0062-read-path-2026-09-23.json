@@ -1,0 +1,380 @@
+{
+  "applied_at": "2026-09-23T14:47:31.084619Z",
+  "base_graph_hash": "931b4cd11607452bad53ee76f4033b519ac861b5e1072c6e7a03d13187d44ac3",
+  "base_summary": {
+    "edge_count": 98,
+    "node_count": 62,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "readpath-round",
+      "node": {
+        "acceptance_criteria": [
+          "给出读取桶内部的结构账（键名 / 行包装 / 摘要 / 路径 / 内容各占多少），用与 tf45_envelope_replay 同一套固定轨迹方法",
+          "任一改动给出兼容策略并进 claim_gate",
+          "按同一口径复测（固定轨迹复算 + live 两臂 × 3 seeds）并更新 C13 与 C15",
+          "门禁全绿、森林收口、改动提交"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "继续缩小 D/A token 比",
+          "validation_plan": [
+            "结构账",
+            "紧凑投影实测",
+            "live 两臂 × 3 seeds",
+            "claim_gate exit 0"
+          ],
+          "why_not_enough": "结构性开销已用尽，剩余差距需要行为面实验",
+          "why_this_task": "C15 把差距定位到读取路径（52.6%），TF-0062 就是处理它"
+        },
+        "confidence": 0.85,
+        "desired_outcomes": [
+          "读取桶的开销构成有可复现归因，而不是靠猜",
+          "改动有明确兼容策略且实测有效",
+          "复测按同口径完成并如实记录（含 A 侧漂移这一干扰项）",
+          "剩余不可动项被论证清楚，下一步指向可动项"
+        ],
+        "difficulty": "medium",
+        "display_order": 1401,
+        "evidence": [
+          "改动前归因（33 次冻结读取调用，15601 字符）：content 36.2%、counts 18.0%、digest 16.9%、residual 11.7%、path 10.4%、line_wrapper 6.8%",
+          "改动后归因（12363 字符）：content 45.7%、digest 21.3%、residual 14.7%、path 13.2%、line_wrapper 4.3%、counts 0.9%",
+          "紧凑投影实测：15601 → 12363 字符（−20.8%）、3886 → 3079 tokens（−20.8%）；file.read_many −20.5%、file.view −23.3%",
+          "兼容性实证：compact=False 与 git 上一版投影器对同一批 37 次冻结调用逐条比对，37/37 逐字节一致",
+          "live 复测（两臂 × 3 seeds，120 行，api_error 0）：D 333.37 → 296.47 tok/run；read_files 净效应 工具 −19.6% / token +6.8%",
+          "门禁：claim_gate 13/13 exit 0（C12 7/7 fresh、C16 0.2077 ≥ 0.10）、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "execution_hints": [
+          "先做归因再动手：可推导的 counts 与行包装才是可动项",
+          "改动前后必须能证明默认路径未变"
+        ],
+        "kind": "global_task",
+        "next_action": "无。下一个杠杆见 behavioral-gap 节点。",
+        "non_goals": [
+          "不改产品信封契约",
+          "不为省 token 丢掉 agent 需要的摘要或行号"
+        ],
+        "priority": 2,
+        "purpose": "把 C15 定位到的读取路径差距变成实测收益，并把剩余不可动项论证清楚。",
+        "source_sessions": [
+          "ses_verseshell-tf0062-readpath-2026-09-23"
+        ],
+        "status": "in_progress",
+        "summary": "读取桶结构账做完并据此改动：参考客户端读取投影改为紧凑形态（完整窗口用单个 text、丢掉可推导的 start_line/total_lines），实测 3886 → 3079 tok（−20.8%），兼容策略是「不动产品契约」（compact=False 逐字节一致，37/37）。live 复测 D 296.5 tok/run（上轮 333.4），批量读取的 token 代价 +22.7% → +6.8%。剩余结构项已论证不可动，下一个杠杆在行为面。",
+        "title": "TF-0062 收口：读取桶紧凑投影与结构性开销用尽"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "compact-projection",
+      "node": {
+        "acceptance_criteria": [
+          "tools/read_path_breakdown.py 用同一批冻结调用做真实 A/B（compact=False vs True）并给出归因",
+          "产物 eval/read_path_breakdown.json 带 evidence 指纹并纳入 C12（7 份）",
+          "claim_gate 新增 C16（token_savings >= 0.10）并 exit 0",
+          "docs/claims-and-evidence.md 新增 C16 并同步 C12/C13/C14/C15"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "token 侧优化",
+          "validation_plan": [
+            "python tools/read_path_breakdown.py",
+            "claim_gate exit 0"
+          ],
+          "why_not_enough": "只覆盖读取算子；file.read_range 未在本轮调用集中出现",
+          "why_this_task": "counts 18.0% + 行包装 6.8% 是读取桶里唯一可动的结构项"
+        },
+        "confidence": 0.9,
+        "difficulty": "medium",
+        "display_order": 1402,
+        "evidence": [
+          "bench/aci/runners/live_agent_loop.py：format_aci_result(response, *, compact=True)，紧凑分支把完整窗口写成 text 并丢掉可推导的 start_line/total_lines；compact=False 保持旧渲染",
+          "tools/read_path_breakdown.py：冻结调用 + 真实双投影 + 归因（content/line_wrapper 精确公式，digest/path/counts 用安全删除变体）",
+          "eval/read_path_breakdown.json：33 次可复现调用，matched={'current': 33}，−20.8%",
+          "tools/claim_gate.py：C16 门槛 >= 0.10，EVIDENCE_ARTIFACTS 扩到 7 份",
+          "docs/claims-and-evidence.md：新增 C16（含 6 条失效边界与两项被否决的激进改动）"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不改产品信封（兼容策略 = 不动契约）",
+          "不把摘要从 16 位压到 8 位（会把碰撞界降到 2^-32）"
+        ],
+        "priority": 2,
+        "purpose": "把读取桶里唯一可动的结构项（可推导 counts + 行数组包装）换成实测收益。",
+        "source_sessions": [
+          "ses_verseshell-tf0062-readpath-2026-09-23"
+        ],
+        "status": "done",
+        "summary": "读取投影改为紧凑形态：完整窗口的 lines 数组换成单个换行连接的 text；窗口从第 1 行开始且覆盖整文件时丢掉 start_line；覆盖整文件时丢掉 total_lines。实测读取桶 3886 → 3079 tok（−20.8%）。产品信封未动，compact=False 与改动前逐字节一致（37/37），所以没有消费者需要迁移。C16 入门禁（>=0.10，实测 0.2077），产物入 C12。",
+        "title": "步骤39：读取桶紧凑投影与 C16 登记"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "splice-tool",
+      "node": {
+        "acceptance_criteria": [
+          "bench/aci/runners/splice_live_cells.py 能定位 run 文件里带 api_error 的格、按同参数补跑、回填并重算 aggregate/comparison",
+          "补跑后 api_error 归零，merge_live_runs.py 才接受合并",
+          "补跑失败（再次 api_error）时 exit 2，不静默写入"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "复测可复现",
+          "validation_plan": [
+            "本轮实际补跑 1 格"
+          ],
+          "why_not_enough": "端点仍会间歇 500，补跑是常态",
+          "why_this_task": "此前补跑是手写的，容易拼出半截产物"
+        },
+        "confidence": 0.9,
+        "difficulty": "low",
+        "display_order": 1403,
+        "evidence": [
+          "bench/aci/runners/splice_live_cells.py：读 run 文件 → 找出 api_error 行 → 用文件内 live_config 的原参数（含 exclude_tools）重跑 → 回填 → 重算 aggregate/comparison",
+          "本轮实际使用：without_seed42.json 的 rust_add_unit_test[verseshell_aci] 因上游 500 失败，补跑后合法失败（6 tools / 404 tok），随后两臂合并均 api_error 0"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不自动无限重试（失败即 exit 2，由人决定）"
+        ],
+        "priority": 2,
+        "purpose": "把「按 (task, condition, seed) 补跑」从手工操作变成可复现脚本。",
+        "source_sessions": [
+          "ses_verseshell-tf0062-readpath-2026-09-23"
+        ],
+        "status": "done",
+        "summary": "新增 bench/aci/runners/splice_live_cells.py：定位 run 文件里带 api_error 的格，用该文件 live_config 的原参数（含 exclude_tools）重跑并回填，重算 aggregate 与 comparison；再次 api_error 则 exit 2。本轮用它补跑了 1 格上游 500。",
+        "title": "步骤40：live 补跑工具（splice_live_cells）"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-commit",
+      "node": {
+        "acceptance_criteria": [
+          "claim_gate exit 0（C12 7/7 fresh）、readme_claims_check 17/17、cargo test exit 0",
+          "森林记录与提交完成，工作区干净"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "收口",
+          "validation_plan": [
+            "三项门禁",
+            "git status 为空"
+          ],
+          "why_not_enough": "无",
+          "why_this_task": "根策略 §6 的固定收尾动作"
+        },
+        "confidence": 0.9,
+        "difficulty": "low",
+        "display_order": 1404,
+        "evidence": [
+          "收口前门禁：claim_gate 13/13 exit 0、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "kind": "task",
+        "next_action": "提交紧凑投影、C16 登记、补跑工具与森林记录，再回填 commit hash。",
+        "non_goals": [
+          "不改写 git 历史"
+        ],
+        "priority": 2,
+        "purpose": "按根策略 §6 完成 proposal-save → apply → validate → export 与提交。",
+        "source_sessions": [
+          "ses_verseshell-tf0062-readpath-2026-09-23"
+        ],
+        "status": "in_progress",
+        "summary": "收口：重跑三项门禁、回填证据、导出森林并提交。",
+        "title": "步骤41：森林收口与提交"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "behavioral-gap",
+      "node": {
+        "acceptance_criteria": [
+          "把「读了但之后从未引用」严格分类为任务输入 / 与提示重复 / 真正多余，并给出各自 token 量",
+          "若改工具描述或工作区清单，必须用 live 实验证明成功率不掉、token 下降",
+          "结论写进 C13 / C15 或新声明"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.8,
+          "user_goal": "继续缩小 D/A token 比",
+          "validation_plan": [
+            "读取用途分类",
+            "live 实验验证成功率"
+          ],
+          "why_not_enough": "还没做严格分类，也不知道改提示会不会掉成功率",
+          "why_this_task": "结构性开销已用尽（见 evidence），读取侧只剩行为面可动"
+        },
+        "confidence": 0.65,
+        "difficulty": "medium",
+        "display_order": 1501,
+        "evidence": [
+          "结构项已论证不可动：digest 16.9% 再压会把碰撞界从 2^-64 降到 2^-32；residual 11.7% 是 JSON 键名/括号（C9 已测出 compact 编码对观察载荷无收益）；path 10.4% 必需；content 是信息本身",
+          "读取形状（本轮）：D 每次读 2.24 个文件引用 / 每引用 37.45 tok；A 每次 1.44 / 23.24 —— D 仍多约 1.55×",
+          "初步分类：37 次 D 读取调用中 9 次（24.3%、572 tok）涉及之后从未被编辑或命令引用的文件；但其中 broken_build.log 是任务输入，TASK.md（5 次）才是与系统提示重复的部分",
+          "读取路径仍占 D/A 差距 52.6%（本轮 +70.47 tok/run，总差距 +133.93）"
+        ],
+        "kind": "follow_up",
+        "next_action": "先做读取用途的严格分类（任务输入 / 与提示重复 / 真正多余），再决定是否改工具描述或工作区清单，并用 live 实验验证成功率不掉。",
+        "non_goals": [
+          "不在没有成功率证据前改提示词或工作区清单"
+        ],
+        "priority": 3,
+        "purpose": "读取侧的结构性开销已经用尽，把剩余 52.6% 的差距指向可动的行为面。",
+        "source_sessions": [
+          "ses_verseshell-tf0062-readpath-2026-09-23"
+        ],
+        "status": "ready",
+        "summary": "读取路径的结构性开销已在本轮用尽：紧凑投影拿掉可推导 counts 与行数组包装后，剩下的构成是 content 45.7%、digest 21.3%、residual 14.7%、path 13.2%、行包装 4.3%、counts 0.9%——其中只有 content 是信息本身、digest 再压会削弱安全界、residual 是 JSON 键名（C9 已证明 compact 编码对观察载荷无收益）、path 必需。但读取仍占 D/A 差距 52.6%，因为 D 每次读 2.24 个文件引用（A 1.44）、每引用 37.45 tok（A 23.24）。初步分类显示 24.3% 的读取调用涉及之后从未引用的文件，但其中多数是任务输入（broken_build.log），只有 TASK.md 与系统提示重复。下一步需要严格分类 + live 实验，而不是继续改信封。",
+        "title": "缺口：读取路径的结构性开销已用尽，下一个杠杆是模型选择读什么"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "紧凑投影是本轮主交付"
+      },
+      "from": "compact-projection",
+      "to": "readpath-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "补跑工具让本轮 live 复测可完成"
+      },
+      "from": "splice-tool",
+      "to": "readpath-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口是最后一步"
+      },
+      "from": "close-commit",
+      "to": "readpath-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "补跑工具是在本轮 live 跑受阻后写的"
+      },
+      "from": "splice-tool",
+      "to": "compact-projection",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口要等改动与复测都落地"
+      },
+      "from": "close-commit",
+      "to": "splice-tool",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "本轮收口的正是 TF-0062"
+      },
+      "from": "readpath-round",
+      "to": "TF-0062",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "行为面缺口由本轮的结构账暴露"
+      },
+      "from": "behavioral-gap",
+      "to": "TF-0062",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.8,
+        "reason": "承接 C15 的读取路径结论"
+      },
+      "from": "behavioral-gap",
+      "to": "TF-0058",
+      "type": "related_to"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 140
+      },
+      "id": "readpath-round"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 10
+      },
+      "id": "compact-projection"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 20
+      },
+      "id": "splice-tool"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 30
+      },
+      "id": "close-commit"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 150
+      },
+      "id": "behavioral-gap"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "读取桶结构账（改动前，33 次冻结调用 / 15601 字符）：content 36.2%、counts 18.0%、digest 16.9%、residual 11.7%、path 10.4%、line_wrapper 6.8%；改动后（12363 字符）：content 45.7%、digest 21.3%、residual 14.7%、path 13.2%、line_wrapper 4.3%、counts 0.9%",
+          "紧凑投影实测：15601 → 12363 字符（−20.8%）、3886 → 3079 tokens（−20.8%）；file.read_many −20.5%、file.view −23.3%",
+          "兼容策略：产品信封未改；compact=False 与 git 上一版投影器对 37 次冻结调用逐条比对 37/37 逐字节一致，无消费者需要迁移",
+          "live 复测（两臂 × 3 seeds，120 行，api_error 0）：D 333.37 → 296.47 tok/run；read_files 净效应 工具 −19.6% / token +6.8%（上轮 −11.8% / +22.7%）",
+          "A 侧干扰项：A 代码三轮未动，with 臂 obs_tok 168.6 → 197.4 → 170.5，所以 D/A 比值（2.44 → 1.69 → 1.74）不能当趋势读；可读的是 D 绝对开销单调下降",
+          "登记：docs/claims-and-evidence.md 新增 C16（门槛 ≥0.10，实测 0.2077），C13/C14/C15 同步更新；C12 覆盖 7 份产物",
+          "门禁：claim_gate 13/13 exit 0（C12 7/7 fresh）、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "next_action": "无。下一个杠杆见 behavioral-gap 节点（读取仍占 D/A 差距 52.6%，但结构项已用尽）。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "TF-0062 完成：先用同一套固定轨迹方法给读取桶做内部归因（改动前 content 36.2%、可推导 counts 18.0%、digest 16.9%、residual 11.7%、path 10.4%、行包装 6.8%），据此把参考客户端的读取投影改成紧凑形态——完整窗口用单个换行连接的 text、丢掉可推导的 start_line 与 total_lines——实测读取桶 3886 → 3079 tok（−20.8%）。兼容策略是「不动产品契约」：compact=False 与改动前逐字节一致（37/37），所以没有消费者需要迁移；这也是该优化必须留在客户端的原因（丢 total_lines 只在展示内容时成立，>10 行窗口仍保留它）。live 两臂 × 3 seeds 复测：D 333.4 → 296.5 tok/run，批量读取的 token 代价 +22.7% → +6.8%，步骤 −19.6%。剩余结构项已论证不可动，下一个杠杆在行为面（behavioral-gap）。"
+      },
+      "id": "TF-0062"
+    }
+  ],
+  "created_at": "2026-09-23T14:47:30.969497Z",
+  "proposal_id": "TFP-tf0062-read-path-2026-09-23",
+  "rationale": "TF-0062 的验收是「给出读取桶内部结构账，据此做一项有兼容策略的改动并按同一口径复测」。结构账做出来了（改动前 content 36.2%、可推导 counts 18.0%、digest 16.9%、residual 11.7%、path 10.4%、行包装 6.8%），据此把参考客户端的读取投影改成紧凑形态并实测 −20.8%；兼容策略是「不动产品契约」（compact=False 与改动前逐字节一致，37/37）。live 两臂 × 3 seeds 复测完成，D 从 333.4 降到 296.5 tok/run，批量读取的 token 代价从 +22.7% 降到 +6.8%。剩余结构项已被论证不可动，故把下一个杠杆开成行为面 follow_up。",
+  "session_id": "ses_verseshell-tf0062-readpath-2026-09-23",
+  "status": "applied"
+}
