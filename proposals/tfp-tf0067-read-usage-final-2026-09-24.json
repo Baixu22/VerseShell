@@ -1,0 +1,55 @@
+{
+  "applied_at": "2026-09-23T17:04:55.866809Z",
+  "base_graph_hash": "619f9106e12762128962428ee96f45f93970d2f755ee85bad01d5ca939f5ada9",
+  "base_summary": {
+    "edge_count": 114,
+    "node_count": 72,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "审计（改动前）：with 臂 D 85 条读取路径中 TASK.md 27 条（33.4% 的读取 token 份额）；同期 A 78 条中 16 条（17.6%）",
+          "冗余可证明：逐条比对 10 个 fixture 的 TASK.md 与注入提示，提示词每条都更详细，TASK.md 无独有信息",
+          "unreferenced 桶（24.8%）不等于浪费：主要是 Cargo.toml（9 次）与失败测试文件（tests/test_math.py 3 次）",
+          "规则 8 冒烟：3 任务 0 次读 TASK.md、3/3 PASS",
+          "live 复测（两臂 × 3 seeds，120 行，api_error 0）：D 的 TASK.md 读取 27→3 条、1064.5→115.3 tok；读取桶 3183→2203 tok（−30.8%）；成功率 A 0.60 / D 0.60 未掉",
+          "但 D 总 token 296.47→303.53：同轮 exec.run 4442→5585 tok（落在其逐轮区间 4442–5585 内，也与预算转移一致，本样本分不开）",
+          "差距构成翻转：read 52.6%→22.3%、exec 21.6%→49.4%、edit 17.8%→20.1%、meta 2.1%→2.6%",
+          "门禁：claim_gate 13/13 exit 0（C12 8/8 fresh）、readme_claims_check 17/17、cargo test exit 0",
+          "提交：commit 1f0d2af（内容 21 文件）+ 2520455（森林记录）；工作区干净"
+        ],
+        "next_action": "无。下一个瓶颈见 TF-0072（exec 占差距 49.4%，其中 81.7% 来自失败命令）。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "本轮完成：严格分类证明 D 的读取里唯一冗余是 TASK.md（提示词是它的严格超集，且两臂都在读），据此加提示规则 8 并 live 复测——TASK.md 读取 −89%、读取桶 −30.8%、成功率未掉，但 D 的总 token 没降（同轮 exec.run 上升），该歧义如实登记。差距构成翻转到 exec.run（49.4%）。三项门禁全绿。"
+      },
+      "id": "TF-0068"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "claim_gate：13/13 gated claims pass，exit 0（C12 由 7 份扩到 8 份，全部 fresh；C14 0.2584、C16 0.2052）",
+          "readme_claims_check：17/17 pass",
+          "cargo test：exit 0",
+          "森林：proposal-save → proposal-apply --yes → validate（校验通过）→ export",
+          "提交：commit 1f0d2af（内容）+ 2520455（森林记录）；提交前后工作区均干净",
+          "凭据自查：本轮无新增密钥材料（git grep 里仅有的 sk- 命中是 src/safety.rs 中测试脱敏函数的假字面量）"
+        ],
+        "next_action": "无。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "收口完成：三项门禁全绿、森林校验通过并导出、内容提交 1f0d2af、森林记录 2520455、工作区干净。"
+      },
+      "id": "TF-0071"
+    }
+  ],
+  "created_at": "2026-09-23T17:04:55.705232Z",
+  "proposal_id": "TFP-tf0067-read-usage-final-2026-09-24",
+  "rationale": "本轮交付完成并提交（commit 1f0d2af）：读取用途审计工具与 C17 登记、TASK.md 提示规则、live 两臂 × 3 seeds 复测、C12 扩到 8 份产物、三项门禁全绿。收口 TF-0068 与 TF-0071，保留 TF-0072（exec 失败缺口）为 ready。",
+  "session_id": "ses_verseshell-tf0067-readusage-2026-09-24",
+  "status": "applied"
+}
