@@ -1,0 +1,313 @@
+{
+  "applied_at": "2026-09-23T11:25:26.287291Z",
+  "base_graph_hash": "4ef8905dea9c5a364540f817cab677e571d28056a30dcbeecae54246bc64751e",
+  "base_summary": {
+    "edge_count": 92,
+    "node_count": 58,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "exec-gap-round",
+      "node": {
+        "acceptance_criteria": [
+          "给出 exec.run 在 D 的 observation token 中的占比与逐任务分布",
+          "用「次数效应 / 单次效应 / 交互」区分「多跑命令」与「输出更大」，并给出成功/失败结构",
+          "定位 D/A 差距的真实来源（分桶），而不是停在「exec 是最大单项」",
+          "工具与产物可复现、纳入 C12 新鲜度，门禁全绿"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "继续缩小 D/A token 比",
+          "validation_plan": [
+            "python tools/exec_token_breakdown.py",
+            "claim_gate exit 0"
+          ],
+          "why_not_enough": "只做定位，未实现读取路径改动",
+          "why_this_task": "TF-0058 的验收就是这条诊断，且上一轮的逐 op 分解已把它排到第一"
+        },
+        "confidence": 0.85,
+        "desired_outcomes": [
+          "exec.run 的占比与逐任务分布有可复现产物",
+          "「多跑命令」与「单次输出更大」两种解释被定量区分，并给出失败命令这一被忽略的第三项",
+          "D/A 差距按 read/exec/edit/meta 分桶定位，避免把力气花在 exec reducer 上",
+          "结论登记进声明矩阵（C15）并被 C12 新鲜度覆盖"
+        ],
+        "difficulty": "medium",
+        "display_order": 1201,
+        "evidence": [
+          "exec.run 占比：with 臂 80 次 / 5045 tok = D 的 50.4%（168.17 tok/run，63.06 tok/次）",
+          "两种解释：with−without 的 exec 增量 +29.2 tok/run = 次数效应 13.33（46%）+ 单次效应 15.87（54%）+ 交互 1.39",
+          "失败结构：失败 exec 占 52.5% 的调用但占 80.1% 的 exec token（96.24 vs 26.39 tok/次）；增量全部来自失败命令 +7 次（35→42），单次成功成本反而 30.55→26.39",
+          "差距重定位：+143.97 tok/run 分桶 read +84.77（58.9%）、edit +24.83（17.2%）、exec +23.33（16.2%）、meta +3.03（2.1%）",
+          "读取形状：D 37 次读取 / 3842 tok / 每次 2.16 个文件引用 / 每引用 48.02；A 40 次读取命令 / 1299 tok / 1.25 / 25.98",
+          "门禁：claim_gate 12/12 exit 0（C12 6/6 fresh）、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "execution_hints": [
+          "先分桶再动手：最大单项开销不等于差距来源",
+          "A 侧没有单次成败标记，涉及 A 的拆分只能到桶级别"
+        ],
+        "kind": "global_task",
+        "next_action": "无。下一个 token 杠杆见 read-path-gap 节点。",
+        "non_goals": [
+          "不在没有分解数据前改 exec.run 的 reducer",
+          "不把诊断数字当成对外主张"
+        ],
+        "priority": 2,
+        "purpose": "回答「exec.run 是不是 D 的 token 问题」，并用分桶把下一步该改哪里定位清楚。",
+        "source_sessions": [
+          "ses_verseshell-tf0058-exec-2026-09-23"
+        ],
+        "status": "in_progress",
+        "summary": "用已存 live 产物做逐 op 分解（无 API 调用）：exec.run 是 D 的单项最大开销（50.4%），但不是 D 比 A 贵的原因。D/A 差距 +143.97 tok/run 里 read 占 58.9%、edit 17.2%、exec 仅 16.2%；失败 exec 只占 52.5% 的调用却占 80.1% 的 exec token；批量读取带来的 exec 增量来自失败命令多了 7 次，而不是单次输出变大。结论与失效边界登记为 C15。",
+        "title": "TF-0058 收口：exec token 分解与 D/A 差距重定位"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "breakdown-tool",
+      "node": {
+        "acceptance_criteria": [
+          "tools/exec_token_breakdown.py 只用已存产物、不调用 API，输出 exec 占比/逐任务分布/次数-单次分解/成败结构/分桶差距/读取形状",
+          "产物 eval/exec_token_breakdown.json 带 evidence.globs 与指纹",
+          "纳入 claim_gate 的 EVIDENCE_ARTIFACTS（C12 由 5 份变 6 份）",
+          "docs/claims-and-evidence.md 新增 C15 并同步 C12/C13"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "可复现证据",
+          "validation_plan": [
+            "python tools/exec_token_breakdown.py",
+            "claim_gate exit 0"
+          ],
+          "why_not_enough": "A 侧分桶是启发式的，已在 C15 边界写明",
+          "why_this_task": "没有可复现分解就无法判断下一步改哪里"
+        },
+        "confidence": 0.9,
+        "difficulty": "medium",
+        "display_order": 1202,
+        "evidence": [
+          "tools/exec_token_breakdown.py：op 表 + decompose(次数/单次/交互) + exec_split(成功/失败) + per_task + 命令意图分类 + d_read_shape/read_command_shape + gap_decomposition",
+          "eval/exec_token_breakdown.json：含 method/evidence 指纹/arms/exec_run_delta_with_minus_without/d_vs_a/gap_decomposition",
+          "tools/claim_gate.py：EVIDENCE_ARTIFACTS 增加 eval/exec_token_breakdown.json（C12 6/6 fresh）",
+          "docs/claims-and-evidence.md：新增 C15（含 6 条失效边界），C13 失效边界新增 ⑨ 指向 C15"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不改任何产品代码（纯诊断轮）",
+          "不引入新的 live 调用"
+        ],
+        "priority": 2,
+        "purpose": "把「exec 是不是问题」变成可复现的分解，而不是靠逐 op 排序猜。",
+        "source_sessions": [
+          "ses_verseshell-tf0058-exec-2026-09-23"
+        ],
+        "status": "done",
+        "summary": "新增 tools/exec_token_breakdown.py：只用两份已存 live 产物，输出 exec.run 的占比与逐任务分布、次数/单次/交互分解、成功-失败结构、A 侧命令意图分类、D/A 差距分桶与读取形状，产物写入 eval/exec_token_breakdown.json 并纳入 C12。结论登记为 C15（无门槛，含启发式边界）。",
+        "title": "步骤37：exec token 分解工具与 C15 登记"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-commit",
+      "node": {
+        "acceptance_criteria": [
+          "claim_gate exit 0（C12 6/6 fresh）、readme_claims_check 17/17、cargo test exit 0",
+          "森林记录与提交完成，工作区干净"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "收口",
+          "validation_plan": [
+            "三项门禁",
+            "git status 为空"
+          ],
+          "why_not_enough": "无",
+          "why_this_task": "根策略 §6 的固定收尾动作"
+        },
+        "confidence": 0.9,
+        "difficulty": "low",
+        "display_order": 1203,
+        "evidence": [
+          "收口前门禁：claim_gate 12/12 exit 0、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "kind": "task",
+        "next_action": "提交分解工具、C15 登记与森林记录，再回填 commit hash。",
+        "non_goals": [
+          "不改写 git 历史"
+        ],
+        "priority": 2,
+        "purpose": "按根策略 §6 完成 proposal-save → apply → validate → export 与提交。",
+        "source_sessions": [
+          "ses_verseshell-tf0058-exec-2026-09-23"
+        ],
+        "status": "in_progress",
+        "summary": "收口：重跑三项门禁、回填证据、导出森林并提交。",
+        "title": "步骤38：森林收口与提交"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "read-path-gap",
+      "node": {
+        "acceptance_criteria": [
+          "给出读取桶内部的结构账（每条目键名 / 行包装 / 摘要 / 路径重复 / 内容各占多少），用与 tools/tf45_envelope_replay.py 同一套固定轨迹方法",
+          "任一改动必须给出兼容策略（双字段或版本化）并进 claim_gate",
+          "若实现，按同一口径复测并更新 C13 与 C15"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "继续缩小 D/A token 比",
+          "validation_plan": [
+            "读取桶组成测量",
+            "固定轨迹复算",
+            "同口径 live 复测"
+          ],
+          "why_not_enough": "还没测过读取桶内部构成，也不知道改动能拿回多少",
+          "why_this_task": "C15 显示 read 桶占 D/A 差距的 58.9%，是当前最大的可动项"
+        },
+        "confidence": 0.7,
+        "difficulty": "medium",
+        "display_order": 1204,
+        "evidence": [
+          "C15 分桶：+143.97 tok/run 的差距里 read +84.77（58.9%）、edit +24.83（17.2%）、exec +23.33（16.2%）、meta +3.03（2.1%）",
+          "读取形状：D 每个文件引用 48.02 tok vs A 的 type 25.98（1.85×），且 D 每次读 2.16 个文件引用 vs A 的 1.25（文件引用数多约 1.6×）",
+          "with 臂读取桶内部：file.read_many 24 次 / 3254 tok（135.6/次）、file.view 13 次 / 588 tok（45.2/次）",
+          "TF-0045 已证明该桶的摘要与键名是主要结构开销（一次 3 文件读取：content 28.4% / sha256 28.0% / JSON 结构 38.3%），摘要已压到 16 位，结构项未动"
+        ],
+        "kind": "follow_up",
+        "next_action": "先用 tools/tf45_envelope_replay.py 的固定轨迹方法给读取桶做内部组成测量，量化「键名 / 行包装 / 路径重复 / 内容」各占多少，再决定改哪一项以及兼容策略。",
+        "non_goals": [
+          "不为省 token 丢掉 agent 需要的行号或摘要",
+          "不在没有兼容策略前改对外字段"
+        ],
+        "priority": 2,
+        "purpose": "把 C15 定位到的 58.9% 差距变成可执行的下一个改动，而不是继续猜。",
+        "source_sessions": [
+          "ses_verseshell-tf0058-exec-2026-09-23"
+        ],
+        "status": "ready",
+        "summary": "C15 把 D/A 差距定位到读取路径（58.9%），并给出两个可动项：①每个文件引用的开销是 A 的 1.85 倍（48.02 vs 25.98 tok），而 TF-0045 的组成测量显示该桶里内容只占 28.4%、键名占 38.3%；②D 每次读取的文件引用数也比 A 多约 1.6 倍。下一步先做读取桶内部组成测量，再决定改结构项还是改读取策略，并给出兼容策略。",
+        "title": "缺口：D 的读取路径是 D/A 差距主因（58.9%），每文件引用 48.0 tok vs A 的 26.0"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "分解工具是本轮主交付"
+      },
+      "from": "breakdown-tool",
+      "to": "exec-gap-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口是最后一步"
+      },
+      "from": "close-commit",
+      "to": "exec-gap-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口要等分解与登记落地"
+      },
+      "from": "close-commit",
+      "to": "breakdown-tool",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "本轮收口的正是 TF-0058"
+      },
+      "from": "exec-gap-round",
+      "to": "TF-0058",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "读取桶缺口由本轮分桶暴露"
+      },
+      "from": "read-path-gap",
+      "to": "TF-0058",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.8,
+        "reason": "承接上一轮的信封改动与同一套固定轨迹方法"
+      },
+      "from": "read-path-gap",
+      "to": "TF-0052",
+      "type": "related_to"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 120
+      },
+      "id": "exec-gap-round"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 10
+      },
+      "id": "breakdown-tool"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 20
+      },
+      "id": "close-commit"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 130
+      },
+      "id": "read-path-gap"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "占比与逐任务分布：with 臂 exec.run 80 次 / 5045 tok = D 的 50.4%（168.17 tok/run，63.06 tok/次）；逐任务表在 eval/exec_token_breakdown.json",
+          "两种解释（with − without，+29.2 tok/run）：次数效应 13.33（46%）+ 单次效应 15.87（54%）+ 交互 1.39；即两种解释都成立，不能只归因于一种",
+          "被忽略的第三项：失败 exec 占 52.5% 的调用但占 80.1% 的 exec token（96.24 vs 26.39 tok/次）；增量全部来自失败命令 +7 次（35→42），单次成功成本反而 30.55→26.39",
+          "差距重定位：D/A 差距 +143.97 tok/run 分桶为 read +84.77（58.9%）、edit +24.83（17.2%）、exec +23.33（16.2%）、meta +3.03（2.1%）——exec.run 不是 D 比 A 贵的原因",
+          "读取形状：D 37 次读取 / 3842 tok / 每次 2.16 个文件引用 / 每引用 48.02；A 40 次读取命令 / 1299 tok / 1.25 / 25.98（D 每引用 1.85×，引用数约 1.6×）",
+          "工具与产物：tools/exec_token_breakdown.py → eval/exec_token_breakdown.json（带 evidence 指纹，已纳入 C12）",
+          "登记：docs/claims-and-evidence.md 新增 C15（含 6 条失效边界），C13 失效边界新增 ⑨ 指向 C15",
+          "门禁：claim_gate 12/12 exit 0（C12 6/6 fresh）、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "next_action": "无。下一个 token 杠杆见 read-path-gap 节点（读取桶占差距 58.9%）。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "TF-0058 已回答：exec.run 确实是 D 的单项最大开销（50.4%、63.06 tok/次），但不是 D 比 A 贵的原因。①with−without 的 exec 增量 +29.2 tok/run 里次数效应 46%、单次效应 54%，且增量全部来自失败命令多了 7 次（35→42），单次成功成本反而下降（30.55→26.39）；②失败 exec 只占 52.5% 的调用却占 80.1% 的 exec token（96.24 vs 26.39）；③D/A 差距 +143.97 tok/run 分桶后 read 58.9%、edit 17.2%、exec 仅 16.2%，D 每文件引用 48.02 tok vs A 的 25.98 且文件引用数多约 1.6×。结论：下一个 token 杠杆在读取路径，不在 exec reducer；已开 read-path-gap 节点。"
+      },
+      "id": "TF-0058"
+    }
+  ],
+  "created_at": "2026-09-23T11:25:26.185509Z",
+  "proposal_id": "TFP-tf0058-exec-breakdown-2026-09-23",
+  "rationale": "TF-0058 的问题（exec.run 的 token 占比，以及增量来自「D 多跑命令」还是「单次输出更大」）已用已存 live 产物回答，并顺带纠正了一个会误导下一步的直觉：exec.run 是 D 的单项最大开销（50.4%），但不是 D 比 A 贵的原因——+144.0 tok/run 的差距里 read 占 58.9%、edit 17.2%、exec 仅 16.2%。因此收口 TF-0058，并把「读取路径」开成新的 follow_up。",
+  "session_id": "ses_verseshell-tf0058-exec-2026-09-23",
+  "status": "applied"
+}
