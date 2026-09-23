@@ -53,9 +53,16 @@ THRESHOLDS = {
 # Stored measurements the gate relies on. Each must record the content fingerprint
 # of the surface it measured, or the gate cannot tell whether the number still
 # describes the current code.
+#
+# `bench/aci/results/latest_live.json` is deliberately NOT listed: it is the live
+# A-vs-D measurement taken at commit 3639cdd on model `sn-glm-5-3-flash`, which the
+# endpoint has since retired, and the re-measurement is blocked by upstream 500s on
+# multi-turn tool-calling sessions. C13 therefore records it as a *historical*
+# measurement rather than current evidence, and gating it against today's source
+# would be a false freshness claim. A successful re-measurement writes a new
+# artifact, and that artifact belongs back in this list.
 EVIDENCE_ARTIFACTS = [
     "bench/aci/results/latest.json",
-    "bench/aci/results/latest_live.json",
     "eval/jev_obs_report.json",
     "eval/cross_shell.json",
 ]

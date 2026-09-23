@@ -35,6 +35,16 @@ pub fn specs() -> Vec<OperationSpec> {
             handler: execute_view,
         },
         OperationSpec {
+            name: "file.read_many",
+            mcp_name: "file_read_many",
+            description:
+                "Read several files in one call: per-file content hash, total_lines and a line window.",
+            effect: "fs.read",
+            capability: "file.read",
+            input_schema: schema_read_many,
+            handler: execute_read_many,
+        },
+        OperationSpec {
             name: "file.hash",
             mcp_name: "file_hash",
             description:
@@ -115,6 +125,15 @@ fn schema_read_range() -> Value {
             "start_line":{"type":"integer","minimum":1},
             "end_line":{"type":"integer","minimum":1},
             "max_lines":{"type":"integer","default":500}
+        }
+    })
+}
+fn schema_read_many() -> Value {
+    json!({
+        "type":"object","required":["paths"],
+        "properties":{
+            "paths":{"type":"array","items":{"type":"string"},"minItems":1,"maxItems":8},
+            "window":{"type":"integer","minimum":1,"default":80}
         }
     })
 }
@@ -300,6 +319,86 @@ fn execute_view(req: &OperationRequest) -> Observation {
             "content_hash": hash,
             "lines": numbered_lines(slice, if all.is_empty() { 0 } else { from + 1 })
         }),
+        &["fs.read"],
+        &["file.read"],
+        start,
+    )
+}
+
+/// Upper bound on one multi-file read: enough for the "read the files this task
+/// touches" case without letting a single call pull the whole repo.
+const MAX_READ_MANY_PATHS: usize = 8;
+
+/// Read one file's window; `Err` carries a per-file message so a batch can
+/// report the missing entries instead of failing the whole call.
+fn read_many_entry(path: &str, window: usize) -> Result<Value, String> {
+    let resolved = resolve_workspace_path(path)?;
+    guard_read(&resolved.to_string_lossy())?;
+    let text = read_text_file(&resolved)?;
+    let all: Vec<&str> = text.lines().collect();
+    let to = window.min(all.len());
+    let slice = if all.is_empty() { &[][..] } else { &all[0..to] };
+    Ok(json!({
+        // Echo the caller's own path: it is shorter than the absolute path and
+        // is directly reusable in the next op.
+        "path": path,
+        "content_hash": content_hash_str(&text),
+        "total_lines": all.len(),
+        "start_line": if all.is_empty() { 0 } else { 1 },
+        "end_line": to,
+        "lines": numbered_lines(slice, if all.is_empty() { 0 } else { 1 })
+    }))
+}
+
+fn execute_read_many(req: &OperationRequest) -> Observation {
+    let start = now();
+    if let Err(o) = require_capability(req, "cat") {
+        return o;
+    }
+    let paths: Vec<String> = req
+        .args
+        .get("paths")
+        .and_then(|v| v.as_array())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|v| v.as_str().map(str::to_string))
+                .collect()
+        })
+        .unwrap_or_default();
+    if paths.is_empty() {
+        return err(
+            req,
+            "file",
+            "E_BAD_ARG",
+            "paths must be a non-empty array of strings",
+            start,
+        );
+    }
+    if paths.len() > MAX_READ_MANY_PATHS {
+        return err(
+            req,
+            "file",
+            "E_BAD_ARG",
+            format!("paths accepts at most {MAX_READ_MANY_PATHS} entries"),
+            start,
+        );
+    }
+    let window = arg_u64(&req.args, "window", 80).clamp(1, 500) as usize;
+    let mut files = Vec::with_capacity(paths.len());
+    let mut errors = 0usize;
+    for path in &paths {
+        match read_many_entry(path, window) {
+            Ok(entry) => files.push(entry),
+            Err(message) => {
+                errors += 1;
+                files.push(json!({"path": path, "error": message}));
+            }
+        }
+    }
+    ok(
+        req,
+        "file",
+        json!({"count": files.len(), "errors": errors, "files": files}),
         &["fs.read"],
         &["file.read"],
         start,

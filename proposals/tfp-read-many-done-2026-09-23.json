@@ -1,0 +1,96 @@
+{
+  "proposal_id": "TFP-read-many-done-2026-09-23",
+  "session_id": "ses_verseshell-tf-live3-2026-09-23",
+  "rationale": "多文件读取算子已实现、测试通过、并在冒烟中确认被模型采用；但同口径 live 复测被端点上游阻塞（多轮工具调用会话持续 500，且原模型 sn-glm-5-3-flash 已被下架换成 glm-5.3-flash），因此 TF-0050 转 blocked 并记录阻塞条件，C13 如实降级为「历史测量」并不再参与 C12 新鲜度门禁（避免用陈旧产物冒充当前证据）。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0048",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "file.read_many 已实现并验证：一次读最多 8 个文件，逐文件返回 content_hash/total_lines/start_line/lines；单个文件缺失或越界只在对应条目报 error，不让整批失败；空 paths 与超过 8 条返回 E_BAD_ARG。schema、handler、catalog 计数断言（31→32）、docs/1.0-aci.md 与 README 两处 op 表同步，并新增单测。",
+        "evidence": [
+          "src/ops/file.rs：schema_read_many + execute_read_many + read_many_entry（MAX_READ_MANY_PATHS=8）",
+          "tests/aci_1_0_ops_tests.rs::file_read_many_reads_several_files_with_hashes → 正常/部分缺失/空列表三种情形",
+          "cargo test --test aci_1_0_ops_tests --test operation_protocol_tests → 10 passed / 9 passed",
+          "cargo test 全量 → exit 0",
+          "tests/operation_protocol_tests.rs catalog 计数断言更新为 32",
+          "docs/1.0-aci.md File 表 + README 两处 op 清单已加 file.read_many"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0049",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "live harness 已暴露 read_files（映射 file.read_many）并对其观察做与 file.view 相同的行扁平化；冒烟实测模型确实把它当作首个调用（两个任务都出现 file.read_many），替代了原本的 2–3 次 file.view。",
+        "evidence": [
+          "bench/aci/runners/live_agent_loop.py：ACI_OP_MAP 增加 \"read_files\": \"file.read_many\"；ACI_TOOLS 增加 read_files（paths 必填、window 可选、最多 8 条）",
+          "format_aci_result 新增 files 分支：逐条保留 path/content_hash/total_lines/start_line/error，lines ≤10 时扁平化",
+          "冒烟（glm-5.3-flash，2 任务 × 2 条件）：D 轨迹首个调用均为 file.read_many（python_fix_pytest_fail 171 tok、rust_fix_compile_error 180 tok），工具数由 5/9 降到 4/6"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0050",
+      "fields": {
+        "status": "blocked",
+        "progress": 20.0,
+        "summary": "同口径 3 次复测未能完成，被端点上游阻塞：①原模型 sn-glm-5-3-flash 已被端点下架（400 model_not_found），替代品为 glm-5.3-flash；②上游对多轮工具调用会话持续返回 500「parse response failed」（单次请求可通，持续会话必失败），三次全量跑（seeds 42/43/44）20 行全部 api_error、成功率为 0。已为 harness 增加 api_error 标记与合并守卫（拒绝把故障行平均进统计），并新增 --exclude-tools 以便恢复后做同模型 A/B。C13 已如实降级为「历史测量」。",
+        "next_action": "上游恢复后：用 --exclude-tools read_files 做同模型 A/B（3+3 次，seeds 42/43/44，max_turns 8、temperature 0），合并后更新 C13 并把新产物重新纳入 C12。",
+        "evidence": [
+          "端点探测（2026-09-23）：GET /v1/models 200；POST /v1/chat/completions 用 sn-glm-5-3-flash → 400 {\"code\":\"model_not_found\"}；当前可用：glm-5.3-flash / glm-5.3 / deepseek-v4.1-flash / sn-deepseek-v4-1-flash",
+          "三次全量跑（seeds 42/43/44，glm-5.3-flash）：产物 ab_with_*.json 全部 A=0.0 D=0.0，日志含 HTTP 500 proxy_error「上游返回 500: parse response failed」",
+          "单次工具调用探测：三个可用模型均能正确返回 tool_calls（说明故障只在持续会话）",
+          "1 任务健康度复测（python_fix_pytest_fail）仍为 A=0.0 D=0.0 → 判定上游未恢复",
+          "harness 改进：rows 增加 api_error 标记；合并脚本对含 api_error 的 run 直接 exit 2；新增 --exclude-tools"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0045",
+      "fields": {
+        "title": "缺口：产品侧观察信封形状（多文件读取已实现，信封形状未动）",
+        "summary": "原缺口含两部分：多文件读取与观察信封形状。多文件读取已由 TF-0048 实现（file.read_many，catalog 计数 32，有单测与文档）；剩余未做的是 file.view / file.read_many 里 lines 的对外形状（现在是逐行对象 [{line,text}]，harness 侧已扁平化，但产品信封未变）——改它会破坏消费者，需要版本化或双字段过渡，故保留为 follow_up。",
+        "next_action": "若要做：给出兼容策略（新增扁平字段并保留旧字段，或按 observation schema 版本化），再更新文档与消费者。",
+        "evidence": [
+          "多文件读取：src/ops/file.rs::file.read_many（已实现，见 TF-0048）",
+          "信封形状：file.view 返回 lines = [{line,text}]（实测 2 行文件 80 字符中纯文本仅 39），harness 投影已扁平化但产品未改"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0047",
+      "fields": {
+        "progress": 60.0,
+        "summary": "算子与 harness 侧已完成并有证据：file.read_many 实现+单测（TF-0048）、live harness 暴露 read_files 且冒烟确认模型采用（TF-0049）。同口径 3 次复测因端点上游故障未能完成（TF-0050 blocked）；C13 已如实降级为历史测量并退出 C12 门禁。因此本轮不是「复测完成」，而是「被测对象已改好、复测待上游恢复」。",
+        "next_action": "上游恢复后执行 TF-0050 的 next_action（同模型 A/B 3+3 次），再更新 C13 并收口。",
+        "evidence": [
+          "cargo test 全量 exit 0；catalog 计数 32",
+          "冒烟：D 首个调用为 file.read_many，工具数 5/9 → 4/6",
+          "复测阻塞：三次全量跑全部 api_error（HTTP 500 proxy_error），1 任务健康度测试仍为 0",
+          "C13 状态改为「历史（待复测）」，EVIDENCE_ARTIFACTS 移除 latest_live.json 并写明原因"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0051",
+      "fields": {
+        "status": "in_progress",
+        "progress": 50.0,
+        "next_action": "提交本轮算子、harness、文档与声明改动（复测产物待上游恢复后补），再回填 commit hash。",
+        "evidence": [
+          "收口前门禁：python tools/claim_gate.py → 见收口复核；readme_claims_check 17/17；cargo test exit 0"
+        ]
+      }
+    }
+  ]
+}

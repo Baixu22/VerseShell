@@ -61,6 +61,12 @@ python bench/aci/runners/live_agent_loop.py --full `
 | `--caps` | capabilities granted to the AE server for condition D (default: the ACI surface set) |
 | `--temperature` / `--seed` | sampling controls (default temperature 0; the endpoint may ignore `seed`) |
 | `--repeat N` | run the whole task × condition matrix N times; each row carries `run_index` |
+| `--exclude-tools a,b` | hide tools from condition D (A/B a single tool on the same model) |
+
+Rows that fail because of an upstream error are flagged `api_error`, and the
+merge step refuses to average them in, so an endpoint outage can never look like
+a "0 tools / 0 tokens" result. A proxy can serve single requests while failing
+sustained multi-turn sessions, so check that flag before trusting a run.
 
 For a reportable number, run at least 3 times and quote the spread: a single
 run varies by 1.5–3x per task on a reasoning model, so one run supports a

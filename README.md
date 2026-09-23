@@ -16,7 +16,7 @@ layer; it is **not** a bash-compatible text shell.
 |------|-----|
 | Run command | `exec.run` |
 | Inspect large logs | `result.query` |
-| Read code window | `file.view` / `file.read_range` |
+| Read code window | `file.view` / `file.read_range` / `file.read_many` (up to 8 files per call) |
 | Exact edit | `file.replace_exact` / `file.edit_range` |
 | Search repo | `repo.search` |
 | Changed files | `repo.changed_files` |
@@ -291,7 +291,7 @@ Full catalog: [docs/1.0-aci.md](docs/1.0-aci.md).
 |------|-----|
 | Run command | `exec.run` |
 | Inspect large logs | `result.query` |
-| Read code window | `file.view` / `file.read_range` |
+| Read code window | `file.view` / `file.read_range` / `file.read_many` (up to 8 files per call) |
 | Exact edit | `file.replace_exact` / `file.edit_range` / `file.apply_patch` |
 | Search repo | `repo.search` |
 | Changed files | `repo.changed_files` |
@@ -971,11 +971,11 @@ cargo bench -- --quick            # Quick mode (fewer samples)
 
 | Operation | VerseShell | PowerShell | Bash | AE vs PWsh |
 |-----------|-----------|------------|------|------------|
-| CPU info | **261.2ms** | 1238.2ms | 361.3ms | **4.7x faster** |
-| Disk info | **11.5ms** | 327.8ms | N/A | **28.6x faster** |
-| List dir | **10.2ms** | 249.6ms | 363.1ms | **24.6x faster** |
-| Read file | **11.5ms** | 141.2ms | 347.4ms | **12.2x faster** |
-| Pipeline 1K | **11.0ms** | 171.0ms | 356.2ms | **15.5x faster** |
+| CPU info | **283.8ms** | 1277.2ms | 401.3ms | **4.5x faster** |
+| Disk info | **11.2ms** | 368.1ms | N/A | **32.8x faster** |
+| List dir | **11.0ms** | 263.6ms | 403.8ms | **23.9x faster** |
+| Read file | **50.2ms** | 202.3ms | 386.0ms | **4.0x faster** |
+| Pipeline 1K | **12.0ms** | 214.0ms | 376.6ms | **17.8x faster** |
 
 Median of 20 runs after 3 warm-up runs on an AMD Ryzen 7 7745HX; each number is a
 real process spawn with stdout/stderr discarded, so process startup is included.

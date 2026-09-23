@@ -106,6 +106,7 @@ ACI_OP_MAP = {
     # LLM-friendly primary names
     "read_file": "file.view",
     "write_file": "file.write",
+    "read_files": "file.read_many",
     "run_command": "exec.run",
     "replace_in_file": "file.replace_exact",
     "search_content": "repo.search",
@@ -140,6 +141,34 @@ ACI_TOOLS = [
                     "window": {"type": "integer", "description": "Max lines (default 80)"},
                 },
                 "required": ["path"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_files",
+            "description": (
+                "Read SEVERAL files in ONE call: every entry returns lines, total_lines and "
+                "content_hash. Prefer this over calling read_file once per file when the task "
+                "touches a known set of files (source + test + task file). A missing file is "
+                "reported in its own entry and does not fail the batch. "
+                "When NOT to use: when you do not yet know which file matters (use search_content)."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "paths": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "File paths relative to workspace root (max 8)",
+                    },
+                    "window": {
+                        "type": "integer",
+                        "description": "Max lines per file (default 80)",
+                    },
+                },
+                "required": ["paths"],
             },
         },
     },
@@ -616,6 +645,25 @@ def format_aci_result(response: dict) -> str:
         elif "content_hash" not in data:
             clean["total_lines"] = len(lines) if isinstance(lines, list) else 0
 
+    # file.read_many: per-file projection, same flattening as file.view, plus
+    # per-file errors so a missing path does not hide the readable ones.
+    if "files" in data and isinstance(data["files"], list):
+        compact: list[dict] = []
+        for entry in data["files"]:
+            if not isinstance(entry, dict):
+                continue
+            item = {
+                key: entry[key]
+                for key in ("path", "content_hash", "total_lines", "start_line", "error")
+                if key in entry
+            }
+            if isinstance(entry.get("lines"), list) and len(entry["lines"]) <= 10:
+                item["lines"] = compact_lines(entry["lines"])
+            compact.append(item)
+        clean["files"] = compact
+        if "errors" in data:
+            clean["errors"] = data["errors"]
+
     # Non-reduced stdout/stderr: include text so model can see dir/list output
     if "stdout" in data:
         s = data["stdout"]
@@ -679,9 +727,13 @@ def run_agent_loop(
     temperature: float = 0.0,
     seed: int | None = None,
     run_index: int = 0,
+    exclude_tools: tuple[str, ...] = (),
 ) -> dict:
     workspace = prepare_workspace(task["workspace_fixture"])
     tools = ACI_TOOLS if condition == "verseshell_aci" else RAW_SHELL_TOOLS
+    if exclude_tools:
+        # Used to A/B a single tool (e.g. read_files) on the same model.
+        tools = [t for t in tools if t["function"]["name"] not in exclude_tools]
     tool_names = {t["function"]["name"] for t in tools}
 
     task_hint = TASK_SPECIFIC_PROMPTS.get(task["id"], task["prompt"])
@@ -700,6 +752,7 @@ def run_agent_loop(
     task_completed = False
     agent_declared_success = False
     last_error = None
+    api_error = False
 
     start_time = time.time()
 
@@ -711,6 +764,9 @@ def run_agent_loop(
                                    base_url=base_url, temperature=temperature, seed=seed)
             except Exception as e:
                 last_error = f"API error turn {turn}: {e}"
+                # Marked so an upstream outage can never be averaged into the
+                # benchmark as a "0 tools / 0 tokens" data point.
+                api_error = True
                 break
 
             usage = resp.get("usage", {})
@@ -840,6 +896,7 @@ def run_agent_loop(
         "llm_completion_tokens": total_completion_tokens,
         "turns": turn,
         "last_error": last_error,
+        "api_error": api_error,
     }
 
 
@@ -1018,9 +1075,12 @@ def main(argv: list[str] | None = None) -> int:
                     help="sampling seed sent to the endpoint (may be ignored by it)")
     ap.add_argument("--repeat", type=int, default=1,
                     help="run the whole task x condition matrix N times")
+    ap.add_argument("--exclude-tools", default="",
+                    help="comma-separated tool names to hide from condition D (A/B a single tool)")
     ap.add_argument("--smoke", action="store_true", help="3-task smoke validation")
     ap.add_argument("--full", action="store_true", help="All 10 tasks")
     args = ap.parse_args(argv)
+    exclude_tools = tuple(t.strip() for t in args.exclude_tools.split(",") if t.strip())
 
     manifest = json.loads((TASKS_DIR / "manifest.json").read_text(encoding="utf-8-sig"))
     all_tasks = manifest.get("tasks", [])
@@ -1066,7 +1126,8 @@ def main(argv: list[str] | None = None) -> int:
                     row = run_agent_loop(task, cond, model=args.model, api_key=api_key,
                                          base_url=args.base_url, max_turns=args.max_turns,
                                          caps=args.caps, temperature=args.temperature,
-                                         seed=args.seed, run_index=run_index)
+                                         seed=args.seed, run_index=run_index,
+                                         exclude_tools=exclude_tools)
                     rows.append(row)
                     wall = int((time.time() - t0) * 1000)
                     status = "PASS" if row["success"] else "FAIL"
@@ -1105,6 +1166,7 @@ def main(argv: list[str] | None = None) -> int:
             "temperature": args.temperature,
             "seed": args.seed,
             "repeat": args.repeat,
+            "exclude_tools": list(exclude_tools),
             "tasks": task_ids,
             "conditions": conditions,
         },

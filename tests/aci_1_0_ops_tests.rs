@@ -128,6 +128,53 @@ fn file_view_replace_and_stale_hash() {
 }
 
 #[test]
+fn file_read_many_reads_several_files_with_hashes() {
+    let workspace = std::env::temp_dir().join(format!("vs-rm-{}", uuid::Uuid::new_v4()));
+    std::fs::create_dir_all(workspace.join("src")).unwrap();
+    std::fs::write(workspace.join("a.txt"), "alpha\nbeta\n").unwrap();
+    std::fs::write(workspace.join("src/b.txt"), "one\ntwo\nthree\n").unwrap();
+
+    let req = op(
+        "1",
+        "file.read_many",
+        json!({"paths": ["a.txt", "src/b.txt"], "window": 10}),
+    );
+    let r = run_server(&req, &workspace).remove(0);
+    assert_eq!(r["ok"], true, "{r}");
+    assert_eq!(r["data"]["count"], 2);
+    assert_eq!(r["data"]["errors"], 0);
+    let files = r["data"]["files"].as_array().unwrap();
+    assert_eq!(files[0]["path"], "a.txt");
+    assert_eq!(files[0]["total_lines"], 2);
+    assert_eq!(files[0]["start_line"], 1);
+    assert!(files[0]["content_hash"]
+        .as_str()
+        .unwrap()
+        .starts_with("sha256:"));
+    assert_eq!(files[1]["path"], "src/b.txt");
+    assert_eq!(files[1]["total_lines"], 3);
+
+    // A missing entry is reported per file instead of failing the batch.
+    let partial = op(
+        "2",
+        "file.read_many",
+        json!({"paths": ["a.txt", "missing.txt"]}),
+    );
+    let r2 = run_server(&partial, &workspace).remove(0);
+    assert_eq!(r2["ok"], true, "{r2}");
+    assert_eq!(r2["data"]["errors"], 1);
+    assert!(r2["data"]["files"][1]["error"].is_string());
+
+    // An empty list is a bad argument, not an empty success.
+    let empty = op("3", "file.read_many", json!({"paths": []}));
+    let r3 = run_server(&empty, &workspace).remove(0);
+    assert_eq!(r3["ok"], false);
+    assert_eq!(r3["error"]["code"], "E_BAD_ARG");
+
+    let _ = std::fs::remove_dir_all(workspace);
+}
+
+#[test]
 fn file_replace_exact_ambiguous_match() {
     let workspace = std::env::temp_dir().join(format!("vs-1a-{}", uuid::Uuid::new_v4()));
     std::fs::create_dir_all(&workspace).unwrap();

@@ -3,6 +3,14 @@
 ## Unreleased
 
 ### Added
+- `file.read_many`: read up to 8 files in one call, each entry carrying its own
+  `content_hash` / `total_lines` / line window; a missing path is reported in its
+  own entry instead of failing the batch. It gives an agent the single call raw
+  shell gets from `type a & type b`, instead of N separate `file.view` calls.
+  Exposed to the live benchmark as the `read_files` tool.
+- Live runner: `--exclude-tools` (hide a tool from condition D to A/B it on the
+  same model) and an `api_error` flag on every row, so an upstream outage can
+  never be averaged into the benchmark as a 0-tool / 0-token data point.
 - Live runner sampling controls: `--temperature` (default 0), `--seed`, and
   `--repeat N`; every row carries `run_index` and `live_config` records all
   three, so a live result can be repeated and quoted with a spread instead of a

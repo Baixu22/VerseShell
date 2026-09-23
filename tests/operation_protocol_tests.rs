@@ -92,7 +92,7 @@ fn runtime_handshake_is_registered_and_reports_enforced_allow_list() {
     assert!(response["data"]["operation_catalog"]["digest"]
         .as_str()
         .is_some_and(|digest| digest.starts_with("sha256:")));
-    assert_eq!(response["data"]["operation_catalog"]["count"], 31);
+    assert_eq!(response["data"]["operation_catalog"]["count"], 32);
     assert!(response["data"]["features"]
         .as_array()
         .is_some_and(|features| features.contains(&json!("process_lifecycle"))));

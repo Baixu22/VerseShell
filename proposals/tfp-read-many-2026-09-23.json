@@ -1,0 +1,269 @@
+{
+  "proposal_id": "TFP-read-many-2026-09-23",
+  "session_id": "ses_verseshell-tf-live3-2026-09-23",
+  "rationale": "用户要求「复测」。上一轮的复测结论是 D 的工具调用数是 A 的 2.12 倍、token 2.24 倍，并指出最大结构来源是「A 一条命令读 3 个文件（48 token），D 要 3 次 file.view（约 165 token）」——即缺多文件读取算子（TF-0045）。本轮先实现该算子并让 live harness 暴露它，再用与上一轮完全相同的口径（temperature=0、seeds 42/43/44、max_turns=8、3 次重复）复测，看工具调用与 token 是否真的下降。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "re-measure",
+      "node": {
+        "title": "复测：新增多文件读取算子后按同口径重跑 live 对比",
+        "kind": "global_task",
+        "status": "in_progress",
+        "display_order": 70,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.75,
+        "summary": "实现 file.read_many（一次读最多 8 个文件，逐文件返回 content_hash/total_lines/窗口，缺文件按条报错而不整批失败），在 live harness 里以 read_files 暴露并做同样的投影瘦身；然后用与上一轮相同的口径（temperature=0、seeds 42/43/44、max_turns=8、3 次重复）复测，与上一轮基线（A 3.1/154.6、D 6.53/345.3，比值 2.12/2.24）同口径对比。",
+        "purpose": "验证「ACI 工具调用数偏高」里有多少来自缺少批量读取这一结构原因。",
+        "desired_outcomes": [
+          "file.read_many 进入 ACI 目录（catalog 计数与断言同步）、有测试、有文档",
+          "live harness 暴露 read_files，且其观察投影与 file.view 同样扁平",
+          "同口径 3 次复测结果与上一轮基线逐项对比",
+          "C13 更新为复测后的数字；门禁与测试全绿；改动已提交"
+        ],
+        "acceptance_criteria": [
+          "cargo test 全绿（含 read_many 用例与 catalog 计数 32）",
+          "冒烟确认模型确实调用了 read_files（轨迹里出现 file.read_many）",
+          "复测产物含 live_config（temperature/seed/repeat）与 run_index，且 C12 判定 fresh",
+          "对比结论写进 C13（含「工具数是否下降、下降多少」）"
+        ],
+        "non_goals": [
+          "不改 file.view / lines 的对外形状（消费者兼容）",
+          "不为了好看调整成功判定或 token 口径"
+        ],
+        "execution_hints": ["先冒烟确认工具被使用，再跑 3 次全量；口径必须与上一轮一致"],
+        "next_action": "冒烟确认 read_files 被调用后，跑 3 次全量复测。",
+        "alignment": {
+          "user_goal": "复测",
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "why_this_task": "TF-0045 记录的正是工具调用数偏高的结构原因，且上一轮已给出同口径基线",
+          "why_not_enough": "仍是单模型；若模型不用新工具则结论不变",
+          "validation_plan": ["cargo test", "冒烟看轨迹", "3 次重复对比", "claim_gate exit 0"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live3-2026-09-23"],
+        "evidence": [
+          "上一轮基线：A 3.1 tools / 154.6 tok，D 6.53 tools / 345.3 tok，比值 2.12 / 2.24（3 次重复，temperature=0，seeds 42/43/44）",
+          "A 侧读取：run_command `type greet.py & type tests\\test_greet.py & type TASK.md` = 48 token；D 侧同内容需 3 次 file.view ≈165 token"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "impl-read-many",
+      "node": {
+        "title": "步骤28：实现 file.read_many 算子",
+        "kind": "task",
+        "status": "done",
+        "display_order": 1023,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.9,
+        "summary": "新增 file.read_many：一次读最多 8 个文件，逐文件返回 content_hash / total_lines / start_line / lines；单个文件缺失或越界只在对应条目里报 error，不让整批失败；空 paths 与超限返回 E_BAD_ARG。schema、handler、catalog 计数断言、文档与测试同步。",
+        "purpose": "给 agent 一个「一次读完这个任务涉及的几个文件」的原语，替代 N 次 file.view。",
+        "acceptance_criteria": [
+          "src/ops/file.rs 注册 file.read_many（capability file.read，effect fs.read）",
+          "tests/aci_1_0_ops_tests.rs::file_read_many_reads_several_files_with_hashes 覆盖正常/部分缺失/空列表",
+          "tests/operation_protocol_tests.rs 的 catalog 计数由 31 更新为 32",
+          "docs/1.0-aci.md 与 README 的 op 表同步"
+        ],
+        "non_goals": ["不做递归/glob 读取（保持显式路径，便于审计）"],
+        "alignment": {
+          "user_goal": "减少 D 的工具调用数",
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "why_this_task": "它是工具调用数偏高的直接结构原因",
+          "why_not_enough": "模型是否采用还需实测",
+          "validation_plan": ["cargo test", "冒烟轨迹"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live3-2026-09-23"],
+        "evidence": [
+          "src/ops/file.rs：schema_read_many + execute_read_many + read_many_entry（上限 MAX_READ_MANY_PATHS=8）",
+          "cargo test --test aci_1_0_ops_tests --test operation_protocol_tests → 10 passed / 9 passed（含新用例 file_read_many_reads_several_files_with_hashes）",
+          "cargo test 全量 → exit 0（16 个 test binary 全绿）",
+          "docs/1.0-aci.md File 表与 README 两处 op 清单已加 file.read_many"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "expose-read-files",
+      "node": {
+        "title": "步骤29：live harness 暴露 read_files 并做同样投影",
+        "kind": "task",
+        "status": "done",
+        "display_order": 1024,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.9,
+        "summary": "在 live harness 里新增 read_files 工具（映射到 file.read_many），描述里明确「一次读多个文件、缺失按条报错、不知道读哪个时用 search_content」；format_aci_result 对 data.files 做与 file.view 相同的行扁平化，并保留逐文件 error，避免新算子反而更啰嗦。",
+        "purpose": "让模型有机会用它，且用了之后观察不膨胀。",
+        "acceptance_criteria": [
+          "ACI_OP_MAP 增加 read_files → file.read_many",
+          "ACI_TOOLS 增加 read_files（paths 必填、window 可选）",
+          "format_aci_result 对 files 条目做扁平化（lines 纯文本 + start_line）并保留 error"
+        ],
+        "non_goals": ["不改其它工具的语义"],
+        "alignment": {
+          "user_goal": "复测有效性",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "工具不暴露或投影不瘦，复测就测不到变化",
+          "why_not_enough": "仍需冒烟确认模型采用",
+          "validation_plan": ["冒烟轨迹里出现 file.read_many"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live3-2026-09-23"],
+        "evidence": [
+          "bench/aci/runners/live_agent_loop.py：ACI_OP_MAP 增加 \"read_files\": \"file.read_many\"；ACI_TOOLS 增加 read_files 定义",
+          "format_aci_result 新增 files 分支：逐条保留 path/content_hash/total_lines/start_line/error，lines ≤10 时扁平化"
+        ]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "run-and-compare",
+      "node": {
+        "title": "步骤30：同口径 3 次复测与 C13 更新",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1025,
+        "priority": 1,
+        "difficulty": "medium",
+        "confidence": 0.75,
+        "summary": "用与上一轮完全相同的口径（temperature=0、seeds 42/43/44、max_turns=8、3 次重复）复测，合并为一份产物，与上一轮基线（A 3.1/154.6、D 6.53/345.3）逐项对比，并把结论写进 C13（工具数与 token 是否下降、下降多少、是否改变方向）。",
+        "purpose": "给出「加了批量读取之后，D 到底省了多少」的可引用结论。",
+        "acceptance_criteria": [
+          "冒烟确认 read_files 被使用（否则如实记录「模型未采用」）",
+          "3 次复测的均值/区间与上一轮同口径对比表",
+          "C13 更新；若结论未变也要如实写明",
+          "复测产物 C12 fresh，claim_gate exit 0"
+        ],
+        "non_goals": ["不做多模型对比"],
+        "alignment": {
+          "user_goal": "复测",
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "why_this_task": "这是本轮的目的",
+          "why_not_enough": "单模型单端点",
+          "validation_plan": ["对比表", "claim_gate exit 0"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live3-2026-09-23"]
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-commit",
+      "node": {
+        "title": "步骤31：森林收口与提交",
+        "kind": "task",
+        "status": "ready",
+        "display_order": 1026,
+        "priority": 1,
+        "difficulty": "low",
+        "confidence": 0.85,
+        "summary": "按根策略 §6 收尾：证据回写各节点，proposal-save → proposal-apply --yes → validate → export，提交算子、harness、复测产物与声明改动（确认无凭据入库）。",
+        "purpose": "让本轮成果落盘可追溯。",
+        "acceptance_criteria": [
+          "各节点 evidence 已回写",
+          "proposal-save → apply --yes → validate → export 全部成功",
+          "git commit 覆盖全部改动；git grep 无 key；提交后工作区干净"
+        ],
+        "non_goals": ["不改写 git 历史、不 force push"],
+        "alignment": {
+          "user_goal": "开发流程与证据链完整",
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "why_this_task": "算子与产物必须一起落盘",
+          "why_not_enough": "提交只是载体",
+          "validation_plan": ["git log/show", "git status 干净"]
+        },
+        "source_sessions": ["ses_verseshell-tf-live3-2026-09-23"]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "impl-read-many",
+      "to": "re-measure",
+      "type": "child_of",
+      "edge": { "reason": "算子实现是复测前提", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "expose-read-files",
+      "to": "re-measure",
+      "type": "child_of",
+      "edge": { "reason": "harness 暴露是复测前提", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "run-and-compare",
+      "to": "re-measure",
+      "type": "child_of",
+      "edge": { "reason": "复测与对比是主交付", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "re-measure",
+      "type": "child_of",
+      "edge": { "reason": "收口与落盘是最后一步", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "expose-read-files",
+      "to": "impl-read-many",
+      "type": "depends_on",
+      "edge": { "reason": "先有算子再暴露", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "run-and-compare",
+      "to": "expose-read-files",
+      "type": "depends_on",
+      "edge": { "reason": "暴露后才能测到变化", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "close-commit",
+      "to": "run-and-compare",
+      "type": "depends_on",
+      "edge": { "reason": "收口要等复测产物落地", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "re-measure",
+      "to": "TF-0045",
+      "type": "derived_from",
+      "edge": { "reason": "本轮的实现正是 TF-0045 记录的产品侧缺口（多文件读取部分）", "confidence": 0.9 }
+    },
+    {
+      "action": "add_edge",
+      "from": "re-measure",
+      "to": "TF-0041",
+      "type": "related_to",
+      "edge": { "reason": "承接 live 复测严谨化轮，使用同一口径", "confidence": 0.85 }
+    },
+    {
+      "action": "update_node",
+      "id": "impl-read-many",
+      "fields": { "display_order": 10 }
+    },
+    {
+      "action": "update_node",
+      "id": "expose-read-files",
+      "fields": { "display_order": 20 }
+    },
+    {
+      "action": "update_node",
+      "id": "run-and-compare",
+      "fields": { "display_order": 30 }
+    },
+    {
+      "action": "update_node",
+      "id": "close-commit",
+      "fields": { "display_order": 40 }
+    }
+  ]
+}
