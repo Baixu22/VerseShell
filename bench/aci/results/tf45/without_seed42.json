@@ -1,0 +1,1759 @@
+{
+  "schema": "verseshell.aci_bench.results/v1",
+  "task_set_version": "1.1.0",
+  "seed": 42,
+  "mode": "live",
+  "generated_at": "2026-09-23T07:58:19.116465+00:00",
+  "git_rev": "6782cc448b85e9027e8b111388907065db3c38be",
+  "evidence": {
+    "globs": [
+      "src/**/*.rs",
+      "Cargo.toml",
+      "bench/aci/tasks/*.json",
+      "bench/aci/fixtures/**/*",
+      "bench/aci/runners/live_agent_loop.py"
+    ],
+    "fingerprint": "1f087668346724e2f56d62de379436bcc3c6279251199e51e89de65315f1f35d"
+  },
+  "live_config": {
+    "model": "sn-glm-5-3-flash",
+    "api_base": "http://127.0.0.1:3065/v1",
+    "caps": "sys.read,file.read,file.write,file.delete,shell.exec,git.read,git.write,proc.list,proc.spawn,proc.kill,crypto.hash",
+    "max_turns": 8,
+    "temperature": 0.0,
+    "seed": 42,
+    "repeat": 1,
+    "exclude_tools": [
+      "read_files"
+    ],
+    "tasks": [
+      "rust_fix_compile_error",
+      "rust_add_unit_test",
+      "rust_search_and_edit",
+      "python_fix_pytest_fail",
+      "python_edit_and_retest",
+      "python_noisy_install_summary",
+      "ts_fix_type_error",
+      "ts_package_script_fail",
+      "windows_path_normalize_edit",
+      "windows_batch_capture_diag"
+    ],
+    "conditions": [
+      "raw_shell",
+      "verseshell_aci"
+    ]
+  },
+  "rows": [
+    {
+      "task_id": "rust_fix_compile_error",
+      "condition": "raw_shell",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 3,
+      "observation_tokens": 117,
+      "elapsed_ms": 16611,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1741",
+        "llm_completion_tokens=302"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type src\\lib.rs && type Cargo.toml && type TASK.md"
+          },
+          "observation_tokens": 46,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"open(r'src\\lib.rs','w').write('pub fn add(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\" && type src\\lib.rs"
+          },
+          "observation_tokens": 14,
+          "condition": "raw_shell",
+          "elapsed_ms": 37
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cargo check"
+          },
+          "observation_tokens": 49,
+          "condition": "raw_shell",
+          "elapsed_ms": 134
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed return type in src/lib.rs from String to i32; cargo check passes."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1741,
+      "llm_completion_tokens": 302,
+      "turns": 4,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "rust_fix_compile_error",
+      "condition": "verseshell_aci",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 5,
+      "observation_tokens": 237,
+      "elapsed_ms": 36736,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=2812",
+        "llm_completion_tokens=356"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 38,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 300,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "Cargo.toml"
+          },
+          "observation_tokens": 44,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 303,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "expected_hash": "sha256:471dfab5b79f216a",
+            "new": "pub fn add(a: i32, b: i32) -> i32 {",
+            "old": "pub fn add(a: i32, b: i32) -> String {",
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 295,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "check"
+            ]
+          },
+          "observation_tokens": 69,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 1920,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cmd",
+              "/c",
+              "cargo check 2>&1"
+            ],
+            "profile": "none"
+          },
+          "observation_tokens": 53,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 476,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed src/lib.rs return type from String to i32; cargo check passes with no errors"
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 2812,
+      "llm_completion_tokens": 356,
+      "turns": 5,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "condition": "raw_shell",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 3,
+      "observation_tokens": 196,
+      "elapsed_ms": 28895,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1844",
+        "llm_completion_tokens=328"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type Cargo.toml & type src\\lib.rs & type TASK.md"
+          },
+          "observation_tokens": 47,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"s=open(r'src\\lib.rs').read(); s+='\\n#[cfg(test)]\\nmod tests {\\n    use super::*;\\n\\n    #[test]\\n    fn test_add() {\\n        assert_eq!(add(2, 3), 5);\\n        assert_eq!(add(-1, 1), 0);\\n    }\\n}\\n'; open(r'src\\lib.rs','w').write(s)\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 37
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cargo test"
+          },
+          "observation_tokens": 139,
+          "condition": "raw_shell",
+          "elapsed_ms": 594
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Added a #[cfg(test)] unit test for add() in src/lib.rs; cargo test passes (1 passed, 0 failed)."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1844,
+      "llm_completion_tokens": 328,
+      "turns": 4,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "condition": "verseshell_aci",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 9,
+      "observation_tokens": 449,
+      "elapsed_ms": 30185,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=7666",
+        "llm_completion_tokens=862"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 37,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 295,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "Cargo.toml"
+          },
+          "observation_tokens": 44,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 301,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "TASK.md"
+          },
+          "observation_tokens": 40,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 293,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "new": "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_add() {\n        assert_eq!(add(2, 3), 5);\n        assert_eq!(add(-1, 1), 0);\n        assert_eq!(add(0, 0), 0);\n    }\n}",
+            "old": "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}",
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 27,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 291,
+          "aci_ok": false
+        },
+        {
+          "op": "file.write",
+          "args": {
+            "content": "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_add() {\n        assert_eq!(add(2, 3), 5);\n        assert_eq!(add(-1, 1), 0);\n        assert_eq!(add(0, 0), 0);\n    }\n}\n",
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 318,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "test"
+            ],
+            "profile": "cargo"
+          },
+          "observation_tokens": 138,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 332,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "rustup",
+              "show"
+            ],
+            "profile": "none"
+          },
+          "observation_tokens": 86,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 338,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cmd",
+              "/c",
+              "where cargo && cargo --version"
+            ],
+            "profile": "none"
+          },
+          "observation_tokens": 27,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 417,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "rustup",
+              "run",
+              "stable",
+              "cargo",
+              "test"
+            ],
+            "profile": "cargo"
+          },
+          "observation_tokens": 17,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 696,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Added a #[cfg(test)] unit test for add() in src/lib.rs covering positive, negative, and zero cases; cargo test passes (1 passed, 0 failed). Note: had to invoke via `rustup run stable cargo test` due to a broken rustup shim in PATH."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 7666,
+      "llm_completion_tokens": 862,
+      "turns": 8,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "condition": "raw_shell",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 2,
+      "observation_tokens": 272,
+      "elapsed_ms": 6160,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1504",
+        "llm_completion_tokens=246"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir /s /b && type TASK.md && type Cargo.toml && type src\\lib.rs"
+          },
+          "observation_tokens": 129,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "cd /d C:\\Users\\27933\\AppData\\Local\\Temp\\aci-live-rust_search_and_edit-u3w0zc1o && python -c \"open(r'src\\lib.rs','w').write('pub fn sum(a: i32, b: i32) -> i32 {\\n    a + b\\n}\\n')\" && cargo test"
+          },
+          "observation_tokens": 135,
+          "condition": "raw_shell",
+          "elapsed_ms": 342
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Implemented sum(a, b) in src/lib.rs to return a + b; cargo test compiles and passes."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1504,
+      "llm_completion_tokens": 246,
+      "turns": 3,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "condition": "verseshell_aci",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": false,
+      "success_reason": "file_contains src/lib.rs",
+      "tool_calls": 11,
+      "observation_tokens": 491,
+      "elapsed_ms": 84012,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=6574",
+        "llm_completion_tokens=668"
+      ],
+      "trajectory": [
+        {
+          "op": "repo.summary",
+          "args": {},
+          "observation_tokens": 14,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 333,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "TASK.md"
+          },
+          "observation_tokens": 37,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 299,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 42,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 303,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "Cargo.toml"
+          },
+          "observation_tokens": 44,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 302,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "expected_hash": "9e7e6da826ccd2c0",
+            "new": "    a + b",
+            "old": "    // TODO(fix-me)\n    0",
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 27,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 284,
+          "aci_ok": false
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "new": "    a + b",
+            "old": "    0",
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 292,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 43,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 286,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "expected_hash": "23b04d49436a8746",
+            "new": "pub fn sum(a: i32, b: i32) -> i32 {",
+            "old": "pub fn sum(a: i32, b: i32) -> i32 {\n    // TODO(fix-me)",
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 27,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 294,
+          "aci_ok": false
+        },
+        {
+          "op": "file.write",
+          "args": {
+            "content": "pub fn sum(a: i32, b: i32) -> i32 {\n    a + b\n}\n",
+            "path": "src/lib.rs"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 287,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "test"
+            ],
+            "profile": "cargo"
+          },
+          "observation_tokens": 138,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 335,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "check"
+            ],
+            "profile": "cargo"
+          },
+          "observation_tokens": 69,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 1473,
+          "aci_ok": false
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": false,
+      "llm_prompt_tokens": 6574,
+      "llm_completion_tokens": 668,
+      "turns": 8,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "python_fix_pytest_fail",
+      "condition": "raw_shell",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "file_contains mathlib.py",
+      "tool_calls": 2,
+      "observation_tokens": 72,
+      "elapsed_ms": 26136,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1050",
+        "llm_completion_tokens=209"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type mathlib.py & type TASK.md & type tests\\test_math.py"
+          },
+          "observation_tokens": 37,
+          "condition": "raw_shell",
+          "elapsed_ms": 20
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"open('mathlib.py','w').write('def add(a, b):\\n    return a + b\\n')\" && python -m pytest -q"
+          },
+          "observation_tokens": 27,
+          "condition": "raw_shell",
+          "elapsed_ms": 635
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed mathlib.add to return a+b instead of a*b; pytest passes."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1050,
+      "llm_completion_tokens": 209,
+      "turns": 3,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "python_fix_pytest_fail",
+      "condition": "verseshell_aci",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "file_contains mathlib.py",
+      "tool_calls": 6,
+      "observation_tokens": 247,
+      "elapsed_ms": 68873,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=3902",
+        "llm_completion_tokens=625"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "mathlib.py"
+          },
+          "observation_tokens": 33,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 289,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "tests/test_math.py"
+          },
+          "observation_tokens": 43,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 295,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "expected_hash": "4fb46b3507c096ae",
+            "new": "    return a + b",
+            "old": "    return a * b",
+            "path": "mathlib.py"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 292,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "pytest",
+              "-q"
+            ],
+            "profile": "pytest"
+          },
+          "observation_tokens": 100,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 916,
+          "aci_ok": false
+        },
+        {
+          "op": "file.write",
+          "args": {
+            "content": "",
+            "path": "conftest.py"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 296,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "pytest",
+              "-q"
+            ],
+            "profile": "pytest"
+          },
+          "observation_tokens": 13,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 869,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed add() in mathlib.py to return a+b (was a*b) and added empty root conftest.py so pytest can import mathlib; pytest now passes (1 passed)."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 3902,
+      "llm_completion_tokens": 625,
+      "turns": 6,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "python_edit_and_retest",
+      "condition": "raw_shell",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "file_contains greet.py",
+      "tool_calls": 3,
+      "observation_tokens": 70,
+      "elapsed_ms": 24743,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1446",
+        "llm_completion_tokens=240"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type greet.py & type tests\\test_greet.py"
+          },
+          "observation_tokens": 33,
+          "condition": "raw_shell",
+          "elapsed_ms": 19
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"open('greet.py','w').write('def greet(name):\\n    return f\\\"Hello, {name}!\\\"\\n')\""
+          },
+          "observation_tokens": 2,
+          "condition": "raw_shell",
+          "elapsed_ms": 36
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -m pytest tests/ -q"
+          },
+          "observation_tokens": 27,
+          "condition": "raw_shell",
+          "elapsed_ms": 554
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Updated greet() to return 'Hello, {name}!' and verified with passing pytest run."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1446,
+      "llm_completion_tokens": 240,
+      "turns": 4,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "python_edit_and_retest",
+      "condition": "verseshell_aci",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "file_contains greet.py",
+      "tool_calls": 4,
+      "observation_tokens": 129,
+      "elapsed_ms": 27320,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1910",
+        "llm_completion_tokens=334"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "greet.py"
+          },
+          "observation_tokens": 35,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 297,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "tests/test_greet.py"
+          },
+          "observation_tokens": 48,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 295,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "expected_hash": "3ab4a6cd647afe33",
+            "new": "    return f\"Hello, {name}!\"",
+            "old": "    return f\"Hi {name}\"",
+            "path": "greet.py"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 291,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "python",
+              "-m",
+              "pytest",
+              "-q"
+            ],
+            "profile": "pytest"
+          },
+          "observation_tokens": 13,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 863,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Updated greet() in greet.py to return 'Hello, {name}!' (was 'Hi {name}'); pytest passes (1 passed)."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1910,
+      "llm_completion_tokens": 334,
+      "turns": 4,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "python_noisy_install_summary",
+      "condition": "raw_shell",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": false,
+      "success_reason": "file_contains SUMMARY.txt",
+      "tool_calls": 3,
+      "observation_tokens": 180,
+      "elapsed_ms": 9334,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1882",
+        "llm_completion_tokens=283"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir && type requirements.txt && type TASK.md"
+          },
+          "observation_tokens": 138,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "pip install -r requirements.txt -q && python -c \"import six; print('six OK', six.__version__)\""
+          },
+          "observation_tokens": 6,
+          "condition": "raw_shell",
+          "elapsed_ms": 1388
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"open('SUMMARY.txt','w').write('Installed 1 package from requirements.txt: six==1.16.0 (no transitive dependencies); verified importable.')\" && type SUMMARY.txt"
+          },
+          "observation_tokens": 28,
+          "condition": "raw_shell",
+          "elapsed_ms": 36
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Installed 1 package from requirements.txt (six==1.16.0), verified importable, and wrote one-line dependency summary to SUMMARY.txt"
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1882,
+      "llm_completion_tokens": 283,
+      "turns": 4,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "python_noisy_install_summary",
+      "condition": "verseshell_aci",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": false,
+      "success_reason": "file_contains SUMMARY.txt",
+      "tool_calls": 4,
+      "observation_tokens": 120,
+      "elapsed_ms": 25930,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1671",
+        "llm_completion_tokens=268"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "TASK.md"
+          },
+          "observation_tokens": 48,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 285,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "requirements.txt"
+          },
+          "observation_tokens": 27,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 291,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "pip",
+              "install",
+              "-r",
+              "requirements.txt"
+            ],
+            "profile": "npm_install"
+          },
+          "observation_tokens": 12,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 1673,
+          "aci_ok": true
+        },
+        {
+          "op": "file.write",
+          "args": {
+            "content": "Installed 1 package from requirements.txt (six==1.16.0).\n",
+            "path": "SUMMARY.txt"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 294,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Installed requirements (1 package: six==1.16.0) and wrote one-line dependency summary to SUMMARY.txt."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1671,
+      "llm_completion_tokens": 268,
+      "turns": 4,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "ts_fix_type_error",
+      "condition": "raw_shell",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": false,
+      "success_reason": "file_contains src/index.ts",
+      "tool_calls": 3,
+      "observation_tokens": 413,
+      "elapsed_ms": 73057,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=2669",
+        "llm_completion_tokens=333"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir && type TASK.md && type package.json && type tsconfig.json && type src\\index.ts"
+          },
+          "observation_tokens": 247,
+          "condition": "raw_shell",
+          "elapsed_ms": 8
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"open(r'src\\index.ts','w').write('export function add(a: number, b: number): number {\\n  const x: number = a + b;\\n  return x;\\n}\\n')\" && npx tsc --noEmit"
+          },
+          "observation_tokens": 138,
+          "condition": "raw_shell",
+          "elapsed_ms": 21955
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "npm install && npx tsc --noEmit"
+          },
+          "observation_tokens": 20,
+          "condition": "raw_shell",
+          "elapsed_ms": 26067
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed type error in src/index.ts (const x: string -> number); tsc --noEmit passes with no errors."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 2669,
+      "llm_completion_tokens": 333,
+      "turns": 4,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "ts_fix_type_error",
+      "condition": "verseshell_aci",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": false,
+      "success_reason": "file_contains src/index.ts",
+      "tool_calls": 12,
+      "observation_tokens": 518,
+      "elapsed_ms": 50200,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=7433",
+        "llm_completion_tokens=664"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/index.ts"
+          },
+          "observation_tokens": 49,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 298,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "package.json"
+          },
+          "observation_tokens": 16,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 301,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "tsconfig.json"
+          },
+          "observation_tokens": 71,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 296,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "TASK.md"
+          },
+          "observation_tokens": 38,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 293,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "new": "  const x: number = a + b;",
+            "old": "  const x: string = a + b;",
+            "path": "src/index.ts"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 289,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "npx",
+              "tsc",
+              "--noEmit"
+            ]
+          },
+          "observation_tokens": 48,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 300,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "node",
+              "node_modules/typescript/bin/tsc",
+              "--noEmit"
+            ]
+          },
+          "observation_tokens": 155,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 363,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "tsc",
+              "--noEmit"
+            ]
+          },
+          "observation_tokens": 36,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 312,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "npm",
+              "install",
+              "--no-save",
+              "typescript"
+            ]
+          },
+          "observation_tokens": 48,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 287,
+          "aci_ok": false
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "package.json"
+          },
+          "observation_tokens": 16,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 308,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "npm.cmd",
+              "install",
+              "--no-save",
+              "typescript"
+            ]
+          },
+          "observation_tokens": 13,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 20050,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "node",
+              "node_modules/typescript/bin/tsc",
+              "--noEmit"
+            ]
+          },
+          "observation_tokens": 3,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 2018,
+          "aci_ok": true
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": false,
+      "llm_prompt_tokens": 7433,
+      "llm_completion_tokens": 664,
+      "turns": 8,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "ts_package_script_fail",
+      "condition": "raw_shell",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "file_contains package.json",
+      "tool_calls": 2,
+      "observation_tokens": 72,
+      "elapsed_ms": 19393,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1016",
+        "llm_completion_tokens=235"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type package.json && echo --- && type TASK.md"
+          },
+          "observation_tokens": 47,
+          "condition": "raw_shell",
+          "elapsed_ms": 6
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "node -e \"const fs=require('fs');fs.writeFileSync('package.json',JSON.stringify({name:'bench-ts-script',version:'1.0.0',private:true,scripts:{test:'node -e \\\"process.exit(0)\\\"'}},null,2)+'\\n')\" && npm test"
+          },
+          "observation_tokens": 17,
+          "condition": "raw_shell",
+          "elapsed_ms": 365
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Fixed package.json test script to exit 0; npm test passes."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1016,
+      "llm_completion_tokens": 235,
+      "turns": 3,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "ts_package_script_fail",
+      "condition": "verseshell_aci",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "file_contains package.json",
+      "tool_calls": 5,
+      "observation_tokens": 205,
+      "elapsed_ms": 439782,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=2698",
+        "llm_completion_tokens=403"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "package.json"
+          },
+          "observation_tokens": 68,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 297,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "TASK.md"
+          },
+          "observation_tokens": 34,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 305,
+          "aci_ok": true
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "expected_hash": "sha256:3c340a008ea26464",
+            "new": "    \"test\": \"node -e \\\"process.exit(0)\\\"\"",
+            "old": "    \"test\": \"node -e \\\"process.exit(1)\\\"\"",
+            "path": "package.json"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 288,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "npm",
+              "test"
+            ]
+          },
+          "observation_tokens": 48,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 291,
+          "aci_ok": false
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "npm.cmd",
+              "test"
+            ]
+          },
+          "observation_tokens": 22,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 610,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Changed package.json test script from `node -e \"process.exit(1)\"` to `node -e \"process.exit(0)\"`; npm test now exits 0."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 2698,
+      "llm_completion_tokens": 403,
+      "turns": 5,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "windows_path_normalize_edit",
+      "condition": "raw_shell",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "file_equals out/result.txt",
+      "tool_calls": 2,
+      "observation_tokens": 158,
+      "elapsed_ms": 15710,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1359",
+        "llm_completion_tokens=277"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir && echo ---TASK--- && type TASK.md && echo ---README--- && type README.md"
+          },
+          "observation_tokens": 141,
+          "condition": "raw_shell",
+          "elapsed_ms": 13
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"from pathlib import Path; p = Path('out') / 'result.txt'; p.parent.mkdir(parents=True, exist_ok=True); p.write_text('OK'); print('written:', p)\" && type out\\result.txt"
+          },
+          "observation_tokens": 9,
+          "condition": "raw_shell",
+          "elapsed_ms": 47
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Created out/result.txt containing 'OK' using pathlib for safe mixed path separator handling; verified content via type."
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1359,
+      "llm_completion_tokens": 277,
+      "turns": 3,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "windows_path_normalize_edit",
+      "condition": "verseshell_aci",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "file_equals out/result.txt",
+      "tool_calls": 3,
+      "observation_tokens": 50,
+      "elapsed_ms": 10518,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1088",
+        "llm_completion_tokens=250"
+      ],
+      "trajectory": [
+        {
+          "op": "repo.summary",
+          "args": {},
+          "observation_tokens": 14,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 327,
+          "aci_ok": true
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "python",
+              "-c",
+              "from pathlib import Path; p = Path('out'); p.mkdir(parents=True, exist_ok=True); (p / 'result.txt').write_text('OK')"
+            ],
+            "profile": "none"
+          },
+          "observation_tokens": 3,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 345,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "out/result.txt"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 281,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Created out/ directory and wrote out/result.txt containing 'OK', verified successfully."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1088,
+      "llm_completion_tokens": 250,
+      "turns": 3,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "windows_batch_capture_diag",
+      "condition": "raw_shell",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 3,
+      "observation_tokens": 168,
+      "elapsed_ms": 42392,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1357",
+        "llm_completion_tokens=280"
+      ],
+      "trajectory": [
+        {
+          "op": "run_command",
+          "args": {
+            "command": "dir"
+          },
+          "observation_tokens": 110,
+          "condition": "raw_shell",
+          "elapsed_ms": 7
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "type broken_build.log"
+          },
+          "observation_tokens": 44,
+          "condition": "raw_shell",
+          "elapsed_ms": 9
+        },
+        {
+          "op": "run_command",
+          "args": {
+            "command": "python -c \"open('ERR.txt','w').write('src\\\\main.rs:12')\" && type ERR.txt"
+          },
+          "observation_tokens": 6,
+          "condition": "raw_shell",
+          "elapsed_ms": 37
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Extracted first error location 'src\\main.rs:12' from broken_build.log and wrote it to ERR.txt"
+          },
+          "observation_tokens": 8,
+          "condition": "raw_shell",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1357,
+      "llm_completion_tokens": 280,
+      "turns": 3,
+      "last_error": null,
+      "api_error": false
+    },
+    {
+      "task_id": "windows_batch_capture_diag",
+      "condition": "verseshell_aci",
+      "model": "sn-glm-5-3-flash",
+      "run_index": 0,
+      "success": true,
+      "success_reason": "all ok",
+      "tool_calls": 3,
+      "observation_tokens": 151,
+      "elapsed_ms": 42867,
+      "notes": [
+        "live",
+        "llm_prompt_tokens=1297",
+        "llm_completion_tokens=248"
+      ],
+      "trajectory": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "broken_build.log"
+          },
+          "observation_tokens": 70,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 304,
+          "aci_ok": true
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "TASK.md"
+          },
+          "observation_tokens": 48,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 304,
+          "aci_ok": true
+        },
+        {
+          "op": "file.write",
+          "args": {
+            "content": "src/main.rs:12\n",
+            "path": "ERR.txt"
+          },
+          "observation_tokens": 25,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 297,
+          "aci_ok": true
+        },
+        {
+          "op": "task_complete",
+          "args": {
+            "success": true,
+            "summary": "Extracted first error location from broken_build.log (src\\main.rs:12:5) and wrote \"src/main.rs:12\" to ERR.txt."
+          },
+          "observation_tokens": 8,
+          "condition": "verseshell_aci",
+          "elapsed_ms": 0
+        }
+      ],
+      "optional_verify": null,
+      "weight": 1.0,
+      "agent_declared_success": true,
+      "llm_prompt_tokens": 1297,
+      "llm_completion_tokens": 248,
+      "turns": 3,
+      "last_error": null,
+      "api_error": false
+    }
+  ],
+  "aggregate": {
+    "aggregates": [
+      {
+        "model": "sn-glm-5-3-flash",
+        "condition": "raw_shell",
+        "tasks": 10,
+        "success_rate": 0.6,
+        "avg_tool_calls": 2.6,
+        "avg_observation_tokens": 171.8,
+        "avg_elapsed_ms": 26243.1
+      },
+      {
+        "model": "sn-glm-5-3-flash",
+        "condition": "verseshell_aci",
+        "tasks": 10,
+        "success_rate": 0.6,
+        "avg_tool_calls": 6.2,
+        "avg_observation_tokens": 259.7,
+        "avg_elapsed_ms": 81642.3
+      }
+    ],
+    "n_rows": 20
+  },
+  "comparison": {
+    "comparisons": [
+      {
+        "model": "sn-glm-5-3-flash",
+        "success_rate_A": 0.6,
+        "success_rate_D": 0.6,
+        "success_advantage_D": 0.0,
+        "avg_tool_calls_A": 2.6,
+        "avg_tool_calls_D": 6.2,
+        "tool_call_ratio_D_over_A": 2.3846,
+        "avg_observation_tokens_A": 171.8,
+        "avg_observation_tokens_D": 259.7,
+        "token_ratio_D_over_A": 1.5116,
+        "meets_acceptance": false
+      }
+    ]
+  }
+}

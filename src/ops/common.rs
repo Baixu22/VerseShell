@@ -117,22 +117,71 @@ pub struct HashMismatch {
     pub message: String,
 }
 
+/// Hex characters kept in the compact digest (`hash`) returned by the read ops.
+///
+/// The full `sha256:<64 hex>` digest costs 71 characters per file, and a batched
+/// read pays that cost once per file. A 16-hex-char (64-bit) prefix is enough to
+/// detect a changed file, which is all optimistic concurrency needs.
+pub const HASH_PREFIX_LEN: usize = 16;
+
+/// Shortest prefix accepted from a caller for `expected_hash`.
+///
+/// 8 hex chars = 32 bits, so accepting a wrong-but-matching prefix needs a
+/// 2^-32 collision against the current content — far below the rate at which a
+/// stale read is accepted for unrelated reasons.
+pub const HASH_PREFIX_MIN: usize = 8;
+
+/// Compact change-detection digest: the first [`HASH_PREFIX_LEN`] hex chars of
+/// the sha256 body, without the `sha256:` scheme.
+pub fn short_hash(full: &str) -> String {
+    full.strip_prefix("sha256:")
+        .unwrap_or(full)
+        .chars()
+        .take(HASH_PREFIX_LEN)
+        .collect()
+}
+
+/// Compare a caller-supplied `expected_hash` against the current content.
+///
+/// Accepts the full `sha256:<64 hex>` form, a bare 64-hex digest, or an
+/// unambiguous hex prefix of at least [`HASH_PREFIX_MIN`] characters — which is
+/// what the compact `hash` field of `file.view` / `file.read_range` /
+/// `file.read_many` returns. Prefix matching is what lets the observation carry
+/// a short digest without giving up the stale-write check; full digests still
+/// compare exactly.
 pub fn check_expected_hash(content: &str, expected: Option<&str>) -> Result<(), HashMismatch> {
     let Some(expected) = expected else {
         return Ok(());
     };
     let actual = content_hash_str(content);
-    let expected_norm = if expected.starts_with("sha256:") {
-        expected.to_string()
-    } else {
-        format!("sha256:{expected}")
-    };
-    if actual != expected_norm {
-        let message = format!(
-            "content hash mismatch: expected {expected_norm}, got {actual}"
-        );
+    let actual_hex = actual
+        .strip_prefix("sha256:")
+        .unwrap_or(&actual)
+        .to_ascii_lowercase();
+    let given = expected.trim();
+    let given_hex = given
+        .strip_prefix("sha256:")
+        .unwrap_or(given)
+        .to_ascii_lowercase();
+    let hex_only = !given_hex.is_empty() && given_hex.bytes().all(|b| b.is_ascii_hexdigit());
+    let matches = hex_only
+        && given_hex.len() >= HASH_PREFIX_MIN
+        && given_hex.len() <= actual_hex.len()
+        && actual_hex.starts_with(&given_hex);
+    if !matches {
+        let message = if !hex_only {
+            format!(
+                "content hash mismatch: expected {given} is not a hex sha256 digest or prefix, got {actual}"
+            )
+        } else if given_hex.len() < HASH_PREFIX_MIN {
+            format!(
+                "content hash mismatch: expected prefix {given} is shorter than {HASH_PREFIX_MIN} hex chars, got {actual}"
+            )
+        } else {
+            format!("content hash mismatch: expected {given}, got {actual}")
+        };
         return Err(HashMismatch {
-            expected: expected_norm,
+            expected: given.to_string(),
             actual,
             message,
         });

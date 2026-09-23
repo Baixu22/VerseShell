@@ -131,7 +131,7 @@ pub fn suggested_from_diagnostics(
                     "path": path.clone(),
                     "old": d.found.clone().unwrap_or_else(|| "<code at failure site>".into()),
                     "new": fix,
-                    "expected_hash": "<from file.view content_hash>"
+                    "expected_hash": "<from file.view hash or content_hash>"
                 }),
             });
         } else if let (Some(expected), Some(found)) = (d.expected.as_ref(), d.found.as_ref()) {
@@ -141,7 +141,7 @@ pub fn suggested_from_diagnostics(
                     "path": path.clone(),
                     "old": found,
                     "new": expected,
-                    "expected_hash": "<from file.view content_hash>"
+                    "expected_hash": "<from file.view hash or content_hash>"
                 }),
             });
         }

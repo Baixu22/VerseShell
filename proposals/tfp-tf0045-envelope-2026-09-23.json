@@ -1,0 +1,539 @@
+{
+  "applied_at": "2026-09-23T08:46:04.832655Z",
+  "base_graph_hash": "8440392d6270fb64e2b44ebe8088f65ff4e704919f03f6c7314a2994d31a8a90",
+  "base_summary": {
+    "edge_count": 79,
+    "node_count": 51,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "envelope-round",
+      "node": {
+        "acceptance_criteria": [
+          "读算子在同一个信封里同时给出完整 content_hash 与紧凑 hash，且 expected_hash 接受前缀（单测覆盖：紧凑摘要可用、错前缀仍 E_STALE_HASH、过短前缀被拒、完整摘要仍精确匹配）",
+          "file.read_many 支持每文件窗口与批量预算，越界条目返回 truncated/deferred + next_start_line，且分页可逐行复原原文件",
+          "C14 进入 claim_gate 且 exit 0；replay 产物纳入 C12 新鲜度",
+          "live 复测按上一轮同口径完成两臂 × 3 seeds，C13 更新为实测数字（含失效边界）",
+          "cargo test / claim_gate / readme_claims_check 全绿；森林记录与提交完成"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "token 侧优化 + 复测",
+          "validation_plan": [
+            "固定轨迹复算给确定性 token 差",
+            "cargo test",
+            "同口径 live 两臂 × 3 seeds",
+            "claim_gate exit 0"
+          ],
+          "why_not_enough": "信封优化只解决读取侧；exec.run 仍是 D 的最大单项开销，且批量读取让它上升",
+          "why_this_task": "TF-0045 正是「信封形状未定型」这一条，且上一轮已给出同口径基线"
+        },
+        "confidence": 0.8,
+        "desired_outcomes": [
+          "信封开销用数据定位，而不是凭感觉改形状",
+          "读算子既能按需取窗口、又有批量预算与分页，且不破坏既有消费者",
+          "信封变化有确定性门禁（C14）与可复现复算工具，不靠 live 噪声",
+          "同口径 live 复测给出可引用结论，并如实标注失效边界"
+        ],
+        "difficulty": "medium",
+        "display_order": 100,
+        "evidence": [
+          "组成测量：一次 3 文件 read_many 的模型可见字符中 content 28.4% / sha256 28.0% / JSON 结构 38.3% / path 4.1% / counts 1.2%（27 次真实调用复算）",
+          "固定轨迹复算：37 次冻结读取调用中 33 次忠实复现，4738 → 3690 tokens（−22.1%）；read_many 24/24，4176 → 3254，且新口径合计与 live 实测合计逐位相同",
+          "分页复原：250 行文件按 window=100 逐页读回，3 页 250/250 行逐行一致",
+          "批量预算：8 个 300 行文件默认返回 240 行（上限 240）、max_total_lines=40 返回 40 行（上限 40），两次都可续读",
+          "live 复测：两臂 × 3 seeds 共 120 行、api_error 0；D/A 工具比 1.6354、token 比 1.6888（上一轮 1.748 / 2.443）"
+        ],
+        "execution_hints": [
+          "改信封前先做组成测量，否则会把 token 花在行文本上",
+          "expected_hash 的兼容性必须先写单测再改实现"
+        ],
+        "kind": "global_task",
+        "next_action": "无。剩余 token 缺口见 exec-token-gap 节点。",
+        "non_goals": [
+          "不改 lines 的对外形状（测量显示逐行包装不是主要开销，改它只会破坏消费者）",
+          "不为好看调整成功判定或 token 口径",
+          "不做多模型对比"
+        ],
+        "priority": 1,
+        "purpose": "把「观察信封该长什么样」从猜测变成有测量支撑的决定，并给出可门禁的信封声明。",
+        "source_sessions": [
+          "ses_verseshell-tf0045-envelope-2026-09-23"
+        ],
+        "status": "in_progress",
+        "summary": "用固定轨迹复算定位信封开销，据此实现按需窗口 + 批量预算 + 紧凑摘要（双字段过渡、前缀可匹配），把信封差做成确定性门禁 C14，并保留 lines 形状；随后按上一轮同口径重跑 live 两臂 × 3 seeds 并更新 C13。",
+        "title": "TF-0045 收口：批量读取信封与按需窗口 + 同口径复测"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "impl-windows",
+      "node": {
+        "acceptance_criteria": [
+          "file.read_many 接受 windows[]（按索引与 paths 对齐）与 max_total_lines",
+          "越界条目返回 truncated/deferred + next_start_line，data 给出 lines_returned/max_total_lines/deferred",
+          "tests/aci_1_0_ops_tests.rs::file_read_many_windows_and_total_budget 覆盖每文件窗口、预算截断、预算耗尽三类情形",
+          "docs/1.0-aci.md 与 README 的 op 表同步"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "按需窗口",
+          "validation_plan": [
+            "cargo test",
+            "固定轨迹复算里的分页复原检查"
+          ],
+          "why_not_enough": "小 fixture 上默认预算不触发，收益主要在大文件与最坏情况",
+          "why_this_task": "TF-0045 的 next_action 明确要求按需窗口"
+        },
+        "confidence": 0.9,
+        "difficulty": "medium",
+        "display_order": 1101,
+        "evidence": [
+          "src/ops/file.rs：FileWindow + read_many_entry(path, spec, budget) + execute_read_many 的 overrides/预算累加",
+          "tests/aci_1_0_ops_tests.rs::file_read_many_windows_and_total_budget（12 passed，cargo test exit 0）",
+          "tools/tf45_envelope_replay.py 的 budget_probe：默认 240/240、tight 40/40、分页 250/250 行复原"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不做递归/glob 读取",
+          "不改 file.view / file.read_range 的窗口语义"
+        ],
+        "priority": 1,
+        "purpose": "让 agent 能按行范围取数、并让一次批量读取有硬上限且仍可分页续读。",
+        "source_sessions": [
+          "ses_verseshell-tf0045-envelope-2026-09-23"
+        ],
+        "status": "done",
+        "summary": "file.read_many 新增 windows[]（每文件 start_line/window，按索引与 paths 对齐）与 max_total_lines（默认 240，整批预算）。被自身窗口截断的条目为 truncated，装不进预算的条目为空且 deferred，两者都返回 next_start_line，因此有界批量仍可分页而不是静默丢文件；data 增加 lines_returned/max_total_lines/deferred。",
+        "title": "步骤32：file.read_many 按需窗口与批量预算"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "impl-digest",
+      "node": {
+        "acceptance_criteria": [
+          "file.view / file.read_range / file.read_many 同时返回 content_hash（完整）与 hash（16 位十六进制）",
+          "check_expected_hash 接受完整摘要、裸 64 位摘要、以及 ≥8 位无歧义前缀；错前缀仍 E_STALE_HASH 且带 data.actual_hash",
+          "tests/aci_1_0_ops_tests.rs::expected_hash_accepts_a_compact_digest_prefix 覆盖可用/错前缀/过短/完整四种情形",
+          "旧消费者读 content_hash 不受影响（双字段过渡）"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "token 侧优化",
+          "validation_plan": [
+            "cargo test",
+            "固定轨迹复算"
+          ],
+          "why_not_enough": "前缀匹配把碰撞概率从 2^-256 降到 2^-32（下限 8 位）；16 位返回值为 2^-64",
+          "why_this_task": "逐文件完整摘要在一次 3 文件批量读取里占模型可见字符的 28.0%"
+        },
+        "confidence": 0.85,
+        "difficulty": "medium",
+        "display_order": 1102,
+        "evidence": [
+          "src/ops/common.rs：HASH_PREFIX_LEN=16 / HASH_PREFIX_MIN=8 / short_hash / 前缀匹配版 check_expected_hash",
+          "src/ops/file.rs：file.view、file.read_range、file.read_many 的条目都增加 hash",
+          "固定轨迹复算：read_many 4740 → 3708 tokens（−21.8%），file.view 90 → 48（−46.7%）",
+          "cargo test 全量 exit 0（282 passed）"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不改 content_hash 的字段名与完整值（双字段过渡，不破坏消费者）",
+          "不改 file.hash（它的用途就是给出完整摘要）"
+        ],
+        "priority": 1,
+        "purpose": "把「变更检测 token」和「完整摘要」分开：观察只带短摘要，写入校验仍失败关闭。",
+        "source_sessions": [
+          "ses_verseshell-tf0045-envelope-2026-09-23"
+        ],
+        "status": "done",
+        "summary": "读算子在同一信封里同时返回完整 content_hash 与 16 位紧凑 hash；expected_hash 改为前缀匹配（接受完整摘要、裸 64 位摘要、≥8 位无歧义前缀），错误信息区分「非十六进制」「过短」「不匹配」三种原因。安全强度不变：错前缀仍失败关闭并给出 data.actual_hash 供一步重试。",
+        "title": "步骤33：读取信封紧凑摘要与前缀 expected_hash"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "replay-claim",
+      "node": {
+        "acceptance_criteria": [
+          "tools/tf45_envelope_replay.py 固定 live 运行里模型真实发出的读取调用，用当前二进制重跑并做两种投影",
+          "只有旧投影能复现 live 记录 token 数的调用才计入，其余逐条列出「复算值 vs live 记录值」",
+          "C14 进入 claim_gate（token_savings >= 0.15，且无截断、预算有界、分页可复原、coverage > 0）",
+          "eval/tf45_envelope_replay.json 纳入 C12 新鲜度"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "可复现证据",
+          "validation_plan": [
+            "python tools/tf45_envelope_replay.py",
+            "python tools/claim_gate.py"
+          ],
+          "why_not_enough": "它测的是观察面，不是模型行为",
+          "why_this_task": "live 单跑噪声大，无法隔离单一信封改动"
+        },
+        "confidence": 0.85,
+        "difficulty": "medium",
+        "display_order": 1103,
+        "evidence": [
+          "tools/tf45_envelope_replay.py：冻结调用 + 双投影 + 保真度判据 + 预算/分页探针",
+          "eval/tf45_envelope_replay.json：33/37 次忠实复现，4738 → 3690 tokens（−22.1%）",
+          "claim_gate：C14 value=0.2224 threshold>=0.15 PASS；C12 覆盖 5 份产物",
+          "tools/claim_gate.py：EVIDENCE_ARTIFACTS 增加 eval/tf45_envelope_replay.json"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不把复算数字当成模型行为结论",
+          "不用它替代 live A/B"
+        ],
+        "priority": 1,
+        "purpose": "给信封改动一个不受采样噪声影响的确定性证据，并让它可以被门禁。",
+        "source_sessions": [
+          "ses_verseshell-tf0045-envelope-2026-09-23"
+        ],
+        "status": "done",
+        "summary": "新增固定轨迹复算工具：把 live 运行里模型真实发出的读取调用固定（本轮 37 次），用当前二进制重跑，对同一信封做旧口径（完整 sha256）与新口径（16 位摘要）两次投影。只有「stored live 那次运行所用投影能复现其记录 token 数」的调用才计入（33/37；排除的 4 次是读运行期自产状态的文件），因此工具在「改了客户端却没重跑 live」时会直接判失败而不是跨口径比较。结果 4738 → 3690 tokens（−22.1%），read_many 24/24 且新口径合计与 live 实测逐位相同。C14 入 claim_gate，产物入 C12。",
+        "title": "步骤34：固定轨迹复算工具与 C14 门禁"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "live-rerun",
+      "node": {
+        "acceptance_criteria": [
+          "with 臂与对照臂各按 seeds 42/43/44 跑满 10 任务 × 2 条件，合并产物 api_error=0",
+          "给出 D/A 成功率、工具数、观察 token 比，以及与上一轮基线的逐项对比",
+          "C13 更新为实测数字，并保留/补充失效边界",
+          "live 产物 C12 fresh，claim_gate exit 0"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "复测",
+          "validation_plan": [
+            "合并产物",
+            "claim_gate exit 0"
+          ],
+          "why_not_enough": "单模型单端点，seed 只是名义确定性",
+          "why_this_task": "这是本轮的目的，也是 C13 的唯一来源"
+        },
+        "confidence": 0.75,
+        "difficulty": "medium",
+        "display_order": 1104,
+        "evidence": [
+          "端点核对：复测前 GET /v1/models 确认 sn-glm-5-3-flash 在列",
+          "with 臂：seeds 42/43/44 各 20 行 → 合并为 bench/aci/results/latest_live.json（60 行，api_error 0）；逐 seed 原始行在 bench/aci/results/tf45/with_seed*.json",
+          "对照臂：同 seeds 同参数加 --exclude-tools read_files → bench/aci/results/live_ab_without_read_files.json（60 行，api_error 0）；原始行在 tf45/without_seed*.json",
+          "本轮结果（紧凑摘要客户端）：with A=0.6333/3.20/197.4、D=0.60/5.23/333.4（D/A 1.6354/1.6888）；without A=0.60/3.07/191.1、D=0.60/5.93/271.8（D/A 1.9348/1.4223）",
+          "read_files 净效应（本轮同客户端同 seeds）：D 工具数 5.93→5.23（−11.8%）、D 观察 token 271.8→333.4（+22.7%）；上一轮为 −8.8% / +36.9%",
+          "跨轮干净信号：read_many 单次开销 175.6→135.6 tok（−22.8%），与确定性复算的 −22.1% 一致",
+          "跨轮警戒：A 侧代码完全未动而 obs_tok 168.6→197.4（+17%），故 D/A token 比 2.44→1.69 不能全部归因于信封改动",
+          "read_many 采用率 24/30 次 D 运行；逐 seed D/A 工具比 1.36/2.20/1.51，方差大",
+          "新增 bench/aci/runners/merge_live_runs.py，把此前手写的合并固化：任一行带 api_error 即 exit 2，本轮 120 行全部 api_error 0 未触发补跑",
+          "C13 已更新为本轮数字，并新增「跨轮比较必须标注口径」与「A 侧漂移」两条失效边界"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不做多模型对比",
+          "不用 live 结果替代确定性复算"
+        ],
+        "priority": 1,
+        "purpose": "回答「信封改小之后，D 相对 A 的步骤与 token 比有没有变化」。",
+        "source_sessions": [
+          "ses_verseshell-tf0045-envelope-2026-09-23"
+        ],
+        "status": "done",
+        "summary": "同口径 live 复测完成（同模型 sn-glm-5-3-flash、同端点、temperature=0、seeds 42/43/44、max_turns=8，两臂各 3 次合并，120 行、api_error 0）。本轮客户端把逐文件完整 sha256 换成 16 位紧凑摘要后：D/A 工具比 1.75→1.64、token 比 2.44→1.69；read_files 的净效应是 D 工具数 −11.8%（5.93→5.23）、D 观察 token +22.7%（271.8→333.4）——仍是「少步骤、多 token」，但读取侧的 token 代价比上一轮的 +36.9% 小。最干净的跨轮信号是 read_many 单次开销 175.6→135.6（−22.8%），与确定性复算的 −22.1% 吻合；同时必须写明 A 侧代码未动却漂了 +17%，所以比值变化不能全部归因于信封。",
+        "title": "步骤35：同口径 live 复测（两臂 × 3 seeds）与 C13 更新"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-commit",
+      "node": {
+        "acceptance_criteria": [
+          "claim_gate exit 0（含 C12 5 份 fresh）、readme_claims_check 17/17、cargo test exit 0",
+          "森林记录（提案/快照/导出）与提交完成，工作区干净"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "收口",
+          "validation_plan": [
+            "三项门禁",
+            "git status 为空"
+          ],
+          "why_not_enough": "无",
+          "why_this_task": "根策略 §6 的固定收尾动作"
+        },
+        "confidence": 0.9,
+        "difficulty": "low",
+        "display_order": 1105,
+        "evidence": [
+          "收口前门禁：claim_gate（含 C14、C12 5 份产物）、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "kind": "task",
+        "next_action": "提交本轮产物、C14 登记、C12 范围调整与文档，再回填 commit hash。",
+        "non_goals": [
+          "不改写 git 历史"
+        ],
+        "priority": 1,
+        "purpose": "按根策略 §6 完成 proposal-save → apply → validate → export 与提交。",
+        "source_sessions": [
+          "ses_verseshell-tf0045-envelope-2026-09-23"
+        ],
+        "status": "in_progress",
+        "summary": "收口：重跑三项门禁、回填证据、导出森林并提交。",
+        "title": "步骤36：森林收口与提交"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "exec-token-gap",
+      "node": {
+        "acceptance_criteria": [
+          "给出 exec.run 在 D 的 observation token 中的占比与逐任务分布",
+          "区分「D 本来就多跑命令」与「命令输出本身更大」两种解释",
+          "结论写进文档或 C13 的失效边界"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.8,
+          "user_goal": "继续缩小 D/A token 比",
+          "validation_plan": [
+            "对已存 live 产物做逐 op 分解",
+            "必要时再复测"
+          ],
+          "why_not_enough": "还没测过；本轮只做到定位",
+          "why_this_task": "逐 op 分解显示 exec.run 是 D 的最大单项开销，且批量读取可用时它反而上升"
+        },
+        "confidence": 0.6,
+        "difficulty": "medium",
+        "display_order": 110,
+        "evidence": [
+          "上一轮 with 臂逐 op 分解（60 行）：exec.run 85 次 / 5278 tok = D 的 42.8%，read_many 38.4%，file.view 9.0%",
+          "同期对照臂（无 read_files）：exec.run 67 次 / 3961 tok = 44.0%；即批量读取可用时 exec.run 的 token 反而 +33%（3961 → 5278）、次数 67 → 85",
+          "对照臂 file.view 66 次 / 3719 tok（56.3 tok/次）vs with 臂 read_many 27 次 / 175.6 tok/次（旧信封）"
+        ],
+        "kind": "follow_up",
+        "next_action": "先对已存 live 产物做 exec.run 的逐任务/逐 profile 分解，判断增量来自「多跑命令」还是「输出更大」，再决定是否值得改 reducer 或提示词。",
+        "non_goals": [
+          "不在没有分解数据前改 exec.run 的 reducer"
+        ],
+        "priority": 2,
+        "purpose": "定位 D/A token 比剩下的主因：读取侧信封已经改小，但 D 的 token 大头是 exec.run。",
+        "source_sessions": [
+          "ses_verseshell-tf0045-envelope-2026-09-23"
+        ],
+        "status": "ready",
+        "summary": "信封优化只解决读取侧：上一轮逐 op 分解显示 exec.run 占 D 的 observation token 42.8%，且在批量读取可用时它反而上升 33%（对照臂 3961 → with 臂 5278，次数 67 → 85）。要真正压低 D/A token 比，下一步必须解释这个增量来自「D 多跑命令」还是「单次输出更大」。",
+        "title": "缺口：exec.run 仍是 D 的 token 主因（42.8%），批量读取还让它上升 33%"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "窗口与预算是信封轮的产品改动"
+      },
+      "from": "impl-windows",
+      "to": "envelope-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "紧凑摘要是信封轮的产品改动"
+      },
+      "from": "impl-digest",
+      "to": "envelope-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "复算与 C14 是信封轮的证据"
+      },
+      "from": "replay-claim",
+      "to": "envelope-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "live 复测是本轮的目的"
+      },
+      "from": "live-rerun",
+      "to": "envelope-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口是最后一步"
+      },
+      "from": "close-commit",
+      "to": "envelope-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "剩余 token 缺口由本轮测量暴露（follow_up 用 derived_from 挂靠，避免阻塞本轮 global_task 收口）"
+      },
+      "from": "exec-token-gap",
+      "to": "envelope-round",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "摘要与窗口同处一个信封，先定窗口语义再定摘要"
+      },
+      "from": "impl-digest",
+      "to": "impl-windows",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "先有产品改动才有可复算的差异"
+      },
+      "from": "replay-claim",
+      "to": "impl-digest",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "live 跑完要重新生成固定轨迹复算"
+      },
+      "from": "live-rerun",
+      "to": "replay-claim",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口要等 live 产物落地"
+      },
+      "from": "close-commit",
+      "to": "live-rerun",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "本轮正是 TF-0045 记录的剩余缺口（信封形状）"
+      },
+      "from": "envelope-round",
+      "to": "TF-0045",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "承接同一复测口径与同一模型/端点"
+      },
+      "from": "envelope-round",
+      "to": "TF-0047",
+      "type": "related_to"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.8,
+        "reason": "缺口由本轮的逐 op 分解暴露"
+      },
+      "from": "exec-token-gap",
+      "to": "TF-0045",
+      "type": "derived_from"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 10
+      },
+      "id": "impl-windows"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 20
+      },
+      "id": "impl-digest"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 30
+      },
+      "id": "replay-claim"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 40
+      },
+      "id": "live-rerun"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 50
+      },
+      "id": "close-commit"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 110
+      },
+      "id": "exec-token-gap"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "信封开销定位：一次 3 文件 read_many 的模型可见字符中文件内容只占 28.4%，逐文件完整 sha256 占 28.0%，JSON 键名占 38.3%",
+          "确定性复算（eval/tf45_envelope_replay.json）：37 次冻结读取调用中 33 次忠实复现，4738 → 3690 tokens（−22.1%）；read_many 24/24，4176 → 3254，新口径合计与 live 实测逐位相同",
+          "按需窗口与批量预算：8×300 行默认返回 240/240、max_total_lines=40 返回 40/40；250 行文件按 window=100 分 3 页读回，250/250 行逐行一致",
+          "live 验证前缀匹配被真实使用：模型回传 expected_hash='sha256:471dfab5b79f216a'（紧凑摘要加前缀）且 aci_ok=True",
+          "产品改动：src/ops/file.rs（windows[]/max_total_lines/truncated/deferred/next_start_line + hash）、src/ops/common.rs（HASH_PREFIX_LEN=16/MIN=8、short_hash、前缀匹配 check_expected_hash）、src/reducers/mod.rs 提示文案",
+          "测试：tests/aci_1_0_ops_tests.rs 新增 file_read_many_windows_and_total_budget 与 expected_hash_accepts_a_compact_digest_prefix；cargo test 全量 exit 0（282 passed）",
+          "门禁：claim_gate 12/12 exit 0（C12 5/5 fresh、C14 0.2212 ≥ 0.15）、readme_claims_check 17/17",
+          "文档：docs/1.0-aci.md 新增「Read envelope: compact digest and batch budget」；README op 表与跨 shell 表同步；CHANGELOG 记录",
+          "信封形状决定：lines 保持 [{line,text}] 不变——测量显示逐行包装不是主要开销（键名与完整摘要才是），改它只会破坏消费者，故按证据保持不动",
+          "live 复测：两臂 × 3 seeds 共 120 行、api_error 0（见 live-rerun 节点）"
+        ],
+        "next_action": "无。信封与窗口已落地；剩余 token 缺口见 exec-token-gap 节点。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "TF-0045 的剩余缺口（产品侧观察信封形状）已收口：先用固定轨迹复算定位开销构成（完整 sha256 占 28%、JSON 键名占 38%、文件内容只占 28%），据此给读算子加 16 位紧凑摘要（expected_hash 改为前缀匹配，旧 content_hash 保留做双字段过渡），并给 file.read_many 加按需窗口与批量预算/分页；lines 形状按测量结果保持不动。信封变化由新门禁 C14 与可复现复算工具固化（读取调用 −22.1%），并按上一轮同口径完成 live 两臂 × 3 seeds 复测（120 行、api_error 0）：D/A 工具比 1.64、token 比 1.69，read_files 净效应为步骤 −11.8%、token +22.7%。"
+      },
+      "id": "TF-0045"
+    }
+  ],
+  "created_at": "2026-09-23T08:45:54.292788Z",
+  "proposal_id": "TFP-tf0045-envelope-2026-09-23",
+  "rationale": "TF-0045 记录的剩余缺口是「产品侧观察信封形状未定型」。本轮先用数据定位 token 到底花在哪：把 live 运行里模型真实发出的读取调用固定下来复算，发现一次 3 文件 read_many 的模型可见字符里只有 28.4% 是文件内容，28.0% 是逐文件完整 sha256（71 字符），38.3% 是逐条 JSON 键名——也就是说信封开销的大头是摘要与结构，不是行文本。据此做了三件事：①给 file.read_many 加按需窗口（windows[]）与批量预算（max_total_lines）并给出 truncated/deferred + next_start_line 分页；②读算子同时返回 16 位紧凑摘要 hash，expected_hash 接受无歧义前缀（≥8 位十六进制），旧字段 content_hash 原样保留（双字段过渡，不破坏消费者）；③把「同一信封两种投影」的差做成确定性门禁 C14，并保留 lines 的既有形状（测量显示逐行包装不是主要开销，改它只会破坏消费者）。随后按与上一轮完全相同的口径（同模型、同端点、temperature=0、seeds 42/43/44、max_turns=8、两臂）重跑 live 复测并更新 C13。",
+  "session_id": "ses_verseshell-tf0045-envelope-2026-09-23",
+  "status": "applied"
+}

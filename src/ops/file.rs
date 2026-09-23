@@ -3,7 +3,7 @@
 use super::common::{
     arg_bool, arg_str, arg_u64, audit, check_expected_hash, content_hash_str, err, err_data,
     guard_delete, guard_read, guard_write, now, numbered_lines, ok, read_text_file,
-    require_capability, resolve_workspace_path, write_text_file,
+    require_capability, resolve_workspace_path, short_hash, write_text_file,
 };
 use super::trash;
 use crate::operation::{Diagnostic, Observation, OperationRequest, OperationSpec, SuggestedAction};
@@ -133,7 +133,19 @@ fn schema_read_many() -> Value {
         "type":"object","required":["paths"],
         "properties":{
             "paths":{"type":"array","items":{"type":"string"},"minItems":1,"maxItems":8},
-            "window":{"type":"integer","minimum":1,"default":80}
+            "windows":{
+                "type":"array",
+                "items":{"type":"object","properties":{
+                    "start_line":{"type":"integer","minimum":1},
+                    "window":{"type":"integer","minimum":1}
+                }},
+                "description":"Optional per-file overrides, aligned by index with paths; a shorter array leaves the rest on the defaults."
+            },
+            "window":{"type":"integer","minimum":1,"default":80},
+            "max_total_lines":{
+                "type":"integer","minimum":1,"default":240,
+                "description":"Budget for the whole batch: entries that no longer fit come back empty with truncated=true and next_start_line."
+            }
         }
     })
 }
@@ -262,6 +274,7 @@ fn execute_read_range(req: &OperationRequest) -> Observation {
             "end_line": to,
             "total_lines": total,
             "content_hash": hash,
+            "hash": short_hash(&hash),
             "truncated": to < end_line.min(total) || (end_line.saturating_sub(start_line) + 1) > max_lines,
             "lines": numbered_lines(slice, from + 1)
         }),
@@ -317,6 +330,7 @@ fn execute_view(req: &OperationRequest) -> Observation {
             "end_line": to,
             "total_lines": all.len(),
             "content_hash": hash,
+            "hash": short_hash(&hash),
             "lines": numbered_lines(slice, if all.is_empty() { 0 } else { from + 1 })
         }),
         &["fs.read"],
@@ -329,24 +343,53 @@ fn execute_view(req: &OperationRequest) -> Observation {
 /// touches" case without letting a single call pull the whole repo.
 const MAX_READ_MANY_PATHS: usize = 8;
 
+/// Default budget for one batch read, in returned lines. The per-file `window`
+/// still applies; this bounds the *sum*, so 8 files cannot each pull a full
+/// window into a single observation.
+const DEFAULT_MAX_TOTAL_LINES: usize = 240;
+
+/// One file's slice request: where to start and how many lines at most.
+#[derive(Clone, Copy)]
+struct FileWindow {
+    start_line: usize,
+    window: usize,
+}
+
 /// Read one file's window; `Err` carries a per-file message so a batch can
 /// report the missing entries instead of failing the whole call.
-fn read_many_entry(path: &str, window: usize) -> Result<Value, String> {
+///
+/// `budget` is how many lines are left in the batch budget. An entry that no
+/// longer fits comes back empty and marked `deferred`, with `next_start_line`
+/// telling the caller exactly how to ask for it again — so a bounded batch is
+/// still paginable instead of silently dropping files.
+fn read_many_entry(path: &str, spec: FileWindow, budget: usize) -> Result<Value, String> {
     let resolved = resolve_workspace_path(path)?;
     guard_read(&resolved.to_string_lossy())?;
     let text = read_text_file(&resolved)?;
     let all: Vec<&str> = text.lines().collect();
-    let to = window.min(all.len());
-    let slice = if all.is_empty() { &[][..] } else { &all[0..to] };
+    let total = all.len();
+    let full_hash = content_hash_str(&text);
+    let from = spec.start_line.saturating_sub(1).min(total);
+    let want = spec.window.min(budget);
+    let to = (from + want).min(total);
+    let truncated = to < total;
+    let slice = if from >= to { &[][..] } else { &all[from..to] };
+    let first = if from < to { from + 1 } else { 0 };
     Ok(json!({
         // Echo the caller's own path: it is shorter than the absolute path and
         // is directly reusable in the next op.
         "path": path,
-        "content_hash": content_hash_str(&text),
-        "total_lines": all.len(),
-        "start_line": if all.is_empty() { 0 } else { 1 },
+        "content_hash": full_hash,
+        // Compact change-detection digest; `expected_hash` accepts it as a
+        // prefix. The full digest stays for consumers that compare digests.
+        "hash": short_hash(&full_hash),
+        "total_lines": total,
+        "start_line": first,
         "end_line": to,
-        "lines": numbered_lines(slice, if all.is_empty() { 0 } else { 1 })
+        "truncated": truncated,
+        "deferred": want == 0 && from < total,
+        "next_start_line": if truncated { Some(to + 1) } else { None },
+        "lines": numbered_lines(slice, first)
     }))
 }
 
@@ -383,12 +426,53 @@ fn execute_read_many(req: &OperationRequest) -> Observation {
             start,
         );
     }
-    let window = arg_u64(&req.args, "window", 80).clamp(1, 500) as usize;
+    let default_window = arg_u64(&req.args, "window", 80).clamp(1, 500) as usize;
+    let max_total = arg_u64(&req.args, "max_total_lines", DEFAULT_MAX_TOTAL_LINES as u64)
+        .clamp(1, 4000) as usize;
+    // Per-file overrides are aligned by index with `paths`; an entry that sets
+    // neither field, or a shorter array, leaves that file on the defaults.
+    let overrides: Vec<Option<FileWindow>> = req
+        .args
+        .get("windows")
+        .and_then(|v| v.as_array())
+        .map(|arr| {
+            arr.iter()
+                .map(|entry| {
+                    let start_line = entry.get("start_line").and_then(|v| v.as_u64());
+                    let window = entry.get("window").and_then(|v| v.as_u64());
+                    if start_line.is_none() && window.is_none() {
+                        return None;
+                    }
+                    Some(FileWindow {
+                        start_line: start_line.unwrap_or(1).max(1) as usize,
+                        window: window.map(|w| w.max(1) as usize).unwrap_or(default_window),
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default();
     let mut files = Vec::with_capacity(paths.len());
     let mut errors = 0usize;
-    for path in &paths {
-        match read_many_entry(path, window) {
-            Ok(entry) => files.push(entry),
+    let mut lines_returned = 0usize;
+    let mut deferred = 0usize;
+    for (i, path) in paths.iter().enumerate() {
+        let spec = overrides.get(i).copied().flatten().unwrap_or(FileWindow {
+            start_line: 1,
+            window: default_window,
+        });
+        let budget = max_total.saturating_sub(lines_returned);
+        match read_many_entry(path, spec, budget) {
+            Ok(entry) => {
+                lines_returned += entry
+                    .get("lines")
+                    .and_then(|l| l.as_array())
+                    .map(|a| a.len())
+                    .unwrap_or(0);
+                if entry.get("deferred").and_then(|v| v.as_bool()).unwrap_or(false) {
+                    deferred += 1;
+                }
+                files.push(entry);
+            }
             Err(message) => {
                 errors += 1;
                 files.push(json!({"path": path, "error": message}));
@@ -398,7 +482,14 @@ fn execute_read_many(req: &OperationRequest) -> Observation {
     ok(
         req,
         "file",
-        json!({"count": files.len(), "errors": errors, "files": files}),
+        json!({
+            "count": files.len(),
+            "errors": errors,
+            "lines_returned": lines_returned,
+            "max_total_lines": max_total,
+            "deferred": deferred,
+            "files": files
+        }),
         &["fs.read"],
         &["file.read"],
         start,

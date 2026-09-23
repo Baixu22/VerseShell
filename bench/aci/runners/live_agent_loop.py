@@ -152,7 +152,9 @@ ACI_TOOLS = [
                 "Read SEVERAL files in ONE call: every entry returns lines, total_lines and "
                 "content_hash. Prefer this over calling read_file once per file when the task "
                 "touches a known set of files (source + test + task file). A missing file is "
-                "reported in its own entry and does not fail the batch. "
+                "reported in its own entry and does not fail the batch. For a long file, pass "
+                "windows to read just the range you need; a cut entry returns truncated + "
+                "next_start_line so you can continue from there. "
                 "When NOT to use: when you do not yet know which file matters (use search_content)."
             ),
             "parameters": {
@@ -166,6 +168,33 @@ ACI_TOOLS = [
                     "window": {
                         "type": "integer",
                         "description": "Max lines per file (default 80)",
+                    },
+                    "windows": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "start_line": {
+                                    "type": "integer",
+                                    "description": "First line to return (1-based, default 1)",
+                                },
+                                "window": {
+                                    "type": "integer",
+                                    "description": "Max lines to return for this file",
+                                },
+                            },
+                        },
+                        "description": (
+                            "Optional per-file overrides aligned by index with paths "
+                            "(index 0 = paths[0]); omit an entry to use the defaults"
+                        ),
+                    },
+                    "max_total_lines": {
+                        "type": "integer",
+                        "description": (
+                            "Budget for the whole batch, in returned lines (default 240). "
+                            "Keep the default unless you need more."
+                        ),
                     },
                 },
                 "required": ["paths"],
@@ -569,6 +598,19 @@ def compact_lines(lines: list) -> list:
     return out
 
 
+def digest_of(payload: dict) -> str | None:
+    """Pick the change-detection digest to show the model.
+
+    Read ops return both `hash` (16 hex chars, accepted as an `expected_hash`
+    prefix) and the full `content_hash` (`sha256:` + 64 hex). The model only
+    needs a token it can hand back for the stale-write check, and the full form
+    costs 71 characters *per file* — measured at 28% of a 3-file batch
+    observation before this projection (docs/claims-and-evidence.md, C14). The
+    key name stays `content_hash` so the model's existing habit still works.
+    """
+    return payload.get("hash") or payload.get("content_hash")
+
+
 def format_aci_result(response: dict) -> str:
     """Extract model-relevant fields from the AE observation envelope.
 
@@ -627,8 +669,9 @@ def format_aci_result(response: dict) -> str:
     # SUCCESS: silence — return only what the model needs to proceed
     if "summary" in data:
         clean["summary"] = data["summary"]
-    if "content_hash" in data:
-        clean["content_hash"] = data["content_hash"]
+    digest = digest_of(data)
+    if digest:
+        clean["content_hash"] = digest
     if "total_lines" in data:
         clean["total_lines"] = data["total_lines"]
 
@@ -654,11 +697,22 @@ def format_aci_result(response: dict) -> str:
                 continue
             item = {
                 key: entry[key]
-                for key in ("path", "content_hash", "total_lines", "start_line", "error")
+                for key in ("path", "total_lines", "start_line", "error")
                 if key in entry
             }
+            entry_digest = digest_of(entry)
+            if entry_digest:
+                item["content_hash"] = entry_digest
             if isinstance(entry.get("lines"), list) and len(entry["lines"]) <= 10:
                 item["lines"] = compact_lines(entry["lines"])
+            # Pagination is only surfaced when the entry was actually cut, so a
+            # complete read stays exactly as small as before.
+            if entry.get("deferred"):
+                item["deferred"] = True
+            elif entry.get("truncated"):
+                item["truncated"] = True
+            if (entry.get("truncated") or entry.get("deferred")) and entry.get("next_start_line") is not None:
+                item["next_start_line"] = entry["next_start_line"]
             compact.append(item)
         clean["files"] = compact
         if "errors" in data:

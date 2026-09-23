@@ -3,6 +3,26 @@
 ## Unreleased
 
 ### Added
+- `file.read_many` on-demand windows: `windows[]` gives each file its own
+  `{start_line, window}`, and `max_total_lines` (default 240) bounds the whole
+  batch. An entry cut by its own window is `truncated`, one that no longer fits
+  the budget comes back `deferred`; both return `next_start_line`, so a bounded
+  batch stays paginable instead of silently dropping files.
+- Read ops (`file.view` / `file.read_range` / `file.read_many`) return a compact
+  `hash` (16 hex chars) next to the full `content_hash`, and `expected_hash` now
+  accepts any unambiguous hex prefix of at least 8 characters. The stale-write
+  check is unchanged in strength (a wrong prefix still fails with
+  `E_STALE_HASH` + `data.actual_hash`), but an observation stops paying 71
+  characters per file for a digest the agent only hands back. Additive: an
+  existing consumer that reads `content_hash` keeps working.
+- Claim C14 + `tools/tf45_envelope_replay.py`: a deterministic replay that pins
+  the read calls the model actually issued in the stored live run, re-runs them
+  against the current binary, and projects each envelope twice (legacy full
+  digest vs compact digest). It measures the observation surface, not model
+  behaviour, and lists every call it could not reproduce with both token counts.
+- `bench/aci/runners/merge_live_runs.py`: merging per-seed live runs now refuses
+  to merge when any row carries `api_error` (exit 2), instead of letting an
+  upstream 500 into the average as a 0-tool / 0-token data point.
 - `file.read_many`: read up to 8 files in one call, each entry carrying its own
   `content_hash` / `total_lines` / line window; a missing path is reported in its
   own entry instead of failing the batch. It gives an agent the single call raw
@@ -29,12 +49,24 @@
   Single-run variance is large, so the direction is the finding, not the ratio.
 
 ### Changed
+- Re-measured the live A/B on the new envelope (same model `sn-glm-5-3-flash`,
+  same endpoint, seeds 42/43/44, 10 tasks x 2 conditions x 2 arms, 120 rows,
+  `api_error` 0). Condition D/A is now **1.64x the tool calls and 1.69x the
+  observation tokens** of raw shell (previously 1.75x / 2.44x). Within this
+  round, hiding `read_files` moves D by **-11.8% tool calls and +22.7%
+  observation tokens** (previously -8.8% / +36.9%). The clean cross-round signal
+  is the per-call cost of `file.read_many`: 175.6 -> 135.6 tokens (-22.8%),
+  matching the deterministic replay's -22.1% (claim C14). Raw shell is untouched
+  code yet its own average moved 168.6 -> 197.4 tokens between rounds, so the
+  ratio movement is not attributable to the envelope alone (claim C13).
 - Measured effect of `file.read_many` (live A/B: same model `sn-glm-5-3-flash`,
   same seeds 42/43/44, 10 tasks x 2 conditions x 2 arms): condition D's tool calls
   drop from 6.03 to 5.50 (-8.8%) and the D/A tool ratio from 1.95 to 1.75, while
   observation tokens rise from 300.2 to 411.1 (+36.9%) because one call now pulls
   more file content. Fewer steps, not fewer tokens — ACI still costs ~1.75x the
-  steps and ~2.4x the tokens of raw shell here (claim C13).
+  steps and ~2.4x the tokens of raw shell here (claim C13). **Superseded by the
+  re-measurement above**, which was taken after the read envelope shrank; the
+  numbers stay here as the record of what that round measured.
 - The model-visible observation projection drops structural redundancy:
   `file.view` lines are flattened from `[{line, text}]` to plain strings with a
   single `start_line` (a 10-line window: 444 -> 250 chars, -43.7%), and a failure

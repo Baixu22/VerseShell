@@ -151,6 +151,15 @@ fn file_read_many_reads_several_files_with_hashes() {
         .as_str()
         .unwrap()
         .starts_with("sha256:"));
+    // TF-0045: the compact digest is a prefix of the full one and is what
+    // `expected_hash` accepts, so a batched read can carry 16 hex chars per file
+    // instead of a 71-character `sha256:<64 hex>` string.
+    let full = files[0]["content_hash"].as_str().unwrap();
+    let short = files[0]["hash"].as_str().unwrap();
+    assert_eq!(short.len(), 16, "{short}");
+    assert!(full.starts_with(&format!("sha256:{short}")), "{full} / {short}");
+    assert_eq!(files[0]["truncated"], false);
+    assert!(files[0]["next_start_line"].is_null());
     assert_eq!(files[1]["path"], "src/b.txt");
     assert_eq!(files[1]["total_lines"], 3);
 
@@ -170,6 +179,149 @@ fn file_read_many_reads_several_files_with_hashes() {
     let r3 = run_server(&empty, &workspace).remove(0);
     assert_eq!(r3["ok"], false);
     assert_eq!(r3["error"]["code"], "E_BAD_ARG");
+
+    let _ = std::fs::remove_dir_all(workspace);
+}
+
+#[test]
+fn file_read_many_windows_and_total_budget() {
+    let workspace = std::env::temp_dir().join(format!("vs-rmw-{}", uuid::Uuid::new_v4()));
+    std::fs::create_dir_all(&workspace).unwrap();
+    let ten = (1..=10)
+        .map(|i| format!("line{i}"))
+        .collect::<Vec<_>>()
+        .join("\n")
+        + "\n";
+    for name in ["a.txt", "b.txt", "c.txt"] {
+        std::fs::write(workspace.join(name), &ten).unwrap();
+    }
+
+    // On-demand windows: lines 4..=6 of a.txt, first 2 lines of b.txt.
+    let req = op(
+        "1",
+        "file.read_many",
+        json!({
+            "paths": ["a.txt", "b.txt"],
+            "windows": [{"start_line": 4, "window": 3}, {"window": 2}]
+        }),
+    );
+    let r = run_server(&req, &workspace).remove(0);
+    assert_eq!(r["ok"], true, "{r}");
+    let files = r["data"]["files"].as_array().unwrap();
+    assert_eq!(files[0]["start_line"], 4);
+    assert_eq!(files[0]["end_line"], 6);
+    assert_eq!(files[0]["truncated"], true);
+    assert_eq!(files[0]["next_start_line"], 7);
+    let texts: Vec<&str> = files[0]["lines"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|l| l["text"].as_str().unwrap())
+        .collect();
+    assert_eq!(texts, vec!["line4", "line5", "line6"]);
+    assert_eq!(files[1]["start_line"], 1);
+    assert_eq!(files[1]["end_line"], 2);
+    assert_eq!(files[1]["next_start_line"], 3);
+
+    // Batch budget: 12 lines across three ten-line files. The first takes 10,
+    // the second is cut to the remaining 2, the third no longer fits and comes
+    // back deferred with a pagination cursor instead of being silently dropped.
+    let req = op(
+        "2",
+        "file.read_many",
+        json!({"paths": ["a.txt", "b.txt", "c.txt"], "window": 10, "max_total_lines": 12}),
+    );
+    let r2 = run_server(&req, &workspace).remove(0);
+    assert_eq!(r2["ok"], true, "{r2}");
+    assert_eq!(r2["data"]["max_total_lines"], 12);
+    assert_eq!(r2["data"]["lines_returned"], 12);
+    assert!(r2["data"]["lines_returned"].as_u64().unwrap() <= 12);
+    let f = r2["data"]["files"].as_array().unwrap();
+    assert_eq!(f[0]["lines"].as_array().unwrap().len(), 10);
+    assert_eq!(f[1]["lines"].as_array().unwrap().len(), 2);
+    assert_eq!(f[1]["truncated"], true);
+    assert_eq!(f[1]["next_start_line"], 3);
+    assert_eq!(f[2]["lines"].as_array().unwrap().len(), 0);
+    assert_eq!(f[2]["deferred"], true);
+    assert_eq!(f[2]["next_start_line"], 1);
+    assert_eq!(r2["data"]["deferred"], 1);
+
+    let _ = std::fs::remove_dir_all(workspace);
+}
+
+#[test]
+fn expected_hash_accepts_a_compact_digest_prefix() {
+    let workspace = std::env::temp_dir().join(format!("vs-ph-{}", uuid::Uuid::new_v4()));
+    std::fs::create_dir_all(&workspace).unwrap();
+    let file = workspace.join("sample.txt");
+    std::fs::write(&file, "alpha\nbeta\ngamma\n").unwrap();
+
+    // The compact digest a read op returns must be usable as-is.
+    let view = run_server(
+        &op("1", "file.view", json!({"path": "sample.txt"})),
+        &workspace,
+    )
+    .remove(0);
+    let short = view["data"]["hash"].as_str().unwrap().to_string();
+    assert_eq!(short.len(), 16, "{short}");
+
+    let r = run_server(
+        &op(
+            "2",
+            "file.replace_exact",
+            json!({"path": "sample.txt", "old": "beta", "new": "BETA", "expected_hash": short}),
+        ),
+        &workspace,
+    )
+    .remove(0);
+    assert_eq!(r["ok"], true, "{r}");
+    assert_eq!(r["data"]["applied"], true);
+
+    // A wrong but well-formed prefix still fails closed and leaves the file alone.
+    std::fs::write(&file, "alpha\nbeta\ngamma\n").unwrap();
+    let bad = run_server(
+        &op(
+            "3",
+            "file.replace_exact",
+            json!({
+                "path": "sample.txt", "old": "beta", "new": "BETA",
+                "expected_hash": "sha256:0123456789abcdef"
+            }),
+        ),
+        &workspace,
+    )
+    .remove(0);
+    assert_eq!(bad["ok"], false, "{bad}");
+    assert_eq!(bad["error"]["code"], "E_STALE_HASH");
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), "alpha\nbeta\ngamma\n");
+
+    // A prefix shorter than the documented minimum is rejected, not matched.
+    let too_short = run_server(
+        &op(
+            "4",
+            "file.replace_exact",
+            json!({
+                "path": "sample.txt", "old": "beta", "new": "BETA", "expected_hash": "abcd"
+            }),
+        ),
+        &workspace,
+    )
+    .remove(0);
+    assert_eq!(too_short["ok"], false, "{too_short}");
+    assert_eq!(too_short["error"]["code"], "E_STALE_HASH");
+
+    // The full digest still compares exactly.
+    let full = view["data"]["content_hash"].as_str().unwrap().to_string();
+    let r5 = run_server(
+        &op(
+            "5",
+            "file.replace_exact",
+            json!({"path": "sample.txt", "old": "beta", "new": "BETA", "expected_hash": full}),
+        ),
+        &workspace,
+    )
+    .remove(0);
+    assert_eq!(r5["ok"], true, "{r5}");
 
     let _ = std::fs::remove_dir_all(workspace);
 }

@@ -16,6 +16,7 @@ Gated claims (thresholds mirror docs/claims-and-evidence.md exactly):
   C10 every documented README example runs and every README implementation number matches its source
   C11 cross-shell wall-clock: worst VerseShell/PowerShell median ratio <= 0.50 (stored measurement)
   C12 stored evidence freshness: each artifact's recorded fingerprint still matches the code
+  C14 batch-read envelope: compact digest + batch budget hold on a frozen-trajectory replay
 C5 (learning cost) has no deterministic metric yet: status-only in evidence.json.
 
 Usage:
@@ -48,6 +49,7 @@ THRESHOLDS = {
     "C10": {"desc": "README examples run and README numbers match source", "op": ">=", "value": 1.00},
     "C11": {"desc": "cross-shell worst VerseShell/PowerShell median ratio", "op": "<=", "value": 0.50},
     "C12": {"desc": "stored evidence freshness (recorded fingerprint matches the code)", "op": ">=", "value": 1.00},
+    "C14": {"desc": "batch-read envelope replay: compact digest saving + bounded batch budget", "op": ">=", "value": 0.15},
 }
 
 # Stored measurements the gate relies on. Each must record the content fingerprint
@@ -65,6 +67,7 @@ EVIDENCE_ARTIFACTS = [
     "bench/aci/results/latest_live.json",
     "eval/jev_obs_report.json",
     "eval/cross_shell.json",
+    "eval/tf45_envelope_replay.json",
 ]
 
 
@@ -204,6 +207,46 @@ def compact_ratio_claim(report: dict) -> dict:
     }
 
 
+def batch_envelope_claim(report: dict) -> dict:
+    """C14 reads the frozen-trajectory replay of the batch-read envelope.
+
+    Two things must hold: the compact digest must actually shrink the
+    model-visible observation on calls the model really issued, and the new
+    `max_total_lines` budget must bound a worst-case batch read while staying
+    paginable. The gated number is the token saving; the budget, the
+    no-truncation guard and a non-empty replay are pass conditions in `detail`.
+    """
+    totals = report.get("totals", {})
+    budget = report.get("budget", {})
+    savings = float(totals.get("token_savings", 0.0))
+    coverage = float(totals.get("coverage", 0.0))
+    exact = bool(totals.get("legacy_comparison_exact"))
+    bounded = bool(budget.get("bounded"))
+    paginable = bool(budget.get("pagination_roundtrip"))
+    return {
+        "value": round(savings, 4),
+        "pass": (savings >= THRESHOLDS["C14"]["value"] and exact and bounded
+                 and paginable and coverage > 0),
+        "detail": {
+            "calls_total": totals.get("calls"),
+            "calls_replayed": totals.get("calls_replayed"),
+            "calls_excluded": totals.get("calls_excluded"),
+            "coverage": coverage,
+            "legacy_tokens": totals.get("legacy_tokens"),
+            "current_tokens": totals.get("current_tokens"),
+            "legacy_comparison_exact": exact,
+            "by_op": report.get("by_op"),
+            "budget_default_lines": (budget.get("default") or {}).get("lines_returned"),
+            "budget_default_cap": (budget.get("default") or {}).get("max_total_lines"),
+            "budget_tight_lines": (budget.get("tight") or {}).get("lines_returned"),
+            "budget_tight_cap": (budget.get("tight") or {}).get("max_total_lines"),
+            "budget_bounded": bounded,
+            "pagination": budget.get("pagination"),
+            "pagination_roundtrip": paginable,
+        },
+    }
+
+
 def summarize_test_output(stdout: str) -> dict:
     """Aggregate every `test result:` line so the evidence carries real counts
     instead of whichever suite happened to print last."""
@@ -227,6 +270,9 @@ def main(argv: list[str] | None = None) -> int:
                     help="reuse an existing eval/compact_ratio.json instead of regenerating")
     ap.add_argument("--cross-shell", type=Path, default=None,
                     help="path to a stored eval/cross_shell.json (regenerate with tools/cross_shell_bench.py)")
+    ap.add_argument("--envelope-replay", type=Path, default=None,
+                    help="path to a stored eval/tf45_envelope_replay.json "
+                         "(regenerate with tools/tf45_envelope_replay.py)")
     ap.add_argument("--evidence", type=Path, default=ROOT / "eval/evidence.json")
     ap.add_argument("--skip-tests", action="store_true",
                     help="skip cargo test; C6/C7 become stale and fail the gate")
@@ -436,6 +482,41 @@ def main(argv: list[str] | None = None) -> int:
                  "single machine); the gate re-checks the stored artifact, so re-run "
                  "tools/cross_shell_bench.py after changing the hot path",
     })
+
+    # ── C14: batch-read envelope on a frozen trajectory ──
+    replay_path = (args.envelope_replay.resolve() if args.envelope_replay
+                   else ROOT / "eval/tf45_envelope_replay.json")
+    if replay_path.exists():
+        replay_report = json.loads(replay_path.read_text(encoding="utf-8"))
+        c14 = batch_envelope_claim(replay_report)
+        claims.append({
+            "id": "C14", "claim": THRESHOLDS["C14"]["desc"],
+            "threshold": ">= 0.15", "value": c14["value"], "pass": c14["pass"],
+            "mode": "deterministic", "sample_size": c14["detail"]["calls_replayed"],
+            "measured_at": replay_report.get("generated_at"),
+            "command": "python tools/tf45_envelope_replay.py --out eval/tf45_envelope_replay.json",
+            "source": ["tools/tf45_envelope_replay.py", "bench/aci/runners/live_agent_loop.py",
+                       "src/ops/file.rs", "src/ops/common.rs", "eval/tf45_envelope_replay.json"],
+            "detail": c14["detail"],
+            "notes": "frozen-trajectory replay: the read ops the model actually issued in the stored "
+                     "live run are re-run against the current binary and projected twice (legacy full "
+                     "`sha256:<64 hex>` vs the compact 16-hex digest). It measures the observation "
+                     "surface, NOT model behaviour; a call only counts when the projection the stored "
+                     "run actually used reproduces its recorded token count, and the rest are listed "
+                     "with both numbers (so a client change without a live re-run fails instead of "
+                     "comparing across projections). The budget half of the claim is structural: a worst-case "
+                     "8x300-line batch must not exceed `max_total_lines`, and paginating a 250-line "
+                     "file by `next_start_line` must recover it line for line",
+        })
+    else:
+        claims.append({
+            "id": "C14", "claim": THRESHOLDS["C14"]["desc"],
+            "threshold": ">= 0.15", "value": None, "pass": False,
+            "mode": "deterministic", "measured_at": now,
+            "command": "python tools/tf45_envelope_replay.py --out eval/tf45_envelope_replay.json",
+            "source": ["tools/tf45_envelope_replay.py"],
+            "notes": f"missing evidence artifact: {replay_path}",
+        })
 
     # ── C12: stored evidence must still describe the current code ──
     freshness = freshness_entries()
