@@ -1,0 +1,53 @@
+{
+  "applied_at": "2026-09-23T11:26:27.592584Z",
+  "base_graph_hash": "c7c1f2ecc8630567effd26491e4180aaa2cf456ab56b03c16072c6798eb0c29a",
+  "base_summary": {
+    "edge_count": 98,
+    "node_count": 62,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "exec.run 占比与逐任务分布：with 臂 80 次 / 5045 tok = D 的 50.4%（168.17 tok/run，63.06 tok/次）；逐任务表在 eval/exec_token_breakdown.json",
+          "两种解释：with−without 的 exec 增量 +29.2 tok/run = 次数效应 13.33（46%）+ 单次效应 15.87（54%）+ 交互 1.39",
+          "失败结构：失败 exec 占 52.5% 的调用但占 80.1% 的 exec token（96.24 vs 26.39 tok/次）；增量全部来自失败命令 +7 次（35→42），单次成功成本反而 30.55→26.39",
+          "差距重定位：+143.97 tok/run 分桶 read +84.77（58.9%）、edit +24.83（17.2%）、exec +23.33（16.2%）、meta +3.03（2.1%）",
+          "读取形状：D 37 次读取 / 3842 tok / 每次 2.16 个文件引用 / 每引用 48.02；A 40 次读取命令 / 1299 tok / 1.25 / 25.98",
+          "门禁：claim_gate 12/12 exit 0（C12 6/6 fresh）、readme_claims_check 17/17、cargo test exit 0",
+          "提交：commit 1018d25（内容）+ 6be75f7（森林记录）；工作区干净"
+        ],
+        "next_action": "无。下一个 token 杠杆见 TF-0062（读取桶占 D/A 差距 58.9%）。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "本轮完成：用已存 live 产物（无 API 调用）分解 exec.run，回答了 TF-0058 的问题并纠正了方向。exec.run 是 D 的单项最大开销（50.4%）但不是 D 比 A 贵的原因——+143.97 tok/run 的差距里 read 58.9%、edit 17.2%、exec 仅 16.2%；失败 exec 占 52.5% 的调用却占 80.1% 的 exec token；批量读取带来的 exec 增量来自失败命令多了 7 次而非单次输出变大。工具与产物可复现并纳入 C12（6/6 fresh），结论登记为 C15。"
+      },
+      "id": "TF-0059"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "claim_gate：12/12 gated claims pass，exit 0（C12 由 5 份扩到 6 份，全部 fresh）",
+          "readme_claims_check：17/17 pass",
+          "cargo test：exit 0",
+          "森林：proposal-save → proposal-apply --yes → validate（校验通过）→ export",
+          "提交：commit 1018d25（7 文件）+ 6be75f7（森林记录）；提交前后工作区均干净",
+          "凭据自查：本轮无新增密钥材料（git grep 里仅有的 sk- 命中是 src/safety.rs 中测试脱敏函数的假字面量）"
+        ],
+        "next_action": "无。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "收口完成：三项门禁全绿、森林校验通过并导出、内容提交 1018d25、森林记录 6be75f7、工作区干净。"
+      },
+      "id": "TF-0061"
+    }
+  ],
+  "created_at": "2026-09-23T11:26:27.492305Z",
+  "proposal_id": "TFP-tf0058-exec-breakdown-final-2026-09-23",
+  "rationale": "本轮交付完成并提交（commit 1018d25）：exec token 分解工具与产物落地、C15 登记、C12 扩到 6 份产物、三项门禁全绿。收口 TF-0059 与 TF-0061，并保留 TF-0062（读取路径缺口）为 ready。",
+  "session_id": "ses_verseshell-tf0058-exec-2026-09-23",
+  "status": "applied"
+}
