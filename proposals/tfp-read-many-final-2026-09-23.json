@@ -1,0 +1,23 @@
+{
+  "proposal_id": "TFP-read-many-final-2026-09-23",
+  "session_id": "ses_verseshell-tf-live3-2026-09-23",
+  "rationale": "提交 124c415 已完成，回填 commit hash 并把 TF-0051 转 done，本轮收口。森林记录随第二次提交落库。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0051",
+      "fields": {
+        "status": "done",
+        "progress": 100.0,
+        "summary": "本轮改动已提交：commit 124c415「chore(bench): complete the read_many re-measurement (same-model A/B)」，20 个文件，覆盖 with/对照两臂的合并产物、C13 更新、C12 范围调整、CHANGELOG 与森林数据。工作区干净。",
+        "next_action": "无。后续 live 复测请先核对 /v1/models（端点会轮换模型），并带 --temperature 0 与 --seed；含 api_error 的 run 不会被合并。",
+        "evidence": [
+          "git commit 124c415（20 files changed）",
+          "提交前门禁：python tools/claim_gate.py → 11/11 gated claims pass, exit 0（C12 4/4 fresh，含 live 产物）",
+          "git status --porcelain 提交后为空"
+        ]
+      }
+    }
+  ]
+}
