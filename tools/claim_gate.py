@@ -18,6 +18,8 @@ Gated claims (thresholds mirror docs/claims-and-evidence.md exactly):
   C12 stored evidence freshness: each artifact's recorded fingerprint still matches the code
   C14 batch-read envelope: compact digest + batch budget hold on a frozen-trajectory replay
 C5 (learning cost) has no deterministic metric yet: status-only in evidence.json.
+C13 (live A/D) and C15 (where D's extra tokens come from) are registered in
+docs/claims-and-evidence.md without a pass threshold: they record measurements, not goals.
 
 Usage:
     python tools/claim_gate.py                 # regenerate metrics + run tests
@@ -68,6 +70,7 @@ EVIDENCE_ARTIFACTS = [
     "eval/jev_obs_report.json",
     "eval/cross_shell.json",
     "eval/tf45_envelope_replay.json",
+    "eval/exec_token_breakdown.json",
 ]
 
 

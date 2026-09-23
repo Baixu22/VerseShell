@@ -36,9 +36,11 @@ python bench/aci/runners/live_agent_loop.py --full --model <model> --base-url <e
 python bench/aci/runners/merge_live_runs.py --out bench/aci/results/latest_live.json <per-seed runs...>
 # C14：批量读取信封的固定轨迹复算（确定性，无 API 调用）
 python tools/tf45_envelope_replay.py --out eval/tf45_envelope_replay.json
+# C15：D 的额外 token 从哪来（逐 op 分解，确定性，无 API 调用）
+python tools/exec_token_breakdown.py --out eval/exec_token_breakdown.json
 ```
 
-## 3. 声明表（C1–C14）
+## 3. 声明表（C1–C15）
 
 ### C1 · 观察 token 比（mock bench）
 
@@ -187,13 +189,13 @@ python tools/tf45_envelope_replay.py --out eval/tf45_envelope_replay.json
 
 | 维度 | 内容 |
 |------|------|
-| 主张原文 | 门禁依赖的五份已存测量（ACI-Bench mock 结果、live A/D 结果、L3 观察质检报告、跨 shell 基准、批量读取信封复算）都记录了生成时被测代码面的 sha256 指纹，且该指纹与当前代码重算结果一致——也就是说这些数字描述的仍是当前实现，而不是两个月前的实现 |
-| 门槛数字 | 五份产物的记录指纹与重算指纹全部一致（`>= 1.00`） |
-| 复现命令 | `python tools/claim_gate.py`；重跑产物用 `python bench/aci/runners/run_suite.py --mode mock`、`python tools/jev_obs_judge.py`、`python tools/cross_shell_bench.py`、`python bench/aci/runners/live_agent_loop.py`（再 `merge_live_runs.py`）、`python tools/tf45_envelope_replay.py` |
-| source | `bench/aci/results/latest.json`、`bench/aci/results/latest_live.json`、`eval/jev_obs_report.json`、`eval/cross_shell.json`、`eval/tf45_envelope_replay.json`、`tools/claim_gate.py` |
-| 样本量 / 日期 | 5 份产物；2026-09-23 |
-| 最近实测 | 5/5 fresh（PASS）。引入本声明前的产物（如 2026-07-27 的 bench 结果）没有指纹字段，会被直接判失败 |
-| 失效边界 | 只覆盖登记在 `tools/claim_gate.py::EVIDENCE_ARTIFACTS` 的五份产物；`live_ab_without_read_files.json` 是配对对照臂，按设计不进 C12（重跑时机由 C13 记录）。指纹是**文件内容哈希**，不含运行环境（OS / 工具链 / CPU），所以换机器重跑不会因环境不同被判陈旧——跨机器可比性仍受 C11 的边界限制；产物未记录指纹时判失败（fail-closed） |
+| 主张原文 | 门禁依赖的六份已存测量（ACI-Bench mock 结果、live A/D 结果、L3 观察质检报告、跨 shell 基准、批量读取信封复算、exec token 分解）都记录了生成时被测代码面的 sha256 指纹，且该指纹与当前代码重算结果一致——也就是说这些数字描述的仍是当前实现，而不是两个月前的实现 |
+| 门槛数字 | 六份产物的记录指纹与重算指纹全部一致（`>= 1.00`） |
+| 复现命令 | `python tools/claim_gate.py`；重跑产物用 `python bench/aci/runners/run_suite.py --mode mock`、`python tools/jev_obs_judge.py`、`python tools/cross_shell_bench.py`、`python bench/aci/runners/live_agent_loop.py`（再 `merge_live_runs.py`）、`python tools/tf45_envelope_replay.py`、`python tools/exec_token_breakdown.py` |
+| source | `bench/aci/results/latest.json`、`bench/aci/results/latest_live.json`、`eval/jev_obs_report.json`、`eval/cross_shell.json`、`eval/tf45_envelope_replay.json`、`eval/exec_token_breakdown.json`、`tools/claim_gate.py` |
+| 样本量 / 日期 | 6 份产物；2026-09-23 |
+| 最近实测 | 6/6 fresh（PASS）。引入本声明前的产物（如 2026-07-27 的 bench 结果）没有指纹字段，会被直接判失败 |
+| 失效边界 | 只覆盖登记在 `tools/claim_gate.py::EVIDENCE_ARTIFACTS` 的六份产物；`live_ab_without_read_files.json` 是配对对照臂，按设计不进 C12（重跑时机由 C13 记录），但它是 `eval/exec_token_breakdown.json` 的输入，所以那份产物会随它一起更新。指纹是**文件内容哈希**，不含运行环境（OS / 工具链 / CPU），所以换机器重跑不会因环境不同被判陈旧——跨机器可比性仍受 C11 的边界限制；产物未记录指纹时判失败（fail-closed） |
 | 状态 | 已证实 |
 
 ### C13 · live A/D 对比与 read_files A/B（真实模型）
@@ -206,7 +208,7 @@ python tools/tf45_envelope_replay.py --out eval/tf45_envelope_replay.json
 | source | `bench/aci/runners/live_agent_loop.py`、`bench/aci/runners/merge_live_runs.py`、`bench/aci/results/latest_live.json`（with，3 次合并）、`bench/aci/results/live_ab_without_read_files.json`（同期对照，3 次合并）、`bench/aci/results/tf45/with_seed*.json`、`bench/aci/results/tf45/without_seed*.json`（逐 seed 原始行）、`bench/aci/tasks/*.json` |
 | 样本量 / 日期 | 10 任务 × 2 条件 × 3 seeds × 2 臂 = 120 行，`api_error` 0；2026-09-23 |
 | 最近实测 | **本轮（紧凑摘要客户端）** 有 `read_files`：A success 0.6333 / tools 3.20 / obs_tok 197.4；D 0.60 / **5.23** / **333.4**（D/A 1.6354 / 1.6888）。无 `read_files`（同期对照）：A 0.60 / 3.07 / 191.1；D 0.60 / **5.93** / **271.8**（D/A 1.9348 / 1.4223）。`read_many` 在 24/30 次 D 运行中被采用。逐 seed 波动很大：with 臂 D/A 工具比 1.36/2.20/1.51、token 比 1.66/2.11/1.43。**上一轮（完整摘要客户端，已被本轮取代）**：有 `read_files` D 5.50 / 411.1（D/A 1.748 / 2.443）；对照 D 6.03 / 300.2（D/A 1.947 / 1.982） |
-| 失效边界 | ①**单模型**（`sn-glm-5-3-flash`），不可外推；该模型曾被端点下架又恢复，说明端点会轮换模型，复测前必须先核对 `/v1/models`。②**名义确定性**：端点接受 `seed` 但不严格复现（同 seed 的 tool_call id 与 token 数仍不同），3 次重复给的是经验区间而非确定性复算——本轮 with 臂逐 seed 的 D/A 工具比在 1.36–2.20 之间。③**跨轮比较必须标注口径**：本轮与上一轮之间客户端投影变了（逐文件完整 `sha256` → 16 位紧凑摘要），且 A 侧代码完全未动而 obs_tok 从 168.6 漂到 197.4（+17%），所以「D/A token 比 2.44 → 1.69」**不能**全部归因于信封改动；信封的净效应由确定性复算给出（C14：读取调用 −22.1%），live 侧可对照的干净信号是 `read_many` 单次开销 175.6 → 135.6（−22.8%）。④观察 token 用 `len(text)//4` 估算，不是真实 tokenizer。⑤成功判定是任务自带的文件谓词，不要求真的跑测试（A 常常不跑测试也满足）。⑥本机 `tsc` 缺失、裸 `pytest` 在 Windows 上因 console-script 的 `sys.path` 行为失败（规范形式 `python -m pytest`），两条件同样受限；失败 exec 仍是 D 的最大单项开销。⑦**与 mock 的 C1/C2 不可混用**：mock 的 D 直接套 GOLDEN 补丁，0.106/0.55 是评分管线自检，不是能力测量。⑧上游会间歇性 500（`parse response failed`）：本轮 6 次运行 120 行全部 `api_error` 0，未触发补跑；合并脚本遇到即 exit 2，不会把故障平均成 0 工具/0 token |
+| 失效边界 | ①**单模型**（`sn-glm-5-3-flash`），不可外推；该模型曾被端点下架又恢复，说明端点会轮换模型，复测前必须先核对 `/v1/models`。②**名义确定性**：端点接受 `seed` 但不严格复现（同 seed 的 tool_call id 与 token 数仍不同），3 次重复给的是经验区间而非确定性复算——本轮 with 臂逐 seed 的 D/A 工具比在 1.36–2.20 之间。③**跨轮比较必须标注口径**：本轮与上一轮之间客户端投影变了（逐文件完整 `sha256` → 16 位紧凑摘要），且 A 侧代码完全未动而 obs_tok 从 168.6 漂到 197.4（+17%），所以「D/A token 比 2.44 → 1.69」**不能**全部归因于信封改动；信封的净效应由确定性复算给出（C14：读取调用 −22.1%），live 侧可对照的干净信号是 `read_many` 单次开销 175.6 → 135.6（−22.8%）。④观察 token 用 `len(text)//4` 估算，不是真实 tokenizer。⑤成功判定是任务自带的文件谓词，不要求真的跑测试（A 常常不跑测试也满足）。⑥本机 `tsc` 缺失、裸 `pytest` 在 Windows 上因 console-script 的 `sys.path` 行为失败（规范形式 `python -m pytest`），两条件同样受限；失败 exec 仍是 D 的最大单项开销。⑦**与 mock 的 C1/C2 不可混用**：mock 的 D 直接套 GOLDEN 补丁，0.106/0.55 是评分管线自检，不是能力测量。⑧上游会间歇性 500（`parse response failed`）：本轮 6 次运行 120 行全部 `api_error` 0，未触发补跑；合并脚本遇到即 exit 2，不会把故障平均成 0 工具/0 token。⑨**逐 op 分解纠正了一个直觉**：`exec.run` 确实是 D 的单项最大开销（50.4%），但它**不是** D 比 A 贵的原因——把 +144.0 tok/run 的差距分桶后 read +84.8（58.9%）、edit +24.8（17.2%）、exec +23.3（16.2%）、meta +3.0（2.1%）。详见 C15 |
 | 状态 | 已证实（本机单模型、3 次重复 × 2 臂，中性/负向结论） |
 
 ### C14 · 批量读取信封（紧凑摘要 + 批量预算，固定轨迹复算）
@@ -222,6 +224,19 @@ python tools/tf45_envelope_replay.py --out eval/tf45_envelope_replay.json
 | 失效边界 | ①这是**客户端信封效应**，不是模型行为测量：调用集合被冻结，所以它说不出「模型会不会因此换别的调用」。②只有「stored live 那次运行所用的投影能复现其记录的 token 数」的调用才计入（本轮 `matched={'current': 33}`，`coverage=33/37`）；这条判据同时保证基线确实是模型当时看到的东西，并让工具在「改了客户端却没重跑 live」时直接判失败而不是悄悄给出跨口径比较。③`file.read_many` 24/24 全部精确匹配，且「新口径」合计与 live 实测合计相同，是最强的保真度交叉验证。④token 用 `len(text)//4` 估算，不是真实 tokenizer。⑤预算与分页那一半是结构性事实（返回行数 ≤ `max_total_lines`、分页可逐行复原），与模型无关，但**只在 `file.read_many` 上成立**；`file.view` / `file.read_range` 仍是单文件窗口。⑥本声明的数字**不能**与 C13 的 live D/A 比值相加或相减来解释：C13 的 D 侧同时含 `exec.run` 等非读取开销 |
 | 状态 | 已证实 |
 
+### C15 · D 的额外 token 从哪来（exec token 分解，TF-0058）
+
+| 维度 | 内容 |
+|------|------|
+| 主张原文 | 用已存 live 产物做逐 op 分解（不调用 API）：①`exec.run` 占条件 D 的 observation token **50.4%**（5045/10001，168.2 tok/run，63.1 tok/次）；②其中 **80.1% 的 exec token 来自失败的命令**（42 次失败 @96.2 tok = 4042 tok，只占 52.5% 的调用）；③with/without `read_files` 的 exec 增量 +29.2 tok/run 拆成次数效应 46% / 单次效应 54% / 交互 5%，且增量全部来自失败命令多了 7 次（35→42），单次成功成本反而下降（30.6→26.4）；④**关键纠正**：`exec.run` 不是 D 比 A 贵的原因——+144.0 tok/run 的差距分桶为 read +84.8（58.9%）、edit +24.8（17.2%）、exec +23.3（16.2%）、meta +3.0（2.1%）；D 每个文件引用 48.0 tok（A 的 `type` 是 26.0），且读的文件引用数多约 1.6× |
+| 门槛数字 | 无（诊断性测量，只登记事实，不设通过门槛） |
+| 复现命令 | `python tools/exec_token_breakdown.py --out eval/exec_token_breakdown.json`，再 `python tools/claim_gate.py` |
+| source | `tools/exec_token_breakdown.py`、`bench/aci/results/latest_live.json`、`bench/aci/results/live_ab_without_read_files.json`、`eval/exec_token_breakdown.json` |
+| 样本量 / 日期 | with 臂 30 次 D 运行（10 任务 × 3 seeds）/ 80 次 `exec.run`；对照臂 30 次 / 73 次；2026-09-23 |
+| 最近实测 | with：D 333.37 tok/run，`exec.run` 80 次 / 5045 tok（50.4%，168.17/run，63.06/次），成功 38 次 @26.39、失败 42 次 @96.24。without：D 271.8 tok/run，`exec.run` 73 次 / 4169 tok（51.1%，138.97/run，57.11/次），成功 38 次 @30.55、失败 35 次 @85.94。差距分桶：read +84.77、edit +24.83、exec +23.33、meta +3.03。读取形状：D 37 次读取 / 3842 tok / 每次 2.16 个文件引用 / 每引用 48.02；A 40 次读取命令 / 1299 tok / 1.25 / 25.98 |
+| 失效边界 | ①**纯诊断**，不是对外主张，也不能反过来当作「ACI 省 token」的证据。②A 侧分桶是**启发式**：按命令字符串关键词分成 build_or_test / read_file / write_or_mkdir / other，优先级 build > read > write；一条命令可能同时读和构建，残差进 other（本轮 other 仅 5 次 / 318 tok），所以 A 的桶是近似值。③A 的 trajectory 不记录单次命令成败（只有 D 记 `aci_ok`），因此无法对 A 做成功/失败拆分。④「每个文件引用」在 D 侧由 `file.read_many.paths` 精确计数、在 A 侧由 `type`/`cat` 出现次数近似，两者不是同一种计数单位。⑤token 仍是 `len(text)//4` 估算。⑥结论只对**本模型、本任务集、本轮 120 行**成立；换模型或换任务集必须重跑 |
+| 状态 | 已证实（本机单模型、诊断性） |
+
 ## 4. 与 README 主张的对应关系
 
 - README 若出现 C1/C2 类数字，必须写成「mock bench，10 任务/条件，seed 42」并指向 `eval/evidence.json`，不得写成真实模型实测。
@@ -232,6 +247,7 @@ python tools/tf45_envelope_replay.py --out eval/tf45_envelope_replay.json
 - C12 是**证据新鲜度**声明：改动被测代码后先重跑对应 runner（`run_suite.py` / `jev_obs_judge.py` / `cross_shell_bench.py` / `live_agent_loop.py`）再跑门禁；产物缺少指纹时直接判失败（fail-closed），不允许用旧数字过门禁。
 - C13 是 **live** 声明：引用真实模型结果时必须同时给出模型、端点、运行次数与方差边界；不得把 mock 的 C1/C2 数字写成真实模型实测，也不得用 live 的负向结论否定 mock 的管线自检作用（两者口径不同）。
 - C14 是**信封**声明：它测的是观察面（同一信封两种投影的 token 差）与批量预算的硬上限，不是模型能力；引用时必须带上 `coverage`（哪些调用无法复现、为什么），不得把它写成「ACI 整体省 22%」或「D/A 比值已降到 X」。
+- C15 是**诊断**声明：它回答「D 的额外 token 从哪来」，用来决定下一步该改哪里，不是对外主张。引用时必须带上它的启发式边界（A 侧分桶、A 无成败标记、文件引用计数口径不同），不得写成「ACI 的 exec 更省」这类结论。
 - 新增任何对外数字时：先在本文件加一行，再在 `tools/claim_gate.py` 加对应门槛（或显式标注不设门槛），最后跑 `python tools/claim_gate.py`。
 
 ## 5. 口径统一规则（已按根策略裁决）
@@ -251,7 +267,7 @@ mock 实测值（0.106 / 0.55）在两侧都过线。今后新增对外数字一
 |------|------|------|
 | （无） | — | 2026-09-22：原「compact 协议 50–70% token 节省 vs JSON」已处置。该数字**无法复现**（实测小响应信封 42.4%、观察载荷合计 −3.1%），已按 §4 登记为 C9，并把 README 口径改成 C9 的实测范围。当前没有已知的「已进 README 但未登记」对外数字 |
 
-## 7. L3 观察质检（不进 C1–C14 门禁）
+## 7. L3 观察质检（不进 C1–C15 门禁）
 
 `tools/jev_obs_judge.py`（TF-0012）对每个失败样本问两个窄问题，产出 `eval/jev_obs_report.json` + `eval/jev_obs_report.md`：
 

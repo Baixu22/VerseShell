@@ -49,6 +49,16 @@
   Single-run variance is large, so the direction is the finding, not the ratio.
 
 ### Changed
+- Decomposed condition D's extra observation tokens with stored artifacts only
+  (claim C15, `tools/exec_token_breakdown.py`). `exec.run` is D's biggest single
+  line item (50.4% of D, 63.1 tokens/call) but it is **not** why D costs more
+  than raw shell: of the +144.0 tokens/run gap, reading is +84.8 (58.9%), edits
+  +24.8 (17.2%) and exec only +23.3 (16.2%). D pays 48.0 tokens per file
+  reference against raw shell's 26.0 and reads ~1.6x as many file references.
+  80.1% of D's exec tokens come from failed commands (96.2 tokens each versus
+  26.4 for successes), and adding batch reads raised exec tokens only by issuing
+  7 more failing commands while the per-success cost fell. The next token lever
+  is the read envelope, not the exec reducer.
 - Re-measured the live A/B on the new envelope (same model `sn-glm-5-3-flash`,
   same endpoint, seeds 42/43/44, 10 tasks x 2 conditions x 2 arms, 120 rows,
   `api_error` 0). Condition D/A is now **1.64x the tool calls and 1.69x the

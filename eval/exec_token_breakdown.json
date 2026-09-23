@@ -1,0 +1,382 @@
+{
+  "schema": "verseshell.exec-token-breakdown/v1",
+  "generated_at": "2026-09-23T11:22:04.613942+00:00",
+  "method": {
+    "inputs": [
+      "bench\\aci\\results\\latest_live.json",
+      "bench\\aci\\results\\live_ab_without_read_files.json"
+    ],
+    "run": "one (task, seed) cell; each arm is 10 tasks x 3 seeds = 30 D runs",
+    "tokens": "len(projected_text) // 4, the same estimate the live bench records",
+    "decomposition": "total/run = calls/run * tokens/call, so the change splits into count effect (dc * p0), per-call effect (c1 * dp) and interaction (dc * dp)",
+    "command_intent": "heuristic keyword buckets ordered build_or_test > read_file > write_or_mkdir > other; raw shell reads files through `type`, so its run_command cost is not comparable to D's exec.run without this split"
+  },
+  "evidence": {
+    "globs": [
+      "bench/aci/results/latest_live.json",
+      "bench/aci/results/live_ab_without_read_files.json",
+      "tools/exec_token_breakdown.py"
+    ],
+    "fingerprint": "948036bd753423bc4769d4f9ee408406ea32a4d499e3c2e29222172adae24eb2"
+  },
+  "arms": {
+    "with_read_files": {
+      "d_runs": 30,
+      "d_total_tokens": 10001,
+      "d_tokens_per_run": 333.37,
+      "d_ops": {
+        "exec.run": {
+          "calls": 80,
+          "tokens": 5045,
+          "tokens_per_call": 63.06
+        },
+        "file.read_many": {
+          "calls": 24,
+          "tokens": 3254,
+          "tokens_per_call": 135.58
+        },
+        "file.view": {
+          "calls": 13,
+          "tokens": 588,
+          "tokens_per_call": 45.23
+        },
+        "file.replace_exact": {
+          "calls": 20,
+          "tokens": 508,
+          "tokens_per_call": 25.4
+        },
+        "file.write": {
+          "calls": 11,
+          "tokens": 275,
+          "tokens_per_call": 25.0
+        },
+        "task_complete": {
+          "calls": 27,
+          "tokens": 216,
+          "tokens_per_call": 8.0
+        },
+        "repo.summary": {
+          "calls": 8,
+          "tokens": 112,
+          "tokens_per_call": 14.0
+        },
+        "repo.search": {
+          "calls": 1,
+          "tokens": 3,
+          "tokens_per_call": 3.0
+        }
+      },
+      "exec_run": {
+        "calls": 80,
+        "tokens": 5045,
+        "share_of_d_tokens": 0.5044,
+        "tokens_per_run": 168.17,
+        "tokens_per_call": 63.06,
+        "per_task": {
+          "rust_search_and_edit": {
+            "calls": 14,
+            "tokens": 1254
+          },
+          "rust_add_unit_test": {
+            "calls": 13,
+            "tokens": 1231
+          },
+          "rust_fix_compile_error": {
+            "calls": 14,
+            "tokens": 1037
+          },
+          "ts_fix_type_error": {
+            "calls": 15,
+            "tokens": 689
+          },
+          "python_fix_pytest_fail": {
+            "calls": 6,
+            "tokens": 339
+          },
+          "python_edit_and_retest": {
+            "calls": 5,
+            "tokens": 237
+          },
+          "ts_package_script_fail": {
+            "calls": 6,
+            "tokens": 191
+          },
+          "python_noisy_install_summary": {
+            "calls": 4,
+            "tokens": 45
+          },
+          "windows_path_normalize_edit": {
+            "calls": 3,
+            "tokens": 22
+          }
+        },
+        "ok_vs_failed": {
+          "calls": 80,
+          "tokens": 5045,
+          "ok": {
+            "calls": 38,
+            "tokens": 1003,
+            "tokens_per_call": 26.39
+          },
+          "failed": {
+            "calls": 42,
+            "tokens": 4042,
+            "tokens_per_call": 96.24
+          },
+          "failed_share_of_calls": 0.525,
+          "failed_share_of_tokens": 0.8012
+        }
+      },
+      "read_shape": {
+        "calls": 37,
+        "tokens": 3842,
+        "tokens_per_call": 103.84,
+        "file_refs": 80,
+        "file_refs_per_call": 2.16,
+        "tokens_per_file_ref": 48.02
+      },
+      "raw_shell": {
+        "runs": 30,
+        "command": {
+          "calls": 96,
+          "tokens": 5682,
+          "tokens_per_call": 59.19
+        },
+        "command_intents": {
+          "build_or_test": {
+            "calls": 40,
+            "tokens": 4027,
+            "tokens_per_call": 100.67
+          },
+          "read_file": {
+            "calls": 40,
+            "tokens": 1299,
+            "tokens_per_call": 32.48
+          },
+          "other": {
+            "calls": 5,
+            "tokens": 318,
+            "tokens_per_call": 63.6
+          },
+          "write_or_mkdir": {
+            "calls": 11,
+            "tokens": 38,
+            "tokens_per_call": 3.45
+          }
+        },
+        "read_command_shape": {
+          "calls": 40,
+          "tokens": 1299,
+          "tokens_per_call": 32.48,
+          "file_refs": 50,
+          "file_refs_per_call": 1.25,
+          "tokens_per_file_ref": 25.98
+        }
+      }
+    },
+    "without_read_files": {
+      "d_runs": 30,
+      "d_total_tokens": 8154,
+      "d_tokens_per_run": 271.8,
+      "d_ops": {
+        "exec.run": {
+          "calls": 73,
+          "tokens": 4169,
+          "tokens_per_call": 57.11
+        },
+        "file.view": {
+          "calls": 67,
+          "tokens": 2874,
+          "tokens_per_call": 42.9
+        },
+        "file.replace_exact": {
+          "calls": 20,
+          "tokens": 508,
+          "tokens_per_call": 25.4
+        },
+        "file.write": {
+          "calls": 13,
+          "tokens": 325,
+          "tokens_per_call": 25.0
+        },
+        "task_complete": {
+          "calls": 26,
+          "tokens": 208,
+          "tokens_per_call": 8.0
+        },
+        "repo.summary": {
+          "calls": 5,
+          "tokens": 70,
+          "tokens_per_call": 14.0
+        }
+      },
+      "exec_run": {
+        "calls": 73,
+        "tokens": 4169,
+        "share_of_d_tokens": 0.5113,
+        "tokens_per_run": 138.97,
+        "tokens_per_call": 57.11,
+        "per_task": {
+          "rust_add_unit_test": {
+            "calls": 12,
+            "tokens": 1050
+          },
+          "rust_search_and_edit": {
+            "calls": 9,
+            "tokens": 823
+          },
+          "ts_fix_type_error": {
+            "calls": 17,
+            "tokens": 767
+          },
+          "rust_fix_compile_error": {
+            "calls": 11,
+            "tokens": 721
+          },
+          "python_fix_pytest_fail": {
+            "calls": 6,
+            "tokens": 339
+          },
+          "ts_package_script_fail": {
+            "calls": 7,
+            "tokens": 213
+          },
+          "python_edit_and_retest": {
+            "calls": 4,
+            "tokens": 138
+          },
+          "python_noisy_install_summary": {
+            "calls": 4,
+            "tokens": 99
+          },
+          "windows_path_normalize_edit": {
+            "calls": 3,
+            "tokens": 19
+          }
+        },
+        "ok_vs_failed": {
+          "calls": 73,
+          "tokens": 4169,
+          "ok": {
+            "calls": 38,
+            "tokens": 1161,
+            "tokens_per_call": 30.55
+          },
+          "failed": {
+            "calls": 35,
+            "tokens": 3008,
+            "tokens_per_call": 85.94
+          },
+          "failed_share_of_calls": 0.4795,
+          "failed_share_of_tokens": 0.7215
+        }
+      },
+      "read_shape": {
+        "calls": 67,
+        "tokens": 2874,
+        "tokens_per_call": 42.9,
+        "file_refs": 67,
+        "file_refs_per_call": 1.0,
+        "tokens_per_file_ref": 42.9
+      },
+      "raw_shell": {
+        "runs": 30,
+        "command": {
+          "calls": 92,
+          "tokens": 5493,
+          "tokens_per_call": 59.71
+        },
+        "command_intents": {
+          "build_or_test": {
+            "calls": 39,
+            "tokens": 3730,
+            "tokens_per_call": 95.64
+          },
+          "read_file": {
+            "calls": 35,
+            "tokens": 1536,
+            "tokens_per_call": 43.89
+          },
+          "other": {
+            "calls": 4,
+            "tokens": 167,
+            "tokens_per_call": 41.75
+          },
+          "write_or_mkdir": {
+            "calls": 14,
+            "tokens": 60,
+            "tokens_per_call": 4.29
+          }
+        },
+        "read_command_shape": {
+          "calls": 35,
+          "tokens": 1536,
+          "tokens_per_call": 43.89,
+          "file_refs": 46,
+          "file_refs_per_call": 1.31,
+          "tokens_per_file_ref": 33.39
+        }
+      }
+    }
+  },
+  "exec_run_delta_with_minus_without": {
+    "runs": 30,
+    "before": {
+      "calls_per_run": 2.433,
+      "tokens_per_call": 57.11,
+      "tokens_per_run": 138.97
+    },
+    "after": {
+      "calls_per_run": 2.667,
+      "tokens_per_call": 63.06,
+      "tokens_per_run": 168.17
+    },
+    "delta_tokens_per_run": 29.2,
+    "count_effect": 13.33,
+    "per_call_effect": 15.87,
+    "interaction": 1.39,
+    "count_share": 0.4564,
+    "per_call_share": 0.5436
+  },
+  "d_vs_a": {
+    "a_total_tokens": 5682,
+    "a_tokens_per_run": 189.4,
+    "d_tokens_per_run": 333.37,
+    "gap_tokens_per_run": 143.97,
+    "d_exec_run_tokens_per_run": 168.17,
+    "a_run_command_tokens_per_run": 189.4,
+    "note": "A's run_command also performs file reading (`type file`), which D splits into file.view / file.read_many, so a smaller D exec.run does not by itself make D cheaper; the raw_shell command_intents table shows how much of A is reading"
+  },
+  "gap_decomposition": {
+    "runs_d": 30,
+    "runs_a": 30,
+    "total_gap_tokens_per_run": 143.97,
+    "buckets": {
+      "read": {
+        "d_tokens_per_run": 128.07,
+        "a_tokens_per_run": 43.3,
+        "delta_tokens_per_run": 84.77,
+        "share_of_gap": 0.5888
+      },
+      "exec": {
+        "d_tokens_per_run": 168.17,
+        "a_tokens_per_run": 144.83,
+        "delta_tokens_per_run": 23.33,
+        "share_of_gap": 0.1621
+      },
+      "edit": {
+        "d_tokens_per_run": 26.1,
+        "a_tokens_per_run": 1.27,
+        "delta_tokens_per_run": 24.83,
+        "share_of_gap": 0.1725
+      },
+      "meta": {
+        "d_tokens_per_run": 11.03,
+        "a_tokens_per_run": 8.0,
+        "delta_tokens_per_run": 3.03,
+        "share_of_gap": 0.0211
+      }
+    },
+    "note": "D buckets by typed op; A buckets by heuristic command intent. A's read bucket is `type`-style commands, which is how A reads files at all, so this is the closest available like-for-like split rather than an exact one"
+  }
+}
