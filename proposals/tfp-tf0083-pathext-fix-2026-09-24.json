@@ -1,0 +1,143 @@
+{
+  "applied_at": "2026-09-24T12:35:37.594479Z",
+  "base_graph_hash": "a8307dc8c34ba2584d0f656c8f248314b564853749905faffdffd68bdfb87194",
+  "base_summary": {
+    "edge_count": 135,
+    "node_count": 85,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "acceptance_criteria": [
+          "先加一个今天会失败的回归用例：同一目录里同时有无扩展名 `sample` 与 `sample.CMD` 时，`resolve_process_command([\"sample\"])` 必须按 PATHEXT 解析到 `sample.CMD` 并按批处理启动",
+          "修 `resolve_candidate`：无扩展名候选先按 PATHEXT 顺序找，全部不存在时才回退到无扩展名文件",
+          "C18 的命名不变量不被破坏（`cargo.exe` 这类带扩展名的 symlink 仍按调用名启动）：`cargo test --lib process_command` 与 C18 门禁全绿",
+          "把 live 重跑交给 TF-0085：在它完成前 C12 会保持红（唯一陈旧产物是 live 基线），这是机检信号而不是回归"
+        ],
+        "evidence": [
+          "代码：`src/process_command.rs::resolve_candidate` 131-133 行先返回 `is_file()` 的无扩展名候选，PATHEXT 分支（135-144 行）只在它不存在时才走",
+          "机器事实：`eval/ts_fixture_audit.json::path_shadow` 列出 npm/npx/yarn/pnpm/corepack 在 `C:\\Program Files\\nodejs`、`C:\\Users\\...\\nvm\\v24.15.0`、`C:\\Users\\...\\AppData\\Roaming\\npm` 都有无扩展名文件与 `.cmd` 兄弟",
+          "live 证据：`ts_package_script_fail` D 3/3 次裸名 `npm test` 失败（48 tok），紧接的 `.cmd`/`cmd /c` 形式成功（22 tok）",
+          "live 证据：`ts_fix_type_error` D 3/3 次各有 `[\"npx\",\"tsc\",\"--noEmit\"]` 与 `[\"npm\",\"install\",...]` 失败（共 6 次 / 288 tok）",
+          "来源：TF-0082 的 C21 分解（`acquisition_chain` 的 `bare_name_launch` 桶）",
+          "代码：`src/process_command.rs::resolve_candidate` 现在对 `candidate.extension().is_none()` 先按 PATHEXT 顺序找，找不到才回退到无扩展名文件；两个回归用例 `prefers_a_pathext_candidate_over_an_extensionless_shim` / `falls_back_to_an_extensionless_candidate`（前者在修复前红、修复后绿）",
+          "单测：`cargo test --lib process_command` → 6 passed（含 C18 的 symlink 命名不变量用例）",
+          "真实 exec.run 对照（修复前）：`[\"npm\",\"--version\"]` → `E_EXEC_SPAWN`（resolved 到 `...\\nvm\\v24.15.0\\npm`）、`[\"npx\",\"--version\"]` 同样失败；同一时刻 `npm.cmd` / `npx.cmd` / `cmd /c npm` 均 `ok=true exit=0`（11.11.0）",
+          "真实 exec.run 对照（修复后）：`npm` / `npx` / `yarn` / `pnpm` / `corepack --version` 5/5 `ok=true exit=0`（11.11.0 / 11.11.0 / 1.22.22 / 10.33.2 / 0.34.6）",
+          "新声明 C22 + 门禁：`tools/exec_failure_breakdown.py::bare_name_probe` 对每个被 PATH 遮蔽的裸名跑裸名命令与 `.cmd` 对照（对照失败则跳过该名字），fail-closed 要求本机确有遮蔽；`claim_gate` C22 = 1.0 PASS，C18 同时仍 PASS",
+          "产物：`eval/exec_failure_breakdown.json` 新增 `bare_name_facts` / `bare_name_probe` 两段",
+          "C12 状态：唯一陈旧产物是 `bench/aci/results/latest_live.json`（其余 10 份已按 C12 重跑并 fresh）；`claim_gate` 15/16（C1–C11/C14/C16/C18/C22 全绿，C12 红），`readme_claims_check` 全 PASS",
+          "顺带同步：`eval/cross_shell.json` 重跑后 worst 0.2301 → 0.2535，README 跨 shell 表格与 C11 行已同步（C10 重新 PASS）",
+          "提交：33f9872（内容：src + tools + docs + README + CHANGELOG + 重跑产物）"
+        ],
+        "next_action": "等 TF-0085 的 live 重跑（需要端点凭据 `LOCAL3065_API_KEY`，见 TF-0085）完成后收口；收口时把 C13/C15/C19/C20/C21 的数字一并更新。",
+        "progress": 75.0,
+        "status": "in_progress",
+        "summary": "解析缺陷已修：`resolve_candidate` 对无扩展名的候选先按 PATHEXT 找、找不到才回退到无扩展名文件，并加两个回归用例（被遮蔽时选 `.cmd`、无 PATHEXT 候选时仍回退）。真实 exec.run 的修复前后对照：`npm --version` / `npx --version` 由 `E_EXEC_SPAWN`（resolved 到 `...\\nvm\\v24.15.0\\npm`）变成 `ok=true exit=0`（11.11.0），本机 5 个被遮蔽的裸名全部可启动。新声明 C22 把它变成机检：`bare_name_probe` 对每个被遮蔽的裸名跑裸名命令 + `.cmd` 对照，fail-closed；C18 的 rustup 命名不变量未被破坏（`cargo test --lib process_command` 6/6、C18 门禁 PASS）。**未完成的是 AC#4**：live 基线还没重跑（本会话没有端点凭据 `LOCAL3065_API_KEY`），所以 C12 仍红，唯一陈旧产物是 `bench/aci/results/latest_live.json`；其余 10 份产物已按 C12 重跑并 fresh（C10/C11 也随之同步）。"
+      },
+      "id": "TF-0083"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "acceptance_criteria": [
+          "必须在 TF-0083 的解析修复（已落地 33f9872）与 TF-0084 的谓词修复之后跑，否则新基线仍带旧口径",
+          "用 `sn-glm-5-3-flash` 跑 10 任务 × 2 条件 × 3 seeds × 2 臂；先核对 `/v1/models`，任一行 `api_error` 即按 `splice_live_cells.py` 补跑后合并",
+          "重跑并更新 C13/C15/C19/C20/C21 与 C12 指纹（含 `exec_token_breakdown` / `read_usage_audit` / `exec_failure_breakdown` / `step_composition` / `ts_fixture_audit` 五份派生产物），`claim_gate` 与 `readme_claims_check` 全绿",
+          "报告里逐条写明与 2026-09-24 之前各轮的不可比性（fixture 与模型不变，变的是产品解析与成功口径）",
+          "若最终决定给 ts fixture 补离线 typescript，必须在本节点内完成并用 `tsc --noEmit` 实测三种修复形态"
+        ],
+        "evidence": [
+          "C12 指纹：`bench/aci/results/latest_live.json` 的 evidence.globs = src/**/*.rs、Cargo.toml、bench/aci/tasks/*.json、bench/aci/fixtures/**/*、bench/aci/runners/live_agent_loop.py",
+          "上一轮规模：with 臂 60 行合计 81.2 分钟；`live_config` = model sn-glm-5-3-flash、temperature 0、seed 42、repeat 3、max_turns 8",
+          "端点核对（2026-09-24）：`GET /v1/models` 仍列出 `sn-glm-5-3-flash`",
+          "`bench/aci/runners/merge_live_runs.py` 遇 `api_error` 即 exit 2；`bench/aci/runners/splice_live_cells.py` 按 (task, condition, seed) 补格",
+          "本轮实测（2026-09-24）：`GET /v1/models` 无需凭据即可访问（200），但 `POST /v1/chat/completions` 无 key / 错 key 一律 401；本会话环境没有 `LOCAL3065_API_KEY`，`~/.dsh/.credentials.yaml` 的 refs 里也没有该键 → 本轮无法执行 live 重跑",
+          "C12 现状（2026-09-24，修 `resolve_candidate` 之后）：15/16 gated claims pass，唯一陈旧产物是 `bench/aci/results/latest_live.json`（记录指纹 651f7a1c… / 当前 8590a31e…），其余 10 份产物 fresh",
+          "重跑范围：6 次 `live_agent_loop.py --full`（seeds 42/43/44 × with/without `--exclude-tools read_files`），每次 20 行；再 `merge_live_runs.py` 合并 with 与 without 两份产物",
+          "重跑后必须一并重跑的确定性产物：`eval/exec_token_breakdown.json`、`eval/read_usage_audit.json`、`eval/exec_failure_breakdown.json`、`eval/step_composition.json`、`eval/ts_fixture_audit.json`（它们的指纹覆盖 live 产物，会随之一并判陈旧）"
+        ],
+        "next_action": "先解决凭据（把 `LOCAL3065_API_KEY` 放进环境或告知可用的 key），然后：6 次 `live_agent_loop.py --full --model sn-glm-5-3-flash --base-url http://127.0.0.1:3065/v1 --temperature 0 --seed <42|43|44>`（其中 3 次加 `--exclude-tools read_files`）→ `merge_live_runs.py` 合并两份产物 → 重跑受影响的确定性产物 → 更新 C13/C15/C19/C20/C21 数字与 C12 指纹 → `claim_gate` + `readme_claims_check` → 森林收口并关闭 TF-0083。",
+        "summary": "C12 的指纹覆盖 `src/**/*.rs`、`bench/aci/tasks/*.json` 与 `bench/aci/fixtures/**/*`，所以 TF-0083 改了 `src/process_command.rs` 之后 `bench/aci/results/latest_live.json` 立刻被判陈旧（当前 15/16，唯一陈旧产物就是它）——重跑不是可选项。**本轮被凭据卡住**：`GET /v1/models` 不需要 key，但 `POST /v1/chat/completions` 无 key/错 key 一律 401，而本会话环境没有 `LOCAL3065_API_KEY`（`~/.dsh/.credentials.yaml` 的 refs 里也没有该键），所以这 6 次调用还没跑。重跑规模：`sn-glm-5-3-flash`，10 任务 × 2 条件 × 3 seeds × 2 臂 = 120 行；上一轮 6 次 `--full` 调用合计约 100 分钟运行时间。"
+      },
+      "id": "TF-0085"
+    },
+    {
+      "action": "add_node",
+      "alias": "doc-artifact-drift",
+      "node": {
+        "acceptance_criteria": [
+          "删掉 C15 表格里的重复行块，并确认数字与 `eval/exec_token_breakdown.json` 一致",
+          "把 C14 的样本量与最近实测改成当前 `eval/tf45_envelope_replay.json` 的数字（34 次调用 / 30 次复现 / 2490 → 1834 / 各 op 的 savings），保留「新口径一侧与 C16 逐位相同」这条交叉验证",
+          "抽查其它 Cx 行是否也有同类漂移（至少覆盖 C15/C16/C17/C19/C20 的样本量与数字）",
+          "`python tools/claim_gate.py` 与 `python tools/readme_claims_check.py` 保持全绿（本节点只改文档，不需要重跑 live）"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "让结论可被第三方只读复现",
+          "validation_plan": [
+            "改 C14/C15",
+            "全表抽查",
+            "claim_gate + readme_claims_check 复跑"
+          ],
+          "why_not_enough": "还没逐条核对所有 Cx 行的样本量与数字是否都跟得上产物换代",
+          "why_this_task": "文档与产物数字不一致时，第三方按文档复现会得到不同结果，声明链就失去可审计性"
+        },
+        "confidence": 0.85,
+        "context_tags": [
+          "docs",
+          "claims",
+          "evidence"
+        ],
+        "difficulty": "low",
+        "display_order": 250,
+        "evidence": [
+          "C15 重复行：`docs/claims-and-evidence.md` 里 `| 门槛数字 | 无（诊断性测量，只登记事实，不设通过门槛） |` 在 C15 段落出现两次（242 与 247 行附近），随后三行同样重复",
+          "C14 漂移：doc 的 C14 样本量写 38 次调用 / 33 复现 / 4181 → 3079，而 `python tools/tf45_envelope_replay.py --out eval/tf45_envelope_replay.json` 当前产出 34 次调用 / 30 次复现 / 2490 → 1834（coverage 0.8824，`legacy_comparison_exact=true`）",
+          "C12 覆盖不到的原因：`eval/tf45_envelope_replay.json` 的 evidence.globs 不含 `bench/aci/results/latest_live.json`，所以 live 基线换代不会让它判陈旧",
+          "来源：TF-0083 轮按 C12 重跑全部确定性产物时核对得出"
+        ],
+        "id": "TF-0086",
+        "kind": "follow_up",
+        "next_action": "先改 C14/C15 两处，再做一次全表抽查；只动文档，不需要 live 重跑。",
+        "non_goals": [
+          "不改任何门槛数字",
+          "不重跑 live（只对齐文档与已存产物）"
+        ],
+        "priority": 3,
+        "purpose": "让 claims-and-evidence.md 的每一行都能和它自己的产物对上，避免第三方按文档复现时拿到不同数字。",
+        "source_sessions": [
+          "ses_verseshell-tf0083-pathext-2026-09-24"
+        ],
+        "status": "ready",
+        "summary": "两处不一致（都是本轮重跑产物时核对出来的，不是本轮改动引入）：①C15 的表格有一整块重复行——门槛数字/复现命令/source/样本量/最近实测各出现两次（242-251 行附近），数字本身不冲突但会误导阅读；②C14 的「样本量」与「最近实测」写的是 2026-09-23 那批 38 次冻结读取调用（26 次 `file.read_many` + 12 次 `file.view`、33 次复现、4181 → 3079 tok），而当前 `eval/tf45_envelope_replay.json` 是 2026-09-24 live 重跑之后的 34 次调用（13 + 17、30 次复现、2490 → 1834 tok，−26.35%）。C12 抓不到第二处：tf45 产物的指纹不覆盖 live 产物，所以 live 基线换代时它不会被判陈旧。",
+        "title": "缺口：声明文档与产物/自身不一致（C15 重复行、C14 数字未随 2026-09-24 live 重跑更新）"
+      }
+    },
+    {
+      "action": "remove_edge",
+      "from": "TF-0085",
+      "to": "TF-0083",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "created_from_session": "ses_verseshell-tf0083-pathext-2026-09-24",
+        "reason": "两处文档-产物不一致是 TF-0083 轮按 C12 重跑全部确定性产物时核对出来的"
+      },
+      "from": "TF-0086",
+      "to": "TF-0083",
+      "type": "derived_from"
+    }
+  ],
+  "created_at": "2026-09-24T12:35:37.466303Z",
+  "proposal_id": "TFP-tf0083-pathext-fix-2026-09-24",
+  "rationale": "TF-0083 的解析缺陷已修复并用真实 exec.run 做了修复前后对照，新声明 C22 把它变成机检；但它的 AC#4（重跑 live 基线）被端点凭据卡住（本会话没有 LOCAL3065_API_KEY），所以 TF-0083 保持 in_progress，并把 live 重跑交给 TF-0085。同时解除 TF-0085 → TF-0083 的 depends_on：两者会互相等待（TF-0083 要等重跑才能收口，而重跑要等 TF-0083 完成）——改成由 TF-0085 的验收条件声明「必须在 TF-0083 的修复之后跑」。顺带把本轮核对出来的两处文档-产物不一致（C15 重复行、C14 数字未随 2026-09-24 live 重跑更新）开成 TF-0086。",
+  "session_id": "ses_verseshell-tf0083-pathext-2026-09-24",
+  "status": "applied"
+}
