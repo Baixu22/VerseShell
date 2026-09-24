@@ -1,0 +1,41 @@
+{
+  "applied_at": "2026-09-24T17:23:16.562283Z",
+  "base_graph_hash": "39aae8eef3246139ee5fc57186043fe6200bd6423ac70cc3eb4804a99e475af8",
+  "base_summary": {
+    "edge_count": 136,
+    "node_count": 87,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "谓词原文：`bench/aci/tasks/python_noisy_install_summary.json::success` = `{\"type\":\"file_contains\",\"path\":\"SUMMARY.txt\",\"contains\":\"packages\"}`；`optional_verify` 为 null",
+          "prompt：`Install requirements and report a one-line dependency summary without pasting full install logs.`",
+          "v1.2.0 轮 D 三行写入的 SUMMARY.txt 内容（逐字见 summary）；`success_reason` 均为 `file_contains SUMMARY.txt`",
+          "两轮 live 的逐任务成功率：v1.1.0 与 v1.2.0 都是 D 0/3、A 0/3",
+          "同类先例：TF-0084/C23 证明字面谓词会误杀真实修复（ts 任务 6 次全被误杀）",
+          "谓词：`bench/aci/tasks/python_noisy_install_summary.json` 的 `success` 由 `file_contains \"packages\"` 改为 `file_matches` + `(?i)[^\\r\\n]*\\bsix\\b[^\\r\\n]*`（单行、点名安装的依赖；贴日志必然多行而失败）；任务 version 与 `manifest.json` 的 `task_set_version` 一起升到 **1.3.0**",
+          "求值器：`file_matches`（整段正则匹配，忽略尾换行）同时加进 `live_agent_loop.check_success` 与 `run_suite.check_success`",
+          "重算（`eval/task_set_audit.json::predicate_changes`，逐条重放 6 条已存轨迹）：v1.3.0 基线上旧谓词 **1/6**（只放过那一行恰好写了复数 `packages` 的摘要）→ 声明谓词 **6/6**；在 v1.2.0 基线上是 0/6 → 6/6",
+          "新声明 C24 + `tools/task_set_audit.py`：用 live runner 同一个 `check_success` 检查全部 **10 个带 GOLDEN 的任务**——pristine 必须失败、GOLDEN 必须通过、注册的等价变体必须通过；**10/10 PASS**（两个注册变体的任务：ts 改名绑定、python 换措辞摘要）",
+          "`tools/trajectory_replay.py`（新）：把「每条已存轨迹最后写下的内容」重放出来（typed ops、`python -c` 内联写、`echo > file`），两个审计工具共用，替换掉原先只在 ts 工具里的私有实现",
+          "live 重跑（第九次复测，task set v1.3.0，120 行，`api_error` 0、未验证 0）：with 臂 A 0.6333 / 4.10 / 177.63、D **0.80** / 4.07 / 157.30（D/A **0.9919 / 0.8855**——工具比首次低于 1）；`python_noisy_install_summary` 两臂都由 0/3 变 3/3",
+          "门禁：`python tools/claim_gate.py` → **17/17 gated claims pass、exit 0**（C12 **12/12 fresh**、C24 = 1.0、C23 = 1.0、C22 = 1.0、C18 = 1.0）；`python tools/readme_claims_check.py` 全 PASS",
+          "提交：01ba4c4（谓词 + C24 + 两个新工具 + 重跑产物 + C13–C24 重登记）"
+        ],
+        "next_action": "无。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "字面谓词已修并收口：`python_noisy_install_summary` 的 `success` 由 `file_contains \"packages\"`（GOLDEN 的字面词）改成 `file_matches` 的正则「单行 + 点名 `six`」，贴安装日志必然多行而失败。逐条重放 6 条已存轨迹：旧谓词只放过 1 条（那一条恰好写了复数 `packages`），新谓词 6/6 全过；live 重跑后该任务两臂都由 0/3 变 **3/3**。为了让这类缺陷不再靠人工发现，把「pristine 失败 / GOLDEN 通过 / 等价变体通过」升级成声明 C24 + `tools/task_set_audit.py`，用 live runner 的同一个 `check_success` 覆盖全部 10 个带 GOLDEN 的任务（10/10 PASS），并把轨迹重放抽成共用的 `tools/trajectory_replay.py`。重跑（task set v1.3.0，120 行）后 **D 0.80 vs A 0.6333**，D/A **0.9919 步 / 0.8855 token**——工具比首次低于 1。`claim_gate` 17/17 exit 0。"
+      },
+      "id": "TF-0087"
+    }
+  ],
+  "created_at": "2026-09-24T17:23:16.424950Z",
+  "proposal_id": "TFP-tf0087-summary-predicate-close-2026-09-24",
+  "rationale": "TF-0087 的四条验收全部完成：谓词改成表达 prompt 承诺的形态（单行 + 点名 `six`），用两轮已存轨迹重算（旧 1/6 → 新 6/6），按 C12 重跑 live 基线并重登记 C13（task set v1.3.0），并把「pristine 失败 / GOLDEN 通过 / 等价变体通过」这条不变量升级成覆盖全部 10 个任务的机检声明 C24。重跑后 D 的成功率升到 0.80，且工具比首次低于 1。",
+  "session_id": "ses_verseshell-tf0087-summary-predicate-2026-09-24",
+  "status": "applied"
+}
