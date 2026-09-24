@@ -78,6 +78,17 @@
   the round below re-measures with the fix in place.
 
 ### Changed
+- Decomposed the remaining step gap (claim C20, `tools/step_composition.py`).
+  D issues 4.53 steps/run against raw shell's 3.23 (1.40x) while using 0.877x the
+  observation tokens. The gap is the surface, not waste: **35% of raw shell's
+  commands do more than one job** (read+run, read+write, run+write, all three),
+  which typed ops cannot. Calls a client could have merged are 8.8% of D's steps
+  (13.0 tokens/run), and most are not waste either — four are legitimate re-runs
+  of the same test after an edit, and the rest are `ts_fix_type_error` probing for
+  a `tsc` the fixture does not ship (`node_modules` is absent while the task
+  prompt promises `tsc --noEmit` succeeds). The failed-exec observation is
+  dominated by `error` and `diagnostics`; the only trimmable fields total ~20%
+  and each still carries signal, so they were evaluated and left alone.
 - Read-usage audit (claim C17, `tools/read_usage_audit.py`): of condition D's 85
   read paths in the with arm, **33.4% of the read tokens go to `TASK.md`**, whose
   text the system prompt already carries in a strictly more detailed form

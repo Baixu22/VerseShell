@@ -20,9 +20,10 @@ Gated claims (thresholds mirror docs/claims-and-evidence.md exactly):
   C16 compact read projection: it actually shrinks the model-visible read observation
   C18 exec launches a name-dispatching shim (rustup's cargo/rustc) by its invoked name
 C5 (learning cost) has no deterministic metric yet: status-only in evidence.json.
-C13 (live A/D), C15 (where D's extra tokens come from), C17 (what the reads are for)
-and C19 (what the failed execs are) are registered in docs/claims-and-evidence.md
-without a pass threshold: they record measurements, not goals.
+C13 (live A/D), C15 (where D's extra tokens come from), C17 (what the reads are for),
+C19 (what the failed execs are) and C20 (where D's extra steps come from) are
+registered in docs/claims-and-evidence.md without a pass threshold: they record
+measurements, not goals.
 
 Usage:
     python tools/claim_gate.py                 # regenerate metrics + run tests
@@ -79,6 +80,7 @@ EVIDENCE_ARTIFACTS = [
     "eval/read_path_breakdown.json",
     "eval/read_usage_audit.json",
     "eval/exec_failure_breakdown.json",
+    "eval/step_composition.json",
 ]
 
 
