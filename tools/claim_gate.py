@@ -18,10 +18,11 @@ Gated claims (thresholds mirror docs/claims-and-evidence.md exactly):
   C12 stored evidence freshness: each artifact's recorded fingerprint still matches the code
   C14 batch-read envelope: compact digest + batch budget hold on a frozen-trajectory replay
   C16 compact read projection: it actually shrinks the model-visible read observation
+  C18 exec launches a name-dispatching shim (rustup's cargo/rustc) by its invoked name
 C5 (learning cost) has no deterministic metric yet: status-only in evidence.json.
-C13 (live A/D), C15 (where D's extra tokens come from) and C17 (what the reads are
-for) are registered in docs/claims-and-evidence.md without a pass threshold: they
-record measurements, not goals.
+C13 (live A/D), C15 (where D's extra tokens come from), C17 (what the reads are for)
+and C19 (what the failed execs are) are registered in docs/claims-and-evidence.md
+without a pass threshold: they record measurements, not goals.
 
 Usage:
     python tools/claim_gate.py                 # regenerate metrics + run tests
@@ -55,6 +56,7 @@ THRESHOLDS = {
     "C12": {"desc": "stored evidence freshness (recorded fingerprint matches the code)", "op": ">=", "value": 1.00},
     "C14": {"desc": "batch-read envelope replay: compact digest saving + bounded batch budget", "op": ">=", "value": 0.15},
     "C16": {"desc": "compact read projection saving on a frozen trajectory", "op": ">=", "value": 0.10},
+    "C18": {"desc": "exec launches a name-dispatching shim by its invoked name", "op": "==", "value": 1.0},
 }
 
 # Stored measurements the gate relies on. Each must record the content fingerprint
@@ -76,6 +78,7 @@ EVIDENCE_ARTIFACTS = [
     "eval/exec_token_breakdown.json",
     "eval/read_path_breakdown.json",
     "eval/read_usage_audit.json",
+    "eval/exec_failure_breakdown.json",
 ]
 
 
@@ -284,6 +287,32 @@ def compact_read_claim(report: dict) -> dict:
     }
 
 
+def shim_launch_claim(report: dict) -> dict:
+    """C18 reads the shim probe: exec must launch a name-dispatching shim by name.
+
+    The probe re-runs `cargo --version` / `cargo check` / `rustc --version` through
+    the real exec path. A launcher that canonicalises the shim away makes rustup
+    answer for all three, which is exactly the defect this claim fences. The gate
+    is fail-closed: it also requires that the machine actually has such a shim, so
+    a machine without one reports not-exercised rather than a vacuous pass.
+    """
+    probe = report.get("shim_probe") or {}
+    facts = report.get("shim_facts") or []
+    shim_present = any(f.get("canonical_loses_name") for f in facts if isinstance(f, dict))
+    passed = bool(probe.get("pass")) and shim_present
+    return {
+        "value": 1.0 if passed else 0.0,
+        "pass": passed,
+        "detail": {
+            "shim_present": shim_present,
+            "cargo_dispatches_correctly": probe.get("cargo_dispatches_correctly"),
+            "cargo_check_succeeds_on_fixed_fixture": probe.get("cargo_check_succeeds_on_fixed_fixture"),
+            "commands": probe.get("commands"),
+            "shims": [f for f in facts if isinstance(f, dict) and f.get("is_symlink")],
+        },
+    }
+
+
 def summarize_test_output(stdout: str) -> dict:
     """Aggregate every `test result:` line so the evidence carries real counts
     instead of whichever suite happened to print last."""
@@ -313,6 +342,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--read-path-breakdown", type=Path, default=None,
                     help="path to a stored eval/read_path_breakdown.json "
                          "(regenerate with tools/read_path_breakdown.py)")
+    ap.add_argument("--exec-failure-breakdown", type=Path, default=None,
+                    help="path to a stored eval/exec_failure_breakdown.json "
+                         "(regenerate with tools/exec_failure_breakdown.py)")
     ap.add_argument("--evidence", type=Path, default=ROOT / "eval/evidence.json")
     ap.add_argument("--skip-tests", action="store_true",
                     help="skip cargo test; C6/C7 become stale and fail the gate")
@@ -588,6 +620,39 @@ def main(argv: list[str] | None = None) -> int:
             "command": "python tools/read_path_breakdown.py --out eval/read_path_breakdown.json",
             "source": ["tools/read_path_breakdown.py"],
             "notes": f"missing evidence artifact: {read_path}",
+        })
+
+    # ── C18: exec must launch a name-dispatching shim by its invoked name ──
+    shim_path = (args.exec_failure_breakdown.resolve() if args.exec_failure_breakdown
+                 else ROOT / "eval/exec_failure_breakdown.json")
+    if shim_path.exists():
+        shim_report = json.loads(shim_path.read_text(encoding="utf-8"))
+        c18 = shim_launch_claim(shim_report)
+        claims.append({
+            "id": "C18", "claim": THRESHOLDS["C18"]["desc"],
+            "threshold": "== 1.00", "value": c18["value"], "pass": c18["pass"],
+            "mode": "deterministic", "sample_size": len(c18["detail"]["commands"] or {}),
+            "measured_at": shim_report.get("generated_at"),
+            "command": "python tools/exec_failure_breakdown.py --out eval/exec_failure_breakdown.json",
+            "source": ["tools/exec_failure_breakdown.py", "src/process_command.rs",
+                       "src/process_runner.rs", "eval/exec_failure_breakdown.json"],
+            "detail": c18["detail"],
+            "notes": "on a rustup install `cargo.exe`/`rustc.exe` are symlinks to `rustup.exe` and "
+                     "rustup picks the tool from the name it was invoked as, so a launcher must not "
+                     "canonicalise the final symlink away. The defect made `cargo check` return exit 100 "
+                     "with '0 error(s)', `cargo build` read as the `+build` toolchain, and "
+                     "`cargo --version` print the rustup version — silently breaking every Rust task in "
+                     "condition D while raw shell (which spawns through cmd) was unaffected. Fail-closed: "
+                     "the gate also requires that this machine actually has such a shim",
+        })
+    else:
+        claims.append({
+            "id": "C18", "claim": THRESHOLDS["C18"]["desc"],
+            "threshold": "== 1.00", "value": None, "pass": False,
+            "mode": "deterministic", "measured_at": now,
+            "command": "python tools/exec_failure_breakdown.py --out eval/exec_failure_breakdown.json",
+            "source": ["tools/exec_failure_breakdown.py"],
+            "notes": f"missing evidence artifact: {shim_path}",
         })
 
     # ── C12: stored evidence must still describe the current code ──

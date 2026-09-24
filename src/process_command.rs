@@ -8,10 +8,25 @@ use std::process::Command;
 
 #[derive(Debug, Clone)]
 pub struct ResolvedProcessCommand {
+    /// Path handed to the OS as the application to launch.
+    ///
+    /// On Windows this is deliberately the path as resolved from PATH *without*
+    /// following a final symlink. Win32 resolves an application symlink against
+    /// the machine-wide PATH, and the child's `argv[0]` is derived from this
+    /// value — so canonicalising it breaks every name-dispatching shim. Rustup's
+    /// `cargo.exe` / `rustc.exe` are exactly that: symlinks to `rustup.exe` that
+    /// pick a tool from the file name they were invoked as. Following the link
+    /// made the shim run as rustup itself (`cargo check` -> exit 100 with
+    /// "0 error(s)", `cargo build` -> "invalid value 'build' for '[+toolchain]'",
+    /// `cargo --version` -> the rustup version), which silently broke every Rust
+    /// task. See `resolve_candidate`.
     pub executable: PathBuf,
     pub args: Vec<String>,
     #[cfg(windows)]
     pub windows_raw_arg: Option<String>,
+    /// Fully resolved real path (symlinks followed), used for audit identity and
+    /// target reporting. Kept separate from [`Self::executable`] so the audit log
+    /// still names the real binary while the launch keeps the shim's name.
     pub audited_executable: PathBuf,
     pub interpreter: Option<PathBuf>,
 }
@@ -32,6 +47,7 @@ pub fn resolve_process_command(
     }
 
     let resolved = resolve_executable(program, cwd, env)?;
+    let audited = canonical_identity(resolved.clone()).unwrap_or_else(|_| resolved.clone());
     #[cfg(windows)]
     if is_batch_script(&resolved) {
         let interpreter = resolve_cmd(env)?;
@@ -40,17 +56,17 @@ pub fn resolve_process_command(
             executable: interpreter.clone(),
             args: vec!["/D".into(), "/S".into(), "/C".into()],
             windows_raw_arg: Some(command_line),
-            audited_executable: resolved,
+            audited_executable: audited,
             interpreter: Some(interpreter),
         });
     }
 
     Ok(ResolvedProcessCommand {
-        executable: resolved.clone(),
+        executable: resolved,
         args: argv[1..].to_vec(),
         #[cfg(windows)]
         windows_raw_arg: None,
-        audited_executable: resolved,
+        audited_executable: audited,
         interpreter: None,
     })
 }
@@ -113,7 +129,7 @@ fn resolve_candidate(
     env: Option<&BTreeMap<String, String>>,
 ) -> Result<PathBuf> {
     if candidate.is_file() {
-        return canonical_identity(candidate);
+        return Ok(candidate);
     }
     #[cfg(windows)]
     if candidate.extension().is_none() {
@@ -122,7 +138,7 @@ fn resolve_candidate(
             value.push(extension);
             let with_extension = PathBuf::from(value);
             if with_extension.is_file() {
-                return canonical_identity(with_extension);
+                return Ok(with_extension);
             }
         }
     }
@@ -243,6 +259,68 @@ mod tests {
             executable.canonicalize().unwrap()
         );
         assert!(resolved.interpreter.is_some());
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    /// A name-dispatching shim must keep the name it was invoked as.
+    ///
+    /// This is the rustup case: `cargo.exe` / `rustc.exe` are symlinks to
+    /// `rustup.exe`, and rustup picks the tool from the file name it was invoked
+    /// by. The launcher must therefore hand the OS the shim path, not the
+    /// canonicalised target — otherwise `cargo check` runs as plain `rustup`
+    /// (observed as exit 100 with "0 error(s)" and as `cargo build` being read as
+    /// the `+build` toolchain). Requires the symlink privilege, so it degrades to
+    /// a no-op rather than failing when that is unavailable.
+    #[cfg(windows)]
+    #[test]
+    fn keeps_a_dispatching_symlink_name_for_launch_but_audits_the_real_path() {
+        let root =
+            std::env::temp_dir().join(format!("verseshell-shim-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let real = root.join("real.exe");
+        std::fs::write(&real, b"not a real executable").unwrap();
+        let shim = root.join("dispatcher.exe");
+        if std::os::windows::fs::symlink_file(&real, &shim).is_err() {
+            let _ = std::fs::remove_dir_all(root);
+            return; // symlink privilege not held; nothing to assert
+        }
+        let env = BTreeMap::from([
+            ("Path".into(), root.to_string_lossy().to_string()),
+            ("PathExt".into(), ".EXE".into()),
+        ]);
+        let resolved =
+            resolve_process_command(&["dispatcher".into()], &root, Some(&env)).unwrap();
+
+        // Launch path keeps the name the caller asked for ...
+        assert_eq!(resolved.executable, shim);
+        assert_eq!(
+            resolved.executable.file_name().unwrap().to_string_lossy(),
+            "dispatcher.exe"
+        );
+        // ... while the audit identity is the real binary.
+        assert_eq!(
+            resolved.audited_executable,
+            real.canonicalize().unwrap()
+        );
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    /// A regular (non-symlink) executable is still launched by its resolved path.
+    #[cfg(windows)]
+    #[test]
+    fn launches_a_plain_executable_by_its_resolved_path() {
+        let root =
+            std::env::temp_dir().join(format!("verseshell-plain-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        let exe = root.join("plain.exe");
+        std::fs::write(&exe, b"not a real executable").unwrap();
+        let env = BTreeMap::from([
+            ("Path".into(), root.to_string_lossy().to_string()),
+            ("PathExt".into(), ".EXE".into()),
+        ]);
+        let resolved = resolve_process_command(&["plain".into()], &root, Some(&env)).unwrap();
+        assert_eq!(resolved.executable, exe);
+        assert_eq!(resolved.audited_executable, exe.canonicalize().unwrap());
         let _ = std::fs::remove_dir_all(root);
     }
 }

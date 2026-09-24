@@ -1,0 +1,254 @@
+{
+  "schema": "verseshell.exec-failure-breakdown/v1",
+  "generated_at": "2026-09-24T11:01:24.406941+00:00",
+  "method": {
+    "inputs": [
+      "bench\\aci\\results\\latest_live.json",
+      "bench\\aci\\results\\live_ab_without_read_files.json"
+    ],
+    "classes": {
+      "first_diagnostic": "first failing run of that command in the run — for these tasks observing the failure is the work itself",
+      "repeat": "the same command failing again later in the run (trial and error)",
+      "toolchain_probe": "version / `+toolchain` probing"
+    },
+    "shim_probe": "re-runs `cargo --version` / `cargo check` / `rustc --version` through the real exec.run on the fixed rust fixture: a name-dispatching shim that was launched by its canonicalised target answers as rustup instead"
+  },
+  "evidence": {
+    "globs": [
+      "src/process_command.rs",
+      "src/process_runner.rs",
+      "bench/aci/runners/live_agent_loop.py",
+      "bench/aci/results/latest_live.json",
+      "bench/aci/results/live_ab_without_read_files.json",
+      "tools/exec_failure_breakdown.py"
+    ],
+    "fingerprint": "383eba379329d53857b778dffe3c6db196ca2c802a1e16b267f61853358d0f49"
+  },
+  "shim_facts": [
+    {
+      "program": "cargo",
+      "found": true,
+      "path": "C:\\Users\\27933\\.cargo\\bin\\cargo.exe",
+      "is_symlink": true,
+      "launch_path_keeps_name": true,
+      "symlink_target": "rustup.exe",
+      "canonical_path": "C:\\Users\\27933\\.cargo\\bin\\rustup.exe",
+      "canonical_loses_name": true
+    },
+    {
+      "program": "rustc",
+      "found": true,
+      "path": "C:\\Users\\27933\\.cargo\\bin\\rustc.exe",
+      "is_symlink": true,
+      "launch_path_keeps_name": true,
+      "symlink_target": "rustup.exe",
+      "canonical_path": "C:\\Users\\27933\\.cargo\\bin\\rustup.exe",
+      "canonical_loses_name": true
+    },
+    {
+      "program": "cargo-clippy",
+      "found": true,
+      "path": "C:\\Users\\27933\\.cargo\\bin\\cargo-clippy.exe",
+      "is_symlink": true,
+      "launch_path_keeps_name": true,
+      "symlink_target": "rustup.exe",
+      "canonical_path": "C:\\Users\\27933\\.cargo\\bin\\rustup.exe",
+      "canonical_loses_name": true
+    },
+    {
+      "program": "rustfmt",
+      "found": true,
+      "path": "C:\\Users\\27933\\.cargo\\bin\\rustfmt.exe",
+      "is_symlink": true,
+      "launch_path_keeps_name": true,
+      "symlink_target": "rustup.exe",
+      "canonical_path": "C:\\Users\\27933\\.cargo\\bin\\rustup.exe",
+      "canonical_loses_name": true
+    }
+  ],
+  "shim_probe": {
+    "commands": {
+      "cargo --version": {
+        "ok": true,
+        "exit_code": 0,
+        "output_head": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+        "answered_as_rustup": false
+      },
+      "cargo check": {
+        "ok": true,
+        "exit_code": 0,
+        "output_head": "Checking bench_fix v0.1.0 (C:\\Users\\27933\\AppData\\Local\\Temp\\tf45-replay-rust_fix_compile_error-nofoedzs)\n    Finished `",
+        "answered_as_rustup": false
+      },
+      "rustc --version": {
+        "ok": true,
+        "exit_code": 0,
+        "output_head": "rustc 1.98.1 (48a229cea 2026-09-01)",
+        "answered_as_rustup": false
+      }
+    },
+    "cargo_dispatches_correctly": true,
+    "cargo_check_succeeds_on_fixed_fixture": true,
+    "pass": true
+  },
+  "with_read_files": {
+    "ok": {
+      "calls": 29,
+      "tokens": 386,
+      "tokens_per_call": 13.31
+    },
+    "failed": {
+      "calls": 21,
+      "tokens": 1735,
+      "tokens_per_call": 82.62,
+      "share_of_exec_tokens": 0.818
+    },
+    "classes": {
+      "first_diagnostic": {
+        "calls": 21,
+        "tokens": 1735,
+        "share_of_failure_tokens": 1.0
+      }
+    },
+    "per_task_failed": {
+      "ts_fix_type_error": {
+        "calls": 9,
+        "tokens": 697
+      },
+      "python_edit_and_retest": {
+        "calls": 6,
+        "tokens": 594
+      },
+      "python_fix_pytest_fail": {
+        "calls": 3,
+        "tokens": 300
+      },
+      "ts_package_script_fail": {
+        "calls": 3,
+        "tokens": 144
+      }
+    },
+    "top_failing_commands": [
+      [
+        "pytest -q",
+        6
+      ],
+      [
+        "npx tsc --noEmit",
+        3
+      ],
+      [
+        "npm test",
+        3
+      ],
+      [
+        "pytest -q --rootdir",
+        2
+      ],
+      [
+        "node node_modules/typescript/bin/tsc --noEmit",
+        2
+      ],
+      [
+        "pytest --collect-only -q",
+        1
+      ],
+      [
+        "npm install --save-dev",
+        1
+      ],
+      [
+        "npx.cmd tsc --noEmit",
+        1
+      ],
+      [
+        "npm install --no-audit",
+        1
+      ],
+      [
+        "npm install",
+        1
+      ]
+    ]
+  },
+  "without_read_files": {
+    "ok": {
+      "calls": 25,
+      "tokens": 328,
+      "tokens_per_call": 13.12
+    },
+    "failed": {
+      "calls": 22,
+      "tokens": 1629,
+      "tokens_per_call": 74.05,
+      "share_of_exec_tokens": 0.8324
+    },
+    "classes": {
+      "first_diagnostic": {
+        "calls": 22,
+        "tokens": 1629,
+        "share_of_failure_tokens": 1.0
+      }
+    },
+    "per_task_failed": {
+      "ts_fix_type_error": {
+        "calls": 11,
+        "tokens": 814
+      },
+      "python_edit_and_retest": {
+        "calls": 6,
+        "tokens": 471
+      },
+      "python_fix_pytest_fail": {
+        "calls": 2,
+        "tokens": 200
+      },
+      "ts_package_script_fail": {
+        "calls": 3,
+        "tokens": 144
+      }
+    },
+    "top_failing_commands": [
+      [
+        "pytest -q",
+        4
+      ],
+      [
+        "npx tsc --noEmit",
+        3
+      ],
+      [
+        "npm test",
+        3
+      ],
+      [
+        "npx.cmd tsc --noEmit",
+        2
+      ],
+      [
+        "tsc --noEmit",
+        2
+      ],
+      [
+        "node node_modules/typescript/bin/tsc --noEmit",
+        1
+      ],
+      [
+        "npm install",
+        1
+      ],
+      [
+        "node C:\\Users\\27933\\AppData\\Roaming\\nvm\\v24.15.0\\node_modules\\typescript\\bin\\tsc --noEmit",
+        1
+      ],
+      [
+        "bash -lc PYTHONPATH=. pytest -q",
+        1
+      ],
+      [
+        "pytest -q tests/",
+        1
+      ]
+    ]
+  }
+}

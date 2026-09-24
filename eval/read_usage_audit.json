@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.read-usage-audit/v1",
-  "generated_at": "2026-09-23T16:58:05.469771+00:00",
+  "generated_at": "2026-09-24T11:01:22.680068+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
@@ -23,41 +23,43 @@
       "bench/aci/results/live_ab_without_read_files.json",
       "tools/read_usage_audit.py"
     ],
-    "fingerprint": "5a5032cd89fd1d7821ccc390e512dede3a089808aaf96fdd079fae8ffc6367c5"
+    "fingerprint": "3d2715f8499d8f6091a02ff66f5a07f5f04cfa50c7a662cf21d3d276f8bf8c46"
   },
   "with_read_files": {
     "d_reads": {
       "calls": 34,
-      "paths": 58,
-      "tokens": 2203.0,
+      "paths": 52,
+      "tokens": 1906.0,
       "per_class_calls": {
-        "mixed:referenced_in_run+unreferenced": 15,
-        "referenced_in_run": 9,
-        "task_subject": 6,
-        "mixed:referenced_in_run+task_file+unreferenced": 3,
-        "unreferenced": 1
+        "mixed:referenced_in_run+unreferenced": 11,
+        "referenced_in_run": 12,
+        "unreferenced": 2,
+        "mixed:referenced_in_run+task_file+unreferenced": 2,
+        "task_file": 1,
+        "task_subject": 6
       },
       "per_class_paths": {
-        "unreferenced": 22,
-        "referenced_in_run": 27,
-        "task_subject": 6,
-        "task_file": 3
+        "unreferenced": 18,
+        "referenced_in_run": 25,
+        "task_file": 3,
+        "task_subject": 6
       },
       "per_class_tokens": {
-        "unreferenced": 850.5,
-        "referenced_in_run": 1018.17,
-        "task_subject": 219.0,
-        "task_file": 115.33
+        "unreferenced": 718.33,
+        "referenced_in_run": 893.33,
+        "task_file": 102.33,
+        "task_subject": 192.0
       },
       "per_class_token_share": {
-        "referenced_in_run": 0.4622,
-        "unreferenced": 0.3861,
-        "task_subject": 0.0994,
-        "task_file": 0.0524
+        "referenced_in_run": 0.4687,
+        "unreferenced": 0.3769,
+        "task_subject": 0.1007,
+        "task_file": 0.0537
       },
       "per_task_class_counts": {
         "python_edit_and_retest": {
-          "referenced_in_run": 3,
+          "referenced_in_run": 4,
+          "task_file": 1,
           "unreferenced": 3
         },
         "python_fix_pytest_fail": {
@@ -68,28 +70,28 @@
           "referenced_in_run": 3
         },
         "rust_add_unit_test": {
-          "unreferenced": 3,
-          "referenced_in_run": 4
+          "referenced_in_run": 3,
+          "unreferenced": 3
         },
         "rust_fix_compile_error": {
-          "unreferenced": 3,
+          "unreferenced": 1,
           "referenced_in_run": 3
         },
         "rust_search_and_edit": {
-          "unreferenced": 3,
-          "referenced_in_run": 5,
-          "task_file": 2
+          "unreferenced": 2,
+          "referenced_in_run": 3,
+          "task_file": 2,
+          "task_subject": 1
         },
         "ts_fix_type_error": {
-          "unreferenced": 7,
           "referenced_in_run": 3,
-          "task_file": 1
+          "unreferenced": 6
         },
         "ts_package_script_fail": {
           "referenced_in_run": 3
         },
         "windows_batch_capture_diag": {
-          "task_subject": 3
+          "task_subject": 2
         },
         "windows_path_normalize_edit": {
           "task_subject": 3
@@ -98,15 +100,19 @@
       "top_paths": [
         [
           "referenced_in_run:src/lib.rs",
-          12
-        ],
-        [
-          "unreferenced:Cargo.toml",
           9
         ],
         [
-          "unreferenced:package.json",
+          "unreferenced:Cargo.toml",
+          6
+        ],
+        [
+          "referenced_in_run:greet.py",
           4
+        ],
+        [
+          "task_file:TASK.md",
+          3
         ],
         [
           "referenced_in_run:mathlib.py",
@@ -114,10 +120,6 @@
         ],
         [
           "unreferenced:tests/test_math.py",
-          3
-        ],
-        [
-          "referenced_in_run:greet.py",
           3
         ],
         [
@@ -129,11 +131,15 @@
           3
         ],
         [
+          "referenced_in_run:src/index.ts",
+          3
+        ],
+        [
           "unreferenced:tsconfig.json",
           3
         ],
         [
-          "referenced_in_run:src/index.ts",
+          "unreferenced:package.json",
           3
         ],
         [
@@ -146,11 +152,11 @@
         ],
         [
           "task_subject:broken_build.log",
-          3
+          2
         ],
         [
-          "task_file:TASK.md",
-          3
+          "task_subject:src/lib.rs",
+          1
         ]
       ],
       "rows": [
@@ -167,6 +173,196 @@
           ],
           "tokens": 76,
           "share_per_path": 38.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 27,
+          "share_per_path": 27.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 33,
+          "share_per_path": 33.0
+        },
+        {
+          "task_id": "rust_search_and_edit",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs",
+            "TASK.md"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_file"
+          ],
+          "tokens": 110,
+          "share_per_path": 36.67
+        },
+        {
+          "task_id": "rust_search_and_edit",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 31,
+          "share_per_path": 31.0
+        },
+        {
+          "task_id": "python_fix_pytest_fail",
+          "op": "file.read_many",
+          "paths": [
+            "mathlib.py",
+            "tests/test_math.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "unreferenced"
+          ],
+          "tokens": 72,
+          "share_per_path": 36.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
+            "greet.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 25,
+          "share_per_path": 25.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
+            "TASK.md"
+          ],
+          "classes": [
+            "task_file"
+          ],
+          "tokens": 29,
+          "share_per_path": 29.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
+            "tests/test_greet.py"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 37,
+          "share_per_path": 37.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
+            "greet.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 27,
+          "share_per_path": 27.0
+        },
+        {
+          "task_id": "python_noisy_install_summary",
+          "op": "file.view",
+          "paths": [
+            "requirements.txt"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 17,
+          "share_per_path": 17.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.read_many",
+          "paths": [
+            "src/index.ts",
+            "tsconfig.json",
+            "package.json"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "unreferenced",
+            "unreferenced"
+          ],
+          "tokens": 137,
+          "share_per_path": 45.67
+        },
+        {
+          "task_id": "ts_package_script_fail",
+          "op": "file.view",
+          "paths": [
+            "package.json"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 55,
+          "share_per_path": 55.0
+        },
+        {
+          "task_id": "windows_path_normalize_edit",
+          "op": "file.view",
+          "paths": [
+            "out/result.txt"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 15,
+          "share_per_path": 15.0
+        },
+        {
+          "task_id": "windows_batch_capture_diag",
+          "op": "file.view",
+          "paths": [
+            "broken_build.log"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 58,
+          "share_per_path": 58.0
+        },
+        {
+          "task_id": "rust_fix_compile_error",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 28,
+          "share_per_path": 28.0
         },
         {
           "task_id": "rust_add_unit_test",
@@ -187,14 +383,122 @@
           "op": "file.read_many",
           "paths": [
             "Cargo.toml",
+            "src/lib.rs",
+            "TASK.md"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_file"
+          ],
+          "tokens": 110,
+          "share_per_path": 36.67
+        },
+        {
+          "task_id": "python_fix_pytest_fail",
+          "op": "file.read_many",
+          "paths": [
+            "mathlib.py",
+            "tests/test_math.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "unreferenced"
+          ],
+          "tokens": 72,
+          "share_per_path": 36.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.read_many",
+          "paths": [
+            "greet.py",
+            "tests/test_greet.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "unreferenced"
+          ],
+          "tokens": 80,
+          "share_per_path": 40.0
+        },
+        {
+          "task_id": "python_noisy_install_summary",
+          "op": "file.view",
+          "paths": [
+            "requirements.txt"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 17,
+          "share_per_path": 17.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.read_many",
+          "paths": [
+            "package.json",
+            "tsconfig.json",
+            "src/index.ts"
+          ],
+          "classes": [
+            "unreferenced",
+            "unreferenced",
+            "referenced_in_run"
+          ],
+          "tokens": 137,
+          "share_per_path": 45.67
+        },
+        {
+          "task_id": "ts_package_script_fail",
+          "op": "file.view",
+          "paths": [
+            "package.json"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 55,
+          "share_per_path": 55.0
+        },
+        {
+          "task_id": "windows_path_normalize_edit",
+          "op": "file.view",
+          "paths": [
+            "out/result.txt"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 15,
+          "share_per_path": 15.0
+        },
+        {
+          "task_id": "rust_fix_compile_error",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 28,
+          "share_per_path": 28.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
             "src/lib.rs"
           ],
           "classes": [
             "unreferenced",
             "referenced_in_run"
           ],
-          "tokens": 80,
-          "share_per_path": 40.0
+          "tokens": 75,
+          "share_per_path": 37.5
         },
         {
           "task_id": "rust_search_and_edit",
@@ -203,7 +507,7 @@
             "src/lib.rs"
           ],
           "classes": [
-            "referenced_in_run"
+            "task_subject"
           ],
           "tokens": 31,
           "share_per_path": 31.0
@@ -266,15 +570,15 @@
         },
         {
           "task_id": "ts_package_script_fail",
-          "op": "file.read_many",
+          "op": "file.view",
           "paths": [
             "package.json"
           ],
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 67,
-          "share_per_path": 67.0
+          "tokens": 55,
+          "share_per_path": 55.0
         },
         {
           "task_id": "windows_path_normalize_edit",
@@ -299,53 +603,201 @@
           ],
           "tokens": 58,
           "share_per_path": 58.0
+        }
+      ]
+    },
+    "a_reads": {
+      "file_refs": 73,
+      "tokens": 2789.0,
+      "per_class_file_refs": {
+        "referenced_in_run": 38,
+        "task_subject": 18,
+        "unreferenced": 12,
+        "task_file": 5
+      },
+      "per_class_tokens": {
+        "referenced_in_run": 1708.5,
+        "task_subject": 495.0,
+        "unreferenced": 330.0,
+        "task_file": 255.5
+      },
+      "per_class_token_share": {
+        "referenced_in_run": 0.6126,
+        "task_subject": 0.1775,
+        "unreferenced": 0.1183,
+        "task_file": 0.0916
+      },
+      "top_paths": [
+        [
+          "src/lib.rs",
+          14
+        ],
+        [
+          "Cargo.toml",
+          9
+        ],
+        [
+          "TASK.md",
+          8
+        ],
+        [
+          "package.json",
+          6
+        ],
+        [
+          "src/index.ts",
+          4
+        ],
+        [
+          "mathlib.py",
+          3
+        ],
+        [
+          "tests/test_math.py",
+          3
+        ],
+        [
+          "greet.py",
+          3
+        ],
+        [
+          "tests/test_greet.py",
+          3
+        ],
+        [
+          "requirements.txt",
+          3
+        ]
+      ]
+    }
+  },
+  "without_read_files": {
+    "d_reads": {
+      "calls": 39,
+      "paths": 39,
+      "tokens": 1315.0,
+      "per_class_calls": {
+        "referenced_in_run": 22,
+        "unreferenced": 14,
+        "task_subject": 3
+      },
+      "per_class_paths": {
+        "referenced_in_run": 22,
+        "unreferenced": 14,
+        "task_subject": 3
+      },
+      "per_class_tokens": {
+        "referenced_in_run": 730.0,
+        "unreferenced": 454.0,
+        "task_subject": 131.0
+      },
+      "per_class_token_share": {
+        "referenced_in_run": 0.5551,
+        "unreferenced": 0.3452,
+        "task_subject": 0.0996
+      },
+      "per_task_class_counts": {
+        "python_edit_and_retest": {
+          "referenced_in_run": 4,
+          "unreferenced": 3
         },
+        "python_fix_pytest_fail": {
+          "referenced_in_run": 2,
+          "unreferenced": 2
+        },
+        "python_noisy_install_summary": {
+          "referenced_in_run": 3
+        },
+        "rust_add_unit_test": {
+          "unreferenced": 2,
+          "referenced_in_run": 2
+        },
+        "rust_fix_compile_error": {
+          "referenced_in_run": 3,
+          "unreferenced": 1
+        },
+        "rust_search_and_edit": {
+          "referenced_in_run": 1
+        },
+        "ts_fix_type_error": {
+          "referenced_in_run": 4,
+          "unreferenced": 6
+        },
+        "ts_package_script_fail": {
+          "referenced_in_run": 3
+        },
+        "windows_batch_capture_diag": {
+          "task_subject": 2
+        },
+        "windows_path_normalize_edit": {
+          "task_subject": 1
+        }
+      },
+      "top_paths": [
+        [
+          "referenced_in_run:src/lib.rs",
+          6
+        ],
+        [
+          "unreferenced:package.json",
+          4
+        ],
+        [
+          "unreferenced:Cargo.toml",
+          3
+        ],
+        [
+          "referenced_in_run:greet.py",
+          3
+        ],
+        [
+          "unreferenced:tests/test_greet.py",
+          3
+        ],
+        [
+          "referenced_in_run:requirements.txt",
+          3
+        ],
+        [
+          "referenced_in_run:src/index.ts",
+          3
+        ],
+        [
+          "referenced_in_run:package.json",
+          3
+        ],
+        [
+          "task_subject:broken_build.log",
+          2
+        ],
+        [
+          "referenced_in_run:mathlib.py",
+          2
+        ],
+        [
+          "unreferenced:tests/test_math.py",
+          2
+        ],
+        [
+          "unreferenced:tsconfig.json",
+          2
+        ],
+        [
+          "referenced_in_run:tsconfig.json",
+          1
+        ],
+        [
+          "referenced_in_run:out.txt",
+          1
+        ],
+        [
+          "task_subject:out/result.txt",
+          1
+        ]
+      ],
+      "rows": [
         {
           "task_id": "rust_fix_compile_error",
-          "op": "file.read_many",
-          "paths": [
-            "src/lib.rs",
-            "Cargo.toml"
-          ],
-          "classes": [
-            "referenced_in_run",
-            "unreferenced"
-          ],
-          "tokens": 76,
-          "share_per_path": 38.0
-        },
-        {
-          "task_id": "rust_add_unit_test",
-          "op": "file.read_many",
-          "paths": [
-            "Cargo.toml",
-            "src/lib.rs"
-          ],
-          "classes": [
-            "unreferenced",
-            "referenced_in_run"
-          ],
-          "tokens": 75,
-          "share_per_path": 37.5
-        },
-        {
-          "task_id": "rust_search_and_edit",
-          "op": "file.read_many",
-          "paths": [
-            "Cargo.toml",
-            "src/lib.rs",
-            "TASK.md"
-          ],
-          "classes": [
-            "unreferenced",
-            "referenced_in_run",
-            "task_file"
-          ],
-          "tokens": 110,
-          "share_per_path": 36.67
-        },
-        {
-          "task_id": "rust_search_and_edit",
           "op": "file.view",
           "paths": [
             "src/lib.rs"
@@ -353,36 +805,56 @@
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 31,
-          "share_per_path": 31.0
+          "tokens": 28,
+          "share_per_path": 28.0
         },
         {
-          "task_id": "python_fix_pytest_fail",
-          "op": "file.read_many",
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
           "paths": [
-            "mathlib.py",
-            "tests/test_math.py"
+            "Cargo.toml"
           ],
           "classes": [
-            "referenced_in_run",
             "unreferenced"
           ],
-          "tokens": 72,
-          "share_per_path": 36.0
+          "tokens": 33,
+          "share_per_path": 33.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 27,
+          "share_per_path": 27.0
         },
         {
           "task_id": "python_edit_and_retest",
-          "op": "file.read_many",
+          "op": "file.view",
           "paths": [
-            "greet.py",
+            "greet.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 25,
+          "share_per_path": 25.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
             "tests/test_greet.py"
           ],
           "classes": [
-            "referenced_in_run",
             "unreferenced"
           ],
-          "tokens": 80,
-          "share_per_path": 40.0
+          "tokens": 37,
+          "share_per_path": 37.0
         },
         {
           "task_id": "python_noisy_install_summary",
@@ -398,19 +870,207 @@
         },
         {
           "task_id": "ts_fix_type_error",
-          "op": "file.read_many",
+          "op": "file.view",
           "paths": [
-            "src/index.ts",
-            "package.json",
+            "src/index.ts"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 38,
+          "share_per_path": 38.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
+            "package.json"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 16,
+          "share_per_path": 16.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
             "tsconfig.json"
           ],
           "classes": [
-            "referenced_in_run",
-            "unreferenced",
+            "referenced_in_run"
+          ],
+          "tokens": 58,
+          "share_per_path": 58.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
+            "package.json"
+          ],
+          "classes": [
             "unreferenced"
           ],
-          "tokens": 137,
-          "share_per_path": 45.67
+          "tokens": 16,
+          "share_per_path": 16.0
+        },
+        {
+          "task_id": "ts_package_script_fail",
+          "op": "file.view",
+          "paths": [
+            "package.json"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 55,
+          "share_per_path": 55.0
+        },
+        {
+          "task_id": "windows_batch_capture_diag",
+          "op": "file.view",
+          "paths": [
+            "broken_build.log"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 58,
+          "share_per_path": 58.0
+        },
+        {
+          "task_id": "rust_fix_compile_error",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 28,
+          "share_per_path": 28.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 27,
+          "share_per_path": 27.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 33,
+          "share_per_path": 33.0
+        },
+        {
+          "task_id": "python_fix_pytest_fail",
+          "op": "file.view",
+          "paths": [
+            "mathlib.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 23,
+          "share_per_path": 23.0
+        },
+        {
+          "task_id": "python_fix_pytest_fail",
+          "op": "file.view",
+          "paths": [
+            "tests/test_math.py"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 32,
+          "share_per_path": 32.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
+            "greet.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 25,
+          "share_per_path": 25.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
+            "tests/test_greet.py"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 37,
+          "share_per_path": 37.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
+            "out.txt"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 52,
+          "share_per_path": 52.0
+        },
+        {
+          "task_id": "python_noisy_install_summary",
+          "op": "file.view",
+          "paths": [
+            "requirements.txt"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 17,
+          "share_per_path": 17.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
+            "src/index.ts"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 38,
+          "share_per_path": 38.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
+            "tsconfig.json"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 58,
+          "share_per_path": 58.0
         },
         {
           "task_id": "ts_fix_type_error",
@@ -462,34 +1122,6 @@
         },
         {
           "task_id": "rust_fix_compile_error",
-          "op": "file.read_many",
-          "paths": [
-            "src/lib.rs",
-            "Cargo.toml"
-          ],
-          "classes": [
-            "referenced_in_run",
-            "unreferenced"
-          ],
-          "tokens": 76,
-          "share_per_path": 38.0
-        },
-        {
-          "task_id": "rust_add_unit_test",
-          "op": "file.read_many",
-          "paths": [
-            "Cargo.toml",
-            "src/lib.rs"
-          ],
-          "classes": [
-            "unreferenced",
-            "referenced_in_run"
-          ],
-          "tokens": 75,
-          "share_per_path": 37.5
-        },
-        {
-          "task_id": "rust_add_unit_test",
           "op": "file.view",
           "paths": [
             "src/lib.rs"
@@ -497,52 +1129,80 @@
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 27,
-          "share_per_path": 27.0
+          "tokens": 28,
+          "share_per_path": 28.0
+        },
+        {
+          "task_id": "rust_fix_compile_error",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 33,
+          "share_per_path": 33.0
         },
         {
           "task_id": "rust_search_and_edit",
-          "op": "file.read_many",
+          "op": "file.view",
           "paths": [
-            "Cargo.toml",
-            "src\\lib.rs",
-            "TASK.md"
+            "src/lib.rs"
           ],
           "classes": [
-            "unreferenced",
-            "referenced_in_run",
-            "task_file"
+            "referenced_in_run"
           ],
-          "tokens": 110,
-          "share_per_path": 36.67
+          "tokens": 31,
+          "share_per_path": 31.0
         },
         {
           "task_id": "python_fix_pytest_fail",
-          "op": "file.read_many",
+          "op": "file.view",
           "paths": [
-            "mathlib.py",
+            "mathlib.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 23,
+          "share_per_path": 23.0
+        },
+        {
+          "task_id": "python_fix_pytest_fail",
+          "op": "file.view",
+          "paths": [
             "tests/test_math.py"
           ],
           "classes": [
-            "referenced_in_run",
             "unreferenced"
           ],
-          "tokens": 72,
-          "share_per_path": 36.0
+          "tokens": 32,
+          "share_per_path": 32.0
         },
         {
           "task_id": "python_edit_and_retest",
-          "op": "file.read_many",
+          "op": "file.view",
           "paths": [
-            "greet.py",
+            "greet.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 25,
+          "share_per_path": 25.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
             "tests/test_greet.py"
           ],
           "classes": [
-            "referenced_in_run",
             "unreferenced"
           ],
-          "tokens": 80,
-          "share_per_path": 40.0
+          "tokens": 37,
+          "share_per_path": 37.0
         },
         {
           "task_id": "python_noisy_install_summary",
@@ -558,21 +1218,39 @@
         },
         {
           "task_id": "ts_fix_type_error",
-          "op": "file.read_many",
+          "op": "file.view",
           "paths": [
-            "package.json",
-            "tsconfig.json",
-            "src/index.ts",
-            "TASK.md"
+            "src/index.ts"
           ],
           "classes": [
-            "unreferenced",
-            "unreferenced",
-            "referenced_in_run",
-            "task_file"
+            "referenced_in_run"
           ],
-          "tokens": 168,
-          "share_per_path": 42.0
+          "tokens": 38,
+          "share_per_path": 38.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
+            "tsconfig.json"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 58,
+          "share_per_path": 58.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
+            "package.json"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 16,
+          "share_per_path": 16.0
         },
         {
           "task_id": "ts_package_script_fail",
@@ -585,74 +1263,50 @@
           ],
           "tokens": 55,
           "share_per_path": 55.0
-        },
-        {
-          "task_id": "windows_path_normalize_edit",
-          "op": "file.view",
-          "paths": [
-            "out/result.txt"
-          ],
-          "classes": [
-            "task_subject"
-          ],
-          "tokens": 15,
-          "share_per_path": 15.0
-        },
-        {
-          "task_id": "windows_batch_capture_diag",
-          "op": "file.view",
-          "paths": [
-            "broken_build.log"
-          ],
-          "classes": [
-            "task_subject"
-          ],
-          "tokens": 58,
-          "share_per_path": 58.0
         }
       ]
     },
     "a_reads": {
-      "file_refs": 64,
-      "tokens": 2437.0,
+      "file_refs": 67,
+      "tokens": 2309.0,
       "per_class_file_refs": {
-        "referenced_in_run": 32,
-        "task_subject": 22,
-        "unreferenced": 6,
-        "task_file": 4
+        "referenced_in_run": 33,
+        "task_subject": 24,
+        "unreferenced": 8,
+        "task_file": 2
       },
       "per_class_tokens": {
-        "referenced_in_run": 1481.0,
-        "task_subject": 602.0,
-        "unreferenced": 113.0,
-        "task_file": 241.0
+        "referenced_in_run": 1203.0,
+        "task_subject": 707.5,
+        "unreferenced": 259.5,
+        "task_file": 139.0
       },
       "per_class_token_share": {
-        "referenced_in_run": 0.6077,
-        "task_subject": 0.247,
-        "task_file": 0.0989,
-        "unreferenced": 0.0464
+        "referenced_in_run": 0.521,
+        "task_subject": 0.3064,
+        "unreferenced": 0.1124,
+        "task_file": 0.0602
       },
       "top_paths": [
         [
           "src/lib.rs",
-          12
+          16
         ],
         [
           "Cargo.toml",
           9
         ],
         [
-          "TASK.md",
-          7
-        ],
-        [
           "package.json",
           7
         ],
         [
+          "TASK.md",
+          5
+        ],
+        [
           "mathlib.py",
-          3
+          4
         ],
         [
           "tests/test_math.py",
@@ -672,914 +1326,6 @@
         ],
         [
           "SUMMARY.txt",
-          3
-        ]
-      ]
-    }
-  },
-  "without_read_files": {
-    "d_reads": {
-      "calls": 59,
-      "paths": 59,
-      "tokens": 3233.0,
-      "per_class_calls": {
-        "referenced_in_run": 28,
-        "unreferenced": 23,
-        "task_subject": 6,
-        "task_file": 2
-      },
-      "per_class_paths": {
-        "referenced_in_run": 28,
-        "unreferenced": 23,
-        "task_subject": 6,
-        "task_file": 2
-      },
-      "per_class_tokens": {
-        "referenced_in_run": 907.0,
-        "unreferenced": 2054.0,
-        "task_subject": 219.0,
-        "task_file": 53.0
-      },
-      "per_class_token_share": {
-        "unreferenced": 0.6353,
-        "referenced_in_run": 0.2805,
-        "task_subject": 0.0677,
-        "task_file": 0.0164
-      },
-      "per_task_class_counts": {
-        "python_edit_and_retest": {
-          "referenced_in_run": 3,
-          "unreferenced": 3
-        },
-        "python_fix_pytest_fail": {
-          "referenced_in_run": 3,
-          "unreferenced": 3
-        },
-        "python_noisy_install_summary": {
-          "referenced_in_run": 3
-        },
-        "rust_add_unit_test": {
-          "unreferenced": 3,
-          "referenced_in_run": 4
-        },
-        "rust_fix_compile_error": {
-          "referenced_in_run": 3,
-          "unreferenced": 3
-        },
-        "rust_search_and_edit": {
-          "referenced_in_run": 3,
-          "unreferenced": 2
-        },
-        "ts_fix_type_error": {
-          "referenced_in_run": 4,
-          "unreferenced": 8,
-          "task_file": 1
-        },
-        "ts_package_script_fail": {
-          "referenced_in_run": 5,
-          "unreferenced": 1,
-          "task_file": 1
-        },
-        "windows_batch_capture_diag": {
-          "task_subject": 3
-        },
-        "windows_path_normalize_edit": {
-          "task_subject": 3
-        }
-      },
-      "top_paths": [
-        [
-          "referenced_in_run:src/lib.rs",
-          10
-        ],
-        [
-          "unreferenced:Cargo.toml",
-          8
-        ],
-        [
-          "unreferenced:package.json",
-          5
-        ],
-        [
-          "referenced_in_run:package.json",
-          5
-        ],
-        [
-          "referenced_in_run:src/index.ts",
-          4
-        ],
-        [
-          "referenced_in_run:mathlib.py",
-          3
-        ],
-        [
-          "unreferenced:tests/test_math.py",
-          3
-        ],
-        [
-          "referenced_in_run:greet.py",
-          3
-        ],
-        [
-          "unreferenced:tests/test_greet.py",
-          3
-        ],
-        [
-          "referenced_in_run:requirements.txt",
-          3
-        ],
-        [
-          "unreferenced:tsconfig.json",
-          3
-        ],
-        [
-          "task_subject:out/result.txt",
-          3
-        ],
-        [
-          "task_subject:broken_build.log",
-          3
-        ],
-        [
-          "task_file:TASK.md",
-          2
-        ],
-        [
-          "unreferenced:ae/audit.log",
-          1
-        ]
-      ],
-      "rows": [
-        {
-          "task_id": "rust_fix_compile_error",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 28,
-          "share_per_path": 28.0
-        },
-        {
-          "task_id": "rust_fix_compile_error",
-          "op": "file.view",
-          "paths": [
-            "Cargo.toml"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 33,
-          "share_per_path": 33.0
-        },
-        {
-          "task_id": "rust_add_unit_test",
-          "op": "file.view",
-          "paths": [
-            "Cargo.toml"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 33,
-          "share_per_path": 33.0
-        },
-        {
-          "task_id": "rust_add_unit_test",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 27,
-          "share_per_path": 27.0
-        },
-        {
-          "task_id": "rust_search_and_edit",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 31,
-          "share_per_path": 31.0
-        },
-        {
-          "task_id": "rust_search_and_edit",
-          "op": "file.view",
-          "paths": [
-            "Cargo.toml"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 33,
-          "share_per_path": 33.0
-        },
-        {
-          "task_id": "python_fix_pytest_fail",
-          "op": "file.view",
-          "paths": [
-            "mathlib.py"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 23,
-          "share_per_path": 23.0
-        },
-        {
-          "task_id": "python_fix_pytest_fail",
-          "op": "file.view",
-          "paths": [
-            "tests/test_math.py"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 32,
-          "share_per_path": 32.0
-        },
-        {
-          "task_id": "python_edit_and_retest",
-          "op": "file.view",
-          "paths": [
-            "greet.py"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 25,
-          "share_per_path": 25.0
-        },
-        {
-          "task_id": "python_edit_and_retest",
-          "op": "file.view",
-          "paths": [
-            "tests/test_greet.py"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 37,
-          "share_per_path": 37.0
-        },
-        {
-          "task_id": "python_noisy_install_summary",
-          "op": "file.view",
-          "paths": [
-            "requirements.txt"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 17,
-          "share_per_path": 17.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "src/index.ts"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 38,
-          "share_per_path": 38.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "tsconfig.json"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 58,
-          "share_per_path": 58.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "package.json"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 16,
-          "share_per_path": 16.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "package.json"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 16,
-          "share_per_path": 16.0
-        },
-        {
-          "task_id": "ts_package_script_fail",
-          "op": "file.view",
-          "paths": [
-            "package.json"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 55,
-          "share_per_path": 55.0
-        },
-        {
-          "task_id": "ts_package_script_fail",
-          "op": "file.view",
-          "paths": [
-            ".ae/audit.log"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 1329,
-          "share_per_path": 1329.0
-        },
-        {
-          "task_id": "windows_path_normalize_edit",
-          "op": "file.view",
-          "paths": [
-            "out/result.txt"
-          ],
-          "classes": [
-            "task_subject"
-          ],
-          "tokens": 15,
-          "share_per_path": 15.0
-        },
-        {
-          "task_id": "windows_batch_capture_diag",
-          "op": "file.view",
-          "paths": [
-            "broken_build.log"
-          ],
-          "classes": [
-            "task_subject"
-          ],
-          "tokens": 58,
-          "share_per_path": 58.0
-        },
-        {
-          "task_id": "rust_fix_compile_error",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 28,
-          "share_per_path": 28.0
-        },
-        {
-          "task_id": "rust_fix_compile_error",
-          "op": "file.view",
-          "paths": [
-            "Cargo.toml"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 33,
-          "share_per_path": 33.0
-        },
-        {
-          "task_id": "rust_add_unit_test",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 27,
-          "share_per_path": 27.0
-        },
-        {
-          "task_id": "rust_add_unit_test",
-          "op": "file.view",
-          "paths": [
-            "Cargo.toml"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 33,
-          "share_per_path": 33.0
-        },
-        {
-          "task_id": "rust_search_and_edit",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 31,
-          "share_per_path": 31.0
-        },
-        {
-          "task_id": "python_fix_pytest_fail",
-          "op": "file.view",
-          "paths": [
-            "mathlib.py"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 23,
-          "share_per_path": 23.0
-        },
-        {
-          "task_id": "python_fix_pytest_fail",
-          "op": "file.view",
-          "paths": [
-            "tests/test_math.py"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 32,
-          "share_per_path": 32.0
-        },
-        {
-          "task_id": "python_edit_and_retest",
-          "op": "file.view",
-          "paths": [
-            "greet.py"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 25,
-          "share_per_path": 25.0
-        },
-        {
-          "task_id": "python_edit_and_retest",
-          "op": "file.view",
-          "paths": [
-            "tests/test_greet.py"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 37,
-          "share_per_path": 37.0
-        },
-        {
-          "task_id": "python_noisy_install_summary",
-          "op": "file.view",
-          "paths": [
-            "requirements.txt"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 17,
-          "share_per_path": 17.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "src/index.ts"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 38,
-          "share_per_path": 38.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "tsconfig.json"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 58,
-          "share_per_path": 58.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "package.json"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 16,
-          "share_per_path": 16.0
-        },
-        {
-          "task_id": "ts_package_script_fail",
-          "op": "file.view",
-          "paths": [
-            "package.json"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 55,
-          "share_per_path": 55.0
-        },
-        {
-          "task_id": "ts_package_script_fail",
-          "op": "file.view",
-          "paths": [
-            "TASK.md"
-          ],
-          "classes": [
-            "task_file"
-          ],
-          "tokens": 25,
-          "share_per_path": 25.0
-        },
-        {
-          "task_id": "ts_package_script_fail",
-          "op": "file.view",
-          "paths": [
-            "package.json"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 55,
-          "share_per_path": 55.0
-        },
-        {
-          "task_id": "windows_path_normalize_edit",
-          "op": "file.view",
-          "paths": [
-            "out/result.txt"
-          ],
-          "classes": [
-            "task_subject"
-          ],
-          "tokens": 15,
-          "share_per_path": 15.0
-        },
-        {
-          "task_id": "windows_batch_capture_diag",
-          "op": "file.view",
-          "paths": [
-            "broken_build.log"
-          ],
-          "classes": [
-            "task_subject"
-          ],
-          "tokens": 58,
-          "share_per_path": 58.0
-        },
-        {
-          "task_id": "rust_fix_compile_error",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 28,
-          "share_per_path": 28.0
-        },
-        {
-          "task_id": "rust_fix_compile_error",
-          "op": "file.view",
-          "paths": [
-            "Cargo.toml"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 33,
-          "share_per_path": 33.0
-        },
-        {
-          "task_id": "rust_add_unit_test",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 27,
-          "share_per_path": 27.0
-        },
-        {
-          "task_id": "rust_add_unit_test",
-          "op": "file.view",
-          "paths": [
-            "Cargo.toml"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 33,
-          "share_per_path": 33.0
-        },
-        {
-          "task_id": "rust_add_unit_test",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 27,
-          "share_per_path": 27.0
-        },
-        {
-          "task_id": "rust_search_and_edit",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 31,
-          "share_per_path": 31.0
-        },
-        {
-          "task_id": "rust_search_and_edit",
-          "op": "file.view",
-          "paths": [
-            "Cargo.toml"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 33,
-          "share_per_path": 33.0
-        },
-        {
-          "task_id": "python_fix_pytest_fail",
-          "op": "file.view",
-          "paths": [
-            "mathlib.py"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 23,
-          "share_per_path": 23.0
-        },
-        {
-          "task_id": "python_fix_pytest_fail",
-          "op": "file.view",
-          "paths": [
-            "tests/test_math.py"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 32,
-          "share_per_path": 32.0
-        },
-        {
-          "task_id": "python_edit_and_retest",
-          "op": "file.view",
-          "paths": [
-            "greet.py"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 25,
-          "share_per_path": 25.0
-        },
-        {
-          "task_id": "python_edit_and_retest",
-          "op": "file.view",
-          "paths": [
-            "tests/test_greet.py"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 37,
-          "share_per_path": 37.0
-        },
-        {
-          "task_id": "python_noisy_install_summary",
-          "op": "file.view",
-          "paths": [
-            "requirements.txt"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 17,
-          "share_per_path": 17.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "src/index.ts"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 38,
-          "share_per_path": 38.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "package.json"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 16,
-          "share_per_path": 16.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "tsconfig.json"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 58,
-          "share_per_path": 58.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "package.json"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 16,
-          "share_per_path": 16.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "TASK.md"
-          ],
-          "classes": [
-            "task_file"
-          ],
-          "tokens": 28,
-          "share_per_path": 28.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.view",
-          "paths": [
-            "src/index.ts"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 38,
-          "share_per_path": 38.0
-        },
-        {
-          "task_id": "ts_package_script_fail",
-          "op": "file.view",
-          "paths": [
-            "package.json"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 55,
-          "share_per_path": 55.0
-        },
-        {
-          "task_id": "ts_package_script_fail",
-          "op": "file.view",
-          "paths": [
-            "package.json"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 55,
-          "share_per_path": 55.0
-        },
-        {
-          "task_id": "windows_path_normalize_edit",
-          "op": "file.view",
-          "paths": [
-            "out/result.txt"
-          ],
-          "classes": [
-            "task_subject"
-          ],
-          "tokens": 15,
-          "share_per_path": 15.0
-        },
-        {
-          "task_id": "windows_batch_capture_diag",
-          "op": "file.view",
-          "paths": [
-            "broken_build.log"
-          ],
-          "classes": [
-            "task_subject"
-          ],
-          "tokens": 58,
-          "share_per_path": 58.0
-        }
-      ]
-    },
-    "a_reads": {
-      "file_refs": 68,
-      "tokens": 2358.0,
-      "per_class_file_refs": {
-        "referenced_in_run": 33,
-        "task_subject": 25,
-        "unreferenced": 6,
-        "task_file": 4
-      },
-      "per_class_tokens": {
-        "referenced_in_run": 1420.0,
-        "task_subject": 590.0,
-        "unreferenced": 126.0,
-        "task_file": 222.0
-      },
-      "per_class_token_share": {
-        "referenced_in_run": 0.6022,
-        "task_subject": 0.2502,
-        "task_file": 0.0941,
-        "unreferenced": 0.0534
-      },
-      "top_paths": [
-        [
-          "src/lib.rs",
-          11
-        ],
-        [
-          "Cargo.toml",
-          9
-        ],
-        [
-          "TASK.md",
-          7
-        ],
-        [
-          "package.json",
-          6
-        ],
-        [
-          "ERR.txt",
-          6
-        ],
-        [
-          "greet.py",
-          4
-        ],
-        [
-          "mathlib.py",
-          3
-        ],
-        [
-          "tests/test_math.py",
-          3
-        ],
-        [
-          "tests/test_greet.py",
-          3
-        ],
-        [
-          "requirements.txt",
           3
         ]
       ]

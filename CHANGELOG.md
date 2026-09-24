@@ -48,6 +48,35 @@
   the same 0.6 success rate — the ACI did not reduce steps or tokens there.
   Single-run variance is large, so the direction is the finding, not the ratio.
 
+### Fixed
+- **Re-measured after the shim fix** (120 rows, `api_error` 0, seeds 42/43/44):
+  condition D now uses **177.3 observation tokens per run against raw shell's
+  202.4** — a D/A token ratio of **0.876**, the first reading below 1 in five
+  rounds — while still issuing 1.40x the tool calls at the same 0.6333 success
+  rate. `exec.run` fell from 76 calls / 5585 tokens to 50 / 2121, and failed
+  execs from 45 / 4565 to 21 / 1735 with the Rust tasks at zero. The gap
+  decomposition flips with it: exec goes from +70.4 to **-74.6** tokens/run,
+  because raw shell has to do its reading, running and writing through one
+  command while D's `exec.run` only executes. Every D-side exec number recorded
+  before this date was measured under the defect and is not comparable (C13).
+- **`exec.run` could not launch a name-dispatching shim.** On a rustup install
+  `cargo.exe` / `rustc.exe` are *symlinks* to `rustup.exe`, and rustup picks the
+  tool from the file name it was invoked as. `resolve_candidate` canonicalised the
+  path, which follows the symlink, so the child ran as plain `rustup`:
+  `cargo check` returned exit 100 with "0 error(s)", `cargo build` was read as the
+  `+build` toolchain, and `cargo --version` printed the rustup version. The launch
+  path is now kept as resolved (the shim name survives) while
+  `audited_executable` stays canonical for audit identity, so the safety guard and
+  target reporting still name the real binary (claim C18,
+  `tools/exec_failure_breakdown.py`, plus two regression tests in
+  `src/process_command.rs`).
+- **This silently corrupted the benchmark.** Condition D could not run any
+  cargo/rustc command on this machine while raw shell (which spawns through
+  `cmd`) was unaffected, so every D-side exec number recorded before 2026-09-24
+  is measured under that defect: the rust tasks' failed execs and the toolchain
+  probing were the defect, not the model. C13/C15 now carry that boundary, and
+  the round below re-measures with the fix in place.
+
 ### Changed
 - Read-usage audit (claim C17, `tools/read_usage_audit.py`): of condition D's 85
   read paths in the with arm, **33.4% of the read tokens go to `TASK.md`**, whose
