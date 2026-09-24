@@ -1,0 +1,106 @@
+{
+  "applied_at": "2026-09-24T16:31:16.533039Z",
+  "base_graph_hash": "e2c3b00b7e775510918d9e846d64e7ed27bda7e62c50088737bac001afeda9dd",
+  "base_summary": {
+    "edge_count": 135,
+    "node_count": 86,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "谓词原文：`bench/aci/tasks/ts_fix_type_error.json::success` = all(file_contains `return a + b`, file_not_contains `const x: string`)",
+          "GOLDEN 就是 `return a + b;`（`bench/aci/fixtures/ts_fix_type_error/GOLDEN/src/index.ts`）；pristine 是 `const x: string = a + b; return x;`",
+          "复算：`eval/ts_fixture_audit.json::success_predicate` 给出 5 次「removes_type_error 为真但 predicate_pass 为假」，与记录成功逐条一致（D 0/3、A 1/3）",
+          "`bench/aci/runners/live_agent_loop.py` 第 979 行硬编码 `\"optional_verify\": None`；`check_success` 本身支持 `command_exit_0`，mock 侧 `run_suite.py` 有 `--optional-verify` 开关",
+          "边界：本工具**不执行 tsc**（fixture 无离线 typescript、本机也无全局 tsc），所以「改对了」目前是语言事实，实测需要先落地离线工具链",
+          "前置变化（2026-09-24）：C22 修复后的 live 基线已重跑并 fresh，所以本节点落地后需要**再一次**全量重跑才能把成功率口径重新登记；本轮 6 次运行的 ts 任务成功判定仍是旧谓词（D 0/3、A 1/3，5 次「改对了却判失败」）",
+          "fixture：`bench/aci/fixtures/ts_fix_type_error/deps/typescript-5.4.5.tgz`（pinned）由新模块 `bench/aci/runners/fixture_deps.py::materialize_deps` 在工作区准备阶段**离线**解包成 `node_modules/typescript`，并写出 `node_modules/.bin/tsc`(`.cmd`)；接入 live runner、mock suite 与 `tf45_envelope_replay`（后者被 `step_composition` / `exec_failure_breakdown` 复用），`prepare_workspace` 对解包失败 fail-closed",
+          "谓词：`bench/aci/tasks/ts_fix_type_error.json` 的 `success` 改为 `command_exit_0 [\"node\",\"node_modules/typescript/bin/tsc\",\"--noEmit\"]`；`manifest.json` 的 `task_set_version` 1.1.0 → **1.2.0**，任务 version 同步 1.2.0",
+          "重算（`eval/ts_fixture_audit.json::success_predicate`）：同一批 6 条已存轨迹，旧 GOLDEN 字面谓词 D 0/3、A 0/3，真实 `tsc --noEmit` **D 3/3、A 3/3** → `runs_where_legacy_rejected_a_passing_fix = 6`；baseline：pristine `tsc` exit 2、GOLDEN exit 0、等价改名修复 exit 0",
+          "runner：`check_success` 可返回 `None`（未验证——所需命令不存在），`aggregate` / `compare_a_vs_d` 把未验证行排除出成功率而不是算失败；每行记录 `\"optional_verify\": {\"ran\": false, \"declared\": ...}`（不再静默写 `None`），并新增 `verify_unavailable` 字段；`success_verdict()` 负责 PASS/FAIL/UNVERIFIED 文案",
+          "新声明 C23（门槛 `== 1.00`）：谓词必须是命令、pristine 必须失败、GOLDEN 必须通过、等价改名修复必须通过；`claim_gate` **16/16 exit 0**（C12 11/11 fresh）",
+          "live 重跑（第八次复测，task set v1.2.0，120 行，`api_error` 0、未验证 0）：with 臂 A 0.6333 / 3.47 / 155.93、D **0.70** / 4.00 / 152.07（D/A **1.1538 / 0.9752**）；`ts_fix_type_error` D 由 0/3 变 3/3、5.33 步 / 292.3 tok → **3.00 步 / 173.0 tok**（A 3.33 / 284.7 → 2.00 / 119.0）；失败 exec 由 5 次变 7 次但全部是 `pytest -q` / `cargo test` 的真实试错（ts 与 Rust 编译归零）",
+          "提交：29c5a03（task set v1.2.0 + 谓词 + fixture + 重跑产物 + C13–C21 重登记）、ec646a8（只保留逐 seed 产物）"
+        ],
+        "next_action": "无。同类缺口见 TF-0087（python_noisy_install_summary 的字面谓词）。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "谓词缺口已修并收口。fixture 现在自带 pinned `typescript`（`deps/typescript-5.4.5.tgz` 由 `fixture_deps.materialize_deps` 离线解包，含 `.bin` shim），两个臂从同一份自洽工作区出发；成功判定改为 `command_exit_0` 跑 fixture 自己的 `tsc --noEmit`；`task_set_version` 升到 1.2.0。用同一批 6 条已存轨迹重算：旧 GOLDEN 字面谓词 D 0/3、A 0/3，真实 `tsc` **D 3/3、A 3/3**——**旧谓词把 6 次真实修复全判成了失败**。新声明 C23 把它变成机检：谓词必须是命令、pristine 必须失败（tsc exit 2）、GOLDEN 必须通过（exit 0）、一个写法不同但等价的修复（改名绑定）也必须通过。runner 侧同时修掉两处：`check_success` 可返回「未验证」并被排除出成功率（不再把环境缺失算成能力失败），每行显式记录 `optional_verify` 没有单独执行。live 重跑（第八次，120 行）后 **D 成功率 0.50 → 0.70，首次不低于 A 的 0.6333**；`ts_fix_type_error` 由 5.33 步 / 292.3 tok 降到 3.00 步 / 173.0 tok。`claim_gate` 16/16 exit 0。"
+      },
+      "id": "TF-0084"
+    },
+    {
+      "action": "add_node",
+      "alias": "noisy-install-predicate",
+      "node": {
+        "acceptance_criteria": [
+          "把谓词改成能表达 prompt 承诺的判定：SUMMARY.txt 存在、内容为单行、不含安装日志片段，且点名了实际安装的包（`six`）——不依赖单复数或某个固定词",
+          "用两轮已存轨迹（D 3 行 + A 3 行）重算新旧口径，给出成功率差异",
+          "按 C12 重跑 live 基线并重登记 C13（task_set_version 再升一档），说明与 v1.2.0 的不可比性",
+          "加一个机检不变量（同 C23）：pristine 失败、GOLDEN 通过、一个写法不同但等价的合法摘要也必须通过"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "让测量反映能力而不是环境",
+          "validation_plan": [
+            "定义行为谓词",
+            "用两轮轨迹重算",
+            "加 C23 式机检不变量",
+            "重跑 live 并重登记 C13"
+          ],
+          "why_not_enough": "还没定义能表达「单行摘要、不贴日志、点名安装内容」的谓词，也没重算两轮轨迹",
+          "why_this_task": "该任务连续两轮 0/6，但 D 的三行摘要都满足 prompt 的要求；字面谓词把「写了单数 package」当成失败，直接压低 D 的成功率"
+        },
+        "confidence": 0.85,
+        "context_tags": [
+          "bench",
+          "task-set",
+          "success-predicate"
+        ],
+        "difficulty": "low",
+        "display_order": 260,
+        "evidence": [
+          "谓词原文：`bench/aci/tasks/python_noisy_install_summary.json::success` = `{\"type\":\"file_contains\",\"path\":\"SUMMARY.txt\",\"contains\":\"packages\"}`；`optional_verify` 为 null",
+          "prompt：`Install requirements and report a one-line dependency summary without pasting full install logs.`",
+          "v1.2.0 轮 D 三行写入的 SUMMARY.txt 内容（逐字见 summary）；`success_reason` 均为 `file_contains SUMMARY.txt`",
+          "两轮 live 的逐任务成功率：v1.1.0 与 v1.2.0 都是 D 0/3、A 0/3",
+          "同类先例：TF-0084/C23 证明字面谓词会误杀真实修复（ts 任务 6 次全被误杀）"
+        ],
+        "id": "TF-0087",
+        "kind": "follow_up",
+        "next_action": "先定新谓词（存在 + 单行 + 不含日志 + 点名 `six`），再按 C23 的模式加机检不变量，最后重跑一次 live 基线并重登记 C13。",
+        "non_goals": [
+          "不为了让 D 好看而放宽到「只要写了 SUMMARY.txt 就算过」——那会把「不贴日志」这条要求丢掉"
+        ],
+        "priority": 2,
+        "purpose": "让这条任务的判定测 prompt 承诺的东西（一行依赖摘要、不贴安装日志），而不是测摘要里有没有出现某个字面词。",
+        "source_sessions": [
+          "ses_verseshell-tf0084-ts-predicate-2026-09-24"
+        ],
+        "status": "ready",
+        "summary": "任务 prompt 是「Install requirements and report a one-line dependency summary without pasting full install logs.」，成功谓词却是 `file_contains SUMMARY.txt \"packages\"`——要求字面词 `packages`。v1.2.0 轮的三次 D 运行分别写了：`Installed 1 package (six==1.16.0) from requirements.txt — success, no errors.`、`Installed 1 package from requirements.txt: six==1.16.0 (no transitive dependencies; verified importable as six 1.16.0).`、`Installed 1 package from requirements.txt: six==1.16.0 (0 upgrades, 0 conflicts).`——三行都满足 prompt（单行、无日志、点名了装了什么），却因为写的是单数 `package` 而全部判失败。该任务在 v1.1.0 与 v1.2.0 两轮都是 0/6（两臂），是 TF-0084 的同类缺陷：用字面文本代替行为判定。",
+        "title": "缺口：python_noisy_install_summary 的谓词要求字面词 packages，三行合法摘要因单数被判失败"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "created_from_session": "ses_verseshell-tf0084-ts-predicate-2026-09-24",
+        "reason": "同类缺陷：字面文本谓词代替行为判定，在 TF-0084 收尾核对其它任务成功率时发现"
+      },
+      "from": "TF-0087",
+      "to": "TF-0084",
+      "type": "derived_from"
+    }
+  ],
+  "created_at": "2026-09-24T16:31:16.394630Z",
+  "proposal_id": "TFP-tf0084-ts-predicate-close-2026-09-24",
+  "rationale": "TF-0084 的四条验收全部完成：谓词改成行为判定（并加了「等价改名修复也必须通过」这条不变量，即 C23 的四项检查）、无法执行 tsc 时记为未验证并排除出成功率、用 6 条已存轨迹给出新旧口径差异（旧谓词误杀全部 6 次真实修复）、runner 不再静默把 optional_verify 置 None。fixture 改为自带 pinned typescript 后两臂从同一份自洽工作区出发，live 重跑显示 D 的成功率首次不低于 A（0.70 vs 0.6333）。收尾时又核对出一处同类缺陷：`python_noisy_install_summary` 的谓词要求字面词 `packages`，而三行合法摘要写的是单数 `package`——按 TF-0084 的同一标准开成 TF-0087。",
+  "session_id": "ses_verseshell-tf0084-ts-predicate-2026-09-24",
+  "status": "applied"
+}
