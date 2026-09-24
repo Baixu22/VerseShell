@@ -43,6 +43,7 @@ AE = ROOT / "target" / "debug" / "ae.exe"
 STORED_LIVE = BENCH / "results" / "latest_live.json"
 
 sys.path.insert(0, str(BENCH / "runners"))
+from fixture_deps import materialize_deps  # noqa: E402
 from live_agent_loop import (  # noqa: E402
     ACI_CAPABILITIES,
     estimate_tokens,
@@ -108,7 +109,7 @@ def prepare_workspace(fixture: str) -> Path:
     src = FIXTURES / fixture
     td = Path(tempfile.mkdtemp(prefix=f"tf45-replay-{fixture}-"))
     for item in src.iterdir():
-        if item.name == "GOLDEN":
+        if item.name in ("GOLDEN", "deps"):
             continue
         dest = td / item.name
         if item.is_dir():
@@ -117,6 +118,7 @@ def prepare_workspace(fixture: str) -> Path:
             )
         else:
             shutil.copy2(item, dest)
+    materialize_deps(src, td)
     return td
 
 

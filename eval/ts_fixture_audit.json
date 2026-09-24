@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.ts-fixture-audit/v1",
-  "generated_at": "2026-09-24T14:36:39.032987+00:00",
+  "generated_at": "2026-09-24T16:28:54.174624+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
@@ -22,13 +22,14 @@
       "bench/aci/results/latest_live.json",
       "tools/ts_fixture_audit.py"
     ],
-    "fingerprint": "96d96bd50d499fa5c6f8d614f1c1eaeb2e34e4938e2b6fb28a9ff02a43d4b4d9"
+    "fingerprint": "a9ce0bb761afee05a9dc000e1928ecb0006a97b8d160a2d6cde27eaa30e57c6d"
   },
   "fixture": {
     "ts_fix_type_error": {
       "files": [
         "GOLDEN/src/index.ts",
         "TASK.md",
+        "deps/typescript-5.4.5.tgz",
         "package.json",
         "src/index.ts",
         "tsconfig.json"
@@ -57,15 +58,18 @@
     },
     "machine": {
       "tsc_on_path": false,
-      "fixture_local_typescript": false
+      "shipped_dependency_archives": [
+        "typescript-5.4.5.tgz"
+      ],
+      "workspace_local_typescript": "materialised by fixture_deps.materialize_deps during workspace prep (not committed unpacked)"
     },
     "promise": {
       "prompt": "Fix the TypeScript type error so tsc --noEmit succeeds.",
       "optional_verify": {
         "type": "command_exit_0",
         "argv": [
-          "npx",
-          "tsc",
+          "node",
+          "node_modules/typescript/bin/tsc",
           "--noEmit"
         ],
         "timeout_sec": 120
@@ -258,87 +262,45 @@
           "per_run": [
             {
               "seed": 42,
-              "success": false,
-              "success_reason": "file_contains src/index.ts",
-              "steps": 5,
-              "tokens": 285,
+              "success": true,
+              "success_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
+              "steps": 3,
+              "tokens": 173,
               "boundary_calls": [
                 {
-                  "index": 1,
-                  "class": "toolchain_probe_failed",
-                  "tokens": 99,
-                  "ok": false,
-                  "command": "npx tsc --noEmit"
-                },
-                {
-                  "index": 3,
-                  "class": "toolchain_install",
-                  "tokens": 13,
-                  "ok": true,
-                  "command": "npm install --save-dev typescript"
-                },
-                {
-                  "index": 4,
+                  "index": 2,
                   "class": "toolchain_verify",
                   "tokens": 3,
                   "ok": true,
-                  "command": "npx tsc --noEmit"
+                  "command": "node_modules/.bin/tsc --noEmit"
                 }
               ]
             },
             {
               "seed": 43,
-              "success": false,
-              "success_reason": "file_contains src/index.ts",
-              "steps": 5,
-              "tokens": 289,
+              "success": true,
+              "success_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
+              "steps": 3,
+              "tokens": 173,
               "boundary_calls": [
                 {
                   "index": 2,
-                  "class": "toolchain_probe_failed",
-                  "tokens": 99,
-                  "ok": false,
-                  "command": "npx tsc --noEmit"
-                },
-                {
-                  "index": 3,
-                  "class": "toolchain_install",
-                  "tokens": 17,
-                  "ok": true,
-                  "command": "npm install --save-dev typescript"
-                },
-                {
-                  "index": 4,
                   "class": "toolchain_verify",
                   "tokens": 3,
                   "ok": true,
-                  "command": "npx tsc --noEmit"
+                  "command": "node node_modules/typescript/bin/tsc --noEmit"
                 }
               ]
             },
             {
               "seed": 44,
-              "success": false,
-              "success_reason": "file_contains src/index.ts",
-              "steps": 6,
-              "tokens": 303,
+              "success": true,
+              "success_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
+              "steps": 3,
+              "tokens": 173,
               "boundary_calls": [
                 {
-                  "index": 3,
-                  "class": "toolchain_probe_failed",
-                  "tokens": 99,
-                  "ok": false,
-                  "command": "npx tsc --noEmit"
-                },
-                {
-                  "index": 4,
-                  "class": "toolchain_install",
-                  "tokens": 17,
-                  "ok": true,
-                  "command": "npm install --save-dev typescript"
-                },
-                {
-                  "index": 5,
+                  "index": 2,
                   "class": "toolchain_verify",
                   "tokens": 3,
                   "ok": true,
@@ -347,23 +309,11 @@
               ]
             }
           ],
-          "boundary_calls": 9,
-          "boundary_calls_per_run": 3.0,
-          "boundary_tokens": 353,
-          "boundary_tokens_per_run": 117.67,
+          "boundary_calls": 3,
+          "boundary_calls_per_run": 1.0,
+          "boundary_tokens": 9,
+          "boundary_tokens_per_run": 3.0,
           "by_class": {
-            "toolchain_install": {
-              "calls": 3,
-              "tokens": 47,
-              "calls_per_run": 1.0,
-              "tokens_per_run": 15.67
-            },
-            "toolchain_probe_failed": {
-              "calls": 3,
-              "tokens": 297,
-              "calls_per_run": 1.0,
-              "tokens_per_run": 99.0
-            },
             "toolchain_verify": {
               "calls": 3,
               "tokens": 9,
@@ -371,8 +321,8 @@
               "tokens_per_run": 3.0
             }
           },
-          "steps_per_run": 5.333,
-          "tokens_per_run": 292.33,
+          "steps_per_run": 3.0,
+          "tokens_per_run": 173.0,
           "note": "typed ops do one job each, so the classes are separable"
         },
         "with_read_files:raw_shell": {
@@ -381,107 +331,87 @@
             {
               "seed": 42,
               "success": true,
-              "success_reason": "all ok",
-              "steps": 4,
-              "tokens": 308,
+              "success_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
+              "steps": 2,
+              "tokens": 124,
               "boundary_calls": [
                 {
                   "index": 0,
                   "class": "raw_shell_toolchain",
-                  "tokens": 127,
+                  "tokens": 114,
                   "ok": null,
-                  "command": "type package.json & type tsconfig.json & type src\\index.ts & dir /s /b src"
+                  "command": "type src\\index.ts & echo ---TSCONFIG--- & type tsconfig.json & echo ---PACKAGE--- & type package.json"
                 },
                 {
-                  "index": 2,
+                  "index": 1,
                   "class": "raw_shell_toolchain",
-                  "tokens": 138,
+                  "tokens": 2,
                   "ok": null,
-                  "command": "npx tsc --noEmit"
-                },
-                {
-                  "index": 3,
-                  "class": "toolchain_install",
-                  "tokens": 33,
-                  "ok": null,
-                  "command": "npm install && npm run typecheck"
+                  "command": "python -c \"open(r'src\\index.ts','w').write('export function add(a: number, b: number): number {\\n  const x: number = a +"
                 }
               ]
             },
             {
               "seed": 43,
-              "success": false,
-              "success_reason": "file_contains src/index.ts",
-              "steps": 3,
-              "tokens": 306,
+              "success": true,
+              "success_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
+              "steps": 2,
+              "tokens": 117,
               "boundary_calls": [
                 {
                   "index": 0,
                   "class": "raw_shell_toolchain",
-                  "tokens": 127,
+                  "tokens": 107,
                   "ok": null,
-                  "command": "type package.json & type tsconfig.json & type src\\index.ts & dir /s /b src"
+                  "command": "type src\\index.ts & echo. & type tsconfig.json & echo. & type package.json"
                 },
                 {
                   "index": 1,
                   "class": "raw_shell_toolchain",
-                  "tokens": 138,
+                  "tokens": 2,
                   "ok": null,
                   "command": "python -c \"open(r'src\\index.ts','w').write('export function add(a: number, b: number): number {\\n  const x: number = a +"
-                },
-                {
-                  "index": 2,
-                  "class": "toolchain_install",
-                  "tokens": 33,
-                  "ok": null,
-                  "command": "npm install && npm run typecheck"
                 }
               ]
             },
             {
               "seed": 44,
-              "success": false,
-              "success_reason": "file_contains src/index.ts",
-              "steps": 3,
-              "tokens": 240,
+              "success": true,
+              "success_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
+              "steps": 2,
+              "tokens": 116,
               "boundary_calls": [
                 {
                   "index": 0,
                   "class": "raw_shell_toolchain",
-                  "tokens": 121,
+                  "tokens": 106,
                   "ok": null,
-                  "command": "type package.json tsconfig.json src\\index.ts"
+                  "command": "type src\\index.ts & type tsconfig.json & type package.json"
                 },
                 {
-                  "index": 2,
-                  "class": "toolchain_install",
-                  "tokens": 8,
+                  "index": 1,
+                  "class": "raw_shell_toolchain",
+                  "tokens": 2,
                   "ok": null,
-                  "command": "python -c \"open('src/index.ts','w').write('export function add(a: number, b: number): number {\\n  const x: number = a + "
+                  "command": "python -c \"open(r'src\\index.ts','w').write('export function add(a: number, b: number): number {\\n  const x: number = a +"
                 }
               ]
             }
           ],
-          "boundary_calls": 8,
-          "boundary_calls_per_run": 2.667,
-          "boundary_tokens": 725,
-          "boundary_tokens_per_run": 241.67,
+          "boundary_calls": 6,
+          "boundary_calls_per_run": 2.0,
+          "boundary_tokens": 333,
+          "boundary_tokens_per_run": 111.0,
           "by_class": {
             "raw_shell_toolchain": {
-              "calls": 5,
-              "tokens": 651,
-              "calls_per_run": 1.667,
-              "tokens_per_run": 217.0
-            },
-            "toolchain_install": {
-              "calls": 3,
-              "tokens": 74,
-              "calls_per_run": 1.0,
-              "tokens_per_run": 24.67
+              "calls": 6,
+              "tokens": 333,
+              "calls_per_run": 2.0,
+              "tokens_per_run": 111.0
             }
           },
-          "steps_per_run": 3.333,
-          "tokens_per_run": 284.67,
+          "steps_per_run": 2.0,
+          "tokens_per_run": 119.0,
           "note": "raw shell folds read/run/write into one command, so these buckets overlap; treat them as an upper bound on A's toolchain share"
         }
       }
@@ -564,8 +494,8 @@
               "seed": 42,
               "success": true,
               "success_reason": "file_contains package.json",
-              "steps": 2,
-              "tokens": 66,
+              "steps": 5,
+              "tokens": 145,
               "boundary_calls": []
             },
             {
@@ -573,7 +503,7 @@
               "success": true,
               "success_reason": "file_contains package.json",
               "steps": 2,
-              "tokens": 70,
+              "tokens": 81,
               "boundary_calls": []
             },
             {
@@ -581,7 +511,7 @@
               "success": true,
               "success_reason": "file_contains package.json",
               "steps": 3,
-              "tokens": 102,
+              "tokens": 148,
               "boundary_calls": []
             }
           ],
@@ -590,8 +520,8 @@
           "boundary_tokens": 0,
           "boundary_tokens_per_run": 0.0,
           "by_class": {},
-          "steps_per_run": 2.333,
-          "tokens_per_run": 79.33,
+          "steps_per_run": 3.333,
+          "tokens_per_run": 124.67,
           "note": "raw shell folds read/run/write into one command, so these buckets overlap; treat them as an upper bound on A's toolchain share"
         }
       }
@@ -603,71 +533,81 @@
     "per_run": [
       {
         "seed": 42,
-        "observed_steps": 5,
-        "observed_tokens": 285,
-        "boundary_calls": 2,
-        "boundary_tokens": 112,
+        "observed_steps": 3,
+        "observed_tokens": 173,
+        "boundary_calls": 0,
+        "boundary_tokens": 0,
         "cf_steps": 3,
         "cf_tokens": 173,
         "verify_tokens": 3
       },
       {
         "seed": 43,
-        "observed_steps": 5,
-        "observed_tokens": 289,
-        "boundary_calls": 2,
-        "boundary_tokens": 116,
+        "observed_steps": 3,
+        "observed_tokens": 173,
+        "boundary_calls": 0,
+        "boundary_tokens": 0,
         "cf_steps": 3,
         "cf_tokens": 173,
         "verify_tokens": 3
       },
       {
         "seed": 44,
-        "observed_steps": 6,
-        "observed_tokens": 303,
-        "boundary_calls": 2,
-        "boundary_tokens": 116,
-        "cf_steps": 4,
-        "cf_tokens": 187,
+        "observed_steps": 3,
+        "observed_tokens": 173,
+        "boundary_calls": 0,
+        "boundary_tokens": 0,
+        "cf_steps": 3,
+        "cf_tokens": 173,
         "verify_tokens": 3
       }
     ],
-    "observed_steps_per_run": 5.333,
-    "observed_tokens_per_run": 292.333,
-    "boundary_calls_per_run": 2.0,
-    "boundary_tokens_per_run": 114.667,
-    "cf_steps_per_run": 3.333,
-    "cf_tokens_per_run": 177.667
+    "observed_steps_per_run": 3.0,
+    "observed_tokens_per_run": 173.0,
+    "boundary_calls_per_run": 0.0,
+    "boundary_tokens_per_run": 0.0,
+    "cf_steps_per_run": 3.0,
+    "cf_tokens_per_run": 173.0
   },
   "sensitivity": {
     "observed": {
-      "steps_per_run_D": 3.767,
-      "steps_per_run_A": 3.1,
-      "step_ratio": 1.2151,
-      "tokens_per_run_D": 144.8,
-      "tokens_per_run_A": 180.87,
-      "token_ratio": 0.8006
+      "steps_per_run_D": 4.0,
+      "steps_per_run_A": 3.467,
+      "step_ratio": 1.1538,
+      "tokens_per_run_D": 152.07,
+      "tokens_per_run_A": 155.93,
+      "token_ratio": 0.9752
     },
     "d_only_counterfactual": {
-      "steps_per_run_D": 3.567,
-      "step_ratio": 1.1505,
-      "tokens_per_run_D": 133.33,
-      "token_ratio": 0.7372
+      "steps_per_run_D": 4.0,
+      "step_ratio": 1.1538,
+      "tokens_per_run_D": 152.07,
+      "token_ratio": 0.9752
     },
     "step_ratio_band": [
-      1.1505,
-      1.2151
+      1.1538,
+      1.1538
     ],
     "token_ratio_band": [
-      0.7372,
-      0.8006
+      0.9752,
+      0.9752
     ],
     "conclusion_flips": false
   },
   "success_predicate": {
     "task": "ts_fix_type_error",
+    "task_version": "1.2.0",
     "prompt": "Fix the TypeScript type error so tsc --noEmit succeeds.",
     "declared_success": {
+      "type": "command_exit_0",
+      "argv": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit"
+      ],
+      "timeout_sec": 120
+    },
+    "legacy_predicate": {
       "type": "all",
       "of": [
         {
@@ -685,8 +625,8 @@
     "optional_verify": {
       "type": "command_exit_0",
       "argv": [
-        "npx",
-        "tsc",
+        "node",
+        "node_modules/typescript/bin/tsc",
         "--noEmit"
       ],
       "timeout_sec": 120
@@ -694,13 +634,36 @@
     "baseline": {
       "pristine": {
         "body": "export function add(a: number, b: number): number {\n  const x: string = a + b;\n  return x;\n}\n",
-        "pass": false,
-        "reason": "file_contains src/index.ts"
+        "legacy_predicate_pass": false,
+        "legacy_reason": "file_contains src/index.ts",
+        "tsc": {
+          "ran": true,
+          "exit_code": 2,
+          "pass": false,
+          "output_head": "src/index.ts(2,9): error TS2322: Type 'number' is not assignable to type 'string'.\nsrc/index.ts(3,3): error TS2322: Type 'string' is not assignable to type 'number'."
+        }
       },
       "golden": {
         "body": "export function add(a: number, b: number): number {\n  return a + b;\n}\n",
-        "pass": true,
-        "reason": "all ok"
+        "legacy_predicate_pass": true,
+        "legacy_reason": "all ok",
+        "tsc": {
+          "ran": true,
+          "exit_code": 0,
+          "pass": true,
+          "output_head": ""
+        }
+      },
+      "equivalent_rename": {
+        "body": "export function add(a: number, b: number): number {\n  const total: number = a + b;\n  return total;\n}\n",
+        "legacy_predicate_pass": false,
+        "legacy_reason": "file_contains src/index.ts",
+        "tsc": {
+          "ran": true,
+          "exit_code": 0,
+          "pass": true,
+          "output_head": ""
+        }
       }
     },
     "per_run": [
@@ -708,93 +671,152 @@
         "condition": "raw_shell",
         "seed": 42,
         "recorded_success": true,
-        "recorded_reason": "all ok",
+        "recorded_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
         "reconstructed": true,
         "how": "inline python write",
-        "final_body": "export function add(a: number, b: number): number {\n  return a + b;\n}\n",
-        "predicate_pass": true,
-        "predicate_reason": "all ok",
+        "final_body": "export function add(a: number, b: number): number {\n  const x: number = a + b;\n  return x;\n}\n",
+        "legacy_predicate_pass": false,
+        "legacy_reason": "file_contains src/index.ts",
         "removes_type_error": true,
-        "keeps_intermediate_binding": false
+        "keeps_intermediate_binding": true,
+        "tsc": {
+          "ran": true,
+          "exit_code": 0,
+          "pass": true,
+          "output_head": ""
+        }
       },
       {
         "condition": "verseshell_aci",
         "seed": 42,
-        "recorded_success": false,
-        "recorded_reason": "file_contains src/index.ts",
+        "recorded_success": true,
+        "recorded_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
         "reconstructed": true,
         "how": "typed file ops",
         "final_body": "export function add(a: number, b: number): number {\n  const x: number = a + b;\n  return x;\n}\n",
-        "predicate_pass": false,
-        "predicate_reason": "file_contains src/index.ts",
+        "legacy_predicate_pass": false,
+        "legacy_reason": "file_contains src/index.ts",
         "removes_type_error": true,
-        "keeps_intermediate_binding": true
+        "keeps_intermediate_binding": true,
+        "tsc": {
+          "ran": true,
+          "exit_code": 0,
+          "pass": true,
+          "output_head": ""
+        }
       },
       {
         "condition": "raw_shell",
         "seed": 43,
-        "recorded_success": false,
-        "recorded_reason": "file_contains src/index.ts",
+        "recorded_success": true,
+        "recorded_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
         "reconstructed": true,
         "how": "inline python write",
         "final_body": "export function add(a: number, b: number): number {\n  const x: number = a + b;\n  return x;\n}\n",
-        "predicate_pass": false,
-        "predicate_reason": "file_contains src/index.ts",
+        "legacy_predicate_pass": false,
+        "legacy_reason": "file_contains src/index.ts",
         "removes_type_error": true,
-        "keeps_intermediate_binding": true
+        "keeps_intermediate_binding": true,
+        "tsc": {
+          "ran": true,
+          "exit_code": 0,
+          "pass": true,
+          "output_head": ""
+        }
       },
       {
         "condition": "verseshell_aci",
         "seed": 43,
-        "recorded_success": false,
-        "recorded_reason": "file_contains src/index.ts",
+        "recorded_success": true,
+        "recorded_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
         "reconstructed": true,
         "how": "typed file ops",
         "final_body": "export function add(a: number, b: number): number {\n  const x: number = a + b;\n  return x;\n}\n",
-        "predicate_pass": false,
-        "predicate_reason": "file_contains src/index.ts",
+        "legacy_predicate_pass": false,
+        "legacy_reason": "file_contains src/index.ts",
         "removes_type_error": true,
-        "keeps_intermediate_binding": true
+        "keeps_intermediate_binding": true,
+        "tsc": {
+          "ran": true,
+          "exit_code": 0,
+          "pass": true,
+          "output_head": ""
+        }
       },
       {
         "condition": "raw_shell",
         "seed": 44,
-        "recorded_success": false,
-        "recorded_reason": "file_contains src/index.ts",
+        "recorded_success": true,
+        "recorded_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
         "reconstructed": true,
         "how": "inline python write",
         "final_body": "export function add(a: number, b: number): number {\n  const x: number = a + b;\n  return x;\n}\n",
-        "predicate_pass": false,
-        "predicate_reason": "file_contains src/index.ts",
+        "legacy_predicate_pass": false,
+        "legacy_reason": "file_contains src/index.ts",
         "removes_type_error": true,
-        "keeps_intermediate_binding": true
+        "keeps_intermediate_binding": true,
+        "tsc": {
+          "ran": true,
+          "exit_code": 0,
+          "pass": true,
+          "output_head": ""
+        }
       },
       {
         "condition": "verseshell_aci",
         "seed": 44,
-        "recorded_success": false,
-        "recorded_reason": "file_contains src/index.ts",
+        "recorded_success": true,
+        "recorded_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
         "reconstructed": true,
         "how": "typed file ops",
         "final_body": "export function add(a: number, b: number): number {\n  const x: number = a + b;\n  return x;\n}\n",
-        "predicate_pass": false,
-        "predicate_reason": "file_contains src/index.ts",
+        "legacy_predicate_pass": false,
+        "legacy_reason": "file_contains src/index.ts",
         "removes_type_error": true,
-        "keeps_intermediate_binding": true
+        "keeps_intermediate_binding": true,
+        "tsc": {
+          "ran": true,
+          "exit_code": 0,
+          "pass": true,
+          "output_head": ""
+        }
       }
     ],
-    "runs_that_fix_the_error_but_fail_the_predicate": 5,
-    "recorded_success_by_condition": {
+    "legacy_predicate_pass_by_condition": {
       "verseshell_aci": {
         "runs": 3,
-        "success": 0
+        "pass": 0
       },
       "raw_shell": {
         "runs": 3,
-        "success": 1
+        "pass": 0
       }
     },
-    "live_runner_skips_optional_verify": true,
-    "note": "the declared predicate is a literal golden-patch match; the behaviour the prompt names (`tsc --noEmit`) is only declared as `optional_verify`, and the live runner never executes it. The type-error judgement here is a language fact about the annotation (`const x: number = a + b`), not a `tsc` run: the fixture has no offline TypeScript to run."
+    "tsc_pass_by_condition": {
+      "verseshell_aci": {
+        "runs": 3,
+        "pass": 3
+      },
+      "raw_shell": {
+        "runs": 3,
+        "pass": 3
+      }
+    },
+    "recorded_success_by_condition": {
+      "verseshell_aci": {
+        "runs": 3,
+        "pass": 3
+      },
+      "raw_shell": {
+        "runs": 3,
+        "pass": 3
+      }
+    },
+    "runs_where_legacy_rejected_a_passing_fix": 6,
+    "live_runner_optional_verify": {
+      "silently_nulled": false,
+      "records_not_run": true
+    },
+    "note": "the v1.2.0 predicate runs the command the prompt names (`tsc --noEmit`) through the fixture's pinned TypeScript, so an equivalent fix passes and a non-fix fails. The v1.1.0 predicate was a literal golden-patch match; this section re-scores the same stored runs under both, and the `tsc` verdict is a real run of the compiler rather than a language judgement."
   }
 }

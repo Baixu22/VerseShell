@@ -20,6 +20,7 @@ Gated claims (thresholds mirror docs/claims-and-evidence.md exactly):
   C16 compact read projection: it actually shrinks the model-visible read observation
   C18 exec launches a name-dispatching shim (rustup's cargo/rustc) by its invoked name
   C22 exec resolves a bare npm-family name to a launchable PATHEXT candidate
+  C23 the ts task scores behaviour (its own tsc) instead of the golden patch's text
 C5 (learning cost) has no deterministic metric yet: status-only in evidence.json.
 C13 (live A/D), C15 (where D's extra tokens come from), C17 (what the reads are for),
 C19 (what the failed execs are), C20 (where D's extra steps come from) and C21 (the ts
@@ -61,6 +62,7 @@ THRESHOLDS = {
     "C16": {"desc": "compact read projection saving on a frozen trajectory", "op": ">=", "value": 0.10},
     "C18": {"desc": "exec launches a name-dispatching shim by its invoked name", "op": "==", "value": 1.0},
     "C22": {"desc": "exec resolves a bare npm-family name to a launchable PATHEXT candidate", "op": "==", "value": 1.0},
+    "C23": {"desc": "the ts task scores behaviour (its own tsc) instead of the golden patch's text", "op": "==", "value": 1.0},
 }
 
 # Stored measurements the gate relies on. Each must record the content fingerprint
@@ -342,6 +344,48 @@ def bare_name_claim(report: dict) -> dict:
             "triggered": probe.get("triggered"),
             "commands": probe.get("commands"),
             "skipped": probe.get("skipped"),
+        },
+    }
+
+
+def ts_fixture_contract_claim(report: dict) -> dict:
+    """C23: the ts task must score the behaviour it asks for, not the patch's text.
+
+    Four things must hold together: the declared predicate is a command (not a
+    `file_contains` on the golden patch), the pristine fixture fails it (the task is
+    not pre-solved), the GOLDEN patch passes it (the task is solvable), and both of
+    those verdicts came from a real run of the fixture's pinned TypeScript. A literal
+    predicate is exactly what made five of six stored runs look like failures when
+    they had in fact fixed the type error.
+    """
+    section = report.get("success_predicate") or {}
+    pred = section.get("declared_success") or {}
+    argv = [str(a) for a in (pred.get("argv") or [])]
+    baseline = section.get("baseline") or {}
+    pristine = (baseline.get("pristine") or {}).get("tsc") or {}
+    golden = (baseline.get("golden") or {}).get("tsc") or {}
+    equivalent = (baseline.get("equivalent_rename") or {}).get("tsc") or {}
+    checks = {
+        "predicate_is_behavioural": pred.get("type") == "command_exit_0"
+                                    and any("typescript" in a for a in argv),
+        "pristine_fails": pristine.get("ran") is True and pristine.get("pass") is False,
+        "golden_passes": golden.get("ran") is True and golden.get("pass") is True,
+        # The bug this gate fences: a different-but-equivalent fix must not be
+        # rejected. `equivalent_rename` keeps the behaviour and renames the binding.
+        "equivalent_fix_passes": equivalent.get("ran") is True
+                                 and equivalent.get("pass") is True,
+    }
+    passed = all(checks.values())
+    return {
+        "value": 1.0 if passed else 0.0,
+        "pass": passed,
+        "detail": {
+            "checks": checks,
+            "argv": argv,
+            "legacy_pass_by_condition": section.get("legacy_predicate_pass_by_condition"),
+            "tsc_pass_by_condition": section.get("tsc_pass_by_condition"),
+            "runs_where_legacy_rejected_a_passing_fix":
+                section.get("runs_where_legacy_rejected_a_passing_fix"),
         },
     }
 
@@ -717,6 +761,39 @@ def main(argv: list[str] | None = None) -> int:
             "command": "python tools/exec_failure_breakdown.py --out eval/exec_failure_breakdown.json",
             "source": ["tools/exec_failure_breakdown.py"],
             "notes": f"missing evidence artifact: {shim_path}",
+        })
+
+    # ── C23: the ts task must score behaviour, not the golden patch's text ──
+    ts_fixture_path = ROOT / "eval/ts_fixture_audit.json"
+    if ts_fixture_path.exists():
+        ts_report = json.loads(ts_fixture_path.read_text(encoding="utf-8"))
+        c23 = ts_fixture_contract_claim(ts_report)
+        claims.append({
+            "id": "C23", "claim": THRESHOLDS["C23"]["desc"],
+            "threshold": "== 1.00", "value": c23["value"], "pass": c23["pass"],
+            "mode": "deterministic",
+            "sample_size": 3,
+            "measured_at": (ts_report.get("generated_at")),
+            "command": "python tools/ts_fixture_audit.py --out eval/ts_fixture_audit.json",
+            "source": ["tools/ts_fixture_audit.py", "bench/aci/tasks/ts_fix_type_error.json",
+                       "bench/aci/fixtures/ts_fix_type_error/**", "eval/ts_fixture_audit.json"],
+            "detail": c23["detail"],
+            "notes": "the v1.1.0 predicate matched the golden patch as a literal string "
+                     "(`file_contains \"return a + b\"`), so a run that fixed the type error by "
+                     "keeping the intermediate binding was scored as a failure — five of six "
+                     "stored runs. The v1.2.0 predicate runs `tsc --noEmit` through the "
+                     "fixture's pinned TypeScript, and this gate also checks that the pristine "
+                     "fixture still fails it and the GOLDEN patch still passes it, so the task "
+                     "cannot silently become pre-solved or unsolvable",
+        })
+    else:
+        claims.append({
+            "id": "C23", "claim": THRESHOLDS["C23"]["desc"],
+            "threshold": "== 1.00", "value": None, "pass": False,
+            "mode": "deterministic", "measured_at": now,
+            "command": "python tools/ts_fixture_audit.py --out eval/ts_fixture_audit.json",
+            "source": ["tools/ts_fixture_audit.py"],
+            "notes": f"missing evidence artifact: {ts_fixture_path}",
         })
 
     # ── C12: stored evidence must still describe the current code ──

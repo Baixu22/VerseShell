@@ -31,6 +31,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fixture_deps import materialize_deps  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[3]
 BENCH = ROOT / "bench" / "aci"
 TASKS = BENCH / "tasks"
@@ -134,7 +137,8 @@ def prepare_workspace(fixture_name: str) -> Path:
     td = Path(tempfile.mkdtemp(prefix=f"aci-{fixture_name}-"))
     if src.exists():
         for item in src.iterdir():
-            if item.name == "GOLDEN":
+            # `deps` is materialised into `node_modules` below, not copied.
+            if item.name in ("GOLDEN", "deps"):
                 continue
             dest = td / item.name
             if item.is_dir():
@@ -142,6 +146,7 @@ def prepare_workspace(fixture_name: str) -> Path:
                                 ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache"))
             else:
                 shutil.copy2(item, dest)
+        materialize_deps(src, td)
     return td
 
 

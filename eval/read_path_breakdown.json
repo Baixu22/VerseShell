@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.read-path-breakdown/v1",
-  "generated_at": "2026-09-24T14:33:19.250135+00:00",
+  "generated_at": "2026-09-24T16:21:59.915958+00:00",
   "method": {
     "frozen_call_source": "bench/aci/results/latest_live.json (condition D read ops)",
     "ab": "the same envelope is projected twice with the real projector: format_aci_result(compact=False) is the pre-change rendering, format_aci_result(compact=True) is current",
@@ -16,207 +16,200 @@
       "tools/tf45_envelope_replay.py",
       "tools/read_path_breakdown.py"
     ],
-    "fingerprint": "9b2f5879596e94eb4ac3dc1b17702fb801f02f0283cdfd9db779218de87676bc"
+    "fingerprint": "bd2ad2d27b72d6d655de7023a0bf451a2e4d56b7bf1f179432579257e39e436e"
   },
   "totals": {
-    "calls": 29,
+    "calls": 39,
     "excluded_calls": 3,
     "matched_projection": {
       "legacy": 0,
-      "current": 29
+      "current": 39
     },
-    "legacy_chars": 10852,
-    "current_chars": 8620,
-    "char_savings": 0.2057,
-    "legacy_tokens": 2701,
-    "current_tokens": 2148,
-    "token_savings": 0.2047,
+    "legacy_chars": 10633,
+    "current_chars": 8363,
+    "char_savings": 0.2135,
+    "legacy_tokens": 2644,
+    "current_tokens": 2078,
+    "token_savings": 0.2141,
     "legacy_parts": {
-      "content": 4060,
-      "counts": 1893,
-      "digest": 1584,
-      "residual": 1372,
-      "path": 1019,
-      "line_wrapper": 924
+      "content": 4128,
+      "counts": 1928,
+      "residual": 1899,
+      "digest": 1044,
+      "line_wrapper": 928,
+      "path": 706
     },
     "legacy_part_shares": {
-      "content": 0.3741,
-      "counts": 0.1744,
-      "digest": 0.146,
-      "residual": 0.1264,
-      "path": 0.0939,
-      "line_wrapper": 0.0851
+      "content": 0.3882,
+      "counts": 0.1813,
+      "residual": 0.1786,
+      "digest": 0.0982,
+      "line_wrapper": 0.0873,
+      "path": 0.0664
     },
     "current_parts": {
-      "content": 4060,
-      "digest": 1584,
-      "residual": 1387,
-      "path": 1019,
-      "line_wrapper": 462,
+      "content": 4128,
+      "residual": 1913,
+      "digest": 1044,
+      "path": 706,
+      "line_wrapper": 464,
       "counts": 108
     },
     "current_part_shares": {
-      "content": 0.471,
-      "digest": 0.1838,
-      "residual": 0.1609,
-      "path": 0.1182,
-      "line_wrapper": 0.0536,
-      "counts": 0.0125
+      "content": 0.4936,
+      "residual": 0.2287,
+      "digest": 0.1248,
+      "path": 0.0844,
+      "line_wrapper": 0.0555,
+      "counts": 0.0129
     }
   },
   "by_op": {
-    "file.read_many": {
-      "calls": 19,
-      "legacy_chars": 8767,
-      "current_chars": 6993,
-      "char_savings": 0.2023,
-      "legacy_tokens": 2185,
-      "current_tokens": 1745,
-      "token_savings": 0.2014,
-      "legacy_parts": {
-        "content": 3154,
-        "line_wrapper": 728,
-        "digest": 1584,
-        "path": 1019,
-        "counts": 1543,
-        "residual": 739
-      },
-      "legacy_part_shares": {
-        "content": 0.3598,
-        "digest": 0.1807,
-        "counts": 0.176,
-        "path": 0.1162,
-        "residual": 0.0843,
-        "line_wrapper": 0.083
-      },
-      "current_parts": {
-        "content": 3154,
-        "line_wrapper": 364,
-        "digest": 1584,
-        "path": 1019,
-        "counts": 108,
-        "residual": 764
-      },
-      "current_part_shares": {
-        "content": 0.451,
-        "digest": 0.2265,
-        "path": 0.1457,
-        "residual": 0.1093,
-        "line_wrapper": 0.0521,
-        "counts": 0.0154
-      }
-    },
     "file.view": {
-      "calls": 10,
-      "legacy_chars": 2085,
-      "current_chars": 1627,
-      "char_savings": 0.2197,
-      "legacy_tokens": 516,
-      "current_tokens": 403,
-      "token_savings": 0.219,
+      "calls": 26,
+      "legacy_chars": 4742,
+      "current_chars": 3608,
+      "char_savings": 0.2391,
+      "legacy_tokens": 1174,
+      "current_tokens": 892,
+      "token_savings": 0.2402,
       "legacy_parts": {
-        "content": 906,
-        "line_wrapper": 196,
+        "content": 1823,
+        "line_wrapper": 396,
         "digest": 0,
         "path": 0,
-        "counts": 350,
-        "residual": 633
+        "counts": 910,
+        "residual": 1613
       },
       "legacy_part_shares": {
-        "content": 0.4345,
-        "residual": 0.3036,
-        "counts": 0.1679,
-        "line_wrapper": 0.094,
+        "content": 0.3844,
+        "residual": 0.3402,
+        "counts": 0.1919,
+        "line_wrapper": 0.0835,
         "digest": 0.0,
         "path": 0.0
       },
       "current_parts": {
-        "content": 906,
-        "line_wrapper": 98,
+        "content": 1823,
+        "line_wrapper": 198,
         "digest": 0,
         "path": 0,
         "counts": 0,
-        "residual": 623
+        "residual": 1587
       },
       "current_part_shares": {
-        "content": 0.5569,
-        "residual": 0.3829,
-        "line_wrapper": 0.0602,
+        "content": 0.5053,
+        "residual": 0.4399,
+        "line_wrapper": 0.0549,
         "digest": 0.0,
         "path": 0.0,
         "counts": 0.0
+      }
+    },
+    "file.read_many": {
+      "calls": 13,
+      "legacy_chars": 5891,
+      "current_chars": 4755,
+      "char_savings": 0.1928,
+      "legacy_tokens": 1470,
+      "current_tokens": 1186,
+      "token_savings": 0.1932,
+      "legacy_parts": {
+        "content": 2305,
+        "line_wrapper": 532,
+        "digest": 1044,
+        "path": 706,
+        "counts": 1018,
+        "residual": 286
+      },
+      "legacy_part_shares": {
+        "content": 0.3913,
+        "digest": 0.1772,
+        "counts": 0.1728,
+        "path": 0.1198,
+        "line_wrapper": 0.0903,
+        "residual": 0.0485
+      },
+      "current_parts": {
+        "content": 2305,
+        "line_wrapper": 266,
+        "digest": 1044,
+        "path": 706,
+        "counts": 108,
+        "residual": 326
+      },
+      "current_part_shares": {
+        "content": 0.4848,
+        "digest": 0.2196,
+        "path": 0.1485,
+        "residual": 0.0686,
+        "line_wrapper": 0.0559,
+        "counts": 0.0227
       }
     }
   },
   "rows": [
     {
       "task_id": "rust_fix_compile_error",
-      "op": "file.read_many",
+      "op": "file.view",
       "args": {
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs"
-        ]
+        "path": "src/lib.rs"
       },
       "matched_projection": "current",
-      "legacy_chars": 390,
-      "current_chars": 304,
-      "legacy_tokens": 97,
-      "current_tokens": 76,
+      "legacy_chars": 154,
+      "current_chars": 112,
+      "legacy_tokens": 38,
+      "current_tokens": 28,
       "legacy_parts": {
-        "content": 108,
-        "line_wrapper": 28,
-        "digest": 72,
-        "path": 44,
-        "counts": 70,
-        "residual": 68
+        "content": 48,
+        "line_wrapper": 12,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 59
       },
       "current_parts": {
-        "content": 108,
-        "line_wrapper": 14,
-        "digest": 72,
-        "path": 44,
+        "content": 48,
+        "line_wrapper": 6,
+        "digest": 0,
+        "path": 0,
         "counts": 0,
-        "residual": 66
-      }
-    },
-    {
-      "task_id": "rust_add_unit_test",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs"
-        ]
-      },
-      "matched_projection": "current",
-      "legacy_chars": 387,
-      "current_chars": 301,
-      "legacy_tokens": 96,
-      "current_tokens": 75,
-      "legacy_parts": {
-        "content": 105,
-        "line_wrapper": 28,
-        "digest": 72,
-        "path": 44,
-        "counts": 70,
-        "residual": 68
-      },
-      "current_parts": {
-        "content": 105,
-        "line_wrapper": 14,
-        "digest": 72,
-        "path": 44,
-        "counts": 0,
-        "residual": 66
+        "residual": 58
       }
     },
     {
       "task_id": "rust_add_unit_test",
       "op": "file.view",
       "args": {
-        "path": "src/lib.rs",
-        "window": 20
+        "path": "Cargo.toml"
+      },
+      "matched_projection": "current",
+      "legacy_chars": 176,
+      "current_chars": 132,
+      "legacy_tokens": 44,
+      "current_tokens": 33,
+      "legacy_parts": {
+        "content": 60,
+        "line_wrapper": 16,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 65
+      },
+      "current_parts": {
+        "content": 60,
+        "line_wrapper": 8,
+        "digest": 0,
+        "path": 0,
+        "counts": 0,
+        "residual": 64
+      }
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
       },
       "matched_projection": "current",
       "legacy_chars": 151,
@@ -242,34 +235,86 @@
     },
     {
       "task_id": "rust_search_and_edit",
-      "op": "file.read_many",
+      "op": "file.view",
       "args": {
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs",
-          "TASK.md"
-        ]
+        "path": "TASK.md"
       },
       "matched_projection": "current",
-      "legacy_chars": 566,
-      "current_chars": 440,
-      "legacy_tokens": 141,
-      "current_tokens": 110,
+      "legacy_chars": 148,
+      "current_chars": 110,
+      "legacy_tokens": 37,
+      "current_tokens": 27,
       "legacy_parts": {
-        "content": 173,
-        "line_wrapper": 36,
-        "digest": 108,
-        "path": 63,
-        "counts": 105,
-        "residual": 81
+        "content": 50,
+        "line_wrapper": 4,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 59
       },
       "current_parts": {
-        "content": 173,
-        "line_wrapper": 18,
-        "digest": 108,
-        "path": 63,
+        "content": 50,
+        "line_wrapper": 2,
+        "digest": 0,
+        "path": 0,
         "counts": 0,
-        "residual": 78
+        "residual": 58
+      }
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "op": "file.view",
+      "args": {
+        "path": "Cargo.toml"
+      },
+      "matched_projection": "current",
+      "legacy_chars": 179,
+      "current_chars": 135,
+      "legacy_tokens": 44,
+      "current_tokens": 33,
+      "legacy_parts": {
+        "content": 63,
+        "line_wrapper": 16,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 65
+      },
+      "current_parts": {
+        "content": 63,
+        "line_wrapper": 8,
+        "digest": 0,
+        "path": 0,
+        "counts": 0,
+        "residual": 64
+      }
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "matched_projection": "current",
+      "legacy_chars": 170,
+      "current_chars": 126,
+      "legacy_tokens": 42,
+      "current_tokens": 31,
+      "legacy_parts": {
+        "content": 60,
+        "line_wrapper": 16,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 59
+      },
+      "current_parts": {
+        "content": 60,
+        "line_wrapper": 8,
+        "digest": 0,
+        "path": 0,
+        "counts": 0,
+        "residual": 58
       }
     },
     {
@@ -367,9 +412,9 @@
       "op": "file.read_many",
       "args": {
         "paths": [
+          "src/index.ts",
           "package.json",
-          "tsconfig.json",
-          "src/index.ts"
+          "tsconfig.json"
         ]
       },
       "matched_projection": "current",
@@ -455,8 +500,8 @@
       "op": "file.read_many",
       "args": {
         "paths": [
-          "Cargo.toml",
-          "src/lib.rs"
+          "src/lib.rs",
+          "Cargo.toml"
         ]
       },
       "matched_projection": "current",
@@ -483,33 +528,30 @@
     },
     {
       "task_id": "rust_add_unit_test",
-      "op": "file.read_many",
+      "op": "file.view",
       "args": {
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs"
-        ]
+        "path": "Cargo.toml"
       },
       "matched_projection": "current",
-      "legacy_chars": 387,
-      "current_chars": 301,
-      "legacy_tokens": 96,
-      "current_tokens": 75,
+      "legacy_chars": 176,
+      "current_chars": 132,
+      "legacy_tokens": 44,
+      "current_tokens": 33,
       "legacy_parts": {
-        "content": 105,
-        "line_wrapper": 28,
-        "digest": 72,
-        "path": 44,
-        "counts": 70,
-        "residual": 68
+        "content": 60,
+        "line_wrapper": 16,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 65
       },
       "current_parts": {
-        "content": 105,
-        "line_wrapper": 14,
-        "digest": 72,
-        "path": 44,
+        "content": 60,
+        "line_wrapper": 8,
+        "digest": 0,
+        "path": 0,
         "counts": 0,
-        "residual": 66
+        "residual": 64
       }
     },
     {
@@ -542,35 +584,114 @@
     },
     {
       "task_id": "rust_search_and_edit",
-      "op": "file.read_many",
+      "op": "file.view",
       "args": {
-        "max_total_lines": 100,
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs",
-          "TASK.md"
-        ]
+        "path": "TASK.md"
       },
       "matched_projection": "current",
-      "legacy_chars": 566,
-      "current_chars": 440,
-      "legacy_tokens": 141,
-      "current_tokens": 110,
+      "legacy_chars": 148,
+      "current_chars": 110,
+      "legacy_tokens": 37,
+      "current_tokens": 27,
       "legacy_parts": {
-        "content": 173,
-        "line_wrapper": 36,
-        "digest": 108,
-        "path": 63,
-        "counts": 105,
-        "residual": 81
+        "content": 50,
+        "line_wrapper": 4,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 59
       },
       "current_parts": {
-        "content": 173,
-        "line_wrapper": 18,
-        "digest": 108,
-        "path": 63,
+        "content": 50,
+        "line_wrapper": 2,
+        "digest": 0,
+        "path": 0,
         "counts": 0,
-        "residual": 78
+        "residual": 58
+      }
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "op": "file.view",
+      "args": {
+        "path": "Cargo.toml"
+      },
+      "matched_projection": "current",
+      "legacy_chars": 179,
+      "current_chars": 135,
+      "legacy_tokens": 44,
+      "current_tokens": 33,
+      "legacy_parts": {
+        "content": 63,
+        "line_wrapper": 16,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 65
+      },
+      "current_parts": {
+        "content": 63,
+        "line_wrapper": 8,
+        "digest": 0,
+        "path": 0,
+        "counts": 0,
+        "residual": 64
+      }
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "matched_projection": "current",
+      "legacy_chars": 170,
+      "current_chars": 126,
+      "legacy_tokens": 42,
+      "current_tokens": 31,
+      "legacy_parts": {
+        "content": 60,
+        "line_wrapper": 16,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 59
+      },
+      "current_parts": {
+        "content": 60,
+        "line_wrapper": 8,
+        "digest": 0,
+        "path": 0,
+        "counts": 0,
+        "residual": 58
+      }
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "matched_projection": "current",
+      "legacy_chars": 170,
+      "current_chars": 126,
+      "legacy_tokens": 42,
+      "current_tokens": 31,
+      "legacy_parts": {
+        "content": 60,
+        "line_wrapper": 16,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 59
+      },
+      "current_parts": {
+        "content": 60,
+        "line_wrapper": 8,
+        "digest": 0,
+        "path": 0,
+        "counts": 0,
+        "residual": 58
       }
     },
     {
@@ -637,33 +758,30 @@
     },
     {
       "task_id": "python_noisy_install_summary",
-      "op": "file.read_many",
+      "op": "file.view",
       "args": {
-        "paths": [
-          "requirements.txt",
-          "TASK.md"
-        ]
+        "path": "requirements.txt"
       },
       "matched_projection": "current",
-      "legacy_chars": 366,
-      "current_chars": 290,
-      "legacy_tokens": 91,
-      "current_tokens": 72,
+      "legacy_chars": 109,
+      "current_chars": 71,
+      "legacy_tokens": 27,
+      "current_tokens": 17,
       "legacy_parts": {
-        "content": 107,
-        "line_wrapper": 8,
-        "digest": 72,
-        "path": 47,
-        "counts": 70,
-        "residual": 62
+        "content": 11,
+        "line_wrapper": 4,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 59
       },
       "current_parts": {
-        "content": 107,
-        "line_wrapper": 4,
-        "digest": 72,
-        "path": 47,
+        "content": 11,
+        "line_wrapper": 2,
+        "digest": 0,
+        "path": 0,
         "counts": 0,
-        "residual": 60
+        "residual": 58
       }
     },
     {
@@ -672,8 +790,8 @@
       "args": {
         "paths": [
           "src/index.ts",
-          "package.json",
-          "tsconfig.json"
+          "tsconfig.json",
+          "package.json"
         ]
       },
       "matched_projection": "current",
@@ -790,65 +908,142 @@
     },
     {
       "task_id": "rust_add_unit_test",
-      "op": "file.read_many",
+      "op": "file.view",
       "args": {
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs"
-        ]
+        "path": "Cargo.toml"
       },
       "matched_projection": "current",
-      "legacy_chars": 387,
-      "current_chars": 301,
-      "legacy_tokens": 96,
-      "current_tokens": 75,
+      "legacy_chars": 176,
+      "current_chars": 132,
+      "legacy_tokens": 44,
+      "current_tokens": 33,
       "legacy_parts": {
-        "content": 105,
-        "line_wrapper": 28,
-        "digest": 72,
-        "path": 44,
-        "counts": 70,
-        "residual": 68
+        "content": 60,
+        "line_wrapper": 16,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 65
       },
       "current_parts": {
-        "content": 105,
-        "line_wrapper": 14,
-        "digest": 72,
-        "path": 44,
+        "content": 60,
+        "line_wrapper": 8,
+        "digest": 0,
+        "path": 0,
         "counts": 0,
-        "residual": 66
+        "residual": 64
+      }
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "matched_projection": "current",
+      "legacy_chars": 151,
+      "current_chars": 109,
+      "legacy_tokens": 37,
+      "current_tokens": 27,
+      "legacy_parts": {
+        "content": 45,
+        "line_wrapper": 12,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 59
+      },
+      "current_parts": {
+        "content": 45,
+        "line_wrapper": 6,
+        "digest": 0,
+        "path": 0,
+        "counts": 0,
+        "residual": 58
+      }
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "op": "file.view",
+      "args": {
+        "path": "TASK.md"
+      },
+      "matched_projection": "current",
+      "legacy_chars": 163,
+      "current_chars": 125,
+      "legacy_tokens": 40,
+      "current_tokens": 31,
+      "legacy_parts": {
+        "content": 65,
+        "line_wrapper": 4,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 59
+      },
+      "current_parts": {
+        "content": 65,
+        "line_wrapper": 2,
+        "digest": 0,
+        "path": 0,
+        "counts": 0,
+        "residual": 58
       }
     },
     {
       "task_id": "rust_search_and_edit",
-      "op": "file.read_many",
+      "op": "file.view",
       "args": {
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs",
-          "TASK.md"
-        ]
+        "path": "TASK.md"
       },
       "matched_projection": "current",
-      "legacy_chars": 566,
-      "current_chars": 440,
-      "legacy_tokens": 141,
-      "current_tokens": 110,
+      "legacy_chars": 148,
+      "current_chars": 110,
+      "legacy_tokens": 37,
+      "current_tokens": 27,
       "legacy_parts": {
-        "content": 173,
-        "line_wrapper": 36,
-        "digest": 108,
-        "path": 63,
-        "counts": 105,
-        "residual": 81
+        "content": 50,
+        "line_wrapper": 4,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 59
       },
       "current_parts": {
-        "content": 173,
-        "line_wrapper": 18,
-        "digest": 108,
-        "path": 63,
+        "content": 50,
+        "line_wrapper": 2,
+        "digest": 0,
+        "path": 0,
         "counts": 0,
-        "residual": 78
+        "residual": 58
+      }
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "op": "file.view",
+      "args": {
+        "path": "Cargo.toml"
+      },
+      "matched_projection": "current",
+      "legacy_chars": 179,
+      "current_chars": 135,
+      "legacy_tokens": 44,
+      "current_tokens": 33,
+      "legacy_parts": {
+        "content": 63,
+        "line_wrapper": 16,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 65
+      },
+      "current_parts": {
+        "content": 63,
+        "line_wrapper": 8,
+        "digest": 0,
+        "path": 0,
+        "counts": 0,
+        "residual": 64
       }
     },
     {
@@ -877,6 +1072,65 @@
         "path": 0,
         "counts": 0,
         "residual": 58
+      }
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "matched_projection": "current",
+      "legacy_chars": 170,
+      "current_chars": 126,
+      "legacy_tokens": 42,
+      "current_tokens": 31,
+      "legacy_parts": {
+        "content": 60,
+        "line_wrapper": 16,
+        "digest": 0,
+        "path": 0,
+        "counts": 35,
+        "residual": 59
+      },
+      "current_parts": {
+        "content": 60,
+        "line_wrapper": 8,
+        "digest": 0,
+        "path": 0,
+        "counts": 0,
+        "residual": 58
+      }
+    },
+    {
+      "task_id": "python_fix_pytest_fail",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "mathlib.py",
+          "tests/test_math.py"
+        ]
+      },
+      "matched_projection": "current",
+      "legacy_chars": 373,
+      "current_chars": 289,
+      "legacy_tokens": 93,
+      "current_tokens": 72,
+      "legacy_parts": {
+        "content": 93,
+        "line_wrapper": 24,
+        "digest": 72,
+        "path": 52,
+        "counts": 70,
+        "residual": 62
+      },
+      "current_parts": {
+        "content": 93,
+        "line_wrapper": 12,
+        "digest": 72,
+        "path": 52,
+        "counts": 0,
+        "residual": 60
       }
     },
     {
@@ -912,30 +1166,33 @@
     },
     {
       "task_id": "python_noisy_install_summary",
-      "op": "file.view",
+      "op": "file.read_many",
       "args": {
-        "path": "requirements.txt"
+        "paths": [
+          "requirements.txt",
+          "TASK.md"
+        ]
       },
       "matched_projection": "current",
-      "legacy_chars": 109,
-      "current_chars": 71,
-      "legacy_tokens": 27,
-      "current_tokens": 17,
+      "legacy_chars": 366,
+      "current_chars": 290,
+      "legacy_tokens": 91,
+      "current_tokens": 72,
       "legacy_parts": {
-        "content": 11,
-        "line_wrapper": 4,
-        "digest": 0,
-        "path": 0,
-        "counts": 35,
-        "residual": 59
+        "content": 107,
+        "line_wrapper": 8,
+        "digest": 72,
+        "path": 47,
+        "counts": 70,
+        "residual": 62
       },
       "current_parts": {
-        "content": 11,
-        "line_wrapper": 2,
-        "digest": 0,
-        "path": 0,
+        "content": 107,
+        "line_wrapper": 4,
+        "digest": 72,
+        "path": 47,
         "counts": 0,
-        "residual": 58
+        "residual": 60
       }
     },
     {
@@ -943,9 +1200,9 @@
       "op": "file.read_many",
       "args": {
         "paths": [
-          "package.json",
+          "src/index.ts",
           "tsconfig.json",
-          "src/index.ts"
+          "package.json"
         ]
       },
       "matched_projection": "current",

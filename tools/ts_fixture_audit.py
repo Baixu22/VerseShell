@@ -18,9 +18,11 @@ call, from the stored live trajectories:
   * **counterfactual / sensitivity** — what the task would cost with the toolchain
     present, and whether that moves either headline D/A ratio (if a conclusion
     flips, the boundary is not merely a caveat);
-  * **success_predicate** — re-score the declared predicate against the pristine
-    file, the golden patch and the file each live run actually left behind, so the
-    literal-match boundary and the never-executed `optional_verify` are visible.
+  * **success_predicate** — re-score the v1.1.0 literal predicate and the v1.2.0
+    behavioural one against the pristine file, the golden patch and the file each
+    live run actually left behind. The behavioural verdict is a real
+    `tsc --noEmit` run against the fixture's pinned TypeScript, so "this fix is
+    equivalent" is measured rather than asserted.
 
 The bare-name split is a *machine* fact (like C18's shim probe) and is reported as
 one; the rest is a pure function of the stored artifacts.
@@ -36,7 +38,10 @@ import hashlib
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -46,6 +51,19 @@ BENCH = ROOT / "bench" / "aci"
 RESULTS = BENCH / "results"
 TASKS = BENCH / "tasks"
 FIXTURES = BENCH / "fixtures"
+
+sys.path.insert(0, str(BENCH / "runners"))
+from fixture_deps import materialize_deps  # noqa: E402
+
+# The v1.1.0 predicate this task shipped before TF-0084. Kept here so the audit can
+# re-score the same stored runs under both and show exactly what the change did.
+LEGACY_SUCCESS = {
+    "type": "all",
+    "of": [
+        {"type": "file_contains", "path": "src/index.ts", "contains": "return a + b"},
+        {"type": "file_not_contains", "path": "src/index.ts", "contains": "const x: string"},
+    ],
+}
 
 ARMS = {
     "with_read_files": RESULTS / "latest_live.json",
@@ -408,73 +426,140 @@ def reconstruct_a(pristine: str, trajectory: list[dict], path: str) -> tuple[str
     return (body if touched else None), ("inline python write" if touched else "no write to the file")
 
 
+def tsc_verdict(fixture: Path, body: str, workdir: Path) -> dict:
+    """Run the fixture's own `tsc --noEmit` on a reconstructed file.
+
+    The fixture ships a pinned TypeScript under `deps/`, so this is an offline, real
+    type check — the same command the task prompt names and the v1.2.0 success
+    predicate runs — rather than a string judgement.
+    """
+    shutil.rmtree(workdir, ignore_errors=True)
+    workdir.mkdir(parents=True, exist_ok=True)
+    for item in fixture.iterdir():
+        if item.name in ("GOLDEN", "deps"):
+            continue
+        dest = workdir / item.name
+        if item.is_dir():
+            shutil.copytree(item, dest)
+        else:
+            shutil.copy2(item, dest)
+    materialize_deps(fixture, workdir)
+    (workdir / "src" / "index.ts").write_text(body, encoding="utf-8", newline="\n")
+    try:
+        proc = subprocess.run(
+            ["node", "node_modules/typescript/bin/tsc", "--noEmit"],
+            cwd=str(workdir), capture_output=True, text=True, timeout=180,
+        )
+    except FileNotFoundError:
+        return {"ran": False, "reason": "node is not on PATH"}
+    except subprocess.TimeoutExpired:
+        return {"ran": False, "reason": "tsc timed out"}
+    output = (proc.stdout + proc.stderr).strip()
+    return {
+        "ran": True,
+        "exit_code": proc.returncode,
+        "pass": proc.returncode == 0,
+        "output_head": output[:200],
+    }
+
+
 def success_report() -> dict:
     task = json.loads((TASKS / "ts_fix_type_error.json").read_text(encoding="utf-8"))
     fixture = FIXTURES / task["workspace_fixture"]
     pristine = (fixture / "src" / "index.ts").read_text(encoding="utf-8")
     golden = (fixture / "GOLDEN" / "src" / "index.ts").read_text(encoding="utf-8")
     pred = task["success"]
+    work = Path(tempfile.mkdtemp(prefix="ts-audit-"))
 
-    baseline = {}
-    for label, body in (("pristine", pristine), ("golden", golden)):
-        ok, reason = evaluate(pred, body)
-        baseline[label] = {"body": body, "pass": ok, "reason": reason}
+    try:
+        # A third, deliberately different fix: same behaviour, different text. The
+        # v1.1.0 literal predicate would reject it; the behavioural one must not.
+        renamed = ("export function add(a: number, b: number): number {\n"
+                   "  const total: number = a + b;\n"
+                   "  return total;\n}\n")
+        baseline = {}
+        for label, body in (("pristine", pristine), ("golden", golden),
+                            ("equivalent_rename", renamed)):
+            legacy_ok, legacy_reason = evaluate(LEGACY_SUCCESS, body)
+            baseline[label] = {
+                "body": body,
+                "legacy_predicate_pass": legacy_ok,
+                "legacy_reason": legacy_reason,
+                "tsc": tsc_verdict(fixture, body, work / label),
+            }
 
-    runs = json.loads(ARMS["with_read_files"].read_text(encoding="utf-8-sig"))["rows"]
-    per_run = []
-    for row in runs:
-        if row["task_id"] != "ts_fix_type_error":
-            continue
-        path = "src/index.ts"
-        if row["condition"] == "verseshell_aci":
-            body, how = reconstruct_d(pristine, row.get("trajectory", []), path)
-        else:
-            body, how = reconstruct_a(pristine, row.get("trajectory", []), path)
-        entry = {
-            "condition": row["condition"],
-            "seed": row.get("seed"),
-            "recorded_success": row.get("success"),
-            "recorded_reason": row.get("success_reason"),
-            "reconstructed": body is not None,
-            "how": how,
+        runs = json.loads(ARMS["with_read_files"].read_text(encoding="utf-8-sig"))["rows"]
+        per_run = []
+        for row in runs:
+            if row["task_id"] != "ts_fix_type_error":
+                continue
+            path = "src/index.ts"
+            if row["condition"] == "verseshell_aci":
+                body, how = reconstruct_d(pristine, row.get("trajectory", []), path)
+            else:
+                body, how = reconstruct_a(pristine, row.get("trajectory", []), path)
+            entry = {
+                "condition": row["condition"],
+                "seed": row.get("seed"),
+                "recorded_success": row.get("success"),
+                "recorded_reason": row.get("success_reason"),
+                "reconstructed": body is not None,
+                "how": how,
+            }
+            if body is not None:
+                legacy_ok, legacy_reason = evaluate(LEGACY_SUCCESS, body)
+                entry.update({
+                    "final_body": body,
+                    "legacy_predicate_pass": legacy_ok,
+                    "legacy_reason": legacy_reason,
+                    "removes_type_error": "const x: string" not in body,
+                    "keeps_intermediate_binding": "const x:" in body,
+                    "tsc": tsc_verdict(fixture, body,
+                                       work / f"{row['condition']}-{row.get('seed')}"),
+                })
+            per_run.append(entry)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+    conditions = ("verseshell_aci", "raw_shell")
+
+    def by_condition(predicate) -> dict:
+        return {
+            condition: {
+                "runs": sum(1 for r in per_run if r["condition"] == condition),
+                "pass": sum(1 for r in per_run
+                            if r["condition"] == condition and predicate(r)),
+            }
+            for condition in conditions
         }
-        if body is not None:
-            ok, reason = evaluate(pred, body)
-            entry.update({
-                "final_body": body,
-                "predicate_pass": ok,
-                "predicate_reason": reason,
-                "removes_type_error": "const x: string" not in body,
-                "keeps_intermediate_binding": "const x:" in body,
-            })
-        per_run.append(entry)
 
-    rejected_but_fixed = [r for r in per_run
-                          if r.get("reconstructed") and r.get("removes_type_error")
-                          and r.get("predicate_pass") is False]
+    legacy_rejected_but_tsc_ok = [
+        r for r in per_run
+        if r.get("tsc", {}).get("pass") and r.get("legacy_predicate_pass") is False
+    ]
     runner_src = (BENCH / "runners" / "live_agent_loop.py").read_text(encoding="utf-8")
     return {
         "task": task["id"],
+        "task_version": task.get("version"),
         "prompt": task["prompt"],
         "declared_success": pred,
+        "legacy_predicate": LEGACY_SUCCESS,
         "optional_verify": task.get("optional_verify"),
         "baseline": baseline,
         "per_run": per_run,
-        "runs_that_fix_the_error_but_fail_the_predicate": len(rejected_but_fixed),
-        "recorded_success_by_condition": {
-            condition: {
-                "runs": sum(1 for r in per_run if r["condition"] == condition),
-                "success": sum(1 for r in per_run
-                               if r["condition"] == condition and r["recorded_success"]),
-            }
-            for condition in ("verseshell_aci", "raw_shell")
+        "legacy_predicate_pass_by_condition": by_condition(lambda r: r.get("legacy_predicate_pass")),
+        "tsc_pass_by_condition": by_condition(lambda r: r.get("tsc", {}).get("pass")),
+        "recorded_success_by_condition": by_condition(lambda r: r.get("recorded_success")),
+        "runs_where_legacy_rejected_a_passing_fix": len(legacy_rejected_but_tsc_ok),
+        "live_runner_optional_verify": {
+            "silently_nulled": '"optional_verify": None' in runner_src,
+            "records_not_run": '"ran": False' in runner_src,
         },
-        "live_runner_skips_optional_verify": '"optional_verify": None' in runner_src,
-        "note": "the declared predicate is a literal golden-patch match; the behaviour the "
-                "prompt names (`tsc --noEmit`) is only declared as `optional_verify`, and the "
-                "live runner never executes it. The type-error judgement here is a language "
-                "fact about the annotation (`const x: number = a + b`), not a `tsc` run: the "
-                "fixture has no offline TypeScript to run.",
+        "note": "the v1.2.0 predicate runs the command the prompt names (`tsc --noEmit`) "
+                "through the fixture's pinned TypeScript, so an equivalent fix passes and a "
+                "non-fix fails. The v1.1.0 predicate was a literal golden-patch match; this "
+                "section re-scores the same stored runs under both, and the `tsc` verdict is a "
+                "real run of the compiler rather than a language judgement.",
     }
 
 
@@ -499,7 +584,11 @@ def fixture_facts() -> dict:
             (Path(d) / "tsc").is_file() or (Path(d) / "tsc.cmd").is_file()
             for d in os.environ.get("PATH", "").split(os.pathsep) if d
         ),
-        "fixture_local_typescript": (FIXTURES / "ts_fix_type_error" / "node_modules" / "typescript").exists(),
+        "shipped_dependency_archives": sorted(
+            p.name for p in (FIXTURES / "ts_fix_type_error" / "deps").glob("*.tgz")
+        ) if (FIXTURES / "ts_fix_type_error" / "deps").is_dir() else [],
+        "workspace_local_typescript": "materialised by fixture_deps.materialize_deps "
+                                      "during workspace prep (not committed unpacked)",
     }
     out["promise"] = {
         "prompt": task["prompt"],
@@ -581,10 +670,12 @@ def main(argv: list[str] | None = None) -> int:
           f"{s['d_only_counterfactual']['token_ratio']} (band {s['token_ratio_band']}); "
           f"conclusion flips: {s['conclusion_flips']}")
     sp = report["success_predicate"]
-    print(f"success predicate: fixes rejected by the literal match = "
-          f"{sp['runs_that_fix_the_error_but_fail_the_predicate']}; recorded "
-          f"{json.dumps(sp['recorded_success_by_condition'], ensure_ascii=False)}; "
-          f"live runner skips optional_verify = {sp['live_runner_skips_optional_verify']}")
+    print(f"success predicate: the legacy literal match rejected a passing fix in "
+          f"{sp['runs_where_legacy_rejected_a_passing_fix']} run(s); "
+          f"legacy {json.dumps(sp['legacy_predicate_pass_by_condition'], ensure_ascii=False)} vs "
+          f"tsc {json.dumps(sp['tsc_pass_by_condition'], ensure_ascii=False)}; "
+          f"runner nulls optional_verify = "
+          f"{sp['live_runner_optional_verify']['silently_nulled']}")
     return 0
 
 

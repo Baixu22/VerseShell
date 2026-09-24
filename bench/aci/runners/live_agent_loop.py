@@ -41,6 +41,11 @@ FIXTURES = BENCH / "fixtures"
 RESULTS = BENCH / "results"
 AE = ROOT / "target" / "debug" / "ae.exe"
 
+# The runner is both a script and an import target (tools/ import it), so make the
+# sibling module importable either way.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fixture_deps import materialize_deps  # noqa: E402
+
 # ── Default API config ──
 DEFAULT_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 DEFAULT_BASE_URL = "https://api.deepseek.com/v1"
@@ -429,11 +434,20 @@ CRITICAL RULES:
 
 # ── Success checking ──
 
-def check_success(pred: dict, workspace: Path) -> tuple[bool, str]:
+def check_success(pred: dict, workspace: Path) -> tuple[bool | None, str]:
+    """Evaluate a success predicate.
+
+    `None` means **unverified**: the check could not run at all on this machine
+    (the command is missing), which must not be recorded as a capability failure.
+    `all` propagates it, so a task that requires behaviour cannot be scored as a
+    failure just because the toolchain is absent.
+    """
     t = pred.get("type")
     if t == "all":
         for child in pred.get("of", []):
             ok, reason = check_success(child, workspace)
+            if ok is None:
+                return None, reason
             if not ok:
                 return False, reason
         return True, "all ok"
@@ -467,10 +481,15 @@ def check_success(pred: dict, workspace: Path) -> tuple[bool, str]:
             )
             return (r.returncode == 0, f"command_exit_0 {argv} -> {r.returncode}")
         except FileNotFoundError:
-            return False, f"command not found: {argv}"
+            return None, f"unverified: command not found: {argv}"
         except subprocess.TimeoutExpired:
             return False, f"timeout: {argv}"
     return False, f"unknown predicate {t}"
+
+
+def success_verdict(success: bool | None) -> str:
+    """`None` is unverified (the check could not run), not a failure."""
+    return "UNVERIFIED" if success is None else ("PASS" if success else "FAIL")
 
 
 # ── Workspace prep ──
@@ -480,7 +499,10 @@ def prepare_workspace(fixture_name: str) -> Path:
     td = Path(tempfile.mkdtemp(prefix=f"aci-live-{fixture_name}-"))
     if src.exists():
         for item in src.iterdir():
-            if item.name == "GOLDEN":
+            # `GOLDEN` is the reference patch; `deps` is materialised below rather
+            # than copied, so the agent sees a workspace that already has its
+            # declared toolchain instead of the archive it came in.
+            if item.name in ("GOLDEN", "deps"):
                 continue
             dest = td / item.name
             if item.is_dir():
@@ -488,6 +510,7 @@ def prepare_workspace(fixture_name: str) -> Path:
                                 ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache"))
             else:
                 shutil.copy2(item, dest)
+        materialize_deps(src, td)
     return td
 
 
@@ -944,7 +967,7 @@ def run_agent_loop(
     finally:
         elapsed_ms = int((time.time() - start_time) * 1000)
 
-    # Check actual workspace state
+    # Check actual workspace state. `None` means unverified (see check_success).
     try:
         actual_ok, actual_reason = check_success(task["success"], workspace)
     except Exception as e:
@@ -956,6 +979,8 @@ def run_agent_loop(
     notes = ["live"]
     if last_error:
         notes.append(f"error: {last_error[:200]}")
+    if actual_ok is None:
+        notes.append(f"verify_unavailable: {actual_reason[:160]}")
     notes.append(f"llm_prompt_tokens={total_prompt_tokens}")
     notes.append(f"llm_completion_tokens={total_completion_tokens}")
 
@@ -976,7 +1001,16 @@ def run_agent_loop(
         "elapsed_ms": elapsed_ms,
         "notes": notes,
         "trajectory": trajectory,
-        "optional_verify": None,
+        # Recorded explicitly instead of `None`: the live runner never executes
+        # `optional_verify`, so a task whose score must depend on behaviour has to
+        # declare that command in `success`.
+        "optional_verify": {
+            "ran": False,
+            "declared": task.get("optional_verify"),
+            "note": "the live runner does not execute optional_verify; behaviour-based "
+                    "scoring must be declared in `success`",
+        },
+        "verify_unavailable": actual_ok is None,
         "weight": float(task.get("weight", 1.0)),
         "agent_declared_success": agent_declared_success,
         "llm_prompt_tokens": total_prompt_tokens,
@@ -1016,8 +1050,11 @@ def aggregate(rows: list[dict]) -> dict:
     table = []
     for key, items in sorted(by_key.items()):
         n = len(items)
-        wsum = sum(float(x.get("weight", 1.0)) for x in items) or 1.0
-        succ_w = sum(float(x.get("weight", 1.0)) for x in items if x.get("success"))
+        # An unverified row (`success is None`) is excluded from the success rate:
+        # the check could not run, so it is not evidence about capability.
+        scored = [x for x in items if x.get("success") is not None]
+        wsum = sum(float(x.get("weight", 1.0)) for x in scored) or 1.0
+        succ_w = sum(float(x.get("weight", 1.0)) for x in scored if x.get("success"))
         tools = sum(x.get("tool_calls", 0) for x in items) / max(n, 1)
         toks = sum(x.get("observation_tokens", 0) for x in items) / max(n, 1)
         elapsed = sum(x.get("elapsed_ms", 0) for x in items) / max(n, 1)
@@ -1025,6 +1062,8 @@ def aggregate(rows: list[dict]) -> dict:
         table.append({
             "model": model, "condition": condition, "tasks": n,
             "success_rate": round(succ_w / wsum, 4),
+            "scored_rows": len(scored),
+            "unverified_rows": n - len(scored),
             "avg_tool_calls": round(tools, 2),
             "avg_observation_tokens": round(toks, 2),
             "avg_elapsed_ms": round(elapsed, 1),
@@ -1047,8 +1086,10 @@ def compare_a_vs_d(rows: list[dict]) -> dict:
             continue
 
         def rate(items: list[dict]) -> float:
-            w = sum(float(x.get("weight", 1.0)) for x in items) or 1.0
-            return sum(float(x.get("weight", 1.0)) for x in items if x.get("success")) / w
+            # Unverified rows are excluded: the check could not run at all.
+            scored = [x for x in items if x.get("success") is not None]
+            w = sum(float(x.get("weight", 1.0)) for x in scored) or 1.0
+            return sum(float(x.get("weight", 1.0)) for x in scored if x.get("success")) / w
 
         def avg(items: list[dict], key: str) -> float:
             return sum(x.get(key, 0) for x in items) / max(len(items), 1)
@@ -1114,7 +1155,7 @@ def write_report(payload: dict, path: Path) -> None:
         ]
     lines += ["## Per-Task Trajectories", ""]
     for r in rows:
-        status = "PASS" if r["success"] else "FAIL"
+        status = success_verdict(r["success"])
         lines.append(f"### {r['task_id']} [{r['condition']}] → {status}")
         lines.append(f"- Reason: {r['success_reason']}")
         lines.append(f"- Tool calls: {r['tool_calls']}, Observation tokens: {r['observation_tokens']}")
@@ -1217,7 +1258,7 @@ def main(argv: list[str] | None = None) -> int:
                                          exclude_tools=exclude_tools)
                     rows.append(row)
                     wall = int((time.time() - t0) * 1000)
-                    status = "PASS" if row["success"] else "FAIL"
+                    status = success_verdict(row["success"])
                     print(f"  -> {status}: {row['tool_calls']} tools, {row['observation_tokens']} obs_tok, "
                           f"wall={wall}ms, turns={row['turns']}")
                     if row.get("last_error"):

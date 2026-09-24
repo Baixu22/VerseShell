@@ -27,6 +27,7 @@ from live_agent_loop import (  # noqa: E402
     aggregate,
     compare_a_vs_d,
     run_agent_loop,
+    success_verdict,
 )
 
 
@@ -68,7 +69,7 @@ def main(argv: list[str] | None = None) -> int:
             fresh["seed"] = row.get("seed", cfg.get("seed"))
             payload["rows"][index] = fresh
             patched_total += 1
-            print(f"    -> {'PASS' if fresh['success'] else 'FAIL'}: "
+            print(f"    -> {success_verdict(fresh['success'])}: "
                   f"{fresh['tool_calls']} tools, {fresh['observation_tokens']} obs_tok")
         payload["generated_at"] = datetime.now(timezone.utc).isoformat()
         payload["aggregate"] = aggregate(payload["rows"])

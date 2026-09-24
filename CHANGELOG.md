@@ -90,6 +90,28 @@
   predicate, and the previous baseline had the same mechanism in two other rows.
   The paired `--exclude-tools read_files` arm is noisier still (one raw-shell row
   at 16007 tokens dominates its A mean), so only the with-arm ratios are quoted.
+- **The `ts_fix_type_error` task now scores behaviour, not the golden patch's
+  text.** Its v1.1.0 predicate was `file_contains "return a + b"`, so a run that
+  fixed the type error by keeping the intermediate binding was scored as a
+  failure: re-scoring the six stored runs shows the old predicate rejected every
+  passing fix (D 0/3, A 1/3) while a real `tsc --noEmit` passes **3/3 in both
+  arms**. The fixture now ships a pinned TypeScript (`deps/typescript-5.4.5.tgz`,
+  extracted offline into `node_modules/typescript` with `.bin` shims by
+  `bench/aci/runners/fixture_deps.py`), the predicate runs that compiler, and
+  claim C23 checks that the pristine fixture still fails it and the GOLDEN patch
+  still passes — so the task can neither become pre-solved nor unsolvable. The
+  live runner no longer writes `"optional_verify": None`: it records that the
+  declared optional check was not run separately, and `check_success` can now
+  return *unverified* (excluded from the success rate) when a required command is
+  missing. `task_set_version` moves to 1.2.0.
+- **Re-measured on the v1.2.0 task set** (120 rows, `api_error` 0, `unverified`
+  0): condition D scores **0.70 against raw shell's 0.6333** — the first round it
+  is not behind — at 4.00 calls / 152.07 tokens per run against 3.47 / 155.93, so
+  the D/A ratios are **1.1538 calls and 0.9752 tokens**. `ts_fix_type_error` fell
+  from 5.33 steps / 292.3 tokens to **3.00 / 173.0** in D (3.33 / 284.7 to
+  2.00 / 119.0 in A), because neither arm has to obtain the toolchain any more;
+  failed execs moved from 5 to 7, and all seven are now real `pytest` /
+  `cargo test` retries (ts and Rust compilation are at zero).
 - **Re-measured after the shim fix** (120 rows, `api_error` 0, seeds 42/43/44):
   condition D now uses **177.3 observation tokens per run against raw shell's
   202.4** — a D/A token ratio of **0.876**, the first reading below 1 in five

@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.exec-failure-breakdown/v1",
-  "generated_at": "2026-09-24T14:33:02.380720+00:00",
+  "generated_at": "2026-09-24T16:21:20.038762+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
@@ -23,7 +23,7 @@
       "bench/aci/results/live_ab_without_read_files.json",
       "tools/exec_failure_breakdown.py"
     ],
-    "fingerprint": "50ec7b6d67916111fe9a86e943f0f4e466b5a62acfef01dc2d4edb4308976224"
+    "fingerprint": "a87e23c7cf5b038bf6a9fca2c91fa7104bf7a2885102cc3d440972875ae58acb"
   },
   "shim_facts": [
     {
@@ -78,7 +78,7 @@
       "cargo check": {
         "ok": true,
         "exit_code": 0,
-        "output_head": "Checking bench_fix v0.1.0 (C:\\Users\\27933\\AppData\\Local\\Temp\\tf45-replay-rust_fix_compile_error-p_3jfy9u)\n    Finished `",
+        "output_head": "Checking bench_fix v0.1.0 (C:\\Users\\27933\\AppData\\Local\\Temp\\tf45-replay-rust_fix_compile_error-qw59mabm)\n    Finished `",
         "answered_as_rustup": false
       },
       "rustc --version": {
@@ -281,27 +281,31 @@
   },
   "with_read_files": {
     "ok": {
-      "calls": 28,
-      "tokens": 422,
-      "tokens_per_call": 15.07
+      "calls": 29,
+      "tokens": 373,
+      "tokens_per_call": 12.86
     },
     "failed": {
-      "calls": 5,
-      "tokens": 495,
-      "tokens_per_call": 99.0,
-      "share_of_exec_tokens": 0.5398
+      "calls": 7,
+      "tokens": 894,
+      "tokens_per_call": 127.71,
+      "share_of_exec_tokens": 0.7056
     },
     "classes": {
       "first_diagnostic": {
-        "calls": 5,
-        "tokens": 495,
+        "calls": 7,
+        "tokens": 894,
         "share_of_failure_tokens": 1.0
       }
     },
     "per_task_failed": {
-      "ts_fix_type_error": {
+      "rust_add_unit_test": {
+        "calls": 2,
+        "tokens": 396
+      },
+      "python_fix_pytest_fail": {
         "calls": 3,
-        "tokens": 297
+        "tokens": 300
       },
       "python_edit_and_retest": {
         "calls": 2,
@@ -310,26 +314,26 @@
     },
     "top_failing_commands": [
       [
-        "npx tsc --noEmit",
-        3
+        "pytest -q",
+        5
       ],
       [
-        "pytest -q",
+        "cargo test",
         2
       ]
     ]
   },
   "without_read_files": {
     "ok": {
-      "calls": 16,
-      "tokens": 280,
-      "tokens_per_call": 17.5
+      "calls": 21,
+      "tokens": 274,
+      "tokens_per_call": 13.05
     },
     "failed": {
       "calls": 5,
       "tokens": 498,
       "tokens_per_call": 99.6,
-      "share_of_exec_tokens": 0.6401
+      "share_of_exec_tokens": 0.6451
     },
     "classes": {
       "first_diagnostic": {

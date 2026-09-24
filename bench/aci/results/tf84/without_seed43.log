@@ -1,0 +1,68 @@
+Model: sn-glm-5-3-flash | Tasks: 10 | Conditions: ['raw_shell', 'verseshell_aci'] | Max turns: 8
+============================================================
+
+[1/20] rust_fix_compile_error [raw_shell] run=0 ...
+  -> PASS: 2 tools, 89 obs_tok, wall=26627ms, turns=3
+
+[2/20] rust_fix_compile_error [verseshell_aci] run=0 ...
+  -> PASS: 4 tools, 111 obs_tok, wall=11541ms, turns=4
+
+[3/20] rust_add_unit_test [raw_shell] run=0 ...
+  -> FAIL: 2 tools, 178 obs_tok, wall=9066ms, turns=3
+
+[4/20] rust_add_unit_test [verseshell_aci] run=0 ...
+  -> FAIL: 0 tools, 0 obs_tok, wall=50346ms, turns=1
+
+[5/20] rust_search_and_edit [raw_shell] run=0 ...
+  -> FAIL: 6 tools, 395 obs_tok, wall=16423ms, turns=7
+
+[6/20] rust_search_and_edit [verseshell_aci] run=0 ...
+  -> FAIL: 4 tools, 95 obs_tok, wall=29760ms, turns=4
+
+[7/20] python_fix_pytest_fail [raw_shell] run=0 ...
+  -> FAIL: 10 tools, 252 obs_tok, wall=173976ms, turns=8
+
+[8/20] python_fix_pytest_fail [verseshell_aci] run=0 ...
+  -> PASS: 5 tools, 201 obs_tok, wall=45475ms, turns=5
+
+[9/20] python_edit_and_retest [raw_shell] run=0 ...
+  -> PASS: 3 tools, 72 obs_tok, wall=9212ms, turns=4
+
+[10/20] python_edit_and_retest [verseshell_aci] run=0 ...
+  -> PASS: 5 tools, 122 obs_tok, wall=39922ms, turns=4
+
+[11/20] python_noisy_install_summary [raw_shell] run=0 ...
+  -> FAIL: 3 tools, 183 obs_tok, wall=36888ms, turns=4
+
+[12/20] python_noisy_install_summary [verseshell_aci] run=0 ...
+  -> FAIL: 0 tools, 0 obs_tok, wall=52237ms, turns=1
+
+[13/20] ts_fix_type_error [raw_shell] run=0 ...
+  -> PASS: 2 tools, 142 obs_tok, wall=14989ms, turns=3
+
+[14/20] ts_fix_type_error [verseshell_aci] run=0 ...
+  -> PASS: 5 tools, 148 obs_tok, wall=16172ms, turns=4
+
+[15/20] ts_package_script_fail [raw_shell] run=0 ...
+  -> PASS: 3 tools, 117 obs_tok, wall=14499ms, turns=4
+
+[16/20] ts_package_script_fail [verseshell_aci] run=0 ...
+  -> PASS: 4 tools, 124 obs_tok, wall=28951ms, turns=4
+
+[17/20] windows_path_normalize_edit [raw_shell] run=0 ...
+  -> PASS: 1 tools, 11 obs_tok, wall=16635ms, turns=2
+
+[18/20] windows_path_normalize_edit [verseshell_aci] run=0 ...
+  -> PASS: 1 tools, 21 obs_tok, wall=6479ms, turns=2
+
+[19/20] windows_batch_capture_diag [raw_shell] run=0 ...
+  -> PASS: 4 tools, 174 obs_tok, wall=34576ms, turns=4
+
+[20/20] windows_batch_capture_diag [verseshell_aci] run=0 ...
+  -> FAIL: 0 tools, 0 obs_tok, wall=50812ms, turns=1
+
+wrote C:\Users\27933\Desktop\verseshell\verseshell\bench\aci\results\tf84\without_seed43.json
+wrote C:\Users\27933\Desktop\verseshell\verseshell\bench\aci\results\live_REPORT.md
+
+=== A vs D Comparison ===
+[sn-glm-5-3-flash] success: A=0.6 D=0.6 tools: A=3.6 D=2.8 (ratio=0.7778) tokens: A=161.3 D=82.2 (ratio=0.5096) accept=PASS
