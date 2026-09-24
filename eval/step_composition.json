@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.step-composition/v1",
-  "generated_at": "2026-09-24T16:21:20.172499+00:00",
+  "generated_at": "2026-09-24T17:14:00.888427+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
@@ -19,156 +19,160 @@
       "bench/aci/results/live_ab_without_read_files.json",
       "tools/step_composition.py"
     ],
-    "fingerprint": "be127d3d4d0af4fe39c7d8e16c31e52ae376084b49eb3f8aa0b70b0ac0fa0d97"
+    "fingerprint": "05c8298ba877aa4dc25ac9f3a79856c8995423abc9527bd653a0db4dd0a27d2b"
   },
   "with_read_files": {
     "d": {
       "runs": 30,
-      "steps": 120,
-      "steps_per_run": 4.0,
-      "tokens": 4338,
-      "tokens_per_run": 144.6,
+      "steps": 122,
+      "steps_per_run": 4.067,
+      "tokens": 4495,
+      "tokens_per_run": 149.83,
       "per_op": {
         "exec.run": {
-          "calls": 36,
-          "tokens": 1267,
-          "per_run": 1.2
-        },
-        "file.view": {
-          "calls": 29,
-          "tokens": 939,
-          "per_run": 0.967
+          "calls": 37,
+          "tokens": 1212,
+          "per_run": 1.233
         },
         "file.replace_exact": {
-          "calls": 18,
-          "tokens": 456,
-          "per_run": 0.6
-        },
-        "file.write": {
-          "calls": 14,
-          "tokens": 350,
-          "per_run": 0.467
+          "calls": 23,
+          "tokens": 586,
+          "per_run": 0.767
         },
         "file.read_many": {
-          "calls": 13,
-          "tokens": 1186,
-          "per_run": 0.433
+          "calls": 18,
+          "tokens": 1616,
+          "per_run": 0.6
+        },
+        "file.view": {
+          "calls": 15,
+          "tokens": 510,
+          "per_run": 0.5
+        },
+        "file.write": {
+          "calls": 15,
+          "tokens": 375,
+          "per_run": 0.5
         },
         "repo.summary": {
-          "calls": 10,
-          "tokens": 140,
-          "per_run": 0.333
+          "calls": 14,
+          "tokens": 196,
+          "per_run": 0.467
         }
       },
       "per_kind": {
-        "read": {
-          "calls": 42,
-          "per_run": 1.4
+        "edit": {
+          "calls": 38,
+          "per_run": 1.267
         },
         "exec": {
-          "calls": 36,
-          "per_run": 1.2
+          "calls": 37,
+          "per_run": 1.233
         },
-        "edit": {
-          "calls": 32,
-          "per_run": 1.067
+        "read": {
+          "calls": 33,
+          "per_run": 1.1
         },
         "meta": {
-          "calls": 10,
-          "per_run": 0.333
+          "calls": 14,
+          "per_run": 0.467
         }
       }
     },
     "a": {
       "runs": 30,
-      "steps": 104,
-      "steps_per_run": 3.467,
-      "tokens": 4454,
-      "tokens_per_run": 148.47,
+      "steps": 123,
+      "steps_per_run": 4.1,
+      "tokens": 5145,
+      "tokens_per_run": 171.5,
       "per_op": {
         "run_command": {
-          "calls": 104,
-          "tokens": 4454,
-          "per_run": 3.467
+          "calls": 123,
+          "tokens": 5145,
+          "per_run": 4.1
         }
       },
       "per_kind": {
         "exec": {
-          "calls": 104,
-          "per_run": 3.467
+          "calls": 123,
+          "per_run": 4.1
         }
       }
     },
     "a_multiplexing": {
-      "commands": 104,
-      "multi_job_commands": 31,
-      "multi_job_share": 0.2981,
+      "commands": 123,
+      "multi_job_commands": 36,
+      "multi_job_share": 0.2927,
       "kinds": {
-        "read": 28,
-        "other": 20,
-        "run": 13,
-        "read+run": 12,
-        "write": 12,
-        "read+write": 10,
-        "run+write": 8,
+        "other": 35,
+        "read": 26,
+        "write": 19,
+        "run+write": 15,
+        "read+run": 11,
+        "read+write": 9,
+        "run": 7,
         "read+run+write": 1
       },
       "note": "raw shell can read, run and write inside one command; D's typed ops cannot, so this share of A's commands is surface, not waste"
     },
     "d_mergeable": {
       "runs": 30,
-      "steps": 120,
-      "duplicate_occurrences": 11,
-      "duplicate_share": 0.0917,
-      "duplicate_tokens": 316.3,
-      "duplicate_tokens_per_run": 10.54,
+      "steps": 122,
+      "duplicate_occurrences": 6,
+      "duplicate_share": 0.0492,
+      "duplicate_tokens": 97.5,
+      "duplicate_tokens_per_run": 3.25,
       "by_task": {
-        "rust_add_unit_test": 7,
-        "rust_search_and_edit": 4
+        "rust_search_and_edit": 2,
+        "python_fix_pytest_fail": 2,
+        "python_edit_and_retest": 2
       },
       "by_op": {
-        "file.view": 7,
-        "exec.run": 4
+        "file.replace_exact": 2,
+        "exec.run": 2,
+        "repo.summary": 2
       }
     },
     "a_mergeable": {
       "runs": 30,
-      "steps": 104,
-      "duplicate_occurrences": 16,
-      "duplicate_share": 0.1538,
-      "duplicate_tokens": 313.5,
-      "duplicate_tokens_per_run": 10.45,
+      "steps": 123,
+      "duplicate_occurrences": 32,
+      "duplicate_share": 0.2602,
+      "duplicate_tokens": 567.0,
+      "duplicate_tokens_per_run": 18.9,
       "by_task": {
-        "python_fix_pytest_fail": 14,
-        "rust_fix_compile_error": 2
+        "python_fix_pytest_fail": 3,
+        "python_edit_and_retest": 14,
+        "windows_batch_capture_diag": 2,
+        "rust_search_and_edit": 13
       },
       "by_op": {
-        "run_command": 16
+        "run_command": 32
       }
     }
   },
   "without_read_files": {
     "d": {
       "runs": 30,
-      "steps": 94,
-      "steps_per_run": 3.133,
-      "tokens": 2628,
-      "tokens_per_run": 87.6,
+      "steps": 92,
+      "steps_per_run": 3.067,
+      "tokens": 2707,
+      "tokens_per_run": 90.23,
       "per_op": {
         "file.view": {
-          "calls": 36,
-          "tokens": 1206,
-          "per_run": 1.2
+          "calls": 35,
+          "tokens": 1102,
+          "per_run": 1.167
         },
         "exec.run": {
-          "calls": 26,
-          "tokens": 772,
-          "per_run": 0.867
+          "calls": 25,
+          "tokens": 955,
+          "per_run": 0.833
         },
         "file.replace_exact": {
-          "calls": 15,
-          "tokens": 379,
-          "per_run": 0.5
+          "calls": 14,
+          "tokens": 354,
+          "per_run": 0.467
         },
         "repo.summary": {
           "calls": 10,
@@ -176,9 +180,9 @@
           "per_run": 0.333
         },
         "file.write": {
-          "calls": 5,
-          "tokens": 125,
-          "per_run": 0.167
+          "calls": 6,
+          "tokens": 150,
+          "per_run": 0.2
         },
         "repo.search": {
           "calls": 2,
@@ -188,12 +192,12 @@
       },
       "per_kind": {
         "read": {
-          "calls": 36,
-          "per_run": 1.2
+          "calls": 35,
+          "per_run": 1.167
         },
         "exec": {
-          "calls": 26,
-          "per_run": 0.867
+          "calls": 25,
+          "per_run": 0.833
         },
         "edit": {
           "calls": 20,
@@ -207,33 +211,37 @@
     },
     "a": {
       "runs": 30,
-      "steps": 102,
-      "steps_per_run": 3.4,
-      "tokens": 4693,
-      "tokens_per_run": 156.43,
+      "steps": 127,
+      "steps_per_run": 4.233,
+      "tokens": 5123,
+      "tokens_per_run": 170.77,
       "per_op": {
         "run_command": {
-          "calls": 102,
-          "tokens": 4693,
-          "per_run": 3.4
+          "calls": 127,
+          "tokens": 5123,
+          "per_run": 4.233
         }
       },
       "per_kind": {
         "exec": {
-          "calls": 102,
-          "per_run": 3.4
+          "calls": 127,
+          "per_run": 4.233
         }
       }
     },
     "d_mergeable": {
       "runs": 30,
-      "steps": 94,
-      "duplicate_occurrences": 0,
-      "duplicate_share": 0.0,
-      "duplicate_tokens": 0.0,
-      "duplicate_tokens_per_run": 0.0,
-      "by_task": {},
-      "by_op": {}
+      "steps": 92,
+      "duplicate_occurrences": 2,
+      "duplicate_share": 0.0217,
+      "duplicate_tokens": 31.0,
+      "duplicate_tokens_per_run": 1.03,
+      "by_task": {
+        "rust_search_and_edit": 2
+      },
+      "by_op": {
+        "file.view": 2
+      }
     }
   },
   "failure_envelope": {

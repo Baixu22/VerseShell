@@ -112,6 +112,26 @@
   2.00 / 119.0 in A), because neither arm has to obtain the toolchain any more;
   failed execs moved from 5 to 7, and all seven are now real `pytest` /
   `cargo test` retries (ts and Rust compilation are at zero).
+- **`python_noisy_install_summary` scored wording, not the summary.** Its
+  predicate was `file_contains SUMMARY.txt "packages"` — the GOLDEN patch happens
+  to say "packages: 1 installed", while every stored run wrote "1 package" and was
+  scored as a failure even though it had done exactly what the prompt asked (one
+  line, no install log). The predicate is now `file_matches` with
+  `(?i)[^\r\n]*\bsix\b[^\r\n]*`: one line naming the installed dependency, which a
+  pasted log cannot satisfy. Re-scoring the six stored runs, the old predicate
+  passed 1/6 and the new one passes 6/6. A `file_matches` predicate type was added
+  to both `check_success` implementations.
+- **Claim C24 + `tools/task_set_audit.py`**: every task that ships a GOLDEN patch
+  is now checked with the live runner's own `check_success` — the pristine fixture
+  must fail the declared predicate, the GOLDEN patch must pass, and a registered
+  equivalent variant must pass too. All 10 tasks pass. The new
+  `tools/trajectory_replay.py` holds the shared reconstruction of what each stored
+  run wrote (typed ops, inline `python -c` writes, and `echo > file`).
+- **Re-measured on task set v1.3.0** (120 rows, `api_error` 0, `unverified` 0):
+  D scores **0.80 against raw shell's 0.6333** and, for the first time, uses no
+  more steps (4.07 vs 4.10, ratio 0.9919) while still spending fewer observation
+  tokens (157.30 vs 177.63, ratio 0.8855). `python_noisy_install_summary` went
+  from 0/3 to 3/3 in both arms.
 - **Re-measured after the shim fix** (120 rows, `api_error` 0, seeds 42/43/44):
   condition D now uses **177.3 observation tokens per run against raw shell's
   202.4** — a D/A token ratio of **0.876**, the first reading below 1 in five

@@ -1,10 +1,10 @@
 {
   "schema": "verseshell.aci_bench.results/v1",
-  "task_set_version": "1.2.0",
+  "task_set_version": "1.3.0",
   "seed": 42,
   "mode": "mock",
-  "generated_at": "2026-09-24T16:03:55.201016+00:00",
-  "git_rev": "dbe6f9143258d58be967e630a23f27371d0cfc9c",
+  "generated_at": "2026-09-24T17:00:41.445416+00:00",
+  "git_rev": "db7d60f5c52415468c85d2378725d19c3859cc2a",
   "evidence": {
     "globs": [
       "src/**/*.rs",
@@ -14,7 +14,7 @@
       "bench/aci/runners/run_suite.py",
       "bench/aci/scorers/*.py"
     ],
-    "fingerprint": "a87c56239cbf97be0081c8fdd61b3964319495833943512b23a65fe5828e3b08"
+    "fingerprint": "d10f323f4af76846595775149d7a4335b429c702b2ca8e54cd63b9d85ebe1d53"
   },
   "rows": [
     {
@@ -25,7 +25,7 @@
       "success_reason": "file_contains src/lib.rs",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 5,
+      "elapsed_ms": 4,
       "notes": [],
       "trajectory": [
         {
@@ -302,7 +302,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 9,
+      "elapsed_ms": 8,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -389,7 +389,7 @@
       "success_reason": "file_contains src/lib.rs",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 3,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -484,7 +484,7 @@
       "success_reason": "all ok",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 8,
+      "elapsed_ms": 7,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -666,7 +666,7 @@
       "success_reason": "file_contains mathlib.py",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 6,
+      "elapsed_ms": 7,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -818,7 +818,7 @@
       "success_reason": "file_contains greet.py",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 6,
+      "elapsed_ms": 8,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -875,7 +875,7 @@
       "success_reason": "missing SUMMARY.txt",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 1,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -967,10 +967,10 @@
       "condition": "verseshell_aci",
       "model": "mock",
       "success": true,
-      "success_reason": "file_contains SUMMARY.txt",
+      "success_reason": "file_matches SUMMARY.txt",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 6,
+      "elapsed_ms": 7,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1027,7 +1027,7 @@
       "success_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 2",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 1733,
+      "elapsed_ms": 2910,
       "notes": [],
       "trajectory": [
         {
@@ -1122,7 +1122,7 @@
       "success_reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 1716,
+      "elapsed_ms": 2912,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1209,7 +1209,7 @@
       "success_reason": "file_contains package.json",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 2,
+      "elapsed_ms": 3,
       "notes": [],
       "trajectory": [
         {
@@ -1304,7 +1304,7 @@
       "success_reason": "file_contains package.json",
       "tool_calls": 7,
       "observation_tokens": 520,
-      "elapsed_ms": 7,
+      "elapsed_ms": 10,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1486,7 +1486,7 @@
       "success_reason": "file_equals out/result.txt",
       "tool_calls": 4,
       "observation_tokens": 290,
-      "elapsed_ms": 6,
+      "elapsed_ms": 9,
       "notes": [
         "golden_applied",
         "ae_available"
@@ -1543,7 +1543,7 @@
       "success_reason": "missing ERR.txt",
       "tool_calls": 10,
       "observation_tokens": 3820,
-      "elapsed_ms": 3,
+      "elapsed_ms": 2,
       "notes": [],
       "trajectory": [
         {
@@ -1697,7 +1697,7 @@
         "success_rate": 0.0,
         "avg_tool_calls": 10.0,
         "avg_observation_tokens": 3820.0,
-        "avg_elapsed_ms": 175.8
+        "avg_elapsed_ms": 293.4
       },
       {
         "model": "mock",
@@ -1706,7 +1706,7 @@
         "success_rate": 1.0,
         "avg_tool_calls": 5.5,
         "avg_observation_tokens": 405.0,
-        "avg_elapsed_ms": 178.2
+        "avg_elapsed_ms": 298.6
       }
     ],
     "n_rows": 20

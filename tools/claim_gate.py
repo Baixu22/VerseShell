@@ -21,6 +21,7 @@ Gated claims (thresholds mirror docs/claims-and-evidence.md exactly):
   C18 exec launches a name-dispatching shim (rustup's cargo/rustc) by its invoked name
   C22 exec resolves a bare npm-family name to a launchable PATHEXT candidate
   C23 the ts task scores behaviour (its own tsc) instead of the golden patch's text
+  C24 every GOLDEN-bearing task is unsolved pristine and solved by GOLDEN
 C5 (learning cost) has no deterministic metric yet: status-only in evidence.json.
 C13 (live A/D), C15 (where D's extra tokens come from), C17 (what the reads are for),
 C19 (what the failed execs are), C20 (where D's extra steps come from) and C21 (the ts
@@ -63,6 +64,7 @@ THRESHOLDS = {
     "C18": {"desc": "exec launches a name-dispatching shim by its invoked name", "op": "==", "value": 1.0},
     "C22": {"desc": "exec resolves a bare npm-family name to a launchable PATHEXT candidate", "op": "==", "value": 1.0},
     "C23": {"desc": "the ts task scores behaviour (its own tsc) instead of the golden patch's text", "op": "==", "value": 1.0},
+    "C24": {"desc": "every GOLDEN-bearing task is unsolved pristine and solved by GOLDEN", "op": "==", "value": 1.0},
 }
 
 # Stored measurements the gate relies on. Each must record the content fingerprint
@@ -87,6 +89,7 @@ EVIDENCE_ARTIFACTS = [
     "eval/exec_failure_breakdown.json",
     "eval/step_composition.json",
     "eval/ts_fixture_audit.json",
+    "eval/task_set_audit.json",
 ]
 
 
@@ -386,6 +389,43 @@ def ts_fixture_contract_claim(report: dict) -> dict:
             "tsc_pass_by_condition": section.get("tsc_pass_by_condition"),
             "runs_where_legacy_rejected_a_passing_fix":
                 section.get("runs_where_legacy_rejected_a_passing_fix"),
+        },
+    }
+
+
+def task_set_consistency_claim(report: dict) -> dict:
+    """C24: every task that ships a GOLDEN patch must be unsolved pristine and solved
+    by that patch (and by an equivalent variant where one is registered).
+
+    This is the invariant a literal-text predicate breaks while still looking
+    correct against the patch it was written from: `file_contains "packages"` and
+    `file_contains "return a + b"` both passed their own GOLDEN and rejected every
+    other correct answer.
+    """
+    consistency = report.get("fixture_consistency") or {}
+    failures = sorted(t for t, e in consistency.items() if not e.get("pass"))
+    passed = bool(consistency) and not failures
+    return {
+        "value": 1.0 if passed else 0.0,
+        "pass": passed,
+        "detail": {
+            "tasks_covered": sorted(consistency),
+            "failures": failures,
+            "verdicts": {
+                t: {
+                    "pristine": (e.get("pristine") or {}).get("pass"),
+                    "golden": (e.get("golden") or {}).get("pass"),
+                    "variant": ((e.get("equivalent_variant") or {}).get("verdict") or {}).get("pass"),
+                }
+                for t, e in consistency.items()
+            },
+            "predicate_changes": {
+                t: {"stored_runs": e.get("runs_scored"),
+                    "reconstructed": e.get("runs_reconstructed"),
+                    "legacy_pass": e.get("legacy_pass"),
+                    "declared_pass": e.get("declared_pass")}
+                for t, e in (report.get("predicate_changes") or {}).items()
+            },
         },
     }
 
@@ -794,6 +834,39 @@ def main(argv: list[str] | None = None) -> int:
             "command": "python tools/ts_fixture_audit.py --out eval/ts_fixture_audit.json",
             "source": ["tools/ts_fixture_audit.py"],
             "notes": f"missing evidence artifact: {ts_fixture_path}",
+        })
+
+    # ── C24: every GOLDEN-bearing task is unsolved pristine and solved by GOLDEN ──
+    task_set_path = ROOT / "eval/task_set_audit.json"
+    if task_set_path.exists():
+        task_set_report = json.loads(task_set_path.read_text(encoding="utf-8"))
+        c24 = task_set_consistency_claim(task_set_report)
+        claims.append({
+            "id": "C24", "claim": THRESHOLDS["C24"]["desc"],
+            "threshold": "== 1.00", "value": c24["value"], "pass": c24["pass"],
+            "mode": "deterministic",
+            "sample_size": len(c24["detail"]["tasks_covered"]),
+            "measured_at": task_set_report.get("generated_at"),
+            "command": "python tools/task_set_audit.py --out eval/task_set_audit.json",
+            "source": ["tools/task_set_audit.py", "tools/trajectory_replay.py",
+                       "bench/aci/tasks/manifest.json", "bench/aci/tasks/*.json",
+                       "bench/aci/fixtures/**", "eval/task_set_audit.json"],
+            "detail": c24["detail"],
+            "notes": "evaluated with the same `check_success` the live runner uses. Two tasks "
+                     "had predicates that matched their GOLDEN patch as literal text and "
+                     "rejected every other correct answer (ts: `return a + b`, python: "
+                     "`packages`); both are fixed and both now recover 6/6 stored runs. The "
+                     "gate also re-checks that no task has silently become pre-solved or "
+                     "unsolvable",
+        })
+    else:
+        claims.append({
+            "id": "C24", "claim": THRESHOLDS["C24"]["desc"],
+            "threshold": "== 1.00", "value": None, "pass": False,
+            "mode": "deterministic", "measured_at": now,
+            "command": "python tools/task_set_audit.py --out eval/task_set_audit.json",
+            "source": ["tools/task_set_audit.py"],
+            "notes": f"missing evidence artifact: {task_set_path}",
         })
 
     # ── C12: stored evidence must still describe the current code ──

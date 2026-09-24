@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.exec-failure-breakdown/v1",
-  "generated_at": "2026-09-24T16:21:20.038762+00:00",
+  "generated_at": "2026-09-24T17:14:00.715680+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
@@ -23,7 +23,7 @@
       "bench/aci/results/live_ab_without_read_files.json",
       "tools/exec_failure_breakdown.py"
     ],
-    "fingerprint": "a87e23c7cf5b038bf6a9fca2c91fa7104bf7a2885102cc3d440972875ae58acb"
+    "fingerprint": "ef000b38a327266368d45d7cd7a77bdbf986f3cb8a196d7854bc7697ac5852b4"
   },
   "shim_facts": [
     {
@@ -78,7 +78,7 @@
       "cargo check": {
         "ok": true,
         "exit_code": 0,
-        "output_head": "Checking bench_fix v0.1.0 (C:\\Users\\27933\\AppData\\Local\\Temp\\tf45-replay-rust_fix_compile_error-qw59mabm)\n    Finished `",
+        "output_head": "Checking bench_fix v0.1.0 (C:\\Users\\27933\\AppData\\Local\\Temp\\tf45-replay-rust_fix_compile_error-smjdzn8j)\n    Finished `",
         "answered_as_rustup": false
       },
       "rustc --version": {
@@ -282,80 +282,88 @@
   "with_read_files": {
     "ok": {
       "calls": 29,
-      "tokens": 373,
-      "tokens_per_call": 12.86
+      "tokens": 351,
+      "tokens_per_call": 12.1
     },
     "failed": {
-      "calls": 7,
-      "tokens": 894,
-      "tokens_per_call": 127.71,
-      "share_of_exec_tokens": 0.7056
+      "calls": 8,
+      "tokens": 861,
+      "tokens_per_call": 107.62,
+      "share_of_exec_tokens": 0.7104
     },
     "classes": {
       "first_diagnostic": {
-        "calls": 7,
-        "tokens": 894,
+        "calls": 8,
+        "tokens": 861,
         "share_of_failure_tokens": 1.0
       }
     },
     "per_task_failed": {
-      "rust_add_unit_test": {
-        "calls": 2,
+      "python_edit_and_retest": {
+        "calls": 4,
         "tokens": 396
       },
       "python_fix_pytest_fail": {
         "calls": 3,
         "tokens": 300
       },
-      "python_edit_and_retest": {
-        "calls": 2,
-        "tokens": 198
+      "rust_add_unit_test": {
+        "calls": 1,
+        "tokens": 165
       }
     },
     "top_failing_commands": [
       [
         "pytest -q",
-        5
+        4
       ],
       [
-        "cargo test",
-        2
+        "pytest -q tests/test_greet.py",
+        3
+      ],
+      [
+        "powershell -Command Get-Content 'src/lib.rs' | Out-String | Format-Hex",
+        1
       ]
     ]
   },
   "without_read_files": {
     "ok": {
-      "calls": 21,
-      "tokens": 274,
-      "tokens_per_call": 13.05
+      "calls": 18,
+      "tokens": 259,
+      "tokens_per_call": 14.39
     },
     "failed": {
-      "calls": 5,
-      "tokens": 498,
-      "tokens_per_call": 99.6,
-      "share_of_exec_tokens": 0.6451
+      "calls": 7,
+      "tokens": 696,
+      "tokens_per_call": 99.43,
+      "share_of_exec_tokens": 0.7288
     },
     "classes": {
       "first_diagnostic": {
-        "calls": 5,
-        "tokens": 498,
+        "calls": 7,
+        "tokens": 696,
         "share_of_failure_tokens": 1.0
       }
     },
     "per_task_failed": {
+      "python_edit_and_retest": {
+        "calls": 4,
+        "tokens": 396
+      },
       "python_fix_pytest_fail": {
         "calls": 3,
         "tokens": 300
-      },
-      "python_edit_and_retest": {
-        "calls": 2,
-        "tokens": 198
       }
     },
     "top_failing_commands": [
       [
         "pytest -q",
-        5
+        6
+      ],
+      [
+        "pytest -q tests/",
+        1
       ]
     ]
   }

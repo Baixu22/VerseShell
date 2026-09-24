@@ -19,6 +19,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -472,6 +473,20 @@ def check_success(pred: dict, workspace: Path) -> tuple[bool | None, str]:
         body = p.read_text(encoding="utf-8-sig", errors="replace")
         needle = pred.get("contains", "")
         return (needle not in body, f"file_not_contains {pred['path']}")
+    if t == "file_matches":
+        # Whole-content regex match (a trailing newline is ignored). It lets a
+        # predicate describe the shape the prompt asked for — e.g. "one line that
+        # names the installed package" — instead of one fixed wording.
+        p = workspace / pred["path"]
+        if not p.exists():
+            return False, f"missing {pred['path']}"
+        body = p.read_text(encoding="utf-8-sig", errors="replace").rstrip("\r\n")
+        pattern = pred.get("pattern", "")
+        try:
+            matched = re.fullmatch(pattern, body) is not None
+        except re.error as error:
+            return None, f"unverified: bad pattern {error!r}"
+        return (matched, f"file_matches {pred['path']}")
     if t == "command_exit_0":
         argv = pred.get("argv") or []
         try:

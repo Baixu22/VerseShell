@@ -1,7 +1,7 @@
 # ACI-Bench Report
 
-- Generated: 2026-09-24T16:03:55.201016+00:00
-- Task set: 1.2.0
+- Generated: 2026-09-24T17:00:41.445416+00:00
+- Task set: 1.3.0
 - Mode: mock
 - Seed: 42
 

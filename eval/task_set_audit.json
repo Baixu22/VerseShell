@@ -1,0 +1,547 @@
+{
+  "schema": "verseshell.task-set-audit/v1",
+  "generated_at": "2026-09-24T17:17:07.931673+00:00",
+  "task_set_version": "1.3.0",
+  "method": {
+    "inputs": [
+      "bench/aci/tasks/manifest.json",
+      "bench/aci/results/latest_live.json"
+    ],
+    "evaluator": "live_agent_loop.check_success — the same function the live run uses",
+    "fixture_consistency": "pristine must fail, GOLDEN must pass, a registered equivalent variant must pass",
+    "predicate_changes": "reconstruct the artifact each stored run left behind and score it under both the legacy and the declared predicate"
+  },
+  "evidence": {
+    "globs": [
+      "bench/aci/tasks/*.json",
+      "bench/aci/fixtures/**/*",
+      "bench/aci/runners/live_agent_loop.py",
+      "bench/aci/results/latest_live.json",
+      "tools/task_set_audit.py",
+      "tools/trajectory_replay.py"
+    ],
+    "fingerprint": "6cf7c3ffc67195305847a1eaed37231f32f9745eb00e79171284dbcc23b5fff5"
+  },
+  "fixture_consistency": {
+    "rust_fix_compile_error": {
+      "task": "rust_fix_compile_error",
+      "task_version": "1.0.0",
+      "predicate": {
+        "type": "all",
+        "of": [
+          {
+            "type": "file_contains",
+            "path": "src/lib.rs",
+            "contains": "-> i32"
+          },
+          {
+            "type": "file_not_contains",
+            "path": "src/lib.rs",
+            "contains": "-> String"
+          }
+        ]
+      },
+      "pristine": {
+        "pass": false,
+        "ran": true,
+        "reason": "file_contains src/lib.rs"
+      },
+      "golden": {
+        "pass": true,
+        "ran": true,
+        "reason": "all ok"
+      },
+      "pass": true
+    },
+    "rust_add_unit_test": {
+      "task": "rust_add_unit_test",
+      "task_version": "1.0.0",
+      "predicate": {
+        "type": "all",
+        "of": [
+          {
+            "type": "file_contains",
+            "path": "src/lib.rs",
+            "contains": "#[test]"
+          },
+          {
+            "type": "file_contains",
+            "path": "src/lib.rs",
+            "contains": "assert_eq!(add(1, 2), 3)"
+          }
+        ]
+      },
+      "pristine": {
+        "pass": false,
+        "ran": true,
+        "reason": "file_contains src/lib.rs"
+      },
+      "golden": {
+        "pass": true,
+        "ran": true,
+        "reason": "all ok"
+      },
+      "pass": true
+    },
+    "rust_search_and_edit": {
+      "task": "rust_search_and_edit",
+      "task_version": "1.0.0",
+      "predicate": {
+        "type": "all",
+        "of": [
+          {
+            "type": "file_contains",
+            "path": "src/lib.rs",
+            "contains": "return a + b"
+          },
+          {
+            "type": "file_not_contains",
+            "path": "src/lib.rs",
+            "contains": "TODO(fix-me)"
+          }
+        ]
+      },
+      "pristine": {
+        "pass": false,
+        "ran": true,
+        "reason": "file_contains src/lib.rs"
+      },
+      "golden": {
+        "pass": true,
+        "ran": true,
+        "reason": "all ok"
+      },
+      "pass": true
+    },
+    "python_fix_pytest_fail": {
+      "task": "python_fix_pytest_fail",
+      "task_version": "1.0.0",
+      "predicate": {
+        "type": "file_contains",
+        "path": "mathlib.py",
+        "contains": "return a + b"
+      },
+      "pristine": {
+        "pass": false,
+        "ran": true,
+        "reason": "file_contains mathlib.py"
+      },
+      "golden": {
+        "pass": true,
+        "ran": true,
+        "reason": "file_contains mathlib.py"
+      },
+      "pass": true
+    },
+    "python_edit_and_retest": {
+      "task": "python_edit_and_retest",
+      "task_version": "1.0.0",
+      "predicate": {
+        "type": "file_contains",
+        "path": "greet.py",
+        "contains": "Hello, {name}!"
+      },
+      "pristine": {
+        "pass": false,
+        "ran": true,
+        "reason": "file_contains greet.py"
+      },
+      "golden": {
+        "pass": true,
+        "ran": true,
+        "reason": "file_contains greet.py"
+      },
+      "pass": true
+    },
+    "python_noisy_install_summary": {
+      "task": "python_noisy_install_summary",
+      "task_version": "1.3.0",
+      "predicate": {
+        "type": "file_matches",
+        "path": "SUMMARY.txt",
+        "pattern": "(?i)[^\\r\\n]*\\bsix\\b[^\\r\\n]*"
+      },
+      "pristine": {
+        "pass": false,
+        "ran": true,
+        "reason": "missing SUMMARY.txt"
+      },
+      "golden": {
+        "pass": true,
+        "ran": true,
+        "reason": "file_matches SUMMARY.txt"
+      },
+      "equivalent_variant": {
+        "why": "same one-line summary, different wording from GOLDEN",
+        "path": "SUMMARY.txt",
+        "content": "Installed 1 dependency from requirements.txt: six==1.16.0 (one line, no install log).\n",
+        "verdict": {
+          "pass": true,
+          "ran": true,
+          "reason": "file_matches SUMMARY.txt"
+        }
+      },
+      "pass": true
+    },
+    "ts_fix_type_error": {
+      "task": "ts_fix_type_error",
+      "task_version": "1.2.0",
+      "predicate": {
+        "type": "command_exit_0",
+        "argv": [
+          "node",
+          "node_modules/typescript/bin/tsc",
+          "--noEmit"
+        ],
+        "timeout_sec": 120
+      },
+      "pristine": {
+        "pass": false,
+        "ran": true,
+        "reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 2"
+      },
+      "golden": {
+        "pass": true,
+        "ran": true,
+        "reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0"
+      },
+      "equivalent_variant": {
+        "why": "same behaviour as GOLDEN, renamed binding",
+        "path": "src/index.ts",
+        "content": "export function add(a: number, b: number): number {\n  const total: number = a + b;\n  return total;\n}\n",
+        "verdict": {
+          "pass": true,
+          "ran": true,
+          "reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0"
+        }
+      },
+      "pass": true
+    },
+    "ts_package_script_fail": {
+      "task": "ts_package_script_fail",
+      "task_version": "1.0.0",
+      "predicate": {
+        "type": "file_contains",
+        "path": "package.json",
+        "contains": "process.exit(0)"
+      },
+      "pristine": {
+        "pass": false,
+        "ran": true,
+        "reason": "file_contains package.json"
+      },
+      "golden": {
+        "pass": true,
+        "ran": true,
+        "reason": "file_contains package.json"
+      },
+      "pass": true
+    },
+    "windows_path_normalize_edit": {
+      "task": "windows_path_normalize_edit",
+      "task_version": "1.0.0",
+      "predicate": {
+        "type": "file_equals",
+        "path": "out/result.txt",
+        "equals": "OK"
+      },
+      "pristine": {
+        "pass": false,
+        "ran": true,
+        "reason": "missing out/result.txt"
+      },
+      "golden": {
+        "pass": true,
+        "ran": true,
+        "reason": "file_equals out/result.txt"
+      },
+      "pass": true
+    },
+    "windows_batch_capture_diag": {
+      "task": "windows_batch_capture_diag",
+      "task_version": "1.0.0",
+      "predicate": {
+        "type": "all",
+        "of": [
+          {
+            "type": "file_contains",
+            "path": "ERR.txt",
+            "contains": ":"
+          },
+          {
+            "type": "file_contains",
+            "path": "ERR.txt",
+            "contains": "12"
+          }
+        ]
+      },
+      "pristine": {
+        "pass": false,
+        "ran": true,
+        "reason": "missing ERR.txt"
+      },
+      "golden": {
+        "pass": true,
+        "ran": true,
+        "reason": "all ok"
+      },
+      "pass": true
+    }
+  },
+  "predicate_changes": {
+    "ts_fix_type_error": {
+      "legacy_predicate": {
+        "type": "all",
+        "of": [
+          {
+            "type": "file_contains",
+            "path": "src/index.ts",
+            "contains": "return a + b"
+          },
+          {
+            "type": "file_not_contains",
+            "path": "src/index.ts",
+            "contains": "const x: string"
+          }
+        ]
+      },
+      "declared_predicate": {
+        "type": "command_exit_0",
+        "argv": [
+          "node",
+          "node_modules/typescript/bin/tsc",
+          "--noEmit"
+        ],
+        "timeout_sec": 120
+      },
+      "runs_scored": 6,
+      "runs_reconstructed": 6,
+      "legacy_pass": 0,
+      "declared_pass": 6,
+      "runs": [
+        {
+          "condition": "raw_shell",
+          "seed": 42,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "inline shell write",
+          "legacy": {
+            "pass": false,
+            "ran": true,
+            "reason": "file_contains src/index.ts"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0"
+          }
+        },
+        {
+          "condition": "verseshell_aci",
+          "seed": 42,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "typed file ops",
+          "legacy": {
+            "pass": false,
+            "ran": true,
+            "reason": "file_contains src/index.ts"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0"
+          }
+        },
+        {
+          "condition": "raw_shell",
+          "seed": 43,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "inline shell write",
+          "legacy": {
+            "pass": false,
+            "ran": true,
+            "reason": "file_contains src/index.ts"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0"
+          }
+        },
+        {
+          "condition": "verseshell_aci",
+          "seed": 43,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "typed file ops",
+          "legacy": {
+            "pass": false,
+            "ran": true,
+            "reason": "file_contains src/index.ts"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0"
+          }
+        },
+        {
+          "condition": "raw_shell",
+          "seed": 44,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "inline shell write",
+          "legacy": {
+            "pass": false,
+            "ran": true,
+            "reason": "file_contains src/index.ts"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0"
+          }
+        },
+        {
+          "condition": "verseshell_aci",
+          "seed": 44,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "typed file ops",
+          "legacy": {
+            "pass": false,
+            "ran": true,
+            "reason": "file_contains src/index.ts"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "command_exit_0 ['node', 'node_modules/typescript/bin/tsc', '--noEmit'] -> 0"
+          }
+        }
+      ]
+    },
+    "python_noisy_install_summary": {
+      "legacy_predicate": {
+        "type": "file_contains",
+        "path": "SUMMARY.txt",
+        "contains": "packages"
+      },
+      "declared_predicate": {
+        "type": "file_matches",
+        "path": "SUMMARY.txt",
+        "pattern": "(?i)[^\\r\\n]*\\bsix\\b[^\\r\\n]*"
+      },
+      "runs_scored": 6,
+      "runs_reconstructed": 6,
+      "legacy_pass": 1,
+      "declared_pass": 6,
+      "runs": [
+        {
+          "condition": "raw_shell",
+          "seed": 42,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "inline shell write",
+          "legacy": {
+            "pass": true,
+            "ran": true,
+            "reason": "file_contains SUMMARY.txt"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "file_matches SUMMARY.txt"
+          }
+        },
+        {
+          "condition": "verseshell_aci",
+          "seed": 42,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "typed file ops",
+          "legacy": {
+            "pass": false,
+            "ran": true,
+            "reason": "file_contains SUMMARY.txt"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "file_matches SUMMARY.txt"
+          }
+        },
+        {
+          "condition": "raw_shell",
+          "seed": 43,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "inline shell write",
+          "legacy": {
+            "pass": false,
+            "ran": true,
+            "reason": "file_contains SUMMARY.txt"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "file_matches SUMMARY.txt"
+          }
+        },
+        {
+          "condition": "verseshell_aci",
+          "seed": 43,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "typed file ops",
+          "legacy": {
+            "pass": false,
+            "ran": true,
+            "reason": "file_contains SUMMARY.txt"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "file_matches SUMMARY.txt"
+          }
+        },
+        {
+          "condition": "raw_shell",
+          "seed": 44,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "inline shell write",
+          "legacy": {
+            "pass": false,
+            "ran": true,
+            "reason": "file_contains SUMMARY.txt"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "file_matches SUMMARY.txt"
+          }
+        },
+        {
+          "condition": "verseshell_aci",
+          "seed": 44,
+          "recorded_success": true,
+          "reconstructed": true,
+          "how": "typed file ops",
+          "legacy": {
+            "pass": false,
+            "ran": true,
+            "reason": "file_contains SUMMARY.txt"
+          },
+          "declared": {
+            "pass": true,
+            "ran": true,
+            "reason": "file_matches SUMMARY.txt"
+          }
+        }
+      ]
+    }
+  }
+}

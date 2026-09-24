@@ -114,6 +114,16 @@ def check_success(pred: dict, workspace: Path) -> tuple[bool, str]:
         body = p.read_text(encoding="utf-8-sig", errors="replace")
         needle = pred.get("contains", "")
         return (needle not in body, f"file_not_contains {pred['path']}")
+    if t == "file_matches":
+        p = workspace / pred["path"]
+        if not p.exists():
+            return False, f"missing {pred['path']}"
+        body = p.read_text(encoding="utf-8-sig", errors="replace").rstrip("\r\n")
+        try:
+            matched = re.fullmatch(pred.get("pattern", ""), body) is not None
+        except re.error as error:
+            return False, f"bad pattern {error!r}"
+        return (matched, f"file_matches {pred['path']}")
     if t == "command_exit_0":
         argv = pred.get("argv") or []
         try:

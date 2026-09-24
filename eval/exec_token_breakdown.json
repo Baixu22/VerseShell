@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.exec-token-breakdown/v1",
-  "generated_at": "2026-09-24T16:21:12.118521+00:00",
+  "generated_at": "2026-09-24T17:13:50.967593+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
@@ -17,37 +17,37 @@
       "bench/aci/results/live_ab_without_read_files.json",
       "tools/exec_token_breakdown.py"
     ],
-    "fingerprint": "715da81700550c43098eac1b4a507b300068d077f693948a6d96b0f0915ddc97"
+    "fingerprint": "93fa1f211a853a2c255303a91f8d549d4cab1f5c61553696c0c1ad7c6de111b1"
   },
   "arms": {
     "with_read_files": {
       "d_runs": 30,
-      "d_total_tokens": 4562,
-      "d_tokens_per_run": 152.07,
+      "d_total_tokens": 4719,
+      "d_tokens_per_run": 157.3,
       "d_ops": {
-        "exec.run": {
-          "calls": 36,
-          "tokens": 1267,
-          "tokens_per_call": 35.19
-        },
         "file.read_many": {
-          "calls": 13,
-          "tokens": 1186,
-          "tokens_per_call": 91.23
+          "calls": 18,
+          "tokens": 1616,
+          "tokens_per_call": 89.78
         },
-        "file.view": {
-          "calls": 29,
-          "tokens": 939,
-          "tokens_per_call": 32.38
+        "exec.run": {
+          "calls": 37,
+          "tokens": 1212,
+          "tokens_per_call": 32.76
         },
         "file.replace_exact": {
-          "calls": 18,
-          "tokens": 456,
-          "tokens_per_call": 25.33
+          "calls": 23,
+          "tokens": 586,
+          "tokens_per_call": 25.48
+        },
+        "file.view": {
+          "calls": 15,
+          "tokens": 510,
+          "tokens_per_call": 34.0
         },
         "file.write": {
-          "calls": 14,
-          "tokens": 350,
+          "calls": 15,
+          "tokens": 375,
           "tokens_per_call": 25.0
         },
         "task_complete": {
@@ -56,153 +56,153 @@
           "tokens_per_call": 8.0
         },
         "repo.summary": {
-          "calls": 10,
-          "tokens": 140,
+          "calls": 14,
+          "tokens": 196,
           "tokens_per_call": 14.0
         }
       },
       "exec_run": {
-        "calls": 36,
-        "tokens": 1267,
-        "share_of_d_tokens": 0.2777,
-        "tokens_per_run": 42.23,
-        "tokens_per_call": 35.19,
+        "calls": 37,
+        "tokens": 1212,
+        "share_of_d_tokens": 0.2568,
+        "tokens_per_run": 40.4,
+        "tokens_per_call": 32.76,
         "per_task": {
-          "rust_add_unit_test": {
-            "calls": 5,
-            "tokens": 447
+          "python_edit_and_retest": {
+            "calls": 7,
+            "tokens": 432
           },
           "python_fix_pytest_fail": {
             "calls": 6,
             "tokens": 339
           },
-          "python_edit_and_retest": {
-            "calls": 5,
-            "tokens": 237
+          "rust_add_unit_test": {
+            "calls": 4,
+            "tokens": 216
           },
           "ts_package_script_fail": {
             "calls": 3,
             "tokens": 66
+          },
+          "python_noisy_install_summary": {
+            "calls": 6,
+            "tokens": 56
           },
           "rust_fix_compile_error": {
             "calls": 3,
             "tokens": 51
           },
           "rust_search_and_edit": {
-            "calls": 3,
-            "tokens": 51
-          },
-          "python_noisy_install_summary": {
-            "calls": 4,
-            "tokens": 45
-          },
-          "windows_path_normalize_edit": {
-            "calls": 4,
-            "tokens": 22
+            "calls": 2,
+            "tokens": 34
           },
           "ts_fix_type_error": {
+            "calls": 3,
+            "tokens": 9
+          },
+          "windows_path_normalize_edit": {
             "calls": 3,
             "tokens": 9
           }
         },
         "ok_vs_failed": {
-          "calls": 36,
-          "tokens": 1267,
+          "calls": 37,
+          "tokens": 1212,
           "ok": {
             "calls": 29,
-            "tokens": 373,
-            "tokens_per_call": 12.86
+            "tokens": 351,
+            "tokens_per_call": 12.1
           },
           "failed": {
-            "calls": 7,
-            "tokens": 894,
-            "tokens_per_call": 127.71
+            "calls": 8,
+            "tokens": 861,
+            "tokens_per_call": 107.62
           },
-          "failed_share_of_calls": 0.1944,
-          "failed_share_of_tokens": 0.7056
+          "failed_share_of_calls": 0.2162,
+          "failed_share_of_tokens": 0.7104
         }
       },
       "read_shape": {
-        "calls": 42,
-        "tokens": 2125,
-        "tokens_per_call": 50.6,
-        "file_refs": 58,
-        "file_refs_per_call": 1.38,
-        "tokens_per_file_ref": 36.64
+        "calls": 33,
+        "tokens": 2126,
+        "tokens_per_call": 64.42,
+        "file_refs": 55,
+        "file_refs_per_call": 1.67,
+        "tokens_per_file_ref": 38.65
       },
       "raw_shell": {
         "runs": 30,
         "command": {
-          "calls": 104,
-          "tokens": 4454,
-          "tokens_per_call": 42.83
+          "calls": 123,
+          "tokens": 5145,
+          "tokens_per_call": 41.83
         },
         "command_intents": {
           "build_or_test": {
-            "calls": 32,
-            "tokens": 2502,
-            "tokens_per_call": 78.19
+            "calls": 33,
+            "tokens": 2382,
+            "tokens_per_call": 72.18
           },
           "read_file": {
-            "calls": 38,
-            "tokens": 1158,
-            "tokens_per_call": 30.47
+            "calls": 36,
+            "tokens": 1535,
+            "tokens_per_call": 42.64
           },
           "other": {
-            "calls": 22,
-            "tokens": 754,
-            "tokens_per_call": 34.27
+            "calls": 35,
+            "tokens": 1163,
+            "tokens_per_call": 33.23
           },
           "write_or_mkdir": {
-            "calls": 12,
-            "tokens": 40,
-            "tokens_per_call": 3.33
+            "calls": 19,
+            "tokens": 65,
+            "tokens_per_call": 3.42
           }
         },
         "read_command_shape": {
-          "calls": 38,
-          "tokens": 1158,
-          "tokens_per_call": 30.47,
-          "file_refs": 42,
-          "file_refs_per_call": 1.11,
-          "tokens_per_file_ref": 27.57
+          "calls": 36,
+          "tokens": 1535,
+          "tokens_per_call": 42.64,
+          "file_refs": 44,
+          "file_refs_per_call": 1.22,
+          "tokens_per_file_ref": 34.89
         }
       }
     },
     "without_read_files": {
       "d_runs": 30,
-      "d_total_tokens": 2796,
-      "d_tokens_per_run": 93.2,
+      "d_total_tokens": 2851,
+      "d_tokens_per_run": 95.03,
       "d_ops": {
         "file.view": {
-          "calls": 36,
-          "tokens": 1206,
-          "tokens_per_call": 33.5
+          "calls": 35,
+          "tokens": 1102,
+          "tokens_per_call": 31.49
         },
         "exec.run": {
-          "calls": 26,
-          "tokens": 772,
-          "tokens_per_call": 29.69
+          "calls": 25,
+          "tokens": 955,
+          "tokens_per_call": 38.2
         },
         "file.replace_exact": {
-          "calls": 15,
-          "tokens": 379,
-          "tokens_per_call": 25.27
+          "calls": 14,
+          "tokens": 354,
+          "tokens_per_call": 25.29
+        },
+        "file.write": {
+          "calls": 6,
+          "tokens": 150,
+          "tokens_per_call": 25.0
         },
         "task_complete": {
-          "calls": 21,
-          "tokens": 168,
+          "calls": 18,
+          "tokens": 144,
           "tokens_per_call": 8.0
         },
         "repo.summary": {
           "calls": 10,
           "tokens": 140,
           "tokens_per_call": 14.0
-        },
-        "file.write": {
-          "calls": 5,
-          "tokens": 125,
-          "tokens_per_call": 25.0
         },
         "repo.search": {
           "calls": 2,
@@ -211,19 +211,19 @@
         }
       },
       "exec_run": {
-        "calls": 26,
-        "tokens": 772,
-        "share_of_d_tokens": 0.2761,
-        "tokens_per_run": 25.73,
-        "tokens_per_call": 29.69,
+        "calls": 25,
+        "tokens": 955,
+        "share_of_d_tokens": 0.335,
+        "tokens_per_run": 31.83,
+        "tokens_per_call": 38.2,
         "per_task": {
+          "python_edit_and_retest": {
+            "calls": 7,
+            "tokens": 435
+          },
           "python_fix_pytest_fail": {
             "calls": 6,
             "tokens": 339
-          },
-          "python_edit_and_retest": {
-            "calls": 5,
-            "tokens": 237
           },
           "ts_package_script_fail": {
             "calls": 3,
@@ -234,79 +234,79 @@
             "tokens": 51
           },
           "rust_search_and_edit": {
-            "calls": 3,
-            "tokens": 51
+            "calls": 2,
+            "tokens": 34
           },
-          "windows_path_normalize_edit": {
+          "python_noisy_install_summary": {
             "calls": 3,
-            "tokens": 19
+            "tokens": 27
           },
           "ts_fix_type_error": {
-            "calls": 3,
-            "tokens": 9
+            "calls": 1,
+            "tokens": 3
           }
         },
         "ok_vs_failed": {
-          "calls": 26,
-          "tokens": 772,
+          "calls": 25,
+          "tokens": 955,
           "ok": {
-            "calls": 21,
-            "tokens": 274,
-            "tokens_per_call": 13.05
+            "calls": 18,
+            "tokens": 259,
+            "tokens_per_call": 14.39
           },
           "failed": {
-            "calls": 5,
-            "tokens": 498,
-            "tokens_per_call": 99.6
+            "calls": 7,
+            "tokens": 696,
+            "tokens_per_call": 99.43
           },
-          "failed_share_of_calls": 0.1923,
-          "failed_share_of_tokens": 0.6451
+          "failed_share_of_calls": 0.28,
+          "failed_share_of_tokens": 0.7288
         }
       },
       "read_shape": {
-        "calls": 36,
-        "tokens": 1206,
-        "tokens_per_call": 33.5,
-        "file_refs": 36,
+        "calls": 35,
+        "tokens": 1102,
+        "tokens_per_call": 31.49,
+        "file_refs": 35,
         "file_refs_per_call": 1.0,
-        "tokens_per_file_ref": 33.5
+        "tokens_per_file_ref": 31.49
       },
       "raw_shell": {
         "runs": 30,
         "command": {
-          "calls": 102,
-          "tokens": 4693,
-          "tokens_per_call": 46.01
+          "calls": 127,
+          "tokens": 5123,
+          "tokens_per_call": 40.34
         },
         "command_intents": {
           "build_or_test": {
-            "calls": 44,
-            "tokens": 2643,
-            "tokens_per_call": 60.07
-          },
-          "read_file": {
-            "calls": 35,
-            "tokens": 1324,
-            "tokens_per_call": 37.83
+            "calls": 37,
+            "tokens": 2511,
+            "tokens_per_call": 67.86
           },
           "other": {
-            "calls": 16,
-            "tokens": 704,
-            "tokens_per_call": 44.0
+            "calls": 28,
+            "tokens": 1354,
+            "tokens_per_call": 48.36
+          },
+          "read_file": {
+            "calls": 34,
+            "tokens": 1140,
+            "tokens_per_call": 33.53
           },
           "write_or_mkdir": {
-            "calls": 7,
-            "tokens": 22,
-            "tokens_per_call": 3.14
+            "calls": 28,
+            "tokens": 118,
+            "tokens_per_call": 4.21
           }
         },
         "read_command_shape": {
-          "calls": 35,
-          "tokens": 1324,
-          "tokens_per_call": 37.83,
+          "calls": 34,
+          "tokens": 1140,
+          "tokens_per_call": 33.53,
           "file_refs": 37,
-          "file_refs_per_call": 1.06,
-          "tokens_per_file_ref": 35.78
+          "file_refs_per_call": 1.09,
+          "tokens_per_file_ref": 30.81
         }
       }
     }
@@ -314,59 +314,59 @@
   "exec_run_delta_with_minus_without": {
     "runs": 30,
     "before": {
-      "calls_per_run": 0.867,
-      "tokens_per_call": 29.69,
-      "tokens_per_run": 25.73
+      "calls_per_run": 0.833,
+      "tokens_per_call": 38.2,
+      "tokens_per_run": 31.83
     },
     "after": {
-      "calls_per_run": 1.2,
-      "tokens_per_call": 35.19,
-      "tokens_per_run": 42.23
+      "calls_per_run": 1.233,
+      "tokens_per_call": 32.76,
+      "tokens_per_run": 40.4
     },
-    "delta_tokens_per_run": 16.5,
-    "count_effect": 9.9,
-    "per_call_effect": 6.6,
-    "interaction": 1.83,
-    "count_share": 0.5998,
-    "per_call_share": 0.4002
+    "delta_tokens_per_run": 8.57,
+    "count_effect": 15.28,
+    "per_call_effect": -6.71,
+    "interaction": -2.18,
+    "count_share": 1.7837,
+    "per_call_share": -0.7837
   },
   "d_vs_a": {
-    "a_total_tokens": 4454,
-    "a_tokens_per_run": 148.47,
-    "d_tokens_per_run": 152.07,
-    "gap_tokens_per_run": 3.6,
-    "d_exec_run_tokens_per_run": 42.23,
-    "a_run_command_tokens_per_run": 148.47,
+    "a_total_tokens": 5145,
+    "a_tokens_per_run": 171.5,
+    "d_tokens_per_run": 157.3,
+    "gap_tokens_per_run": -14.2,
+    "d_exec_run_tokens_per_run": 40.4,
+    "a_run_command_tokens_per_run": 171.5,
     "note": "A's run_command also performs file reading (`type file`), which D splits into file.view / file.read_many, so a smaller D exec.run does not by itself make D cheaper; the raw_shell command_intents table shows how much of A is reading"
   },
   "gap_decomposition": {
     "runs_d": 30,
     "runs_a": 30,
-    "total_gap_tokens_per_run": 3.6,
+    "total_gap_tokens_per_run": -14.2,
     "buckets": {
       "read": {
-        "d_tokens_per_run": 70.83,
-        "a_tokens_per_run": 38.6,
-        "delta_tokens_per_run": 32.23,
-        "share_of_gap": 8.9537
+        "d_tokens_per_run": 70.87,
+        "a_tokens_per_run": 51.17,
+        "delta_tokens_per_run": 19.7,
+        "share_of_gap": -1.3873
       },
       "exec": {
-        "d_tokens_per_run": 42.23,
-        "a_tokens_per_run": 108.53,
-        "delta_tokens_per_run": -66.3,
-        "share_of_gap": -18.4167
+        "d_tokens_per_run": 40.4,
+        "a_tokens_per_run": 118.17,
+        "delta_tokens_per_run": -77.77,
+        "share_of_gap": 5.4765
       },
       "edit": {
-        "d_tokens_per_run": 26.87,
-        "a_tokens_per_run": 1.33,
-        "delta_tokens_per_run": 25.53,
-        "share_of_gap": 7.0926
+        "d_tokens_per_run": 32.03,
+        "a_tokens_per_run": 2.17,
+        "delta_tokens_per_run": 29.87,
+        "share_of_gap": -2.1033
       },
       "meta": {
-        "d_tokens_per_run": 12.13,
-        "a_tokens_per_run": 7.47,
-        "delta_tokens_per_run": 4.67,
-        "share_of_gap": 1.2963
+        "d_tokens_per_run": 14.0,
+        "a_tokens_per_run": 6.13,
+        "delta_tokens_per_run": 7.87,
+        "share_of_gap": -0.554
       }
     },
     "note": "D buckets by typed op; A buckets by heuristic command intent. A's read bucket is `type`-style commands, which is how A reads files at all, so this is the closest available like-for-like split rather than an exact one"

@@ -33,11 +33,9 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import ast
 import hashlib
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -53,7 +51,9 @@ TASKS = BENCH / "tasks"
 FIXTURES = BENCH / "fixtures"
 
 sys.path.insert(0, str(BENCH / "runners"))
+sys.path.insert(0, str(ROOT / "tools"))
 from fixture_deps import materialize_deps  # noqa: E402
+from trajectory_replay import reconstruct, step_text  # noqa: E402
 
 # The v1.1.0 predicate this task shipped before TF-0084. Kept here so the audit can
 # re-score the same stored runs under both and show exactly what the change did.
@@ -84,6 +84,7 @@ EVIDENCE_GLOBS = [
     "bench/aci/fixtures/ts_package_script_fail/**/*",
     "bench/aci/results/latest_live.json",
     "tools/ts_fixture_audit.py",
+    "tools/trajectory_replay.py",
 ]
 
 
@@ -141,14 +142,6 @@ def path_shadow_facts() -> dict:
 
 def step_tokens(step: dict) -> int:
     return int(step.get("observation_tokens", 0) or 0)
-
-
-def step_text(step: dict) -> str:
-    args = step.get("args") or {}
-    argv = args.get("argv")
-    if isinstance(argv, list):
-        return " ".join(str(a) for a in argv)
-    return str(args.get("command", ""))
 
 
 def first_token(step: dict) -> str:
@@ -379,53 +372,6 @@ def evaluate(pred: dict, body: str) -> tuple[bool, str]:
     return False, f"unknown predicate {t}"
 
 
-WRITE_RE = re.compile(
-    r"open\(\s*(?:r)?(?P<q1>['\"])(?P<path>.*?)(?P=q1)\s*,\s*['\"]w['\"]\s*\)\s*\.\s*"
-    r"write\(\s*(?P<q2>['\"])(?P<body>(?:\\.|(?!(?P=q2)).)*?)(?P=q2)",
-    re.DOTALL,
-)
-
-
-def reconstruct_d(pristine: str, trajectory: list[dict], path: str) -> tuple[str | None, str]:
-    """Replay the typed writes a D run left in the workspace."""
-    body = pristine
-    touched = False
-    for step in trajectory:
-        op = step.get("op")
-        args = step.get("args") or {}
-        if op == "file.write" and args.get("path") == path:
-            body = str(args.get("content", ""))
-            touched = True
-        elif op == "file.replace_exact" and args.get("path") == path:
-            old = str(args.get("old", ""))
-            new = str(args.get("new", ""))
-            if old and old in body:
-                body = body.replace(old, new, 1)
-                touched = True
-    return (body if touched else None), ("typed file ops" if touched else "no write to the file")
-
-
-def reconstruct_a(pristine: str, trajectory: list[dict], path: str) -> tuple[str | None, str]:
-    """Recover the raw-shell write from the `python -c ...write(...)` one-liner."""
-    body = pristine
-    touched = False
-    for step in trajectory:
-        if step.get("op") != "run_command":
-            continue
-        command = step_text(step)
-        for match in WRITE_RE.finditer(command):
-            target = match.group("path").replace("\\", "/")
-            if target != path.replace("\\", "/"):
-                continue
-            quote = match.group("q2")
-            try:
-                body = ast.literal_eval(f"{quote}{match.group('body')}{quote}")
-                touched = True
-            except (ValueError, SyntaxError) as error:
-                return None, f"could not decode the inline write: {error}"
-    return (body if touched else None), ("inline python write" if touched else "no write to the file")
-
-
 def tsc_verdict(fixture: Path, body: str, workdir: Path) -> dict:
     """Run the fixture's own `tsc --noEmit` on a reconstructed file.
 
@@ -494,10 +440,7 @@ def success_report() -> dict:
             if row["task_id"] != "ts_fix_type_error":
                 continue
             path = "src/index.ts"
-            if row["condition"] == "verseshell_aci":
-                body, how = reconstruct_d(pristine, row.get("trajectory", []), path)
-            else:
-                body, how = reconstruct_a(pristine, row.get("trajectory", []), path)
+            body, how = reconstruct(row["condition"], pristine, row.get("trajectory", []), path)
             entry = {
                 "condition": row["condition"],
                 "seed": row.get("seed"),

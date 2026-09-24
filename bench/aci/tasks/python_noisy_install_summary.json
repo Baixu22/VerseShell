@@ -1,6 +1,6 @@
 {
   "id": "python_noisy_install_summary",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "lang": "python",
   "platform": [
     "any"
@@ -14,8 +14,8 @@
   "timeout_sec": 300,
   "weight": 1.0,
   "success": {
-    "type": "file_contains",
+    "type": "file_matches",
     "path": "SUMMARY.txt",
-    "contains": "packages"
+    "pattern": "(?i)[^\\r\\n]*\\bsix\\b[^\\r\\n]*"
   }
 }
