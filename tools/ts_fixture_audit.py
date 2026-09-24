@@ -1,0 +1,580 @@
+#!/usr/bin/env python3
+"""TF-0082: audit the ts fixture's two boundaries — toolchain acquisition and success.
+
+The live task set promises the model `tsc --noEmit succeeds` but ships a fixture
+without `node_modules`, and it decides success by matching the golden patch as a
+*literal string*. Both arms pay the first boundary; condition D pays more of it
+because typed ops cannot fold install-and-verify into one command. This tool
+answers the three questions TF-0082 asks, deterministically and without any API
+call, from the stored live trajectories:
+
+  * **acquisition_chain** — which `exec.run` calls on the two ts tasks exist only
+    because of the environment, split by root cause: a bare `npm` / `npx` name
+    that this machine cannot launch (an extensionless shim shadows the `.cmd` one
+    on PATH), a genuinely missing TypeScript, the install workaround, and the one
+    verification call the task actually needs.
+  * **counterfactual / sensitivity** — what the task would cost with the toolchain
+    present, and whether that moves either headline D/A ratio (if a conclusion
+    flips, the boundary is not merely a caveat);
+  * **success_predicate** — re-score the declared predicate against the pristine
+    file, the golden patch and the file each live run actually left behind, so the
+    literal-match boundary and the never-executed `optional_verify` are visible.
+
+The bare-name split is a *machine* fact (like C18's shim probe) and is reported as
+one; the rest is a pure function of the stored artifacts.
+
+Usage:
+    python tools/ts_fixture_audit.py --out eval/ts_fixture_audit.json
+"""
+from __future__ import annotations
+
+import argparse
+import ast
+import hashlib
+import json
+import os
+import re
+import sys
+from collections import Counter, defaultdict
+from datetime import datetime, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+BENCH = ROOT / "bench" / "aci"
+RESULTS = BENCH / "results"
+TASKS = BENCH / "tasks"
+FIXTURES = BENCH / "fixtures"
+
+ARMS = {
+    "with_read_files": RESULTS / "latest_live.json",
+    "without_read_files": RESULTS / "live_ab_without_read_files.json",
+}
+# The node's subject first; the second task shares the same machine boundary and
+# needs no toolchain of its own, which is what makes the split legible.
+TS_TASKS = ("ts_fix_type_error", "ts_package_script_fail")
+# Names that npm-family installs ship twice on Windows: an extensionless shim
+# (a POSIX shell script) and a `.cmd` launcher. `exec.run` takes argv directly.
+SHIM_NAMES = ("npm", "npx", "yarn", "pnpm", "corepack")
+INSTALL_HINTS = ("install", "i --", "add ")
+EVIDENCE_GLOBS = [
+    "src/process_command.rs",
+    "bench/aci/runners/live_agent_loop.py",
+    "bench/aci/tasks/ts_*.json",
+    "bench/aci/fixtures/ts_fix_type_error/**/*",
+    "bench/aci/fixtures/ts_package_script_fail/**/*",
+    "bench/aci/results/latest_live.json",
+    "tools/ts_fixture_audit.py",
+]
+
+
+def evidence_fingerprint(globs: list[str]) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(p for pat in globs for p in ROOT.glob(pat)
+                       if p.is_file() and "__pycache__" not in p.parts):
+        digest.update(path.relative_to(ROOT).as_posix().encode())
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+    return digest.hexdigest()
+
+
+# ── machine facts: which bare names are shadowed by an extensionless shim? ──
+
+def path_shadow_facts() -> dict:
+    """Does some PATH directory hold an extensionless `npm` next to `npm.cmd`?
+
+    `resolve_candidate` returns the first *file* it finds and only tries PATHEXT
+    when that file does not exist. On an nvm-for-Windows / nodejs install both
+    exist, so the bare name resolves to a POSIX shell script that Win32 cannot
+    launch. This is the fact that turns a `.cmd` retry into a wasted call.
+    """
+    entries: dict[str, dict] = {}
+    for name in SHIM_NAMES:
+        found: list[dict] = []
+        for directory in os.environ.get("PATH", "").split(os.pathsep):
+            if not directory:
+                continue
+            bare = Path(directory) / name
+            if not bare.is_file():
+                continue
+            siblings = sorted(p.name for p in Path(directory).iterdir()
+                              if p.is_file() and p.name.lower().startswith(name.lower())
+                              and p.name.lower() != name.lower())
+            found.append({
+                "dir": directory,
+                "bare_file": str(bare),
+                "bare_is_symlink": bare.is_symlink(),
+                "siblings": siblings,
+                "shadowed": any(s.lower().endswith((".cmd", ".exe", ".bat")) for s in siblings),
+            })
+        entries[name] = {"found": bool(found), "shadowed": any(f["shadowed"] for f in found),
+                         "hits": found}
+    return {
+        "shim_names": list(SHIM_NAMES),
+        "bare_names": entries,
+        "shadowed_names": sorted(n for n, e in entries.items() if e["shadowed"]),
+        "resolution_order": "src/process_command.rs::resolve_candidate returns the bare "
+                            "file when it exists and only then tries PATHEXT, so the "
+                            "extensionless shim wins over the `.cmd` launcher",
+    }
+
+
+# ── step classification ──
+
+def step_tokens(step: dict) -> int:
+    return int(step.get("observation_tokens", 0) or 0)
+
+
+def step_text(step: dict) -> str:
+    args = step.get("args") or {}
+    argv = args.get("argv")
+    if isinstance(argv, list):
+        return " ".join(str(a) for a in argv)
+    return str(args.get("command", ""))
+
+
+def first_token(step: dict) -> str:
+    args = step.get("args") or {}
+    argv = args.get("argv")
+    if isinstance(argv, list) and argv:
+        return str(argv[0])
+    return ""
+
+
+def bare_shim_name(step: dict) -> str | None:
+    """A first argv token that is a bare npm-family name (no path, no extension)."""
+    token = first_token(step).strip().strip('"')
+    if not token or "/" in token or "\\" in token:
+        return None
+    name = token.lower()
+    if name in SHIM_NAMES:
+        return name
+    return None
+
+
+def classify(step: dict, shadowed: set[str], condition: str) -> str | None:
+    """Name the boundary a step belongs to, or None when it is ordinary work.
+
+    Rules, in order (each is a statement about the command, not about intent):
+      1. a bare npm-family argv[0] that this machine shadows -> the launcher picks
+         the extensionless shim, so the call cannot start;
+      2. anything mentioning an install through npm / npm-cli.js -> acquisition;
+      3. anything mentioning `tsc` or `node_modules` -> toolchain work: failed is
+         the missing-toolchain diagnostic, succeeded is the verification the task
+         actually needs.
+    Raw shell folds read/run/write into one command, so its buckets are labelled
+    as multiplexed rather than cleanly separable.
+    """
+    if step.get("op") not in ("exec.run", "run_command"):
+        return None
+    text = step_text(step).lower()
+    ok = bool(step.get("aci_ok")) if condition == "verseshell_aci" else None
+    name = bare_shim_name(step)
+    if name and name in shadowed:
+        return "bare_name_launch" if ok is not True else "bare_name_launched_ok"
+    if any(hint in text for hint in INSTALL_HINTS) and ("npm" in text or "npm-cli" in text):
+        return "toolchain_install"
+    if "tsc" in text or "node_modules" in text:
+        if condition == "verseshell_aci":
+            return "toolchain_verify" if ok else "toolchain_missing"
+        return "raw_shell_toolchain"
+    return None
+
+
+def chain_report(rows: list[dict], task_id: str, shadowed: set[str]) -> dict:
+    """The with-`read_files` arm is the primary record; the paired control arm only
+    sizes the effect of hiding one tool, so the chain table is computed on the primary."""
+    out: dict = {"task_id": task_id, "arms": {}}
+    for condition in ("verseshell_aci", "raw_shell"):
+        runs = [r for r in rows if r["task_id"] == task_id and r["condition"] == condition]
+        if not runs:
+            continue
+        per_run = []
+        totals: Counter = Counter()
+        token_totals: Counter = Counter()
+        for row in runs:
+            calls = []
+            for index, step in enumerate(row.get("trajectory", [])):
+                klass = classify(step, shadowed, condition)
+                if klass is None:
+                    continue
+                calls.append({
+                    "index": index,
+                    "class": klass,
+                    "tokens": step_tokens(step),
+                    "ok": step.get("aci_ok") if condition == "verseshell_aci" else None,
+                    "command": step_text(step)[:120],
+                })
+                totals[klass] += 1
+                token_totals[klass] += step_tokens(step)
+            per_run.append({
+                "seed": row.get("seed"),
+                "success": row.get("success"),
+                "success_reason": row.get("success_reason"),
+                "steps": row.get("tool_calls"),
+                "tokens": row.get("observation_tokens"),
+                "boundary_calls": calls,
+            })
+        n = len(runs)
+        out["arms"][f"with_read_files:{condition}"] = {
+            "runs": n,
+            "per_run": per_run,
+            "boundary_calls": sum(totals.values()),
+            "boundary_calls_per_run": round(sum(totals.values()) / n, 3),
+            "boundary_tokens": sum(token_totals.values()),
+            "boundary_tokens_per_run": round(sum(token_totals.values()) / n, 2),
+            "by_class": {k: {"calls": totals[k], "tokens": token_totals[k],
+                             "calls_per_run": round(totals[k] / n, 3),
+                             "tokens_per_run": round(token_totals[k] / n, 2)}
+                         for k in sorted(totals)},
+            "steps_per_run": round(sum(r.get("tool_calls", 0) for r in runs) / n, 3),
+            "tokens_per_run": round(sum(r.get("observation_tokens", 0) for r in runs) / n, 2),
+            "note": ("typed ops do one job each, so the classes are separable"
+                     if condition == "verseshell_aci" else
+                     "raw shell folds read/run/write into one command, so these buckets "
+                     "overlap; treat them as an upper bound on A's toolchain share"),
+        }
+    return out
+
+
+# ── counterfactual + headline sensitivity ──
+
+def counterfactual(rows: list[dict], task_id: str, shadowed: set[str]) -> dict:
+    """D's ts task if the toolchain were present: keep the verification, drop the rest."""
+    runs = [r for r in rows if r["task_id"] == task_id and r["condition"] == "verseshell_aci"]
+    per_run = []
+    for row in runs:
+        artifact_calls = artifact_tokens = 0
+        verify_tokens = 0
+        for step in row.get("trajectory", []):
+            klass = classify(step, shadowed, "verseshell_aci")
+            if klass is None:
+                continue
+            if klass == "toolchain_verify":
+                verify_tokens += step_tokens(step)
+                continue
+            artifact_calls += 1
+            artifact_tokens += step_tokens(step)
+        observed_steps = int(row.get("tool_calls", 0))
+        observed_tokens = int(row.get("observation_tokens", 0))
+        per_run.append({
+            "seed": row.get("seed"),
+            "observed_steps": observed_steps,
+            "observed_tokens": observed_tokens,
+            "boundary_calls": artifact_calls,
+            "boundary_tokens": artifact_tokens,
+            # `artifact_calls` already excludes the one verification call the task
+            # needs, so keeping it is simply "do not drop it" — no `+ 1`.
+            "cf_steps": observed_steps - artifact_calls,
+            "cf_tokens": observed_tokens - artifact_tokens,
+            "verify_tokens": verify_tokens,
+        })
+    n = len(per_run)
+    mean = lambda key: round(sum(r[key] for r in per_run) / n, 3) if n else None  # noqa: E731
+    return {
+        "task_id": task_id,
+        "rule": "keep one verification call, drop every other boundary call",
+        "per_run": per_run,
+        "observed_steps_per_run": mean("observed_steps"),
+        "observed_tokens_per_run": mean("observed_tokens"),
+        "boundary_calls_per_run": mean("boundary_calls"),
+        "boundary_tokens_per_run": mean("boundary_tokens"),
+        "cf_steps_per_run": mean("cf_steps"),
+        "cf_tokens_per_run": mean("cf_tokens"),
+    }
+
+
+def sensitivity(rows: list[dict], task_id: str, cf: dict) -> dict:
+    """Recompute the headline D/A ratios with only D's ts task counterfactual.
+
+    A pays the same acquisition boundary but folds it into its own commands, so
+    this is the *lower* bound on the post-fix step ratio (A would drop too, which
+    pushes the ratio back toward the observed value). Both bounds are reported.
+    """
+    def totals(condition: str) -> tuple[int, int, int]:
+        rs = [r for r in rows if r["condition"] == condition]
+        return (len(rs), sum(r.get("tool_calls", 0) for r in rs),
+                sum(r.get("observation_tokens", 0) for r in rs))
+
+    n_d, steps_d, tokens_d = totals("verseshell_aci")
+    n_a, steps_a, tokens_a = totals("raw_shell")
+    cf_steps = round(cf["cf_steps_per_run"] * 3)  # 3 seeds of this task
+    cf_tokens = round(cf["cf_tokens_per_run"] * 3)
+    ts_steps = sum(r.get("tool_calls", 0) for r in rows
+                   if r["condition"] == "verseshell_aci" and r["task_id"] == task_id)
+    ts_tokens = sum(r.get("observation_tokens", 0) for r in rows
+                    if r["condition"] == "verseshell_aci" and r["task_id"] == task_id)
+    d_steps = steps_d - ts_steps + cf_steps
+    d_tokens = tokens_d - ts_tokens + cf_tokens
+    observed = {
+        "steps_per_run_D": round(steps_d / n_d, 3),
+        "steps_per_run_A": round(steps_a / n_a, 3),
+        "step_ratio": round((steps_d / n_d) / (steps_a / n_a), 4),
+        "tokens_per_run_D": round(tokens_d / n_d, 2),
+        "tokens_per_run_A": round(tokens_a / n_a, 2),
+        "token_ratio": round((tokens_d / n_d) / (tokens_a / n_a), 4),
+    }
+    counterfactual_side = {
+        "steps_per_run_D": round(d_steps / n_d, 3),
+        "step_ratio": round((d_steps / n_d) / (steps_a / n_a), 4),
+        "tokens_per_run_D": round(d_tokens / n_d, 2),
+        "token_ratio": round((d_tokens / n_d) / (tokens_a / n_a), 4),
+    }
+    return {
+        "observed": observed,
+        "d_only_counterfactual": counterfactual_side,
+        "step_ratio_band": [min(observed["step_ratio"], counterfactual_side["step_ratio"]),
+                            max(observed["step_ratio"], counterfactual_side["step_ratio"])],
+        "token_ratio_band": [min(observed["token_ratio"], counterfactual_side["token_ratio"]),
+                             max(observed["token_ratio"], counterfactual_side["token_ratio"])],
+        "conclusion_flips": (observed["step_ratio"] > 1) != (counterfactual_side["step_ratio"] > 1)
+                            or (observed["token_ratio"] < 1) != (counterfactual_side["token_ratio"] < 1),
+    }
+
+
+# ── success predicate ──
+
+def evaluate(pred: dict, body: str) -> tuple[bool, str]:
+    """Mirror of `bench/aci/runners/live_agent_loop.py::check_success` for file predicates."""
+    t = pred.get("type")
+    if t == "all":
+        for child in pred.get("of", []):
+            ok, reason = evaluate(child, body)
+            if not ok:
+                return False, reason
+        return True, "all ok"
+    if t == "file_contains":
+        needle = pred.get("contains", "")
+        return (needle in body, f"file_contains {pred.get('path')}")
+    if t == "file_not_contains":
+        needle = pred.get("contains", "")
+        return (needle not in body, f"file_not_contains {pred.get('path')}")
+    if t == "file_equals":
+        return (body.strip() == str(pred.get("equals", "")).strip(), "file_equals")
+    return False, f"unknown predicate {t}"
+
+
+WRITE_RE = re.compile(
+    r"open\(\s*(?:r)?(?P<q1>['\"])(?P<path>.*?)(?P=q1)\s*,\s*['\"]w['\"]\s*\)\s*\.\s*"
+    r"write\(\s*(?P<q2>['\"])(?P<body>(?:\\.|(?!(?P=q2)).)*?)(?P=q2)",
+    re.DOTALL,
+)
+
+
+def reconstruct_d(pristine: str, trajectory: list[dict], path: str) -> tuple[str | None, str]:
+    """Replay the typed writes a D run left in the workspace."""
+    body = pristine
+    touched = False
+    for step in trajectory:
+        op = step.get("op")
+        args = step.get("args") or {}
+        if op == "file.write" and args.get("path") == path:
+            body = str(args.get("content", ""))
+            touched = True
+        elif op == "file.replace_exact" and args.get("path") == path:
+            old = str(args.get("old", ""))
+            new = str(args.get("new", ""))
+            if old and old in body:
+                body = body.replace(old, new, 1)
+                touched = True
+    return (body if touched else None), ("typed file ops" if touched else "no write to the file")
+
+
+def reconstruct_a(pristine: str, trajectory: list[dict], path: str) -> tuple[str | None, str]:
+    """Recover the raw-shell write from the `python -c ...write(...)` one-liner."""
+    body = pristine
+    touched = False
+    for step in trajectory:
+        if step.get("op") != "run_command":
+            continue
+        command = step_text(step)
+        for match in WRITE_RE.finditer(command):
+            target = match.group("path").replace("\\", "/")
+            if target != path.replace("\\", "/"):
+                continue
+            quote = match.group("q2")
+            try:
+                body = ast.literal_eval(f"{quote}{match.group('body')}{quote}")
+                touched = True
+            except (ValueError, SyntaxError) as error:
+                return None, f"could not decode the inline write: {error}"
+    return (body if touched else None), ("inline python write" if touched else "no write to the file")
+
+
+def success_report() -> dict:
+    task = json.loads((TASKS / "ts_fix_type_error.json").read_text(encoding="utf-8"))
+    fixture = FIXTURES / task["workspace_fixture"]
+    pristine = (fixture / "src" / "index.ts").read_text(encoding="utf-8")
+    golden = (fixture / "GOLDEN" / "src" / "index.ts").read_text(encoding="utf-8")
+    pred = task["success"]
+
+    baseline = {}
+    for label, body in (("pristine", pristine), ("golden", golden)):
+        ok, reason = evaluate(pred, body)
+        baseline[label] = {"body": body, "pass": ok, "reason": reason}
+
+    runs = json.loads(ARMS["with_read_files"].read_text(encoding="utf-8-sig"))["rows"]
+    per_run = []
+    for row in runs:
+        if row["task_id"] != "ts_fix_type_error":
+            continue
+        path = "src/index.ts"
+        if row["condition"] == "verseshell_aci":
+            body, how = reconstruct_d(pristine, row.get("trajectory", []), path)
+        else:
+            body, how = reconstruct_a(pristine, row.get("trajectory", []), path)
+        entry = {
+            "condition": row["condition"],
+            "seed": row.get("seed"),
+            "recorded_success": row.get("success"),
+            "recorded_reason": row.get("success_reason"),
+            "reconstructed": body is not None,
+            "how": how,
+        }
+        if body is not None:
+            ok, reason = evaluate(pred, body)
+            entry.update({
+                "final_body": body,
+                "predicate_pass": ok,
+                "predicate_reason": reason,
+                "removes_type_error": "const x: string" not in body,
+                "keeps_intermediate_binding": "const x:" in body,
+            })
+        per_run.append(entry)
+
+    rejected_but_fixed = [r for r in per_run
+                          if r.get("reconstructed") and r.get("removes_type_error")
+                          and r.get("predicate_pass") is False]
+    runner_src = (BENCH / "runners" / "live_agent_loop.py").read_text(encoding="utf-8")
+    return {
+        "task": task["id"],
+        "prompt": task["prompt"],
+        "declared_success": pred,
+        "optional_verify": task.get("optional_verify"),
+        "baseline": baseline,
+        "per_run": per_run,
+        "runs_that_fix_the_error_but_fail_the_predicate": len(rejected_but_fixed),
+        "recorded_success_by_condition": {
+            condition: {
+                "runs": sum(1 for r in per_run if r["condition"] == condition),
+                "success": sum(1 for r in per_run
+                               if r["condition"] == condition and r["recorded_success"]),
+            }
+            for condition in ("verseshell_aci", "raw_shell")
+        },
+        "live_runner_skips_optional_verify": '"optional_verify": None' in runner_src,
+        "note": "the declared predicate is a literal golden-patch match; the behaviour the "
+                "prompt names (`tsc --noEmit`) is only declared as `optional_verify`, and the "
+                "live runner never executes it. The type-error judgement here is a language "
+                "fact about the annotation (`const x: number = a + b`), not a `tsc` run: the "
+                "fixture has no offline TypeScript to run.",
+    }
+
+
+# ── fixture facts ──
+
+def fixture_facts() -> dict:
+    out = {}
+    for fixture in ("ts_fix_type_error", "ts_package_script_fail"):
+        root = FIXTURES / fixture
+        files = sorted(p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file())
+        package = json.loads((root / "package.json").read_text(encoding="utf-8"))
+        out[fixture] = {
+            "files": files,
+            "has_node_modules": (root / "node_modules").exists(),
+            "declared_dev_dependencies": package.get("devDependencies") or {},
+            "declared_scripts": package.get("scripts") or {},
+            "task_file_present": (root / "TASK.md").exists(),
+        }
+    task = json.loads((TASKS / "ts_fix_type_error.json").read_text(encoding="utf-8"))
+    out["machine"] = {
+        "tsc_on_path": bool(os.environ.get("PATH")) and any(
+            (Path(d) / "tsc").is_file() or (Path(d) / "tsc.cmd").is_file()
+            for d in os.environ.get("PATH", "").split(os.pathsep) if d
+        ),
+        "fixture_local_typescript": (FIXTURES / "ts_fix_type_error" / "node_modules" / "typescript").exists(),
+    }
+    out["promise"] = {
+        "prompt": task["prompt"],
+        "optional_verify": task.get("optional_verify"),
+    }
+    return out
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--out", type=Path, default=None)
+    args = ap.parse_args(argv)
+
+    missing = [str(p) for p in ARMS.values() if not p.exists()]
+    if missing:
+        print(f"ERROR: missing {missing}", file=sys.stderr)
+        return 1
+
+    rows = json.loads(ARMS["with_read_files"].read_text(encoding="utf-8-sig"))["rows"]
+    shadow = path_shadow_facts()
+    shadowed = set(shadow["shadowed_names"])
+
+    chains = {task: chain_report(rows, task, shadowed) for task in TS_TASKS}
+    cf = counterfactual(rows, "ts_fix_type_error", shadowed)
+    report = {
+        "schema": "verseshell.ts-fixture-audit/v1",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "method": {
+            "inputs": [str(p.relative_to(ROOT)) for p in ARMS.values()],
+            "arm": "the chain table is computed on the with_read_files arm, the primary "
+                   "record; the paired control arm only sizes the effect of hiding a tool",
+            "classify": "exec steps on the ts tasks: bare npm-family argv[0] shadowed by an "
+                        "extensionless shim -> bare_name_launch; npm/npm-cli install -> "
+                        "toolchain_install; `tsc`/`node_modules` -> toolchain_missing when it "
+                        "failed and toolchain_verify when it succeeded",
+            "counterfactual": "keep one verification call, drop the rest",
+            "sensitivity": "replace only D's ts task with the counterfactual; A pays the same "
+                           "boundary inside its own commands, so the band is a lower bound on "
+                           "the post-fix step ratio",
+            "success": "mirror of check_success for the file predicates, replayed on the final "
+                       "file each run left behind",
+        },
+        "evidence": {"globs": EVIDENCE_GLOBS, "fingerprint": evidence_fingerprint(EVIDENCE_GLOBS)},
+        "fixture": fixture_facts(),
+        "path_shadow": shadow,
+        "acquisition_chain": chains,
+        "counterfactual": cf,
+        "sensitivity": sensitivity(rows, "ts_fix_type_error", cf),
+        "success_predicate": success_report(),
+    }
+
+    text = json.dumps(report, indent=2, ensure_ascii=False) + "\n"
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(text, encoding="utf-8", newline="\n")
+        print(f"wrote {args.out}")
+    else:
+        print(text)
+
+    print(f"shadowed bare names on PATH: {shadow['shadowed_names'] or 'none'}")
+    for task in TS_TASKS:
+        for arm, payload in chains[task]["arms"].items():
+            print(f"[{task} / {arm}] steps/run {payload['steps_per_run']} "
+                  f"tokens/run {payload['tokens_per_run']} | boundary calls/run "
+                  f"{payload['boundary_calls_per_run']} tokens/run {payload['boundary_tokens_per_run']}")
+            for klass, entry in payload["by_class"].items():
+                print(f"    {klass:<20} calls={entry['calls']:<3} tokens={entry['tokens']:<5} "
+                      f"({entry['calls_per_run']}/run, {entry['tokens_per_run']} tok/run)")
+    print(f"counterfactual ts_fix_type_error: {cf['observed_steps_per_run']} steps / "
+          f"{cf['observed_tokens_per_run']} tok -> {cf['cf_steps_per_run']} steps / "
+          f"{cf['cf_tokens_per_run']} tok")
+    s = report["sensitivity"]
+    print(f"sensitivity: step ratio {s['observed']['step_ratio']} -> "
+          f"{s['d_only_counterfactual']['step_ratio']} (band {s['step_ratio_band']}); "
+          f"token ratio {s['observed']['token_ratio']} -> "
+          f"{s['d_only_counterfactual']['token_ratio']} (band {s['token_ratio_band']}); "
+          f"conclusion flips: {s['conclusion_flips']}")
+    sp = report["success_predicate"]
+    print(f"success predicate: fixes rejected by the literal match = "
+          f"{sp['runs_that_fix_the_error_but_fail_the_predicate']}; recorded "
+          f"{json.dumps(sp['recorded_success_by_condition'], ensure_ascii=False)}; "
+          f"live runner skips optional_verify = {sp['live_runner_skips_optional_verify']}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

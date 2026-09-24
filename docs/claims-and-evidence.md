@@ -46,6 +46,8 @@ python tools/read_usage_audit.py --out eval/read_usage_audit.json
 python tools/exec_failure_breakdown.py --out eval/exec_failure_breakdown.json
 # C20：D 与 A 的步骤构成分解（确定性，无 API 调用）
 python tools/step_composition.py --out eval/step_composition.json
+# C21：ts fixture 的工具链获取链与成功谓词边界（确定性，无 API 调用）
+python tools/ts_fixture_audit.py --out eval/ts_fixture_audit.json
 ```
 
 ## 3. 声明表（C1–C20）
@@ -197,13 +199,13 @@ python tools/step_composition.py --out eval/step_composition.json
 
 | 维度 | 内容 |
 |------|------|
-| 主张原文 | 门禁依赖的十份已存测量（ACI-Bench mock 结果、live A/D 结果、L3 观察质检报告、跨 shell 基准、批量读取信封复算、exec token 分解、读取桶紧凑投影、读取用途审计、exec 失败分解、步骤构成分解）都记录了生成时被测代码面的 sha256 指纹，且该指纹与当前代码重算结果一致——也就是说这些数字描述的仍是当前实现，而不是两个月前的实现 |
-| 门槛数字 | 十份产物的记录指纹与重算指纹全部一致（`>= 1.00`） |
-| 复现命令 | `python tools/claim_gate.py`；重跑产物用 `python bench/aci/runners/run_suite.py --mode mock`、`python tools/jev_obs_judge.py`、`python tools/cross_shell_bench.py`、`python bench/aci/runners/live_agent_loop.py`（再 `merge_live_runs.py`）、`python tools/tf45_envelope_replay.py`、`python tools/exec_token_breakdown.py`、`python tools/read_path_breakdown.py`、`python tools/read_usage_audit.py`、`python tools/exec_failure_breakdown.py`、`python tools/step_composition.py` |
-| source | `bench/aci/results/latest.json`、`bench/aci/results/latest_live.json`、`eval/jev_obs_report.json`、`eval/cross_shell.json`、`eval/tf45_envelope_replay.json`、`eval/exec_token_breakdown.json`、`eval/read_path_breakdown.json`、`eval/read_usage_audit.json`、`eval/exec_failure_breakdown.json`、`eval/step_composition.json`、`tools/claim_gate.py` |
-| 样本量 / 日期 | 10 份产物；2026-09-24 |
-| 最近实测 | 10/10 fresh（PASS）。引入本声明前的产物（如 2026-07-27 的 bench 结果）没有指纹字段，会被直接判失败 |
-| 失效边界 | 只覆盖登记在 `tools/claim_gate.py::EVIDENCE_ARTIFACTS` 的十份产物；`live_ab_without_read_files.json` 是配对对照臂，按设计不进 C12（重跑时机由 C13 记录），但它是 `eval/exec_token_breakdown.json`、`eval/read_usage_audit.json`、`eval/exec_failure_breakdown.json` 与 `eval/step_composition.json` 的输入，所以那四份产物会随它一起更新。指纹是**文件内容哈希**，不含运行环境（OS / 工具链 / CPU），所以换机器重跑不会因环境不同被判陈旧——跨机器可比性仍受 C11 的边界限制；产物未记录指纹时判失败（fail-closed） |
+| 主张原文 | 门禁依赖的十一份已存测量（ACI-Bench mock 结果、live A/D 结果、L3 观察质检报告、跨 shell 基准、批量读取信封复算、exec token 分解、读取桶紧凑投影、读取用途审计、exec 失败分解、步骤构成分解、ts fixture 边界审计）都记录了生成时被测代码面的 sha256 指纹，且该指纹与当前代码重算结果一致——也就是说这些数字描述的仍是当前实现，而不是两个月前的实现 |
+| 门槛数字 | 十一份产物的记录指纹与重算指纹全部一致（`>= 1.00`） |
+| 复现命令 | `python tools/claim_gate.py`；重跑产物用 `python bench/aci/runners/run_suite.py --mode mock`、`python tools/jev_obs_judge.py`、`python tools/cross_shell_bench.py`、`python bench/aci/runners/live_agent_loop.py`（再 `merge_live_runs.py`）、`python tools/tf45_envelope_replay.py`、`python tools/exec_token_breakdown.py`、`python tools/read_path_breakdown.py`、`python tools/read_usage_audit.py`、`python tools/exec_failure_breakdown.py`、`python tools/step_composition.py`、`python tools/ts_fixture_audit.py` |
+| source | `bench/aci/results/latest.json`、`bench/aci/results/latest_live.json`、`eval/jev_obs_report.json`、`eval/cross_shell.json`、`eval/tf45_envelope_replay.json`、`eval/exec_token_breakdown.json`、`eval/read_path_breakdown.json`、`eval/read_usage_audit.json`、`eval/exec_failure_breakdown.json`、`eval/step_composition.json`、`eval/ts_fixture_audit.json`、`tools/claim_gate.py` |
+| 样本量 / 日期 | 11 份产物；2026-09-24 |
+| 最近实测 | 11/11 fresh（PASS）。引入本声明前的产物（如 2026-07-27 的 bench 结果）没有指纹字段，会被直接判失败 |
+| 失效边界 | 只覆盖登记在 `tools/claim_gate.py::EVIDENCE_ARTIFACTS` 的十一份产物；`live_ab_without_read_files.json` 是配对对照臂，按设计不进 C12（重跑时机由 C13 记录），但它是 `eval/exec_token_breakdown.json`、`eval/read_usage_audit.json`、`eval/exec_failure_breakdown.json` 与 `eval/step_composition.json` 的输入，所以那四份产物会随它一起更新。`eval/ts_fixture_audit.json` 的指纹额外覆盖 `src/process_command.rs`、`bench/aci/tasks/ts_*.json` 与两个 ts fixture——**改动 ts fixture 或裸名解析会让 live 证据与本产物一起被判陈旧**（C21 的边界因此是机检的，不靠约定）。指纹是**文件内容哈希**，不含运行环境（OS / 工具链 / CPU），所以换机器重跑不会因环境不同被判陈旧——跨机器可比性仍受 C11 的边界限制；产物未记录指纹时判失败（fail-closed） |
 | 状态 | 已证实 |
 
 ### C13 · live A/D 对比与 read_files A/B（真实模型）
@@ -216,7 +218,7 @@ python tools/step_composition.py --out eval/step_composition.json
 | source | `bench/aci/runners/live_agent_loop.py`、`bench/aci/runners/merge_live_runs.py`、`bench/aci/runners/splice_live_cells.py`、`src/process_command.rs`（C18 修复）、`bench/aci/results/latest_live.json`（with，3 次合并）、`bench/aci/results/live_ab_without_read_files.json`（同期对照，3 次合并）、`bench/aci/results/tf72/with_seed*.json`、`bench/aci/results/tf72/without_seed*.json`（逐 seed 原始行）、`bench/aci/tasks/*.json` |
 | 样本量 / 日期 | 10 任务 × 2 条件 × 3 seeds × 2 臂 = 120 行，`api_error` 0（3 格上游 500 已用 `splice_live_cells.py` 补跑）；2026-09-24（第五次复测，**C18 修复后**） |
 | 最近实测 | **本轮（C18 修复后）** with：A 0.6333 / 3.23 / 202.43；D 0.6333 / **4.53** / **177.27**（D/A **1.4025 / 0.8757**）。without：A 0.60 / 3.23 / 169.20；D 0.5333 / **4.07** / **139.50**（D/A 1.2601 / 0.8245）。`read_files` 净效应：工具 **+11.3%**、观察 token **+27.1%**。**逐轮 with 臂 D 绝对开销**：411.1 → 333.4 → 296.5 → 303.5 → **177.3**；A：168.6 → 197.4 → 170.5 → 168.9 → **202.4**。**本轮 exec 结构变化**：`exec.run` 由 76 次 / 5585 tok（73.49 tok/次）降到 **50 次 / 2121 tok（42.42 tok/次）**；失败 exec 由 45 次 / 4565 tok 降到 **21 次 / 1735 tok，且 Rust 任务归零**。**差距分桶（总 −17.17 tok/run，D 更省）**：exec **−74.63**、read +16.20、edit +27.77、meta +5.50。**上一轮（修复前，已被取代且不可比）**：with D 5.33 / 303.53（D/A 1.7591 / 1.7974）；without D 6.13 / 314.53（D/A 1.9774 / 1.8516） |
-| 失效边界 | ①**修复前的 D 侧数字受 C18 污染，不可与修复后比较**：2026-09-24 之前条件 D 在本机无法执行任何 cargo/rustc 命令（`cargo check` → exit 100 且报「0 error(s)」、`cargo build` 被读成 `+build` 工具链、`cargo --version` 打印 rustup 版本），而 A 走 `cmd` 不受影响。这直接解释了此前登记的高失败率、工具链探测与高 exec token；引用任何 2026-09-24 之前的 D 侧 exec 数字时必须同时引用 C18 与 C19。②**单模型**（`sn-glm-5-3-flash`），不可外推；该模型曾被端点下架又恢复，复测前必须先核对 `/v1/models`。③**名义确定性**：端点接受 `seed` 但不严格复现，3 次重复给的是经验区间而非确定性复算。④**D/A 比值受 A 侧漂移主导**：A 的代码五轮未动，其 with 臂 obs_tok 却在 168.6 / 197.4 / 170.5 / 168.9 / 202.4 之间摆动（约 ±9%），比值变化不宜单独作为趋势证据；可读的是 D 的绝对开销与确定性复算（C14 / C16）。⑤观察 token 用 `len(text)//4` 估算，不是真实 tokenizer。⑥成功判定是任务自带的文件谓词，不要求真的跑测试；**修复后** D 才真正具备跑通 cargo/pytest/tsc 的能力。⑦本机 `tsc` 缺失、裸 `pytest` 在 Windows 上因 console-script 的 `sys.path` 行为失败（规范形式 `python -m pytest`），两条件同样受限。⑧**与 mock 的 C1/C2 不可混用**：mock 的 D 直接套 GOLDEN 补丁，0.106/0.55 是评分管线自检，不是能力测量。⑨上游会间歇性 500（`parse response failed`）：本轮 6 次运行有 3 格受影响，已用 `splice_live_cells.py` 按 (task, condition, seed) 补跑后合并；合并脚本遇到 `api_error` 即 exit 2 |
+| 失效边界 | ①**修复前的 D 侧数字受 C18 污染，不可与修复后比较**：2026-09-24 之前条件 D 在本机无法执行任何 cargo/rustc 命令（`cargo check` → exit 100 且报「0 error(s)」、`cargo build` 被读成 `+build` 工具链、`cargo --version` 打印 rustup 版本），而 A 走 `cmd` 不受影响。这直接解释了此前登记的高失败率、工具链探测与高 exec token；引用任何 2026-09-24 之前的 D 侧 exec 数字时必须同时引用 C18 与 C19。②**单模型**（`sn-glm-5-3-flash`），不可外推；该模型曾被端点下架又恢复，复测前必须先核对 `/v1/models`。③**名义确定性**：端点接受 `seed` 但不严格复现，3 次重复给的是经验区间而非确定性复算。④**D/A 比值受 A 侧漂移主导**：A 的代码五轮未动，其 with 臂 obs_tok 却在 168.6 / 197.4 / 170.5 / 168.9 / 202.4 之间摆动（约 ±9%），比值变化不宜单独作为趋势证据；可读的是 D 的绝对开销与确定性复算（C14 / C16）。⑤观察 token 用 `len(text)//4` 估算，不是真实 tokenizer。⑥成功判定是任务自带的文件谓词，不要求真的跑测试；**修复后** D 才真正具备跑通 cargo/pytest/tsc 的能力。⑦本机 `tsc` 缺失（fixture 声明了 `typescript` 但工作区不带 `node_modules`）、裸 `pytest` 在 Windows 上因 console-script 的 `sys.path` 行为失败（规范形式 `python -m pytest`），两条件同样受限；本轮已把这条边界量化，并把它拆成「裸名 `npm`/`npx` 无法启动」（**产品侧**解析缺陷）与「缺 typescript」两半（C21，修复跟踪在 TF-0083/TF-0085）。⑧**与 mock 的 C1/C2 不可混用**：mock 的 D 直接套 GOLDEN 补丁，0.106/0.55 是评分管线自检，不是能力测量。⑨上游会间歇性 500（`parse response failed`）：本轮 6 次运行有 3 格受影响，已用 `splice_live_cells.py` 按 (task, condition, seed) 补跑后合并；合并脚本遇到 `api_error` 即 exit 2 |
 | 状态 | 已证实（本机单模型、3 次重复 × 2 臂；**C18 修复后的口径**） |
 
 ### C14 · 批量读取信封（紧凑摘要 + 批量预算，固定轨迹复算）
@@ -299,7 +301,7 @@ python tools/step_composition.py --out eval/step_composition.json
 | source | `tools/exec_failure_breakdown.py`、`bench/aci/results/latest_live.json`、`bench/aci/results/live_ab_without_read_files.json`、`eval/exec_failure_breakdown.json` |
 | 样本量 / 日期 | 修复前 with 臂 76 次 `exec.run`（45 次失败）；修复后 50 次（21 次失败）；2026-09-24 |
 | 最近实测 | 修复后 with：`exec.run` 50 次 / 2121 tok（39.9% of D），成功 29 次 @13.31、失败 **21 次 @82.62**（占 42.0% 的调用、81.8% 的 exec token），**100% first_diagnostic，repeat 与 toolchain_probe 均为 0**；失败集中在 `ts_fix_type_error`（9 次）、`python_edit_and_retest`（6）、`python_fix_pytest_fail`（3）、`ts_package_script_fail`（3），**Rust 任务全部归零**。without：`exec.run` 47 次 / 1957 tok，失败 22 次 @74.05（83.2%），同样 100% first_diagnostic。修复前同臂为 76 次 / 5585 tok、失败 45 次 @101.44（89.3% first_diagnostic + 10.7% toolchain_probe） |
-| 失效边界 | ①分类是**启发式**：`--version` / `+toolchain` 关键词判为探测，同命令第二次失败判为重复，因此 `repeat=0` 是「没有出现同命令二次失败」而非「模型从不试错」。②**修复前的数字受 C18 污染**：Rust 任务的失败里有相当部分由启动缺陷造成，不能当作「模型试错成本」的证据；引用时必须同时引用 C18。③`first_diagnostic` **不等于浪费**：这套任务的很多条目就是「跑一次失败、看诊断、再修」，所以它的占比高本身不是缺陷。④只对本模型、本任务集、当前轮次成立；换模型或改任务集必须重跑 |
+| 失效边界 | ①分类是**启发式**：`--version` / `+toolchain` 关键词判为探测，同命令第二次失败判为重复，因此 `repeat=0` 是「没有出现同命令二次失败」而非「模型从不试错」。**本轮 ts 任务的 9 次失败经 C21 分解后是 6 次裸名启动失败 + 3 次工具链缺失，都没有产出可操作诊断**——即 `first_diagnostic` 在这 9 次上只说明「是该命令第一次失败」，不说明「看到了值得看的失败」。②**修复前的数字受 C18 污染**：Rust 任务的失败里有相当部分由启动缺陷造成，不能当作「模型试错成本」的证据；引用时必须同时引用 C18。③`first_diagnostic` **不等于浪费**：这套任务的很多条目就是「跑一次失败、看诊断、再修」，所以它的占比高本身不是缺陷。④只对本模型、本任务集、当前轮次成立；换模型或改任务集必须重跑 |
 | 状态 | 已证实（本机单模型、诊断性） |
 
 ### C20 · D 与 A 的步骤构成（多出来的步骤从哪来，TF-0078）
@@ -312,8 +314,20 @@ python tools/step_composition.py --out eval/step_composition.json
 | source | `tools/step_composition.py`、`bench/aci/results/latest_live.json`、`bench/aci/results/live_ab_without_read_files.json`、`bench/aci/tasks/*.json`、`eval/step_composition.json` |
 | 样本量 / 日期 | with 臂 30 次 D 运行 / 30 次 A 运行；2026-09-24（C18 修复后） |
 | 最近实测 | D 4.533 步/run（170.60 tok）vs A 3.233 步/run（194.43 tok），比值 **1.402 / 0.877**；D 的 op 构成（30 次运行合计）`exec.run` 50、`file.replace_exact` 22、`file.view` 21、`repo.summary` 14、`file.read_many` 13、`file.write` 13、`repo.search` 3；A 的多合一命令 34/97（35.0%）；重复调用 D 12 次（8.8%，13.02 tok/run）、A 4 次（4.1%）；失败观察 leave-one-out：`error` 560、`diagnostics` 325、`stats` 103、`ok` 52、`stderr_summary` 48、`stdout_summary` 48、`exit_code` 34 字符 |
-| 失效边界 | ①**「重复调用」不等于浪费**：判据是 `(op, args)` 完全相同，看不到状态变化——编辑后重跑同一条验证命令会被计入，而那正是正确行为。因此 8.8% 是**上界**。②多合一的判定是**关键词启发式**（命令串里是否同时出现 read/run/write 提示词），不是语法分析。③`ts_fix_type_error` 的探测链根因是 **fixture 不含 `node_modules`**（任务 prompt 承诺 `tsc --noEmit succeeds`，但 fixture 只有 `package.json` / `tsconfig.json` / `src`），模型于是依次试 `npx tsc` → `node node_modules/typescript/bin/tsc` → `npm install` → `npm-cli.js`；这是任务集/环境边界，不是 ACI 缺陷，已由 TF-0082 记录。④失败观察的构成来自**代表性复现**（在 pristine fixture 上重跑失败命令），不是当轮轨迹的原样重放。⑤只对本模型、本任务集、本轮 120 行成立 |
+| 失效边界 | ①**「重复调用」不等于浪费**：判据是 `(op, args)` 完全相同，看不到状态变化——编辑后重跑同一条验证命令会被计入，而那正是正确行为。因此 8.8% 是**上界**。②多合一的判定是**关键词启发式**（命令串里是否同时出现 read/run/write 提示词），不是语法分析。③`ts_fix_type_error` 的探测链已由 TF-0082 逐类量化（C21）：3 次 D 运行共 **15 次 exec 调用 / 754 tok**，其中 **6 次 / 288 tok 是裸名 `npm` / `npx` 启动失败**（PATH 上无扩展名的 POSIX shim 抢在 `npm.cmd` 前面被选中，属**产品侧解析缺陷**，跟踪在 TF-0083）、**6 次 / 457 tok 是缺 `node_modules` 的失败与安装绕行**（fixture 声明了 `typescript` 但不带 `node_modules`，prompt 却承诺 `tsc --noEmit succeeds`）、**只有 3 次 / 9 tok 是任务真正需要的验证**。也就是说这条链里约 8 次「重复调用」并不全是环境开销，而是产品缺陷与环境边界各占一半；本轮**不改任务集**（判据见 C21 的敏感性分析：剔除后 D/A 步骤比 1.402 → 1.278、token 比 0.876 → 0.753，两条结论都不翻转，而改 fixture 会让 C12 直接把 live 证据判为陈旧、必须整轮重跑）。④失败观察的构成来自**代表性复现**（在 pristine fixture 上重跑失败命令），不是当轮轨迹的原样重放。⑤只对本模型、本任务集、本轮 120 行成立 |
 | 状态 | 已证实（本机单模型、诊断性） |
+
+### C21 · ts fixture 的两条边界：工具链获取链与成功谓词（TF-0082）
+
+| 维度 | 内容 |
+|------|------|
+| 主张原文 | 用已存 live 产物 + 本机文件事实做确定性分解（不调用 API）：①`ts_fix_type_error` 在条件 D 下 3 次运行共 **15 次 exec 调用 / 754 tok**，逐类为**裸名启动失败 6 次 / 288 tok**（PATH 上无扩展名的 POSIX `npm` / `npx` 抢在 `npm.cmd` 前面被选中，`exec.run` 拿它启动必然失败）、**缺 typescript 的失败 3 次 / 409 tok + 安装绕行 3 次 / 48 tok**、**任务真正需要的验证 3 次 / 9 tok**；②A 也付这条边界（3 次运行 11 次工具链相关调用 / 990 tok），但 raw shell 把读/跑/写折进一条命令，桶会重叠，只能当上界；③把 D 侧这条链剔除后，该任务由 7.333 步 / 427.0 tok 降到 3.333 步 / 178.7 tok，全量 D/A 步骤比 1.402 → **1.278**、token 比 0.876 → **0.753**，**两条结论都不翻转**；④同一 fixture 的成功谓词是**字面 golden 匹配**（`file_contains "return a + b"`），6 次运行里有 **5 次**把类型错误真的改掉了却判失败（D 0/3、A 1/3），而 prompt 承诺的行为只写在 `optional_verify` 里、live runner **从不执行**它（源码里硬编码 `"optional_verify": None`）；⑤`ts_package_script_fail` 本身不需要任何工具链，却仍 3/3 次先发一条注定失败的 `npm test`（144 tok）——这一半与 fixture 无关，纯产品侧 |
+| 门槛数字 | 无（诊断性测量，只登记事实，不设通过门槛） |
+| 复现命令 | `python tools/ts_fixture_audit.py --out eval/ts_fixture_audit.json`，再 `python tools/claim_gate.py` |
+| source | `tools/ts_fixture_audit.py`、`bench/aci/results/latest_live.json`、`bench/aci/tasks/ts_fix_type_error.json`、`bench/aci/tasks/ts_package_script_fail.json`、`bench/aci/fixtures/ts_fix_type_error/**`、`bench/aci/fixtures/ts_package_script_fail/**`、`bench/aci/runners/live_agent_loop.py`、`src/process_command.rs`、`eval/ts_fixture_audit.json` |
+| 样本量 / 日期 | 两个 ts 任务各 3 次 D 运行 + 3 次 A 运行（live with 臂，seeds 42/43/44）；2026-09-24 |
+| 最近实测 | D `ts_fix_type_error` 7.333 步 / 427.0 tok，其中边界 5.0 次调用 / 251.3 tok（裸名 2.0 次 / 96.0 tok、缺 typescript 1.0 次 / 136.3 tok、安装绕行 1.0 次 / 16.0 tok、真实验证 1.0 次 / 3.0 tok）；剔除边界后 3.333 步 / 178.7 tok。全量 D/A：步骤比 1.402 → 1.278（band [1.278, 1.402]）、token 比 0.876 → 0.753（band [0.753, 0.876]），`conclusion_flips=false`。成功谓词：**5 次「改对了却判失败」**（D 0/3、A 1/3），复算判定与记录成功逐条一致；`live_runner_skips_optional_verify=true`。本机被无扩展名 shim 遮蔽的裸名：`npm`、`npx`、`yarn`、`pnpm`、`corepack` |
+| 失效边界 | ①**裸名那一半是机器事实**（性质同 C18）：`resolve_candidate` 在 `candidate.is_file()` 为真时直接返回无扩展名文件，只有它不存在时才试 PATHEXT；这台机器的 nvm-for-Windows / nodejs 目录同时有无扩展名 `npm` 与 `npm.cmd`，所以必然选错。换一台只有 `.cmd` 的机器这一半不触发，产物会如实记为 `shadowed=false`。②**本工具不执行 tsc**：fixture 无离线 typescript、本机也无全局 `tsc`，所以「`const x: number = a + b` 是合法修复」是**语言事实**而不是实测；要用 `tsc --noEmit` 实测这批补丁，必须先落地离线工具链（TF-0085）。③A 侧分桶是上界：raw shell 把安装、写文件、验证折进一条命令，关键词分类拆不开。④「剔除边界」的反事实只改 D 的 ts 任务（A 也付这条边界，把 A 一起改会把比值推回观测值），所以 band 是**下界→观测值**的区间，不是点估计。⑤成功谓词是字符串级重放（typed ops 直接重放；raw shell 从 `python -c ...write(...)` 一行里解出字面量），不是重跑工作区。⑥只对本模型、本任务集、本轮 120 行成立 |
 
 ## 4. 与 README 主张的对应关系
 
@@ -330,6 +344,7 @@ python tools/step_composition.py --out eval/step_composition.json
 - C17 是**诊断**声明：它说明 D 的读取用在哪，用来决定该不该动提示词或工作区清单。引用时必须带上「`unreferenced` 不等于无用」与「token 是按路径均摊」两条边界，不得写成「D 有 25% 的读取是浪费」。
 - C18 是**平台缺陷**声明：它守住「启动名不被 canonicalize 破坏」这一条不变量，只对本机 rustup 软链 shim 生效。引用它时必须带上「硬链接/复制形态不覆盖」「无 symlink 权限时回归用例退化」两条边界；**更要紧的是**：引用 2026-09-24 之前的 D 侧 exec 数字时，必须同时引用 C18，因为那批数字是在缺陷态下测的。
 - C20 是**诊断**声明：它说明 D 多出来的步骤是 typed-op 拆分的结果，不是浪费。引用时必须带上「重复调用是上界」「多合一是启发式」两条边界，不得写成「D 有 8.8% 的步骤是浪费」。
+- C21 是**任务集边界**声明：它把 ts fixture 的获取链拆成产品侧（裸名 `npm`/`npx` 解析缺陷）与环境侧（fixture 不带 `node_modules`），并给出剔除后的 D/A 比值区间。引用时必须带上「裸名那一半是机器事实」「本工具不执行 tsc」「band 是下界→观测值」三条边界，不得写成「ts 任务 59% 的 token 是浪费」；它也不替代 C13 的成功率口径——成功谓词的缺口由 TF-0084 跟踪。
 - 新增任何对外数字时：先在本文件加一行，再在 `tools/claim_gate.py` 加对应门槛（或显式标注不设门槛），最后跑 `python tools/claim_gate.py`。
 
 ## 5. 口径统一规则（已按根策略裁决）

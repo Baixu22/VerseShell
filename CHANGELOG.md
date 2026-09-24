@@ -3,6 +3,19 @@
 ## Unreleased
 
 ### Added
+- Claim C21 + `tools/ts_fixture_audit.py`: a deterministic audit of the two
+  boundaries around `ts_fix_type_error`. It splits the task's toolchain chain
+  (15 `exec.run` calls / 754 tokens over three D runs) into **6 calls / 288
+  tokens lost to bare `npm` / `npx`** — this machine has an extensionless POSIX
+  shim on PATH, `resolve_candidate` returns it before trying PATHEXT, and Win32
+  cannot launch it — **6 calls / 457 tokens** spent on the missing
+  `node_modules` plus the install workaround, and the **3 calls / 9 tokens** the
+  task actually needs. Dropping D's share moves the D/A step ratio 1.402 → 1.278
+  and the token ratio 0.876 → 0.753 without flipping either conclusion, so the
+  task set is deliberately left unchanged and the boundary is registered
+  instead. The same audit re-scores the declared success predicate against the
+  file each run left behind: it is a literal GOLDEN match, and **5 of 6 runs
+  fixed the type error yet failed it** (D 0/3, A 1/3).
 - `file.read_many` on-demand windows: `windows[]` gives each file its own
   `{start_line, window}`, and `max_total_lines` (default 240) bounds the whole
   batch. An entry cut by its own window is `truncated`, one that no longer fits
