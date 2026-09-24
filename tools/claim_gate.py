@@ -19,6 +19,7 @@ Gated claims (thresholds mirror docs/claims-and-evidence.md exactly):
   C14 batch-read envelope: compact digest + batch budget hold on a frozen-trajectory replay
   C16 compact read projection: it actually shrinks the model-visible read observation
   C18 exec launches a name-dispatching shim (rustup's cargo/rustc) by its invoked name
+  C22 exec resolves a bare npm-family name to a launchable PATHEXT candidate
 C5 (learning cost) has no deterministic metric yet: status-only in evidence.json.
 C13 (live A/D), C15 (where D's extra tokens come from), C17 (what the reads are for),
 C19 (what the failed execs are), C20 (where D's extra steps come from) and C21 (the ts
@@ -59,6 +60,7 @@ THRESHOLDS = {
     "C14": {"desc": "batch-read envelope replay: compact digest saving + bounded batch budget", "op": ">=", "value": 0.15},
     "C16": {"desc": "compact read projection saving on a frozen trajectory", "op": ">=", "value": 0.10},
     "C18": {"desc": "exec launches a name-dispatching shim by its invoked name", "op": "==", "value": 1.0},
+    "C22": {"desc": "exec resolves a bare npm-family name to a launchable PATHEXT candidate", "op": "==", "value": 1.0},
 }
 
 # Stored measurements the gate relies on. Each must record the content fingerprint
@@ -313,6 +315,33 @@ def shim_launch_claim(report: dict) -> dict:
             "cargo_check_succeeds_on_fixed_fixture": probe.get("cargo_check_succeeds_on_fixed_fixture"),
             "commands": probe.get("commands"),
             "shims": [f for f in facts if isinstance(f, dict) and f.get("is_symlink")],
+        },
+    }
+
+
+def bare_name_claim(report: dict) -> dict:
+    """C22 reads the bare-name probe: a bare npm-family name must actually start.
+
+    npm-for-Windows ships an extensionless `npm` (a `#!/bin/sh` script) beside
+    `npm.cmd`, and `resolve_candidate` returned the bare file first — so
+    `exec.run(["npm", ...])` failed with `E_EXEC_SPAWN` while raw shell (which
+    spawns through `cmd`) worked, costing condition D a wasted call on every npm
+    task. Fail-closed: the gate also requires that this machine actually shadows
+    such a name, so a machine without one reports not-exercised rather than a
+    vacuous pass.
+    """
+    probe = report.get("bare_name_probe") or {}
+    facts = report.get("bare_name_facts") or {}
+    shadowed = list(facts.get("shadowed") or [])
+    passed = bool(probe.get("pass")) and bool(shadowed) and bool(probe.get("triggered"))
+    return {
+        "value": 1.0 if passed else 0.0,
+        "pass": passed,
+        "detail": {
+            "shadowed": shadowed,
+            "triggered": probe.get("triggered"),
+            "commands": probe.get("commands"),
+            "skipped": probe.get("skipped"),
         },
     }
 
@@ -652,6 +681,37 @@ def main(argv: list[str] | None = None) -> int:
     else:
         claims.append({
             "id": "C18", "claim": THRESHOLDS["C18"]["desc"],
+            "threshold": "== 1.00", "value": None, "pass": False,
+            "mode": "deterministic", "measured_at": now,
+            "command": "python tools/exec_failure_breakdown.py --out eval/exec_failure_breakdown.json",
+            "source": ["tools/exec_failure_breakdown.py"],
+            "notes": f"missing evidence artifact: {shim_path}",
+        })
+
+    # ── C22: a bare npm-family name must resolve to a launchable image ──
+    if shim_path.exists():
+        bare_report = json.loads(shim_path.read_text(encoding="utf-8"))
+        c22 = bare_name_claim(bare_report)
+        claims.append({
+            "id": "C22", "claim": THRESHOLDS["C22"]["desc"],
+            "threshold": "== 1.00", "value": c22["value"], "pass": c22["pass"],
+            "mode": "deterministic", "sample_size": len(c22["detail"]["commands"] or {}),
+            "measured_at": bare_report.get("generated_at"),
+            "command": "python tools/exec_failure_breakdown.py --out eval/exec_failure_breakdown.json",
+            "source": ["tools/exec_failure_breakdown.py", "src/process_command.rs",
+                       "eval/exec_failure_breakdown.json"],
+            "detail": c22["detail"],
+            "notes": "an extensionless sibling on PATH is normally a POSIX shell script that Win32 "
+                     "cannot launch (`npm` sits next to `npm.cmd`), and `cmd.exe` resolves a bare "
+                     "name through PATHEXT. Resolving the bare file first made every "
+                     "`exec.run([\"npm\", ...])` / `[\"npx\", ...]` fail with `E_EXEC_SPAWN` while raw "
+                     "shell was unaffected — it cost condition D a wasted call plus ~48 observation "
+                     "tokens on each npm task. Fail-closed: the gate also requires that this machine "
+                     "actually shadows such a name",
+        })
+    else:
+        claims.append({
+            "id": "C22", "claim": THRESHOLDS["C22"]["desc"],
             "threshold": "== 1.00", "value": None, "pass": False,
             "mode": "deterministic", "measured_at": now,
             "command": "python tools/exec_failure_breakdown.py --out eval/exec_failure_breakdown.json",

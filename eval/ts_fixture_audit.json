@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.ts-fixture-audit/v1",
-  "generated_at": "2026-09-24T12:09:40.109716+00:00",
+  "generated_at": "2026-09-24T12:29:59.085890+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
@@ -22,7 +22,7 @@
       "bench/aci/results/latest_live.json",
       "tools/ts_fixture_audit.py"
     ],
-    "fingerprint": "14246ddbed8a79c256514a35d767e6f3a8b57968fa75fa1b6a0dd9c92e68447f"
+    "fingerprint": "a37fadc1302a32a7f76343dee5cbaec004bb3dde740a31e90170b91b377c6024"
   },
   "fixture": {
     "ts_fix_type_error": {

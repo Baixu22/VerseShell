@@ -1,7 +1,7 @@
 {
   "schema": "verseshell.jev-obs-report/v1",
-  "generated_at": "2026-09-24T10:57:21.988530+00:00",
-  "git_rev": "377169377c9c5a61eba729f3640fd14e311be03d",
+  "generated_at": "2026-09-24T12:27:38.717092+00:00",
+  "git_rev": "6f6c223a6522014d89684925271797fee28f7bc4",
   "evidence": {
     "globs": [
       "src/**/*.rs",
@@ -10,7 +10,7 @@
       "examples/eval_metrics.rs",
       "tools/jev_obs_judge.py"
     ],
-    "fingerprint": "ccba70014a652bdbb0638f153cd2c912b04980db9f692897564edf80bb6d2f71"
+    "fingerprint": "4259e18183e505dad33a1a25af9d5f276be6fa85f318a25ce311899c8e731abf"
   },
   "generator": "tools/jev_obs_judge.py",
   "mode": "heuristic",

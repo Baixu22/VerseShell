@@ -62,6 +62,20 @@
   Single-run variance is large, so the direction is the finding, not the ratio.
 
 ### Fixed
+- **`exec.run` could not launch a bare `npm` / `npx`.** npm-for-Windows ships an
+  extensionless `npm` (a `#!/bin/sh` script) beside `npm.cmd`, and
+  `resolve_candidate` returned the bare file whenever it existed — only then trying
+  PATHEXT. Win32 cannot launch the shell script, so `exec.run(["npm", ...])` and
+  `["npx", ...]` failed with `E_EXEC_SPAWN` while raw shell (which spawns through
+  `cmd`) worked: condition D paid a wasted call plus ~48 observation tokens on
+  every npm task, and `ts_package_script_fail` failed one `npm test` in all three
+  seeds before falling back to `npm.cmd`. The resolver now tries PATHEXT first for
+  a candidate without an extension and keeps the extensionless file as a fallback.
+  Claim C22 re-runs every bare name that PATH shadows (plus its `.cmd` control)
+  through the real `exec.run`, fail-closed. Verified: `npm` / `npx` / `yarn` /
+  `pnpm` / `corepack --version` all exit 0, and C18's rustup shim invariant still
+  holds. The stored live evidence predates the fix, so C12 reports it stale until
+  the baseline is re-measured — no D-side live number may be quoted before that.
 - **Re-measured after the shim fix** (120 rows, `api_error` 0, seeds 42/43/44):
   condition D now uses **177.3 observation tokens per run against raw shell's
   202.4** — a D/A token ratio of **0.876**, the first reading below 1 in five

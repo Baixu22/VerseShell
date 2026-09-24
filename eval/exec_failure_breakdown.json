@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.exec-failure-breakdown/v1",
-  "generated_at": "2026-09-24T11:01:24.406941+00:00",
+  "generated_at": "2026-09-24T12:23:00.223486+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
@@ -11,7 +11,8 @@
       "repeat": "the same command failing again later in the run (trial and error)",
       "toolchain_probe": "version / `+toolchain` probing"
     },
-    "shim_probe": "re-runs `cargo --version` / `cargo check` / `rustc --version` through the real exec.run on the fixed rust fixture: a name-dispatching shim that was launched by its canonicalised target answers as rustup instead"
+    "shim_probe": "re-runs `cargo --version` / `cargo check` / `rustc --version` through the real exec.run on the fixed rust fixture: a name-dispatching shim that was launched by its canonicalised target answers as rustup instead",
+    "bare_name_probe": "re-runs each bare npm-family name that PATH shadows with an extensionless file, plus its `.cmd` control, through the real exec.run: a bare name that resolves to the extensionless script cannot start"
   },
   "evidence": {
     "globs": [
@@ -22,7 +23,7 @@
       "bench/aci/results/live_ab_without_read_files.json",
       "tools/exec_failure_breakdown.py"
     ],
-    "fingerprint": "383eba379329d53857b778dffe3c6db196ca2c802a1e16b267f61853358d0f49"
+    "fingerprint": "70855b9e4457925f11419a363227ea9dc7a8d44d5964b7476a24470aa4fe78f1"
   },
   "shim_facts": [
     {
@@ -77,7 +78,7 @@
       "cargo check": {
         "ok": true,
         "exit_code": 0,
-        "output_head": "Checking bench_fix v0.1.0 (C:\\Users\\27933\\AppData\\Local\\Temp\\tf45-replay-rust_fix_compile_error-nofoedzs)\n    Finished `",
+        "output_head": "Checking bench_fix v0.1.0 (C:\\Users\\27933\\AppData\\Local\\Temp\\tf45-replay-rust_fix_compile_error-f9mclr6q)\n    Finished `",
         "answered_as_rustup": false
       },
       "rustc --version": {
@@ -89,6 +90,193 @@
     },
     "cargo_dispatches_correctly": true,
     "cargo_check_succeeds_on_fixed_fixture": true,
+    "pass": true
+  },
+  "bare_name_facts": {
+    "names": {
+      "npm": [
+        {
+          "dir": "C:\\Program Files\\nodejs",
+          "bare_file": "C:\\Program Files\\nodejs\\npm",
+          "bare_is_symlink": false,
+          "siblings": [
+            "npm.cmd",
+            "npm.ps1"
+          ],
+          "shadowed": true
+        },
+        {
+          "dir": "C:\\Users\\27933\\AppData\\Roaming\\npm",
+          "bare_file": "C:\\Users\\27933\\AppData\\Roaming\\npm\\npm",
+          "bare_is_symlink": false,
+          "siblings": [
+            "npm.cmd",
+            "npm.ps1"
+          ],
+          "shadowed": true
+        },
+        {
+          "dir": "C:\\Users\\27933\\AppData\\Roaming\\npm",
+          "bare_file": "C:\\Users\\27933\\AppData\\Roaming\\npm\\npm",
+          "bare_is_symlink": false,
+          "siblings": [
+            "npm.cmd",
+            "npm.ps1"
+          ],
+          "shadowed": true
+        }
+      ],
+      "npx": [
+        {
+          "dir": "C:\\Program Files\\nodejs",
+          "bare_file": "C:\\Program Files\\nodejs\\npx",
+          "bare_is_symlink": false,
+          "siblings": [
+            "npx.cmd",
+            "npx.ps1"
+          ],
+          "shadowed": true
+        },
+        {
+          "dir": "C:\\Users\\27933\\AppData\\Roaming\\npm",
+          "bare_file": "C:\\Users\\27933\\AppData\\Roaming\\npm\\npx",
+          "bare_is_symlink": false,
+          "siblings": [
+            "npx.cmd",
+            "npx.ps1"
+          ],
+          "shadowed": true
+        },
+        {
+          "dir": "C:\\Users\\27933\\AppData\\Roaming\\npm",
+          "bare_file": "C:\\Users\\27933\\AppData\\Roaming\\npm\\npx",
+          "bare_is_symlink": false,
+          "siblings": [
+            "npx.cmd",
+            "npx.ps1"
+          ],
+          "shadowed": true
+        }
+      ],
+      "yarn": [
+        {
+          "dir": "C:\\Users\\27933\\AppData\\Roaming\\npm",
+          "bare_file": "C:\\Users\\27933\\AppData\\Roaming\\npm\\yarn",
+          "bare_is_symlink": false,
+          "siblings": [
+            "yarn.cmd",
+            "yarn.ps1",
+            "yarnpkg",
+            "yarnpkg.cmd",
+            "yarnpkg.ps1"
+          ],
+          "shadowed": true
+        },
+        {
+          "dir": "C:\\Users\\27933\\AppData\\Roaming\\npm",
+          "bare_file": "C:\\Users\\27933\\AppData\\Roaming\\npm\\yarn",
+          "bare_is_symlink": false,
+          "siblings": [
+            "yarn.cmd",
+            "yarn.ps1",
+            "yarnpkg",
+            "yarnpkg.cmd",
+            "yarnpkg.ps1"
+          ],
+          "shadowed": true
+        }
+      ],
+      "pnpm": [
+        {
+          "dir": "C:\\Users\\27933\\AppData\\Roaming\\npm",
+          "bare_file": "C:\\Users\\27933\\AppData\\Roaming\\npm\\pnpm",
+          "bare_is_symlink": false,
+          "siblings": [
+            "pnpm.cmd",
+            "pnpm.cmd.codex-bak",
+            "pnpm.ps1",
+            "pnpm.ps1.codex-bak"
+          ],
+          "shadowed": true
+        },
+        {
+          "dir": "C:\\Users\\27933\\AppData\\Local\\pnpm\\bin",
+          "bare_file": "C:\\Users\\27933\\AppData\\Local\\pnpm\\bin\\pnpm",
+          "bare_is_symlink": false,
+          "siblings": [
+            "pnpm.CMD"
+          ],
+          "shadowed": true
+        },
+        {
+          "dir": "C:\\Users\\27933\\AppData\\Roaming\\npm",
+          "bare_file": "C:\\Users\\27933\\AppData\\Roaming\\npm\\pnpm",
+          "bare_is_symlink": false,
+          "siblings": [
+            "pnpm.cmd",
+            "pnpm.cmd.codex-bak",
+            "pnpm.ps1",
+            "pnpm.ps1.codex-bak"
+          ],
+          "shadowed": true
+        }
+      ],
+      "corepack": [
+        {
+          "dir": "C:\\Program Files\\nodejs",
+          "bare_file": "C:\\Program Files\\nodejs\\corepack",
+          "bare_is_symlink": false,
+          "siblings": [
+            "corepack.cmd"
+          ],
+          "shadowed": true
+        }
+      ]
+    },
+    "shadowed": [
+      "corepack",
+      "npm",
+      "npx",
+      "pnpm",
+      "yarn"
+    ],
+    "note": "an extensionless sibling is normally a POSIX shell script that Win32 cannot launch, so a bare name must resolve through PATHEXT"
+  },
+  "bare_name_probe": {
+    "triggered": true,
+    "commands": {
+      "corepack": {
+        "ok": true,
+        "exit_code": 0,
+        "error_code": null,
+        "output_head": "0.34.6"
+      },
+      "npm": {
+        "ok": true,
+        "exit_code": 0,
+        "error_code": null,
+        "output_head": "11.11.0"
+      },
+      "npx": {
+        "ok": true,
+        "exit_code": 0,
+        "error_code": null,
+        "output_head": "11.11.0"
+      },
+      "pnpm": {
+        "ok": true,
+        "exit_code": 0,
+        "error_code": null,
+        "output_head": "10.33.2"
+      },
+      "yarn": {
+        "ok": true,
+        "exit_code": 0,
+        "error_code": null,
+        "output_head": "1.22.22"
+      }
+    },
+    "skipped": {},
     "pass": true
   },
   "with_read_files": {

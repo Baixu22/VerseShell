@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""TF-0072: decompose D's failed `exec.run` calls, and pin the shim launch defect.
+"""TF-0072: decompose D's failed `exec.run` calls, and pin the exec launch defects.
 
-Two questions:
+Three questions:
 
   * What are the failed exec calls? Classified as `first_diagnostic` (the first
     failing run of that command in a run — for these tasks seeing the failure *is*
@@ -16,6 +16,13 @@ Two questions:
     printed the rustup version. The `shim_probe` section re-runs those commands
     through `exec.run`, so a regression fails this tool (and claim C18) instead of
     quietly corrupting the live numbers again.
+  * Does a bare npm-family name resolve to a launchable image? npm-for-Windows
+    ships an extensionless `npm` (a `#!/bin/sh` script) beside `npm.cmd`;
+    resolving the bare file first made `exec.run(["npm", ...])` fail with
+    `E_EXEC_SPAWN` while raw shell (through `cmd`) worked, costing condition D a
+    wasted call on every npm task. The `bare_name_probe` section re-runs each
+    shadowed name and its `.cmd` control through `exec.run`, so claim C22 is
+    machine-checked rather than assumed.
 
 Usage:
     python tools/exec_failure_breakdown.py --out eval/exec_failure_breakdown.json
@@ -29,6 +36,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -47,6 +55,7 @@ ARMS = {
 }
 PROBE_HINTS = ("--version", " version", "+stable", "+1.", "rustup", "where ", "which ")
 SHIM_NAMES = ("cargo", "rustc", "cargo-clippy", "rustfmt")
+BARE_SHIM_NAMES = ("npm", "npx", "yarn", "pnpm", "corepack")
 EVIDENCE_GLOBS = [
     "src/process_command.rs",
     "src/process_runner.rs",
@@ -207,6 +216,86 @@ def shim_probe() -> dict:
     }
 
 
+def bare_name_facts() -> dict:
+    """Which bare npm-family names are shadowed by an extensionless file on PATH?"""
+    names: dict[str, list[dict]] = {}
+    for name in BARE_SHIM_NAMES:
+        hits = []
+        for directory in os.environ.get("PATH", "").split(os.pathsep):
+            if not directory:
+                continue
+            bare = Path(directory) / name
+            if not bare.is_file():
+                continue
+            siblings = sorted(
+                p.name for p in Path(directory).iterdir()
+                if p.is_file() and p.name.lower() != name.lower()
+                and p.name.lower().startswith(name.lower())
+            )
+            hits.append({
+                "dir": directory,
+                "bare_file": str(bare),
+                "bare_is_symlink": bare.is_symlink(),
+                "siblings": siblings,
+                "shadowed": any(s.lower().endswith((".cmd", ".exe", ".bat")) for s in siblings),
+            })
+        names[name] = hits
+    shadowed = sorted(n for n, hits in names.items() if any(h["shadowed"] for h in hits))
+    return {
+        "names": names,
+        "shadowed": shadowed,
+        "note": "an extensionless sibling is normally a POSIX shell script that Win32 "
+                "cannot launch, so a bare name must resolve through PATHEXT",
+    }
+
+
+def bare_name_probe(shadowed: list[str]) -> dict:
+    """Re-run each shadowed bare name, and its `.cmd` control, through `exec.run`.
+
+    The control is the same command spelled with the PATHEXT suffix: if that fails
+    too, the tool is broken for another reason and the name is skipped rather than
+    blamed on resolution. Fail-closed: if no shadowed-and-working name exists the
+    probe reports `triggered=false` and cannot pass vacuously.
+    """
+    if not shadowed:
+        return {
+            "triggered": False,
+            "pass": False,
+            "reason": "no extensionless shim shadows a bare npm-family name on this PATH",
+        }
+    ws = Path(tempfile.mkdtemp(prefix="verseshell-bare-"))
+    commands: dict[str, dict] = {}
+    skipped: dict[str, str] = {}
+    try:
+        for name in shadowed:
+            control = run_op("exec.run",
+                             {"argv": [f"{name}.cmd", "--version"], "cwd": ".", "profile": "none"},
+                             ws)
+            control_data = control.get("data") or {}
+            if not (control.get("ok") and control_data.get("exit_code") == 0):
+                skipped[name] = "the `.cmd` control did not run, so this name is not attributable"
+                continue
+            bare = run_op("exec.run",
+                          {"argv": [name, "--version"], "cwd": ".", "profile": "none"}, ws)
+            data = bare.get("data") or {}
+            text = ""
+            for stream in ("stdout", "stderr"):
+                value = data.get(stream)
+                if isinstance(value, dict) and value.get("text"):
+                    text += value["text"]
+            error = bare.get("error")
+            commands[name] = {
+                "ok": bare.get("ok"),
+                "exit_code": data.get("exit_code"),
+                "error_code": error.get("code") if isinstance(error, dict) else None,
+                "output_head": text.strip()[:80],
+            }
+    finally:
+        shutil.rmtree(ws, ignore_errors=True)
+    passed = bool(commands) and all(c["ok"] and c.get("exit_code") == 0 for c in commands.values())
+    return {"triggered": bool(commands), "commands": commands, "skipped": skipped, "pass": bool(passed)}
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=None)
@@ -221,6 +310,8 @@ def main(argv: list[str] | None = None) -> int:
             for name, path in ARMS.items()}
     facts = shim_facts()
     probe = shim_probe()
+    bare_facts = bare_name_facts()
+    bare_probe = bare_name_probe(bare_facts["shadowed"])
 
     report = {
         "schema": "verseshell.exec-failure-breakdown/v1",
@@ -236,10 +327,16 @@ def main(argv: list[str] | None = None) -> int:
             "shim_probe": "re-runs `cargo --version` / `cargo check` / `rustc --version` through the "
                           "real exec.run on the fixed rust fixture: a name-dispatching shim that was "
                           "launched by its canonicalised target answers as rustup instead",
+            "bare_name_probe": "re-runs each bare npm-family name that PATH shadows with an "
+                               "extensionless file, plus its `.cmd` control, through the real "
+                               "exec.run: a bare name that resolves to the extensionless script "
+                               "cannot start",
         },
         "evidence": {"globs": EVIDENCE_GLOBS, "fingerprint": evidence_fingerprint(EVIDENCE_GLOBS)},
         "shim_facts": facts,
         "shim_probe": probe,
+        "bare_name_facts": bare_facts,
+        "bare_name_probe": bare_probe,
         "with_read_files": failures(rows["with_read_files"]),
         "without_read_files": failures(rows["without_read_files"]),
     }
@@ -275,7 +372,15 @@ def main(argv: list[str] | None = None) -> int:
     print(f"    cargo dispatches correctly={probe['cargo_dispatches_correctly']} "
           f"cargo check on fixed fixture={probe['cargo_check_succeeds_on_fixed_fixture']} "
           f"pass={probe['pass']}")
-    return 0 if probe["pass"] else 1
+    print("bare-name resolution:")
+    print(f"    shadowed on PATH: {bare_facts['shadowed'] or 'none'}")
+    for name, entry in bare_probe.get("commands", {}).items():
+        print(f"    {name:<9} ok={entry['ok']} exit={entry['exit_code']} "
+              f"error={entry['error_code']} out={entry['output_head'][:40]!r}")
+    for name, reason in bare_probe.get("skipped", {}).items():
+        print(f"    {name:<9} skipped: {reason}")
+    print(f"    triggered={bare_probe['triggered']} pass={bare_probe['pass']}")
+    return 0 if (probe["pass"] and bare_probe["pass"]) else 1
 
 
 if __name__ == "__main__":

@@ -42,7 +42,7 @@ python tools/exec_token_breakdown.py --out eval/exec_token_breakdown.json
 python tools/read_path_breakdown.py --out eval/read_path_breakdown.json
 # C17：读取用途审计（读了但之后从未引用的是什么，确定性，无 API 调用）
 python tools/read_usage_audit.py --out eval/read_usage_audit.json
-# C18/C19：exec 失败分解与 shim 启动回归检测（确定性）
+# C18/C19/C22：exec 失败分解、shim 启动与裸名解析回归检测（确定性）
 python tools/exec_failure_breakdown.py --out eval/exec_failure_breakdown.json
 # C20：D 与 A 的步骤构成分解（确定性，无 API 调用）
 python tools/step_composition.py --out eval/step_composition.json
@@ -50,7 +50,7 @@ python tools/step_composition.py --out eval/step_composition.json
 python tools/ts_fixture_audit.py --out eval/ts_fixture_audit.json
 ```
 
-## 3. 声明表（C1–C20）
+## 3. 声明表（C1–C22）
 
 ### C1 · 观察 token 比（mock bench）
 
@@ -190,8 +190,8 @@ python tools/ts_fixture_audit.py --out eval/ts_fixture_audit.json
 | 门槛数字 | `worst_ratio_ae_over_pwsh <= 0.50` 且所有命令退出码为 0 |
 | 复现命令 | `python tools/cross_shell_bench.py`（写 `eval/cross_shell.json`），再 `python tools/claim_gate.py` |
 | source | `tools/cross_shell_bench.py`、`eval/cross_shell.json`、`README.md`、`bench_final.sh` |
-| 样本量 / 日期 | 5 项操作 × 3 shell（Bash 无 Disk 等价命令，故 4 项）× 20 次 + 3 次预热；2026-09-23 |
-| 最近实测 | worst **0.2301**（CPU info，4.3x）；Disk 0.0278（36.0x）、List dir 0.0434（23.1x）、Read file 0.0761（13.1x）、Pipeline 1K 0.0671（14.9x）；`all_commands_ok=true`。2026-09-24 重测（改 `src/process_command.rs` 后按 C12 重跑）；上一次产物为 0.2207，README 表格已同步 |
+| 样本量 / 日期 | 5 项操作 × 3 shell（Bash 无 Disk 等价命令，故 4 项）× 20 次 + 3 次预热；2026-09-24 |
+| 最近实测 | worst **0.2535**（CPU info，3.9x）；Disk 0.0310（32.3x）、List dir 0.0459（21.8x）、Read file 0.0707（14.2x）、Pipeline 1K 0.0637（15.7x）；`all_commands_ok=true`。2026-09-24 重测（改 `src/process_command.rs::resolve_candidate` 后按 C12 重跑）；上一次产物为 0.2301（CPU info 291.2ms / 4.3x），README 表格已同步。**注意**：本次 D 侧数字与 C13 的 live 基线不是同一次测量，live 证据尚未重跑（见 C12） |
 | 失效边界 | 墙钟测量，含进程启动开销，只代表本机与当前工具链（AMD Ryzen 7 7745HX / Windows PowerShell 5.1 `-NoProfile` / Git Bash）；不测吞吐、内存、并发；门禁读的是**已存产物** `eval/cross_shell.json`，改动热路径后必须重跑 runner 才会更新（C12 会判陈旧）；每次重跑数字都会小幅漂移，README 表格必须与产物逐行一致（由 C10 检查）；README 里旧的 v0.5.1 数字（3.7x / 14.4x / …）已作废并被本声明取代 |
 | 状态 | 已证实（本机单次测量） |
 
@@ -327,7 +327,21 @@ python tools/ts_fixture_audit.py --out eval/ts_fixture_audit.json
 | source | `tools/ts_fixture_audit.py`、`bench/aci/results/latest_live.json`、`bench/aci/tasks/ts_fix_type_error.json`、`bench/aci/tasks/ts_package_script_fail.json`、`bench/aci/fixtures/ts_fix_type_error/**`、`bench/aci/fixtures/ts_package_script_fail/**`、`bench/aci/runners/live_agent_loop.py`、`src/process_command.rs`、`eval/ts_fixture_audit.json` |
 | 样本量 / 日期 | 两个 ts 任务各 3 次 D 运行 + 3 次 A 运行（live with 臂，seeds 42/43/44）；2026-09-24 |
 | 最近实测 | D `ts_fix_type_error` 7.333 步 / 427.0 tok，其中边界 5.0 次调用 / 251.3 tok（裸名 2.0 次 / 96.0 tok、缺 typescript 1.0 次 / 136.3 tok、安装绕行 1.0 次 / 16.0 tok、真实验证 1.0 次 / 3.0 tok）；剔除边界后 3.333 步 / 178.7 tok。全量 D/A：步骤比 1.402 → 1.278（band [1.278, 1.402]）、token 比 0.876 → 0.753（band [0.753, 0.876]），`conclusion_flips=false`。成功谓词：**5 次「改对了却判失败」**（D 0/3、A 1/3），复算判定与记录成功逐条一致；`live_runner_skips_optional_verify=true`。本机被无扩展名 shim 遮蔽的裸名：`npm`、`npx`、`yarn`、`pnpm`、`corepack` |
-| 失效边界 | ①**裸名那一半是机器事实**（性质同 C18）：`resolve_candidate` 在 `candidate.is_file()` 为真时直接返回无扩展名文件，只有它不存在时才试 PATHEXT；这台机器的 nvm-for-Windows / nodejs 目录同时有无扩展名 `npm` 与 `npm.cmd`，所以必然选错。换一台只有 `.cmd` 的机器这一半不触发，产物会如实记为 `shadowed=false`。②**本工具不执行 tsc**：fixture 无离线 typescript、本机也无全局 `tsc`，所以「`const x: number = a + b` 是合法修复」是**语言事实**而不是实测；要用 `tsc --noEmit` 实测这批补丁，必须先落地离线工具链（TF-0085）。③A 侧分桶是上界：raw shell 把安装、写文件、验证折进一条命令，关键词分类拆不开。④「剔除边界」的反事实只改 D 的 ts 任务（A 也付这条边界，把 A 一起改会把比值推回观测值），所以 band 是**下界→观测值**的区间，不是点估计。⑤成功谓词是字符串级重放（typed ops 直接重放；raw shell 从 `python -c ...write(...)` 一行里解出字面量），不是重跑工作区。⑥只对本模型、本任务集、本轮 120 行成立 |
+| 失效边界 | ①**裸名那一半是机器事实**（性质同 C18）：本机 nvm-for-Windows / nodejs 目录同时有无扩展名 `npm` 与 `npm.cmd`，旧 `resolve_candidate` 先返回无扩展名文件所以必然选错；该缺陷已在本轮修复并由 C22 机检。换一台只有 `.cmd` 的机器这一半不触发，产物会如实记为 `shadowed=false`。②**本工具不执行 tsc**：fixture 无离线 typescript、本机也无全局 `tsc`，所以「`const x: number = a + b` 是合法修复」是**语言事实**而不是实测；要用 `tsc --noEmit` 实测这批补丁，必须先落地离线工具链（TF-0085）。③A 侧分桶是上界：raw shell 把安装、写文件、验证折进一条命令，关键词分类拆不开。④「剔除边界」的反事实只改 D 的 ts 任务（A 也付这条边界，把 A 一起改会把比值推回观测值），所以 band 是**下界→观测值**的区间，不是点估计。⑤成功谓词是字符串级重放（typed ops 直接重放；raw shell 从 `python -c ...write(...)` 一行里解出字面量），不是重跑工作区。⑥只对本模型、本任务集、本轮 120 行成立 |
+| 状态 | 已证实（本机单模型、诊断性） |
+
+### C22 · exec 按 PATHEXT 解析裸名（Windows 无扩展名 shim 遮蔽，TF-0083）
+
+| 维度 | 内容 |
+|------|------|
+| 主张原文 | 在 PATH 上同时存在无扩展名 `npm`（POSIX shim）与 `npm.cmd` 的机器上，`exec.run(["npm", ...])` / `["npx", ...]` 必须按 PATHEXT 解析到可启动的 `.cmd`，而不是把无扩展名脚本交给 Win32。`tools/exec_failure_breakdown.py` 的 `bare_name_probe` 对每个被遮蔽的裸名**通过真实 exec.run** 跑 `<name> --version`，并先用 `<name>.cmd --version` 做对照（对照跑不起来则该名字跳过、不归因于解析） |
+| 门槛数字 | `== 1.00`；且本机必须确实存在「无扩展名 shim 遮蔽裸名」的情况、且至少一个名字的 `.cmd` 对照可运行（fail-closed，避免在没有这种 shim 的机器上空过） |
+| 复现命令 | `python tools/exec_failure_breakdown.py --out eval/exec_failure_breakdown.json`，再 `python tools/claim_gate.py`；单测：`cargo test --lib process_command` |
+| source | `tools/exec_failure_breakdown.py`、`src/process_command.rs`（`resolve_candidate`）、`eval/exec_failure_breakdown.json` |
+| 样本量 / 日期 | 本机 5 个被遮蔽的裸名（corepack / npm / npx / pnpm / yarn），每个 1 条裸名命令 + 1 条 `.cmd` 对照；2026-09-24 |
+| 最近实测 | **缺陷态**：`npm --version` → `E_EXEC_SPAWN`（resolved 到 `...\nvm\v24.15.0\npm`）、`npx --version` 同样失败；同一时刻 `npm.cmd` / `npx.cmd` / `cmd /c npm` 均 `ok=true exit=0`（11.11.0）。**修复后**：5/5 裸名 `ok=true exit=0`（corepack 0.34.6、npm 11.11.0、npx 11.11.0、pnpm 10.33.2、yarn 1.22.22），`bare_name_probe.pass=true`；同一产物的 C18 rustup shim probe 仍 `pass=true` |
+| 失效边界 | ①只覆盖**裸名**（argv[0] 不带路径分隔符、不带扩展名）：显式写 `npm.cmd` 或 `cmd /c npm` 本来就能跑，不在本声明范围内。②这是**本机/平台**事实：换一台 PATH 上没有无扩展名 `npm` 的机器，本声明只报告未触发，门禁按 fail-closed 判失败。③对照判据是 `<name>.cmd --version` 退出码 0，对照不通过的名字会被跳过，所以 `sample_size` 可能小于 PATH 上被遮蔽的名字数。④它只证明**能启动**，不证明被启动程序的业务行为（版本字符串只作为「确实跑起来了」的证据）。⑤与 C18 是同一段代码路径上的两个不同不变量：C18 管「带扩展名的 symlink 不丢调用名」，C22 管「无扩展名的裸名不被不可启动的兄弟文件抢走」。⑥它不覆盖 `exec.run` 之外的启动路径（raw shell 走 `cmd`，本来就有 PATHEXT 语义） |
+| 状态 | 已证实（本机，Windows + nvm-for-Windows/nodejs） |
 
 ## 4. 与 README 主张的对应关系
 
@@ -345,6 +359,7 @@ python tools/ts_fixture_audit.py --out eval/ts_fixture_audit.json
 - C18 是**平台缺陷**声明：它守住「启动名不被 canonicalize 破坏」这一条不变量，只对本机 rustup 软链 shim 生效。引用它时必须带上「硬链接/复制形态不覆盖」「无 symlink 权限时回归用例退化」两条边界；**更要紧的是**：引用 2026-09-24 之前的 D 侧 exec 数字时，必须同时引用 C18，因为那批数字是在缺陷态下测的。
 - C20 是**诊断**声明：它说明 D 多出来的步骤是 typed-op 拆分的结果，不是浪费。引用时必须带上「重复调用是上界」「多合一是启发式」两条边界，不得写成「D 有 8.8% 的步骤是浪费」。
 - C21 是**任务集边界**声明：它把 ts fixture 的获取链拆成产品侧（裸名 `npm`/`npx` 解析缺陷）与环境侧（fixture 不带 `node_modules`），并给出剔除后的 D/A 比值区间。引用时必须带上「裸名那一半是机器事实」「本工具不执行 tsc」「band 是下界→观测值」三条边界，不得写成「ts 任务 59% 的 token 是浪费」；它也不替代 C13 的成功率口径——成功谓词的缺口由 TF-0084 跟踪。
+- C22 是**平台解析**声明：它守住「裸 `npm`/`npx` 必须解析到可启动的 PATHEXT 候选」这一条不变量，与 C18 是同一段代码路径上的两个不同缺陷。引用时必须带上「只覆盖裸名」「本机事实、无遮蔽的机器判失败」「对照不通过的名字会被跳过」三条边界，不得写成「exec.run 在 Windows 上已经完全等价于 cmd」。
 - 新增任何对外数字时：先在本文件加一行，再在 `tools/claim_gate.py` 加对应门槛（或显式标注不设门槛），最后跑 `python tools/claim_gate.py`。
 
 ## 5. 口径统一规则（已按根策略裁决）
@@ -364,7 +379,7 @@ mock 实测值（0.106 / 0.55）在两侧都过线。今后新增对外数字一
 |------|------|------|
 | （无） | — | 2026-09-22：原「compact 协议 50–70% token 节省 vs JSON」已处置。该数字**无法复现**（实测小响应信封 42.4%、观察载荷合计 −3.1%），已按 §4 登记为 C9，并把 README 口径改成 C9 的实测范围。当前没有已知的「已进 README 但未登记」对外数字 |
 
-## 7. L3 观察质检（不进 C1–C20 门禁）
+## 7. L3 观察质检（不进 C1–C22 门禁）
 
 `tools/jev_obs_judge.py`（TF-0012）对每个失败样本问两个窄问题，产出 `eval/jev_obs_report.json` + `eval/jev_obs_report.md`：
 

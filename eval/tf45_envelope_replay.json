@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.tf45-envelope-replay/v1",
-  "generated_at": "2026-09-24T10:59:15.442440+00:00",
+  "generated_at": "2026-09-24T12:29:46.054587+00:00",
   "method": {
     "frozen_call_source": "bench/aci/results/latest_live.json (condition D read ops)",
     "legacy_projection": "format_aci_result on the envelope with the compact `hash` removed (== the pre-TF-0045 client projection)",
@@ -18,7 +18,7 @@
       "bench/aci/results/latest_live.json",
       "tools/tf45_envelope_replay.py"
     ],
-    "fingerprint": "dbd6bd979770d2aabdeb5f01fbb809bc6880803d3f22a1a195624a325fd82790"
+    "fingerprint": "e5bed3c59031d65b1ed4d6fee34798011ddd82f865f88e867393ccc422a2fdd8"
   },
   "totals": {
     "calls": 34,

@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.readme-claims/v1",
-  "generated_at": "2026-09-24T12:10:12.641141+00:00",
+  "generated_at": "2026-09-24T12:33:16.501753+00:00",
   "generator": "tools/readme_claims_check.py",
   "ae_binary": "target\\debug\\ae.exe",
   "all_pass": true,
@@ -128,7 +128,7 @@
       "kind": "cross_shell",
       "name": "CPU info",
       "source": "README.md vs eval/cross_shell.json",
-      "expected": "| CPU info | **291.2ms** | 1265.5ms | 422.8ms | **4.3x faster** |",
+      "expected": "| CPU info | **330.5ms** | 1303.9ms | 429.3ms | **3.9x faster** |",
       "actual": "present",
       "pass": true
     },
@@ -136,7 +136,7 @@
       "kind": "cross_shell",
       "name": "Disk info",
       "source": "README.md vs eval/cross_shell.json",
-      "expected": "| Disk info | **10.9ms** | 392.0ms | N/A | **36.0x faster** |",
+      "expected": "| Disk info | **12.5ms** | 403.9ms | N/A | **32.3x faster** |",
       "actual": "present",
       "pass": true
     },
@@ -144,7 +144,7 @@
       "kind": "cross_shell",
       "name": "List dir",
       "source": "README.md vs eval/cross_shell.json",
-      "expected": "| List dir | **11.5ms** | 264.4ms | 362.2ms | **23.1x faster** |",
+      "expected": "| List dir | **13.5ms** | 295.0ms | 420.1ms | **21.8x faster** |",
       "actual": "present",
       "pass": true
     },
@@ -152,7 +152,7 @@
       "kind": "cross_shell",
       "name": "Read file",
       "source": "README.md vs eval/cross_shell.json",
-      "expected": "| Read file | **11.0ms** | 144.7ms | 383.5ms | **13.1x faster** |",
+      "expected": "| Read file | **12.7ms** | 180.3ms | 465.4ms | **14.2x faster** |",
       "actual": "present",
       "pass": true
     },
@@ -160,7 +160,7 @@
       "kind": "cross_shell",
       "name": "Pipeline 1K",
       "source": "README.md vs eval/cross_shell.json",
-      "expected": "| Pipeline 1K | **11.8ms** | 175.5ms | 398.6ms | **14.9x faster** |",
+      "expected": "| Pipeline 1K | **14.9ms** | 234.1ms | 444.2ms | **15.7x faster** |",
       "actual": "present",
       "pass": true
     }

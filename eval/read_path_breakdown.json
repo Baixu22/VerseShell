@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.read-path-breakdown/v1",
-  "generated_at": "2026-09-24T10:59:27.011285+00:00",
+  "generated_at": "2026-09-24T12:29:58.926800+00:00",
   "method": {
     "frozen_call_source": "bench/aci/results/latest_live.json (condition D read ops)",
     "ab": "the same envelope is projected twice with the real projector: format_aci_result(compact=False) is the pre-change rendering, format_aci_result(compact=True) is current",
@@ -16,7 +16,7 @@
       "tools/tf45_envelope_replay.py",
       "tools/read_path_breakdown.py"
     ],
-    "fingerprint": "e2b4bb5615b0511f7d7f560edef45b57ae8c559ffef755796c8dbe06d22695b9"
+    "fingerprint": "bba0a23acb8ffdf0620afc57461a0edbe22a4e26209d6ef79c60a4ee6e5afd6d"
   },
   "totals": {
     "calls": 30,

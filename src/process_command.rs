@@ -128,9 +128,12 @@ fn resolve_candidate(
     candidate: PathBuf,
     env: Option<&BTreeMap<String, String>>,
 ) -> Result<PathBuf> {
-    if candidate.is_file() {
-        return Ok(candidate);
-    }
+    // On Windows `cmd.exe` resolves a bare name through PATHEXT, and an
+    // extensionless sibling is usually a POSIX shell script that Win32 cannot
+    // launch: npm-for-Windows ships `npm` next to `npm.cmd`. Returning the bare
+    // file first made `exec.run(["npm", ...])` fail with `E_EXEC_SPAWN` while raw
+    // shell (which spawns through `cmd`) kept working, so prefer the PATHEXT
+    // candidate and keep the extensionless file only as a fallback.
     #[cfg(windows)]
     if candidate.extension().is_none() {
         for extension in windows_extensions(env) {
@@ -141,6 +144,9 @@ fn resolve_candidate(
                 return Ok(with_extension);
             }
         }
+    }
+    if candidate.is_file() {
+        return Ok(candidate);
     }
     Err(anyhow!("candidate is not an executable file"))
 }
@@ -259,6 +265,56 @@ mod tests {
             executable.canonicalize().unwrap()
         );
         assert!(resolved.interpreter.is_some());
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    /// A bare name must not lose to an extensionless shim that sits next to it.
+    ///
+    /// npm-for-Windows ships `npm` (a `#!/bin/sh` script) beside `npm.cmd` in the
+    /// same directory. Win32 cannot launch the former, and `cmd.exe` resolves a
+    /// bare name through PATHEXT — so the launcher must too. Before this, `npm`
+    /// resolved to the shell script and every `exec.run(["npm", ...])` failed with
+    /// `E_EXEC_SPAWN` while raw shell (which spawns through `cmd`) worked.
+    #[cfg(windows)]
+    #[test]
+    fn prefers_a_pathext_candidate_over_an_extensionless_shim() {
+        let root =
+            std::env::temp_dir().join(format!("verseshell-shadow-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        std::fs::write(root.join("npm"), b"#!/bin/sh\nexec npm.cmd \"$@\"\n").unwrap();
+        std::fs::write(root.join("npm.cmd"), b"@echo off\r\n").unwrap();
+        let env = BTreeMap::from([
+            ("Path".into(), root.to_string_lossy().to_string()),
+            ("PathExt".into(), ".COM;.EXE;.BAT;.CMD".into()),
+            ("SystemRoot".into(), std::env::var("SystemRoot").unwrap()),
+        ]);
+        let resolved = resolve_process_command(&["npm".into()], &root, Some(&env)).unwrap();
+        assert_eq!(
+            resolved.audited_executable,
+            root.join("npm.cmd").canonicalize().unwrap()
+        );
+        assert!(
+            resolved.interpreter.is_some(),
+            "a .cmd candidate must launch through cmd.exe"
+        );
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    /// With no PATHEXT candidate the extensionless file is still the answer, so an
+    /// unusual but launchable image without an extension keeps working.
+    #[cfg(windows)]
+    #[test]
+    fn falls_back_to_an_extensionless_candidate() {
+        let root =
+            std::env::temp_dir().join(format!("verseshell-bare-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&root).unwrap();
+        std::fs::write(root.join("tool"), b"not a real executable").unwrap();
+        let env = BTreeMap::from([
+            ("Path".into(), root.to_string_lossy().to_string()),
+            ("PathExt".into(), ".EXE;.CMD".into()),
+        ]);
+        let resolved = resolve_process_command(&["tool".into()], &root, Some(&env)).unwrap();
+        assert_eq!(resolved.executable, root.join("tool"));
         let _ = std::fs::remove_dir_all(root);
     }
 
