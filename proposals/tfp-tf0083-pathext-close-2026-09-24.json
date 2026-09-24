@@ -1,0 +1,106 @@
+{
+  "applied_at": "2026-09-24T14:42:47.352529Z",
+  "base_graph_hash": "01a1c87e7ec08373fa2d6aadaf835f9f3690174925d55ae4444cf98899590a5d",
+  "base_summary": {
+    "edge_count": 135,
+    "node_count": 86,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "代码：`src/process_command.rs::resolve_candidate` 131-133 行先返回 `is_file()` 的无扩展名候选，PATHEXT 分支（135-144 行）只在它不存在时才走",
+          "机器事实：`eval/ts_fixture_audit.json::path_shadow` 列出 npm/npx/yarn/pnpm/corepack 在 `C:\\Program Files\\nodejs`、`C:\\Users\\...\\nvm\\v24.15.0`、`C:\\Users\\...\\AppData\\Roaming\\npm` 都有无扩展名文件与 `.cmd` 兄弟",
+          "live 证据：`ts_package_script_fail` D 3/3 次裸名 `npm test` 失败（48 tok），紧接的 `.cmd`/`cmd /c` 形式成功（22 tok）",
+          "live 证据：`ts_fix_type_error` D 3/3 次各有 `[\"npx\",\"tsc\",\"--noEmit\"]` 与 `[\"npm\",\"install\",...]` 失败（共 6 次 / 288 tok）",
+          "来源：TF-0082 的 C21 分解（`acquisition_chain` 的 `bare_name_launch` 桶）",
+          "代码：`src/process_command.rs::resolve_candidate` 现在对 `candidate.extension().is_none()` 先按 PATHEXT 顺序找，找不到才回退到无扩展名文件；两个回归用例 `prefers_a_pathext_candidate_over_an_extensionless_shim` / `falls_back_to_an_extensionless_candidate`（前者在修复前红、修复后绿）",
+          "单测：`cargo test --lib process_command` → 6 passed（含 C18 的 symlink 命名不变量用例）",
+          "真实 exec.run 对照（修复前）：`[\"npm\",\"--version\"]` → `E_EXEC_SPAWN`（resolved 到 `...\\nvm\\v24.15.0\\npm`）、`[\"npx\",\"--version\"]` 同样失败；同一时刻 `npm.cmd` / `npx.cmd` / `cmd /c npm` 均 `ok=true exit=0`（11.11.0）",
+          "真实 exec.run 对照（修复后）：`npm` / `npx` / `yarn` / `pnpm` / `corepack --version` 5/5 `ok=true exit=0`（11.11.0 / 11.11.0 / 1.22.22 / 10.33.2 / 0.34.6）",
+          "新声明 C22 + 门禁：`tools/exec_failure_breakdown.py::bare_name_probe` 对每个被 PATH 遮蔽的裸名跑裸名命令与 `.cmd` 对照（对照失败则跳过该名字），fail-closed 要求本机确有遮蔽；`claim_gate` C22 = 1.0 PASS，C18 同时仍 PASS",
+          "产物：`eval/exec_failure_breakdown.json` 新增 `bare_name_facts` / `bare_name_probe` 两段",
+          "C12 状态：唯一陈旧产物是 `bench/aci/results/latest_live.json`（其余 10 份已按 C12 重跑并 fresh）；`claim_gate` 15/16（C1–C11/C14/C16/C18/C22 全绿，C12 红），`readme_claims_check` 全 PASS",
+          "顺带同步：`eval/cross_shell.json` 重跑后 worst 0.2301 → 0.2535，README 跨 shell 表格与 C11 行已同步（C10 重新 PASS）",
+          "提交：33f9872（内容：src + tools + docs + README + CHANGELOG + 重跑产物）",
+          "live 重跑（第六次复测，seeds 42/43/44，120 行，`api_error` 0）：失败 exec 由 21 次 / 1735 tok 降到 **5 次 / 495 tok**；`ts_fix_type_error` 的探测链由 15 次调用 / 754 tok 降到每 run 3 次（1 次失败的 `npx tsc` 探测 + 1 次 `npm install typescript` + 1 次验证），该任务 7.333 步 / 427.0 tok → **5.333 步 / 292.3 tok**；`ts_package_script_fail` 5.0 步 / 172 tok → **4.0 步 / 137.3 tok**（`npm test` 3/3 次一次通过）",
+          "全量 D/A（with 臂）：D 3.77 步 / 144.80 tok vs A 3.10 步 / 180.87 tok，比值 **1.2151 / 0.8006**（上一轮 1.4025 / 0.8757）",
+          "门禁：`python tools/claim_gate.py` → **15/15 gated claims pass、exit 0**（C12 11/11 fresh、C22 = 1.0、C18 = 1.0）；`python tools/readme_claims_check.py` 全 PASS",
+          "提交：2237467（重跑产物 + C13/C14/C15/C16/C17/C19/C20/C21 重登记 + CHANGELOG）"
+        ],
+        "next_action": "无。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "解析缺陷已修并收口：`resolve_candidate` 对无扩展名的候选先按 PATHEXT 找、找不到才回退，两个回归用例（修复前红、修复后绿）钉住两半；真实 exec.run 对照 `npm`/`npx --version` 由 `E_EXEC_SPAWN` 变成 `ok=true exit=0`，本机 5 个被遮蔽的裸名全部可启动；新声明 C22 把它变成机检（`bare_name_probe`，fail-closed），C18 的 rustup 命名不变量未被破坏。live 重跑（第六次复测，120 行）证实了效果：失败 exec 21 次 / 1735 tok → **5 次 / 495 tok**，`ts_package_script_fail` 的 `npm test` 从「3/3 次先失败」变成「3/3 次一次通过」（5.0 步 / 172 tok → 4.0 步 / 137.3 tok），`ts_fix_type_error` 由 7.333 步 / 427.0 tok 降到 5.333 步 / 292.3 tok；全量 D/A 由 1.4025 / 0.8757 变成 **1.2151 / 0.8006**。`claim_gate` 15/15 exit 0。"
+      },
+      "id": "TF-0083"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "C12 指纹：`bench/aci/results/latest_live.json` 的 evidence.globs = src/**/*.rs、Cargo.toml、bench/aci/tasks/*.json、bench/aci/fixtures/**/*、bench/aci/runners/live_agent_loop.py",
+          "上一轮规模：with 臂 60 行合计 81.2 分钟；`live_config` = model sn-glm-5-3-flash、temperature 0、seed 42、repeat 3、max_turns 8",
+          "端点核对（2026-09-24）：`GET /v1/models` 仍列出 `sn-glm-5-3-flash`",
+          "`bench/aci/runners/merge_live_runs.py` 遇 `api_error` 即 exit 2；`bench/aci/runners/splice_live_cells.py` 按 (task, condition, seed) 补格",
+          "本轮实测（2026-09-24）：`GET /v1/models` 无需凭据即可访问（200），但 `POST /v1/chat/completions` 无 key / 错 key 一律 401；本会话环境没有 `LOCAL3065_API_KEY`，`~/.dsh/.credentials.yaml` 的 refs 里也没有该键 → 本轮无法执行 live 重跑",
+          "C12 现状（2026-09-24，修 `resolve_candidate` 之后）：15/16 gated claims pass，唯一陈旧产物是 `bench/aci/results/latest_live.json`（记录指纹 651f7a1c… / 当前 8590a31e…），其余 10 份产物 fresh",
+          "重跑范围：6 次 `live_agent_loop.py --full`（seeds 42/43/44 × with/without `--exclude-tools read_files`），每次 20 行；再 `merge_live_runs.py` 合并 with 与 without 两份产物",
+          "重跑后必须一并重跑的确定性产物：`eval/exec_token_breakdown.json`、`eval/read_usage_audit.json`、`eval/exec_failure_breakdown.json`、`eval/step_composition.json`、`eval/ts_fixture_audit.json`（它们的指纹覆盖 live 产物，会随之一并判陈旧）",
+          "本轮完成（2026-09-24）：6 次 `live_agent_loop.py --full`（seeds 42/43/44 × with/without `--exclude-tools read_files`）→ `splice_live_cells.py` 补 1 格上游 500 → `merge_live_runs.py` 合并两份产物；120 行，`api_error` 0",
+          "with：A 0.6333 / 3.10 / 180.87；D 0.50 / 3.77 / 144.80（D/A 1.2151 / 0.8006）。without：A 0.6333 / 3.07 / 707.47（被一行 16007 tok 主导）、D 0.30 / 2.37 / 72.60",
+          "一并重跑的确定性派生产物：`exec_token_breakdown` / `read_usage_audit` / `exec_failure_breakdown` / `step_composition` / `ts_fixture_audit` / `read_path_breakdown` / `tf45_envelope_replay`；C12 11/11 fresh，`claim_gate` 15/15",
+          "凭据：用 `.env.local`（已被 `.gitignore` 忽略）里的 `ACI_BENCH_BASE_URL` / `ACI_BENCH_API_KEY` / `ACI_BENCH_MODEL` 指向本地 3065 端点；模型仍用基线同款 `sn-glm-5-3-flash`——端点也提供 `glm-5.3-flash`，换模型会破坏与前五轮的可比性",
+          "与历轮的不可比性：2026-09-24 之前的所有 D 侧 exec 数字受 C18 污染；C22 修复前那一轮受裸名解析缺陷污染。两处都已在 C13/C19 的失效边界写明"
+        ],
+        "next_action": "无（TF-0084 落地后需要另一次重跑，那属于它的收尾）。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "全量 live 重跑已完成：用本地 3065 端点（凭据放在 gitignored 的 `.env.local`）与基线同款 `sn-glm-5-3-flash` 跑了 6 次 `--full`（seeds 42/43/44 × with/without），补掉 1 格上游 500 后合并成 120 行、`api_error` 0。with 臂：A 0.6333 / 3.10 / 180.87，D 0.50 / 3.77 / 144.80（D/A 1.2151 / 0.8006）；without 臂被一行 16007 tok 的真实调用主导，只在边界里说明。所有随 live 基线变化的确定性产物与 C13/C14/C15/C16/C17/C19/C20/C21 都已重登记，C12 11/11 fresh、`claim_gate` 15/15。D 的成功率低于 A 由 3 行退化运行与 2 行谓词不匹配主导，已在 C13 边界⑩写明，不算解析修复的因果。"
+      },
+      "id": "TF-0085"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "C15 重复行：`docs/claims-and-evidence.md` 里 `| 门槛数字 | 无（诊断性测量，只登记事实，不设通过门槛） |` 在 C15 段落出现两次（242 与 247 行附近），随后三行同样重复",
+          "C14 漂移：doc 的 C14 样本量写 38 次调用 / 33 复现 / 4181 → 3079，而 `python tools/tf45_envelope_replay.py --out eval/tf45_envelope_replay.json` 当前产出 34 次调用 / 30 次复现 / 2490 → 1834（coverage 0.8824，`legacy_comparison_exact=true`）",
+          "C12 覆盖不到的原因：`eval/tf45_envelope_replay.json` 的 evidence.globs 不含 `bench/aci/results/latest_live.json`，所以 live 基线换代不会让它判陈旧",
+          "来源：TF-0083 轮按 C12 重跑全部确定性产物时核对得出",
+          "本轮完成：C15 的重复行块已删除（`门槛数字`/`复现命令`/`source`/`样本量`/`最近实测` 原来各出现两次）",
+          "C14 的样本量与最近实测已改成当前 `eval/tf45_envelope_replay.json` 的数字（32 次冻结调用 / 29 复现 / 2886 → 2148 tok；`file.read_many` 19/19 2343 → 1745、`file.view` 10/13 543 → 403）",
+          "全表抽查：C13/C15/C16/C17/C19/C20/C21 的样本量与数字都已随本轮 live 重跑更新，并各自写明与上一轮的关系",
+          "门禁：`claim_gate` 15/15 exit 0、`readme_claims_check` 全 PASS；提交：2237467"
+        ],
+        "next_action": "无。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "两处文档-产物不一致已修：C15 的重复行块删除；C14 的样本量与最近实测改成当前 `eval/tf45_envelope_replay.json` 的数字。借着本轮 live 重跑，C13/C15/C16/C17/C19/C20/C21 的样本量与数字也一并更新到新基线，并各自写明与上一轮的关系。门禁保持全绿。"
+      },
+      "id": "TF-0086"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "谓词原文：`bench/aci/tasks/ts_fix_type_error.json::success` = all(file_contains `return a + b`, file_not_contains `const x: string`)",
+          "GOLDEN 就是 `return a + b;`（`bench/aci/fixtures/ts_fix_type_error/GOLDEN/src/index.ts`）；pristine 是 `const x: string = a + b; return x;`",
+          "复算：`eval/ts_fixture_audit.json::success_predicate` 给出 5 次「removes_type_error 为真但 predicate_pass 为假」，与记录成功逐条一致（D 0/3、A 1/3）",
+          "`bench/aci/runners/live_agent_loop.py` 第 979 行硬编码 `\"optional_verify\": None`；`check_success` 本身支持 `command_exit_0`，mock 侧 `run_suite.py` 有 `--optional-verify` 开关",
+          "边界：本工具**不执行 tsc**（fixture 无离线 typescript、本机也无全局 tsc），所以「改对了」目前是语言事实，实测需要先落地离线工具链",
+          "前置变化（2026-09-24）：C22 修复后的 live 基线已重跑并 fresh，所以本节点落地后需要**再一次**全量重跑才能把成功率口径重新登记；本轮 6 次运行的 ts 任务成功判定仍是旧谓词（D 0/3、A 1/3，5 次「改对了却判失败」）"
+        ],
+        "next_action": "落地谓词修复 + 离线工具链，然后跑一次全量 live 重跑并重登记成功率口径（C13 的 success_rate_D 与 `optional_verify` 的执行方式）。"
+      },
+      "id": "TF-0084"
+    }
+  ],
+  "created_at": "2026-09-24T14:42:47.226364Z",
+  "proposal_id": "TFP-tf0083-pathext-close-2026-09-24",
+  "rationale": "TF-0083 的修复已用真实 exec.run 对照 + C22 机检验证，本轮又拿到凭据完成了 TF-0085 的全量 live 重跑：失败 exec 21 → 5、`ts_package_script_fail` 的 `npm test` 归零、D 的步骤与 token 同时下降。因此 TF-0083、TF-0085 收口；顺带在重跑中把 C14 的陈旧数字与 C15 的重复行一并修掉，TF-0086 也随之完成。TF-0084（成功谓词）仍是 ready——它落地后需要自己的那次重跑。",
+  "session_id": "ses_verseshell-tf0083-pathext-2026-09-24",
+  "status": "applied"
+}
