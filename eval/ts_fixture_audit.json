@@ -1,14 +1,14 @@
 {
   "schema": "verseshell.ts-fixture-audit/v1",
-  "generated_at": "2026-09-24T12:29:59.085890+00:00",
+  "generated_at": "2026-09-24T14:36:39.032987+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
       "bench\\aci\\results\\live_ab_without_read_files.json"
     ],
     "arm": "the chain table is computed on the with_read_files arm, the primary record; the paired control arm only sizes the effect of hiding a tool",
-    "classify": "exec steps on the ts tasks: bare npm-family argv[0] shadowed by an extensionless shim -> bare_name_launch; npm/npm-cli install -> toolchain_install; `tsc`/`node_modules` -> toolchain_missing when it failed and toolchain_verify when it succeeded",
-    "counterfactual": "keep one verification call, drop the rest",
+    "classify": "exec steps on the ts tasks, by what the command *is*: an npm/npm-cli install -> toolchain_install; anything mentioning `tsc`/`node_modules` -> toolchain_verify when it succeeded, toolchain_probe_failed when it did not; a bare npm-family argv[0] that PATH shadows -> shadowed_bare_name (an observation, not a cost bucket). A failure is never attributed to the launcher here — C22's probe owns that claim",
+    "counterfactual": "keep the verification the task needs, drop the failed probe and the install that only exist because `node_modules` is absent",
     "sensitivity": "replace only D's ts task with the counterfactual; A pays the same boundary inside its own commands, so the band is a lower bound on the post-fix step ratio",
     "success": "mirror of check_success for the file predicates, replayed on the final file each run left behind"
   },
@@ -22,7 +22,7 @@
       "bench/aci/results/latest_live.json",
       "tools/ts_fixture_audit.py"
     ],
-    "fingerprint": "a37fadc1302a32a7f76343dee5cbaec004bb3dde740a31e90170b91b377c6024"
+    "fingerprint": "96d96bd50d499fa5c6f8d614f1c1eaeb2e34e4938e2b6fb28a9ff02a43d4b4d9"
   },
   "fixture": {
     "ts_fix_type_error": {
@@ -260,43 +260,29 @@
               "seed": 42,
               "success": false,
               "success_reason": "file_contains src/index.ts",
-              "steps": 8,
-              "tokens": 466,
+              "steps": 5,
+              "tokens": 285,
               "boundary_calls": [
                 {
-                  "index": 3,
-                  "class": "bare_name_launch",
-                  "tokens": 48,
+                  "index": 1,
+                  "class": "toolchain_probe_failed",
+                  "tokens": 99,
                   "ok": false,
                   "command": "npx tsc --noEmit"
                 },
                 {
-                  "index": 4,
-                  "class": "toolchain_missing",
-                  "tokens": 155,
-                  "ok": false,
-                  "command": "node node_modules/typescript/bin/tsc --noEmit"
-                },
-                {
-                  "index": 5,
-                  "class": "bare_name_launch",
-                  "tokens": 48,
-                  "ok": false,
+                  "index": 3,
+                  "class": "toolchain_install",
+                  "tokens": 13,
+                  "ok": true,
                   "command": "npm install --save-dev typescript"
                 },
                 {
-                  "index": 6,
-                  "class": "toolchain_install",
-                  "tokens": 25,
-                  "ok": true,
-                  "command": "node C:\\Users\\27933\\AppData\\Roaming\\nvm\\v24.15.0\\node_modules\\npm\\bin\\npm-cli.js install --no-save typescript"
-                },
-                {
-                  "index": 7,
+                  "index": 4,
                   "class": "toolchain_verify",
                   "tokens": 3,
                   "ok": true,
-                  "command": "node node_modules/typescript/bin/tsc --noEmit"
+                  "command": "npx tsc --noEmit"
                 }
               ]
             },
@@ -304,43 +290,29 @@
               "seed": 43,
               "success": false,
               "success_reason": "file_contains src/index.ts",
-              "steps": 7,
-              "tokens": 378,
+              "steps": 5,
+              "tokens": 289,
               "boundary_calls": [
                 {
                   "index": 2,
-                  "class": "bare_name_launch",
-                  "tokens": 48,
+                  "class": "toolchain_probe_failed",
+                  "tokens": 99,
                   "ok": false,
                   "command": "npx tsc --noEmit"
                 },
                 {
                   "index": 3,
-                  "class": "toolchain_missing",
-                  "tokens": 99,
-                  "ok": false,
-                  "command": "npx.cmd tsc --noEmit"
+                  "class": "toolchain_install",
+                  "tokens": 17,
+                  "ok": true,
+                  "command": "npm install --save-dev typescript"
                 },
                 {
                   "index": 4,
-                  "class": "bare_name_launch",
-                  "tokens": 48,
-                  "ok": false,
-                  "command": "npm install --no-audit --no-fund typescript"
-                },
-                {
-                  "index": 5,
-                  "class": "toolchain_install",
-                  "tokens": 10,
-                  "ok": true,
-                  "command": "npm.cmd install --no-audit --no-fund typescript"
-                },
-                {
-                  "index": 6,
                   "class": "toolchain_verify",
                   "tokens": 3,
                   "ok": true,
-                  "command": "npx.cmd tsc --noEmit"
+                  "command": "npx tsc --noEmit"
                 }
               ]
             },
@@ -348,69 +320,49 @@
               "seed": 44,
               "success": false,
               "success_reason": "file_contains src/index.ts",
-              "steps": 7,
-              "tokens": 437,
+              "steps": 6,
+              "tokens": 303,
               "boundary_calls": [
                 {
-                  "index": 2,
-                  "class": "bare_name_launch",
-                  "tokens": 48,
+                  "index": 3,
+                  "class": "toolchain_probe_failed",
+                  "tokens": 99,
                   "ok": false,
                   "command": "npx tsc --noEmit"
                 },
                 {
-                  "index": 3,
-                  "class": "toolchain_missing",
-                  "tokens": 155,
-                  "ok": false,
-                  "command": "node node_modules/typescript/bin/tsc --noEmit"
-                },
-                {
                   "index": 4,
-                  "class": "bare_name_launch",
-                  "tokens": 48,
-                  "ok": false,
-                  "command": "npm install"
+                  "class": "toolchain_install",
+                  "tokens": 17,
+                  "ok": true,
+                  "command": "npm install --save-dev typescript"
                 },
                 {
                   "index": 5,
-                  "class": "toolchain_install",
-                  "tokens": 13,
-                  "ok": true,
-                  "command": "node C:\\Users\\27933\\AppData\\Roaming\\nvm\\v24.15.0\\node_modules\\npm\\bin\\npm-cli.js install"
-                },
-                {
-                  "index": 6,
                   "class": "toolchain_verify",
                   "tokens": 3,
                   "ok": true,
-                  "command": "node node_modules/typescript/bin/tsc --noEmit"
+                  "command": "npx tsc --noEmit"
                 }
               ]
             }
           ],
-          "boundary_calls": 15,
-          "boundary_calls_per_run": 5.0,
-          "boundary_tokens": 754,
-          "boundary_tokens_per_run": 251.33,
+          "boundary_calls": 9,
+          "boundary_calls_per_run": 3.0,
+          "boundary_tokens": 353,
+          "boundary_tokens_per_run": 117.67,
           "by_class": {
-            "bare_name_launch": {
-              "calls": 6,
-              "tokens": 288,
-              "calls_per_run": 2.0,
-              "tokens_per_run": 96.0
-            },
             "toolchain_install": {
               "calls": 3,
-              "tokens": 48,
+              "tokens": 47,
               "calls_per_run": 1.0,
-              "tokens_per_run": 16.0
+              "tokens_per_run": 15.67
             },
-            "toolchain_missing": {
+            "toolchain_probe_failed": {
               "calls": 3,
-              "tokens": 409,
+              "tokens": 297,
               "calls_per_run": 1.0,
-              "tokens_per_run": 136.33
+              "tokens_per_run": 99.0
             },
             "toolchain_verify": {
               "calls": 3,
@@ -419,8 +371,8 @@
               "tokens_per_run": 3.0
             }
           },
-          "steps_per_run": 7.333,
-          "tokens_per_run": 427.0,
+          "steps_per_run": 5.333,
+          "tokens_per_run": 292.33,
           "note": "typed ops do one job each, so the classes are separable"
         },
         "with_read_files:raw_shell": {
@@ -428,91 +380,47 @@
           "per_run": [
             {
               "seed": 42,
-              "success": false,
-              "success_reason": "file_contains src/index.ts",
+              "success": true,
+              "success_reason": "all ok",
               "steps": 4,
-              "tokens": 356,
+              "tokens": 308,
               "boundary_calls": [
                 {
                   "index": 0,
                   "class": "raw_shell_toolchain",
-                  "tokens": 200,
+                  "tokens": 127,
                   "ok": null,
-                  "command": "dir src && type package.json && type tsconfig.json && type src\\index.ts"
+                  "command": "type package.json & type tsconfig.json & type src\\index.ts & dir /s /b src"
                 },
                 {
-                  "index": 1,
+                  "index": 2,
                   "class": "raw_shell_toolchain",
                   "tokens": 138,
                   "ok": null,
                   "command": "npx tsc --noEmit"
                 },
                 {
-                  "index": 2,
-                  "class": "toolchain_install",
-                  "tokens": 8,
-                  "ok": null,
-                  "command": "python -c \"open('src/index.ts','w').write('export function add(a: number, b: number): number {\\n  const x: number = a + "
-                },
-                {
                   "index": 3,
-                  "class": "raw_shell_toolchain",
-                  "tokens": 2,
+                  "class": "toolchain_install",
+                  "tokens": 33,
                   "ok": null,
-                  "command": "npx tsc --noEmit"
+                  "command": "npm install && npm run typecheck"
                 }
               ]
             },
             {
               "seed": 43,
-              "success": true,
-              "success_reason": "all ok",
-              "steps": 5,
-              "tokens": 412,
-              "boundary_calls": [
-                {
-                  "index": 0,
-                  "class": "raw_shell_toolchain",
-                  "tokens": 207,
-                  "ok": null,
-                  "command": "type package.json & type tsconfig.json & type src\\index.ts & dir /s /b"
-                },
-                {
-                  "index": 1,
-                  "class": "raw_shell_toolchain",
-                  "tokens": 138,
-                  "ok": null,
-                  "command": "python -c \"open(r'src\\index.ts','w').write('export function add(a: number, b: number): number {\\n  return a + b;\\n}\\n')\""
-                },
-                {
-                  "index": 2,
-                  "class": "toolchain_install",
-                  "tokens": 28,
-                  "ok": null,
-                  "command": "npm install --no-audit --no-fund 2>&1 | tail -2 && npx tsc --noEmit && echo TYPECHECK_OK"
-                },
-                {
-                  "index": 3,
-                  "class": "toolchain_install",
-                  "tokens": 11,
-                  "ok": null,
-                  "command": "npm install --no-audit --no-fund && npx tsc --noEmit && echo TYPECHECK_OK"
-                }
-              ]
-            },
-            {
-              "seed": 44,
               "success": false,
               "success_reason": "file_contains src/index.ts",
               "steps": 3,
-              "tokens": 266,
+              "tokens": 306,
               "boundary_calls": [
                 {
                   "index": 0,
                   "class": "raw_shell_toolchain",
-                  "tokens": 109,
+                  "tokens": 127,
                   "ok": null,
-                  "command": "type package.json && echo --- && type tsconfig.json && echo --- && type src\\index.ts"
+                  "command": "type package.json & type tsconfig.json & type src\\index.ts & dir /s /b src"
                 },
                 {
                   "index": 1,
@@ -524,33 +432,56 @@
                 {
                   "index": 2,
                   "class": "toolchain_install",
-                  "tokens": 11,
+                  "tokens": 33,
                   "ok": null,
-                  "command": "npm install --no-audit --no-fund && npx tsc --noEmit && echo TYPECHECK_OK"
+                  "command": "npm install && npm run typecheck"
+                }
+              ]
+            },
+            {
+              "seed": 44,
+              "success": false,
+              "success_reason": "file_contains src/index.ts",
+              "steps": 3,
+              "tokens": 240,
+              "boundary_calls": [
+                {
+                  "index": 0,
+                  "class": "raw_shell_toolchain",
+                  "tokens": 121,
+                  "ok": null,
+                  "command": "type package.json tsconfig.json src\\index.ts"
+                },
+                {
+                  "index": 2,
+                  "class": "toolchain_install",
+                  "tokens": 8,
+                  "ok": null,
+                  "command": "python -c \"open('src/index.ts','w').write('export function add(a: number, b: number): number {\\n  const x: number = a + "
                 }
               ]
             }
           ],
-          "boundary_calls": 11,
-          "boundary_calls_per_run": 3.667,
-          "boundary_tokens": 990,
-          "boundary_tokens_per_run": 330.0,
+          "boundary_calls": 8,
+          "boundary_calls_per_run": 2.667,
+          "boundary_tokens": 725,
+          "boundary_tokens_per_run": 241.67,
           "by_class": {
             "raw_shell_toolchain": {
-              "calls": 7,
-              "tokens": 932,
-              "calls_per_run": 2.333,
-              "tokens_per_run": 310.67
+              "calls": 5,
+              "tokens": 651,
+              "calls_per_run": 1.667,
+              "tokens_per_run": 217.0
             },
             "toolchain_install": {
-              "calls": 4,
-              "tokens": 58,
-              "calls_per_run": 1.333,
-              "tokens_per_run": 19.33
+              "calls": 3,
+              "tokens": 74,
+              "calls_per_run": 1.0,
+              "tokens_per_run": 24.67
             }
           },
-          "steps_per_run": 4.0,
-          "tokens_per_run": 344.67,
+          "steps_per_run": 3.333,
+          "tokens_per_run": 284.67,
           "note": "raw shell folds read/run/write into one command, so these buckets overlap; treat them as an upper bound on A's toolchain share"
         }
       }
@@ -565,14 +496,14 @@
               "seed": 42,
               "success": true,
               "success_reason": "file_contains package.json",
-              "steps": 5,
-              "tokens": 172,
+              "steps": 4,
+              "tokens": 124,
               "boundary_calls": [
                 {
                   "index": 3,
-                  "class": "bare_name_launch",
-                  "tokens": 48,
-                  "ok": false,
+                  "class": "shadowed_bare_name",
+                  "tokens": 22,
+                  "ok": true,
                   "command": "npm test"
                 }
               ]
@@ -581,14 +512,14 @@
               "seed": 43,
               "success": true,
               "success_reason": "file_contains package.json",
-              "steps": 5,
-              "tokens": 172,
+              "steps": 4,
+              "tokens": 164,
               "boundary_calls": [
                 {
                   "index": 3,
-                  "class": "bare_name_launch",
-                  "tokens": 48,
-                  "ok": false,
+                  "class": "shadowed_bare_name",
+                  "tokens": 22,
+                  "ok": true,
                   "command": "npm test"
                 }
               ]
@@ -597,14 +528,14 @@
               "seed": 44,
               "success": true,
               "success_reason": "file_contains package.json",
-              "steps": 5,
-              "tokens": 172,
+              "steps": 4,
+              "tokens": 124,
               "boundary_calls": [
                 {
                   "index": 3,
-                  "class": "bare_name_launch",
-                  "tokens": 48,
-                  "ok": false,
+                  "class": "shadowed_bare_name",
+                  "tokens": 22,
+                  "ok": true,
                   "command": "npm test"
                 }
               ]
@@ -612,18 +543,18 @@
           ],
           "boundary_calls": 3,
           "boundary_calls_per_run": 1.0,
-          "boundary_tokens": 144,
-          "boundary_tokens_per_run": 48.0,
+          "boundary_tokens": 66,
+          "boundary_tokens_per_run": 22.0,
           "by_class": {
-            "bare_name_launch": {
+            "shadowed_bare_name": {
               "calls": 3,
-              "tokens": 144,
+              "tokens": 66,
               "calls_per_run": 1.0,
-              "tokens_per_run": 48.0
+              "tokens_per_run": 22.0
             }
           },
-          "steps_per_run": 5.0,
-          "tokens_per_run": 172.0,
+          "steps_per_run": 4.0,
+          "tokens_per_run": 137.33,
           "note": "typed ops do one job each, so the classes are separable"
         },
         "with_read_files:raw_shell": {
@@ -633,24 +564,24 @@
               "seed": 42,
               "success": true,
               "success_reason": "file_contains package.json",
-              "steps": 3,
-              "tokens": 68,
+              "steps": 2,
+              "tokens": 66,
               "boundary_calls": []
             },
             {
               "seed": 43,
               "success": true,
               "success_reason": "file_contains package.json",
-              "steps": 3,
-              "tokens": 179,
+              "steps": 2,
+              "tokens": 70,
               "boundary_calls": []
             },
             {
               "seed": 44,
               "success": true,
               "success_reason": "file_contains package.json",
-              "steps": 2,
-              "tokens": 66,
+              "steps": 3,
+              "tokens": 102,
               "boundary_calls": []
             }
           ],
@@ -659,8 +590,8 @@
           "boundary_tokens": 0,
           "boundary_tokens_per_run": 0.0,
           "by_class": {},
-          "steps_per_run": 2.667,
-          "tokens_per_run": 104.33,
+          "steps_per_run": 2.333,
+          "tokens_per_run": 79.33,
           "note": "raw shell folds read/run/write into one command, so these buckets overlap; treat them as an upper bound on A's toolchain share"
         }
       }
@@ -672,64 +603,64 @@
     "per_run": [
       {
         "seed": 42,
-        "observed_steps": 8,
-        "observed_tokens": 466,
-        "boundary_calls": 4,
-        "boundary_tokens": 276,
-        "cf_steps": 4,
-        "cf_tokens": 190,
+        "observed_steps": 5,
+        "observed_tokens": 285,
+        "boundary_calls": 2,
+        "boundary_tokens": 112,
+        "cf_steps": 3,
+        "cf_tokens": 173,
         "verify_tokens": 3
       },
       {
         "seed": 43,
-        "observed_steps": 7,
-        "observed_tokens": 378,
-        "boundary_calls": 4,
-        "boundary_tokens": 205,
+        "observed_steps": 5,
+        "observed_tokens": 289,
+        "boundary_calls": 2,
+        "boundary_tokens": 116,
         "cf_steps": 3,
         "cf_tokens": 173,
         "verify_tokens": 3
       },
       {
         "seed": 44,
-        "observed_steps": 7,
-        "observed_tokens": 437,
-        "boundary_calls": 4,
-        "boundary_tokens": 264,
-        "cf_steps": 3,
-        "cf_tokens": 173,
+        "observed_steps": 6,
+        "observed_tokens": 303,
+        "boundary_calls": 2,
+        "boundary_tokens": 116,
+        "cf_steps": 4,
+        "cf_tokens": 187,
         "verify_tokens": 3
       }
     ],
-    "observed_steps_per_run": 7.333,
-    "observed_tokens_per_run": 427.0,
-    "boundary_calls_per_run": 4.0,
-    "boundary_tokens_per_run": 248.333,
+    "observed_steps_per_run": 5.333,
+    "observed_tokens_per_run": 292.333,
+    "boundary_calls_per_run": 2.0,
+    "boundary_tokens_per_run": 114.667,
     "cf_steps_per_run": 3.333,
-    "cf_tokens_per_run": 178.667
+    "cf_tokens_per_run": 177.667
   },
   "sensitivity": {
     "observed": {
-      "steps_per_run_D": 4.533,
-      "steps_per_run_A": 3.233,
-      "step_ratio": 1.4021,
-      "tokens_per_run_D": 177.27,
-      "tokens_per_run_A": 202.43,
-      "token_ratio": 0.8757
+      "steps_per_run_D": 3.767,
+      "steps_per_run_A": 3.1,
+      "step_ratio": 1.2151,
+      "tokens_per_run_D": 144.8,
+      "tokens_per_run_A": 180.87,
+      "token_ratio": 0.8006
     },
     "d_only_counterfactual": {
-      "steps_per_run_D": 4.133,
-      "step_ratio": 1.2784,
-      "tokens_per_run_D": 152.43,
-      "token_ratio": 0.753
+      "steps_per_run_D": 3.567,
+      "step_ratio": 1.1505,
+      "tokens_per_run_D": 133.33,
+      "token_ratio": 0.7372
     },
     "step_ratio_band": [
-      1.2784,
-      1.4021
+      1.1505,
+      1.2151
     ],
     "token_ratio_band": [
-      0.753,
-      0.8757
+      0.7372,
+      0.8006
     ],
     "conclusion_flips": false
   },
@@ -776,15 +707,15 @@
       {
         "condition": "raw_shell",
         "seed": 42,
-        "recorded_success": false,
-        "recorded_reason": "file_contains src/index.ts",
+        "recorded_success": true,
+        "recorded_reason": "all ok",
         "reconstructed": true,
         "how": "inline python write",
-        "final_body": "export function add(a: number, b: number): number {\n  const x: number = a + b;\n  return x;\n}\n",
-        "predicate_pass": false,
-        "predicate_reason": "file_contains src/index.ts",
+        "final_body": "export function add(a: number, b: number): number {\n  return a + b;\n}\n",
+        "predicate_pass": true,
+        "predicate_reason": "all ok",
         "removes_type_error": true,
-        "keeps_intermediate_binding": true
+        "keeps_intermediate_binding": false
       },
       {
         "condition": "verseshell_aci",
@@ -802,15 +733,15 @@
       {
         "condition": "raw_shell",
         "seed": 43,
-        "recorded_success": true,
-        "recorded_reason": "all ok",
+        "recorded_success": false,
+        "recorded_reason": "file_contains src/index.ts",
         "reconstructed": true,
         "how": "inline python write",
-        "final_body": "export function add(a: number, b: number): number {\n  return a + b;\n}\n",
-        "predicate_pass": true,
-        "predicate_reason": "all ok",
+        "final_body": "export function add(a: number, b: number): number {\n  const x: number = a + b;\n  return x;\n}\n",
+        "predicate_pass": false,
+        "predicate_reason": "file_contains src/index.ts",
         "removes_type_error": true,
-        "keeps_intermediate_binding": false
+        "keeps_intermediate_binding": true
       },
       {
         "condition": "verseshell_aci",

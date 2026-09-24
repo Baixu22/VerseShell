@@ -74,8 +74,22 @@
   Claim C22 re-runs every bare name that PATH shadows (plus its `.cmd` control)
   through the real `exec.run`, fail-closed. Verified: `npm` / `npx` / `yarn` /
   `pnpm` / `corepack --version` all exit 0, and C18's rustup shim invariant still
-  holds. The stored live evidence predates the fix, so C12 reports it stale until
-  the baseline is re-measured — no D-side live number may be quoted before that.
+  holds. The stored live evidence predated the fix, so it was re-measured in the
+  same round (see the next entry).
+- **Re-measured after the PATHEXT fix** (120 rows, `api_error` 0, seeds 42/43/44,
+  same model `sn-glm-5-3-flash`): condition D fell to **3.77 tool calls and 144.8
+  observation tokens per run** (from 4.53 / 177.3), with raw shell at 3.10 / 180.9
+  — a D/A tool ratio of **1.215** and a token ratio of **0.801**. `exec.run`
+  dropped from 50 calls / 2121 tokens to **33 / 917**, and failed execs from
+  21 / 1735 to **5 / 495**: the six bare-`npm`/`npx` launch failures C21 had
+  counted are gone, and `ts_package_script_fail` now passes `npm test` on the
+  first try (5 steps / 172 tokens -> 4 / 137). D's success rate this round
+  (0.50 against A's 0.6333) is **not** attributable to the fix: three
+  `python_fix_pytest_fail` runs spent their entire output budget on reasoning
+  (0-1 tool calls), two `python_noisy_install_summary` runs missed the file
+  predicate, and the previous baseline had the same mechanism in two other rows.
+  The paired `--exclude-tools read_files` arm is noisier still (one raw-shell row
+  at 16007 tokens dominates its A mean), so only the with-arm ratios are quoted.
 - **Re-measured after the shim fix** (120 rows, `api_error` 0, seeds 42/43/44):
   condition D now uses **177.3 observation tokens per run against raw shell's
   202.4** — a D/A token ratio of **0.876**, the first reading below 1 in five

@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.exec-failure-breakdown/v1",
-  "generated_at": "2026-09-24T12:23:00.223486+00:00",
+  "generated_at": "2026-09-24T14:33:02.380720+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
@@ -23,7 +23,7 @@
       "bench/aci/results/live_ab_without_read_files.json",
       "tools/exec_failure_breakdown.py"
     ],
-    "fingerprint": "70855b9e4457925f11419a363227ea9dc7a8d44d5964b7476a24470aa4fe78f1"
+    "fingerprint": "50ec7b6d67916111fe9a86e943f0f4e466b5a62acfef01dc2d4edb4308976224"
   },
   "shim_facts": [
     {
@@ -78,7 +78,7 @@
       "cargo check": {
         "ok": true,
         "exit_code": 0,
-        "output_head": "Checking bench_fix v0.1.0 (C:\\Users\\27933\\AppData\\Local\\Temp\\tf45-replay-rust_fix_compile_error-f9mclr6q)\n    Finished `",
+        "output_head": "Checking bench_fix v0.1.0 (C:\\Users\\27933\\AppData\\Local\\Temp\\tf45-replay-rust_fix_compile_error-p_3jfy9u)\n    Finished `",
         "answered_as_rustup": false
       },
       "rustc --version": {
@@ -281,161 +281,77 @@
   },
   "with_read_files": {
     "ok": {
-      "calls": 29,
-      "tokens": 386,
-      "tokens_per_call": 13.31
+      "calls": 28,
+      "tokens": 422,
+      "tokens_per_call": 15.07
     },
     "failed": {
-      "calls": 21,
-      "tokens": 1735,
-      "tokens_per_call": 82.62,
-      "share_of_exec_tokens": 0.818
+      "calls": 5,
+      "tokens": 495,
+      "tokens_per_call": 99.0,
+      "share_of_exec_tokens": 0.5398
     },
     "classes": {
       "first_diagnostic": {
-        "calls": 21,
-        "tokens": 1735,
+        "calls": 5,
+        "tokens": 495,
         "share_of_failure_tokens": 1.0
       }
     },
     "per_task_failed": {
       "ts_fix_type_error": {
-        "calls": 9,
-        "tokens": 697
+        "calls": 3,
+        "tokens": 297
       },
       "python_edit_and_retest": {
-        "calls": 6,
-        "tokens": 594
-      },
-      "python_fix_pytest_fail": {
-        "calls": 3,
-        "tokens": 300
-      },
-      "ts_package_script_fail": {
-        "calls": 3,
-        "tokens": 144
+        "calls": 2,
+        "tokens": 198
       }
     },
     "top_failing_commands": [
-      [
-        "pytest -q",
-        6
-      ],
       [
         "npx tsc --noEmit",
         3
       ],
       [
-        "npm test",
-        3
-      ],
-      [
-        "pytest -q --rootdir",
+        "pytest -q",
         2
-      ],
-      [
-        "node node_modules/typescript/bin/tsc --noEmit",
-        2
-      ],
-      [
-        "pytest --collect-only -q",
-        1
-      ],
-      [
-        "npm install --save-dev",
-        1
-      ],
-      [
-        "npx.cmd tsc --noEmit",
-        1
-      ],
-      [
-        "npm install --no-audit",
-        1
-      ],
-      [
-        "npm install",
-        1
       ]
     ]
   },
   "without_read_files": {
     "ok": {
-      "calls": 25,
-      "tokens": 328,
-      "tokens_per_call": 13.12
+      "calls": 16,
+      "tokens": 280,
+      "tokens_per_call": 17.5
     },
     "failed": {
-      "calls": 22,
-      "tokens": 1629,
-      "tokens_per_call": 74.05,
-      "share_of_exec_tokens": 0.8324
+      "calls": 5,
+      "tokens": 498,
+      "tokens_per_call": 99.6,
+      "share_of_exec_tokens": 0.6401
     },
     "classes": {
       "first_diagnostic": {
-        "calls": 22,
-        "tokens": 1629,
+        "calls": 5,
+        "tokens": 498,
         "share_of_failure_tokens": 1.0
       }
     },
     "per_task_failed": {
-      "ts_fix_type_error": {
-        "calls": 11,
-        "tokens": 814
+      "python_fix_pytest_fail": {
+        "calls": 3,
+        "tokens": 300
       },
       "python_edit_and_retest": {
-        "calls": 6,
-        "tokens": 471
-      },
-      "python_fix_pytest_fail": {
         "calls": 2,
-        "tokens": 200
-      },
-      "ts_package_script_fail": {
-        "calls": 3,
-        "tokens": 144
+        "tokens": 198
       }
     },
     "top_failing_commands": [
       [
         "pytest -q",
-        4
-      ],
-      [
-        "npx tsc --noEmit",
-        3
-      ],
-      [
-        "npm test",
-        3
-      ],
-      [
-        "npx.cmd tsc --noEmit",
-        2
-      ],
-      [
-        "tsc --noEmit",
-        2
-      ],
-      [
-        "node node_modules/typescript/bin/tsc --noEmit",
-        1
-      ],
-      [
-        "npm install",
-        1
-      ],
-      [
-        "node C:\\Users\\27933\\AppData\\Roaming\\nvm\\v24.15.0\\node_modules\\typescript\\bin\\tsc --noEmit",
-        1
-      ],
-      [
-        "bash -lc PYTHONPATH=. pytest -q",
-        1
-      ],
-      [
-        "pytest -q tests/",
-        1
+        5
       ]
     ]
   }

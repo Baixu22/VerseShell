@@ -9,10 +9,12 @@ answers the three questions TF-0082 asks, deterministically and without any API
 call, from the stored live trajectories:
 
   * **acquisition_chain** — which `exec.run` calls on the two ts tasks exist only
-    because of the environment, split by root cause: a bare `npm` / `npx` name
-    that this machine cannot launch (an extensionless shim shadows the `.cmd` one
-    on PATH), a genuinely missing TypeScript, the install workaround, and the one
-    verification call the task actually needs.
+    because of the environment: a genuinely missing TypeScript (a failed `tsc`
+    probe), the install that fixes it, and the one verification call the task
+    actually needs. It also counts how often the model reaches for a bare
+    `npm` / `npx` name, which PATH shadows with an extensionless shim — that was
+    the launch defect C22 now fences (TF-0083), so it is reported as an
+    observation and never charged as a cost here.
   * **counterfactual / sensitivity** — what the task would cost with the toolchain
     present, and whether that moves either headline D/A ratio (if a conclusion
     flips, the boundary is not merely a caveat);
@@ -151,15 +153,19 @@ def bare_shim_name(step: dict) -> str | None:
 
 
 def classify(step: dict, shadowed: set[str], condition: str) -> str | None:
-    """Name the boundary a step belongs to, or None when it is ordinary work.
+    """Name the *observable* bucket a step belongs to, or None for ordinary work.
 
-    Rules, in order (each is a statement about the command, not about intent):
-      1. a bare npm-family argv[0] that this machine shadows -> the launcher picks
-         the extensionless shim, so the call cannot start;
-      2. anything mentioning an install through npm / npm-cli.js -> acquisition;
-      3. anything mentioning `tsc` or `node_modules` -> toolchain work: failed is
-         the missing-toolchain diagnostic, succeeded is the verification the task
-         actually needs.
+    It deliberately does **not** infer why a call failed. After the C22 fix a bare
+    `npm` / `npx` call starts fine and can still fail as a command (no local
+    TypeScript yet), so a failure is never attributed to the launcher here — C22's
+    probe is what proves the launch itself works. Rules, in order:
+
+      1. an install through npm / npm-cli.js -> `toolchain_install`;
+      2. anything mentioning `tsc` or `node_modules` -> `toolchain_verify` when it
+         succeeded, `toolchain_probe_failed` when it did not;
+      3. a bare npm-family argv[0] that PATH shadows -> `shadowed_bare_name`, kept
+         as an observation (how often the model reaches for a bare name) rather
+         than a cost bucket.
     Raw shell folds read/run/write into one command, so its buckets are labelled
     as multiplexed rather than cleanly separable.
     """
@@ -167,15 +173,15 @@ def classify(step: dict, shadowed: set[str], condition: str) -> str | None:
         return None
     text = step_text(step).lower()
     ok = bool(step.get("aci_ok")) if condition == "verseshell_aci" else None
-    name = bare_shim_name(step)
-    if name and name in shadowed:
-        return "bare_name_launch" if ok is not True else "bare_name_launched_ok"
     if any(hint in text for hint in INSTALL_HINTS) and ("npm" in text or "npm-cli" in text):
         return "toolchain_install"
     if "tsc" in text or "node_modules" in text:
         if condition == "verseshell_aci":
-            return "toolchain_verify" if ok else "toolchain_missing"
+            return "toolchain_verify" if ok else "toolchain_probe_failed"
         return "raw_shell_toolchain"
+    name = bare_shim_name(step)
+    if name and name in shadowed:
+        return "shadowed_bare_name"
     return None
 
 
@@ -238,8 +244,10 @@ def chain_report(rows: list[dict], task_id: str, shadowed: set[str]) -> dict:
 # ── counterfactual + headline sensitivity ──
 
 def counterfactual(rows: list[dict], task_id: str, shadowed: set[str]) -> dict:
-    """D's ts task if the toolchain were present: keep the verification, drop the rest."""
+    """D's ts task if the fixture shipped the toolchain: keep the verification, drop
+    the failed probe and the install that only exist because `node_modules` is absent."""
     runs = [r for r in rows if r["task_id"] == task_id and r["condition"] == "verseshell_aci"]
+    dropped = ("toolchain_install", "toolchain_probe_failed")
     per_run = []
     for row in runs:
         artifact_calls = artifact_tokens = 0
@@ -251,8 +259,9 @@ def counterfactual(rows: list[dict], task_id: str, shadowed: set[str]) -> dict:
             if klass == "toolchain_verify":
                 verify_tokens += step_tokens(step)
                 continue
-            artifact_calls += 1
-            artifact_tokens += step_tokens(step)
+            if klass in dropped:
+                artifact_calls += 1
+                artifact_tokens += step_tokens(step)
         observed_steps = int(row.get("tool_calls", 0))
         observed_tokens = int(row.get("observation_tokens", 0))
         per_run.append({
@@ -261,8 +270,8 @@ def counterfactual(rows: list[dict], task_id: str, shadowed: set[str]) -> dict:
             "observed_tokens": observed_tokens,
             "boundary_calls": artifact_calls,
             "boundary_tokens": artifact_tokens,
-            # `artifact_calls` already excludes the one verification call the task
-            # needs, so keeping it is simply "do not drop it" — no `+ 1`.
+            # the verification the task needs is already excluded from
+            # `artifact_calls`, so keeping it is simply "do not drop it"
             "cf_steps": observed_steps - artifact_calls,
             "cf_tokens": observed_tokens - artifact_tokens,
             "verify_tokens": verify_tokens,
@@ -522,11 +531,14 @@ def main(argv: list[str] | None = None) -> int:
             "inputs": [str(p.relative_to(ROOT)) for p in ARMS.values()],
             "arm": "the chain table is computed on the with_read_files arm, the primary "
                    "record; the paired control arm only sizes the effect of hiding a tool",
-            "classify": "exec steps on the ts tasks: bare npm-family argv[0] shadowed by an "
-                        "extensionless shim -> bare_name_launch; npm/npm-cli install -> "
-                        "toolchain_install; `tsc`/`node_modules` -> toolchain_missing when it "
-                        "failed and toolchain_verify when it succeeded",
-            "counterfactual": "keep one verification call, drop the rest",
+            "classify": "exec steps on the ts tasks, by what the command *is*: an npm/npm-cli "
+                        "install -> toolchain_install; anything mentioning `tsc`/`node_modules` "
+                        "-> toolchain_verify when it succeeded, toolchain_probe_failed when it "
+                        "did not; a bare npm-family argv[0] that PATH shadows -> "
+                        "shadowed_bare_name (an observation, not a cost bucket). A failure is "
+                        "never attributed to the launcher here — C22's probe owns that claim",
+            "counterfactual": "keep the verification the task needs, drop the failed probe and "
+                              "the install that only exist because `node_modules` is absent",
             "sensitivity": "replace only D's ts task with the counterfactual; A pays the same "
                            "boundary inside its own commands, so the band is a lower bound on "
                            "the post-fix step ratio",
