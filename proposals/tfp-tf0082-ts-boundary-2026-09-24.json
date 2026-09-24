@@ -1,0 +1,252 @@
+{
+  "applied_at": "2026-09-24T12:11:51.288648Z",
+  "base_graph_hash": "45e3bd713c3a9ff2a8be1a43954b29596aa3e789fcbcea448662a05e2dce10b9",
+  "base_summary": {
+    "edge_count": 130,
+    "node_count": 82,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "量化（确定性，无 API）：`python tools/ts_fixture_audit.py --out eval/ts_fixture_audit.json` → D `ts_fix_type_error` 7.333 步 / 427.0 tok，其中边界 5.0 次调用 / 251.3 tok：裸名启动失败 2.0 次 / 96.0 tok、缺 typescript 1.0 次 / 136.3 tok、安装绕行 1.0 次 / 16.0 tok、真实验证 1.0 次 / 3.0 tok",
+          "全量分解：3 次 D 运行共 15 次 exec / 754 tok = 裸名 6 次 / 288 tok + 缺 typescript 与安装绕行 6 次 / 457 tok + 真实验证 3 次 / 9 tok",
+          "A 也付这条边界：3 次运行 11 次工具链相关调用 / 990 tok（raw shell 把读/跑/写折进一条命令，只能当上界）",
+          "敏感性：剔除 D 侧边界后该任务 3.333 步 / 178.7 tok；全量 D/A 步骤比 1.402 → 1.278、token 比 0.876 → 0.753，`conclusion_flips=false`（band [1.278, 1.402] / [0.753, 0.876]）",
+          "产品侧主因：`src/process_command.rs::resolve_candidate` 先 `if candidate.is_file() { return Ok(candidate) }`（131-133 行），PATHEXT 分支（135-144）只在无扩展名文件不存在时才走；本机 `npm`/`npx`/`yarn`/`pnpm`/`corepack` 都有无扩展名文件与 `.cmd` 兄弟，所以裸名必然选错",
+          "live 证据：`ts_package_script_fail` D 3/3 次 `[\"npm\",\"test\"]` ok=False 48 tok → 紧接 `[\"npm.cmd\",\"test\"]`/`[\"cmd\",\"/c\",\"npm\",\"test\"]` ok=True 22 tok",
+          "成功谓词缺口：`all(file_contains \"return a + b\", file_not_contains \"const x: string\")` 是 GOLDEN 字面匹配；6 次运行 5 次改对却判失败（D 0/3、A 1/3）；`optional_verify` 在 live runner 第 979 行硬编码 None，从不执行",
+          "C12 机检：`eval/ts_fixture_audit.json` 的指纹覆盖 `src/process_command.rs`、`bench/aci/tasks/ts_*.json`、两个 ts fixture 与 live 产物——改 fixture 或解析会让 live 证据直接判陈旧",
+          "门禁：`python tools/claim_gate.py` 14/14 exit 0（C12 11/11 fresh、C7 cargo test 绿）；`python tools/readme_claims_check.py` 17/17 pass",
+          "文档：新增 C21；更新 C13 边界⑦、C19 边界①、C20 边界③、C12 的产物清单（十份→十一份）与 §2/§4；`tools/claim_gate.py::EVIDENCE_ARTIFACTS` 加入 `eval/ts_fixture_audit.json`"
+        ],
+        "next_action": "无。后续：裸名解析缺陷 TF-0083、成功谓词缺口 TF-0084、两者的全量重跑 TF-0085。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "结论：本轮**不改任务集**，把边界量化并登记为 C21，另开两个缺口节点与一个重跑节点。量化：`ts_fix_type_error` 的探测链在 3 次 D 运行里是 15 次 exec / 754 tok，其中 6 次 / 288 tok 是**裸名 `npm`/`npx` 启动失败**（PATH 上无扩展名的 POSIX shim 抢在 `npm.cmd` 前面被选中，属产品侧解析缺陷）、6 次 / 457 tok 是**缺 `node_modules` 的失败与安装绕行**、只有 3 次 / 9 tok 是任务真正需要的验证。三种处置的裁决：①**补 node_modules 否决**——它把「新克隆要先装依赖」这段真实工作从任务里拿掉，收益只有 D/A 步骤比 1.402→1.278、token 比 0.876→0.753（两条结论都不翻转），代价是仓库背上工具链二进制、且 C12 会把全部 live 证据判陈旧而必须整轮重跑；②**改 prompt 否决**——它不解决环境缺失（`optional_verify` 仍是 `npx tsc`），还把任务从「修类型错误」降级成「按字面改写」；③**保持现状并写明边界采纳**——边界已逐类量化，「改任务集必须整轮重跑」由 C12 指纹机检而非靠约定。顺带发现两个更值钱的缺口：裸名解析是**产品缺陷**（raw shell 走 cmd.exe 不受影响，D 在每个 npm/npx 任务上白费一次调用），成功谓词是 **GOLDEN 字面匹配**（6 次运行里 5 次改对了却判失败，D 0/3）。"
+      },
+      "id": "TF-0082"
+    },
+    {
+      "action": "add_node",
+      "alias": "bare-name-shim",
+      "node": {
+        "acceptance_criteria": [
+          "先加一个今天会失败的回归用例：同一目录里同时有无扩展名 `sample` 与 `sample.CMD` 时，`resolve_process_command([\"sample\"])` 必须按 PATHEXT 解析到 `sample.CMD` 并按批处理启动",
+          "修 `resolve_candidate`：无扩展名候选先按 PATHEXT 顺序找，全部不存在时才回退到无扩展名文件",
+          "C18 的命名不变量不被破坏（`cargo.exe` 这类带扩展名的 symlink 仍按调用名启动）：`cargo test --lib process_command` 与 C18 门禁全绿",
+          "重跑全量 live 基线并更新 C13/C15/C19/C20/C21 与 C12 指纹，写明与历轮不可比"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "让测量反映能力而不是环境",
+          "validation_plan": [
+            "先加会失败的回归用例",
+            "改 resolve_candidate",
+            "cargo test --lib process_command + C18 门禁",
+            "全量 live 重跑"
+          ],
+          "why_not_enough": "还没写回归用例，也没验证修完 PATHEXT 优先级后 C18 的命名不变量仍然成立",
+          "why_this_task": "裸名 npm/npx 失败是产品侧缺陷，raw shell 不受影响，直接制造 D 的额外调用与 token"
+        },
+        "confidence": 0.9,
+        "context_tags": [
+          "windows",
+          "exec",
+          "shim"
+        ],
+        "difficulty": "medium",
+        "display_order": 220,
+        "evidence": [
+          "代码：`src/process_command.rs::resolve_candidate` 131-133 行先返回 `is_file()` 的无扩展名候选，PATHEXT 分支（135-144 行）只在它不存在时才走",
+          "机器事实：`eval/ts_fixture_audit.json::path_shadow` 列出 npm/npx/yarn/pnpm/corepack 在 `C:\\Program Files\\nodejs`、`C:\\Users\\...\\nvm\\v24.15.0`、`C:\\Users\\...\\AppData\\Roaming\\npm` 都有无扩展名文件与 `.cmd` 兄弟",
+          "live 证据：`ts_package_script_fail` D 3/3 次裸名 `npm test` 失败（48 tok），紧接的 `.cmd`/`cmd /c` 形式成功（22 tok）",
+          "live 证据：`ts_fix_type_error` D 3/3 次各有 `[\"npx\",\"tsc\",\"--noEmit\"]` 与 `[\"npm\",\"install\",...]` 失败（共 6 次 / 288 tok）",
+          "来源：TF-0082 的 C21 分解（`acquisition_chain` 的 `bare_name_launch` 桶）"
+        ],
+        "id": "TF-0083",
+        "kind": "follow_up",
+        "next_action": "先写会失败的回归用例，再改 `resolve_candidate`；改完与 TF-0084 合并成一次全量 live 重跑（TF-0085）。",
+        "non_goals": [
+          "不为绕开缺陷去改 prompt 或 fixture（那会把产品缺陷固化进基线）",
+          "不放宽 E_EXEC_BAD_ARG 的控制字符拒绝"
+        ],
+        "priority": 2,
+        "purpose": "让 `exec.run([\"npm\", ...])` / `[\"npx\", ...]` 在这台机器上像 raw shell 一样能用，消掉 D 在 npm/npx 任务上白费的调用与 token。",
+        "source_sessions": [
+          "ses_verseshell-tf0082-tsboundary-2026-09-24"
+        ],
+        "status": "ready",
+        "summary": "本机 PATH 上同时存在无扩展名 `npm`（POSIX shim）与 `npm.cmd`：`src/process_command.rs::resolve_candidate` 在 `candidate.is_file()` 为真时直接返回无扩展名文件，只有它不存在时才按 PATHEXT 找，于是 `exec.run([\"npm\",\"test\"])` 必然启动失败。raw shell 走 cmd.exe 不受影响，所以这是**产品侧**的不对称：D 在每个用到 npm/npx 的任务上先白费一次调用。live 证据：`ts_package_script_fail` 3/3 次先失败一条 `npm test`（48 tok）再改用 `npm.cmd`/`cmd /c`；`ts_fix_type_error` 3/3 次各有 2 次裸名失败（共 6 次 / 288 tok）。被遮蔽的裸名：npm、npx、yarn、pnpm、corepack。",
+        "title": "缺口：exec.run 的裸名解析优先选无扩展名的 npm/npx，Windows 上必然启动失败"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "success-predicate",
+      "node": {
+        "acceptance_criteria": [
+          "成功谓词改成行为判定：同一 fixture 的三种合法修复形态（GOLDEN 直返、保留中间变量、改名）都以 `tsc --noEmit` 退出码为准",
+          "无法执行 `tsc` 时显式记为「未验证」而不是判失败（避免把环境缺失算成能力失败）",
+          "用本轮 6 条已存轨迹重算成功判定，给出新旧口径的成功率差异",
+          "live runner 要么执行 `optional_verify`，要么在行里写明它没有执行（不得静默置 None）"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "让测量反映能力而不是环境",
+          "validation_plan": [
+            "定义行为谓词",
+            "离线 typescript 实测三种修复形态",
+            "用已存轨迹重算成功率差异",
+            "全量 live 重跑"
+          ],
+          "why_not_enough": "还没定义行为判定的离线落地方式，也没实测三种修复形态真的都过 tsc",
+          "why_this_task": "成功谓词是 GOLDEN 字面匹配，把等价且正确的修复判为失败，直接扭曲 C13 的成功率口径"
+        },
+        "confidence": 0.85,
+        "context_tags": [
+          "bench",
+          "task-set",
+          "success-predicate"
+        ],
+        "difficulty": "low",
+        "display_order": 230,
+        "evidence": [
+          "谓词原文：`bench/aci/tasks/ts_fix_type_error.json::success` = all(file_contains `return a + b`, file_not_contains `const x: string`)",
+          "GOLDEN 就是 `return a + b;`（`bench/aci/fixtures/ts_fix_type_error/GOLDEN/src/index.ts`）；pristine 是 `const x: string = a + b; return x;`",
+          "复算：`eval/ts_fixture_audit.json::success_predicate` 给出 5 次「removes_type_error 为真但 predicate_pass 为假」，与记录成功逐条一致（D 0/3、A 1/3）",
+          "`bench/aci/runners/live_agent_loop.py` 第 979 行硬编码 `\"optional_verify\": None`；`check_success` 本身支持 `command_exit_0`，mock 侧 `run_suite.py` 有 `--optional-verify` 开关",
+          "边界：本工具**不执行 tsc**（fixture 无离线 typescript、本机也无全局 tsc），所以「改对了」目前是语言事实，实测需要先落地离线工具链"
+        ],
+        "id": "TF-0084",
+        "kind": "follow_up",
+        "next_action": "先决定「行为判定 + 离线工具链」的落地顺序（与 TF-0085 的前置条件绑定），再与 TF-0083 合并成一次全量重跑。",
+        "non_goals": [
+          "不为了让 D 好看而放宽成功判定（改成行为判定后三种形态都必须真过 tsc）"
+        ],
+        "priority": 2,
+        "purpose": "让成功判定测 prompt 承诺的行为（`tsc --noEmit` 退出码），而不是测是否复刻了 GOLDEN 补丁。",
+        "source_sessions": [
+          "ses_verseshell-tf0082-tsboundary-2026-09-24"
+        ],
+        "status": "ready",
+        "summary": "任务谓词是 `all(file_contains \"return a + b\", file_not_contains \"const x: string\")`，而 `return a + b` 就是 `GOLDEN/src/index.ts` 的字面内容。6 次 live 运行（D 3 + A 3）里有 5 次把 `const x: string` 改成 `const x: number`——类型错误确实消失——却因为保留了中间变量 `const x` 而判失败（D 0/3、A 1/3）。同时 prompt 承诺的 `tsc --noEmit succeeds` 只写在 `optional_verify` 里，live runner 硬编码 `\"optional_verify\": None`，从不执行它：成功率口径既不是行为判定，也没跑过它承诺的验证。",
+        "title": "缺口：ts_fix_type_error 的成功谓词是 GOLDEN 字面匹配，6 次里 5 次「改对了」被判失败"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "live-rerun",
+      "node": {
+        "acceptance_criteria": [
+          "用 `sn-glm-5-3-flash` 跑 10 任务 × 2 条件 × 3 seeds × 2 臂；先核对 `/v1/models`，任一行 `api_error` 即按 `splice_live_cells.py` 补跑后合并",
+          "更新 C13/C15/C19/C20/C21 与 C12 指纹，`claim_gate` 与 `readme_claims_check` 全绿",
+          "报告里逐条写明与 2026-09-24 之前各轮的不可比性（fixture 与模型不变，变的是产品解析与成功口径）",
+          "若最终决定给 ts fixture 补离线 typescript，必须在本节点内完成并用 `tsc --noEmit` 实测三种修复形态"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.8,
+          "user_goal": "让测量反映能力而不是环境",
+          "validation_plan": [
+            "核对端点模型",
+            "跑 120 行",
+            "合并并更新声明与指纹",
+            "claim_gate + readme_claims_check"
+          ],
+          "why_not_enough": "前置修复还没做，端点与 fixture 口径也还没最终确定",
+          "why_this_task": "任何改产品解析或任务谓词的修复都会让已存 live 证据失效，必须一次同口径重跑才能继续引用数字"
+        },
+        "confidence": 0.8,
+        "context_tags": [
+          "bench",
+          "live",
+          "evidence"
+        ],
+        "difficulty": "medium",
+        "display_order": 240,
+        "evidence": [
+          "C12 指纹：`bench/aci/results/latest_live.json` 的 evidence.globs = src/**/*.rs、Cargo.toml、bench/aci/tasks/*.json、bench/aci/fixtures/**/*、bench/aci/runners/live_agent_loop.py",
+          "上一轮规模：with 臂 60 行合计 81.2 分钟；`live_config` = model sn-glm-5-3-flash、temperature 0、seed 42、repeat 3、max_turns 8",
+          "端点核对（2026-09-24）：`GET /v1/models` 仍列出 `sn-glm-5-3-flash`",
+          "`bench/aci/runners/merge_live_runs.py` 遇 `api_error` 即 exit 2；`bench/aci/runners/splice_live_cells.py` 按 (task, condition, seed) 补格"
+        ],
+        "id": "TF-0085",
+        "kind": "follow_up",
+        "next_action": "等 TF-0083/TF-0084 完成后启动；先核对端点模型清单，再决定是否同时补 fixture 的离线 typescript。",
+        "priority": 3,
+        "purpose": "产品侧解析修复与成功谓词修复都会让已存 live 证据失效，用一次同口径重跑把它们重新变成可引用的数字。",
+        "source_sessions": [
+          "ses_verseshell-tf0082-tsboundary-2026-09-24"
+        ],
+        "status": "ready",
+        "summary": "C12 的指纹已经覆盖 `src/**/*.rs`、`bench/aci/tasks/*.json` 与 `bench/aci/fixtures/**/*`，所以只要 TF-0083 改 Rust 或 TF-0084 改任务谓词，`bench/aci/results/latest_live.json` 就会被判陈旧、门禁直接失败——重跑不是可选项。上一轮全量 live 用 `sn-glm-5-3-flash`（本地端点，端点仍在服务）：10 任务 × 2 条件 × 3 seeds × 2 臂 = 120 行，with 臂 60 行合计 81.2 分钟运行时间。",
+        "title": "TF-0083/TF-0084 落地后的一次全量 live 重跑与声明重登记"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "created_from_session": "ses_verseshell-tf0082-tsboundary-2026-09-24",
+        "reason": "裸名 shim 解析缺陷是 TF-0082 的探测链分解里新发现的产品侧主因"
+      },
+      "from": "TF-0083",
+      "to": "TF-0082",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "created_from_session": "ses_verseshell-tf0082-tsboundary-2026-09-24",
+        "reason": "成功谓词的 GOLDEN 字面匹配是 TF-0082 审计同一 fixture 时发现的成功率口径缺口"
+      },
+      "from": "TF-0084",
+      "to": "TF-0082",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.8,
+        "created_from_session": "ses_verseshell-tf0082-tsboundary-2026-09-24",
+        "reason": "重跑节点是 TF-0082 裁决「保持现状」后必然留下的收尾动作"
+      },
+      "from": "TF-0085",
+      "to": "TF-0082",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "created_from_session": "ses_verseshell-tf0082-tsboundary-2026-09-24",
+        "reason": "重跑必须包含裸名解析修复，否则新基线仍然带着这条产品侧缺陷"
+      },
+      "from": "TF-0085",
+      "to": "TF-0083",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "created_from_session": "ses_verseshell-tf0082-tsboundary-2026-09-24",
+        "reason": "重跑必须包含成功谓词修复，否则新基线的成功率仍是旧口径"
+      },
+      "from": "TF-0085",
+      "to": "TF-0084",
+      "type": "depends_on"
+    }
+  ],
+  "created_at": "2026-09-24T12:11:45.825235Z",
+  "proposal_id": "TFP-tf0082-ts-boundary-2026-09-24",
+  "rationale": "TF-0082 要求把「ts fixture 缺 node_modules 却承诺 tsc 成功」这条边界量化、给出三种处置的代价与可比性影响并落结论。本轮做了确定性分解（tools/ts_fixture_audit.py + eval/ts_fixture_audit.json）：探测链 15 次 exec / 754 tok = 产品侧裸名解析失败 6 次 / 288 tok + 缺 typescript 与安装绕行 6 次 / 457 tok + 真实验证 3 次 / 9 tok；剔除后 D/A 步骤比 1.402→1.278、token 比 0.876→0.753，两条结论都不翻转；改 fixture 会被 C12 直接判为 live 证据陈旧。因此裁决为「保持现状 + 写明边界」（登记 C21），并把它发现的两个更值钱的缺口各开一个节点：裸名 shim 解析缺陷（产品侧）与 GOLDEN 字面成功谓词，两者的全量重跑由第三个节点承载。",
+  "session_id": "ses_verseshell-tf0082-tsboundary-2026-09-24",
+  "status": "applied"
+}
