@@ -1,0 +1,53 @@
+{
+  "applied_at": "2026-09-24T11:07:30.857867Z",
+  "base_graph_hash": "d3e0664eb3d0eaa4796cf6e90a5f8b797cf2a7bde71180fae59b2496d4ba1f13",
+  "base_summary": {
+    "edge_count": 124,
+    "node_count": 78,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "失败分解（修复前）：with 臂 45 次失败 @101.44 tok = 81.7% 的 exec token；first_diagnostic 89.3%、toolchain_probe 10.7%、repeat 0",
+          "根因：cargo/rustc/cargo-clippy/rustfmt 都是指向 rustup.exe 的符号链接，resolve_candidate 的 canonicalize 把链接解析掉",
+          "修复：src/process_command.rs 启动路径保留 PATH 解析结果，canonical 仅用于 audited_executable；2 个回归测试；cargo test 全量 exit 0",
+          "修复后复测（两臂 × 3 seeds，120 行，api_error 0）：D 177.27 vs A 202.43 tok/run（D/A 0.8757），成功率 0.6333 vs 0.6333",
+          "exec.run 76→50 次、5585→2121 tok；失败 45→21 次、4565→1735 tok，Rust 任务归零；差距分桶 exec 由 +70.43 变 −74.63",
+          "门禁：claim_gate 14/14 exit 0（C12 9/9 fresh、C18 1.0）、readme_claims_check 17/17、cargo test exit 0",
+          "提交：commit 13279f5（内容 29 文件）+ b4756a8（森林记录）；工作区干净"
+        ],
+        "next_action": "无。剩余不对称见 TF-0078（D 步骤数 1.40×，token 已 0.876×）。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "本轮完成：失败 exec 分解把根因定位到产品缺陷（exec 启动时 canonicalize 掉 rustup 软链 shim，使 D 无法运行 cargo/rustc 而 A 不受影响），修复后 D 的观察 token 首次低于 A（177.27 vs 202.43，D/A 0.876），exec 从差距最大正项翻转为最大负项（−74.63）。新增 C18（有门槛）与 C19（无门槛），C12 覆盖 9 份产物，旧数字的不可比性已写进 C13 失效边界。三项门禁全绿。"
+      },
+      "id": "TF-0073"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "claim_gate：14/14 gated claims pass，exit 0（C12 由 8 份扩到 9 份，全部 fresh；C18 ==1.00、C14 0.2635、C16 0.2112）",
+          "readme_claims_check：17/17 pass",
+          "cargo test：exit 0",
+          "森林：proposal-save → proposal-apply --yes → validate（校验通过）→ export",
+          "提交：commit 13279f5（内容）+ b4756a8（森林记录）；提交前后工作区均干净",
+          "凭据自查：本轮无新增密钥材料（git grep 里仅有的 sk- 命中是 src/safety.rs 中测试脱敏函数的假字面量）"
+        ],
+        "next_action": "无。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "收口完成：三项门禁全绿、森林校验通过并导出、内容提交 13279f5、森林记录 b4756a8、工作区干净。"
+      },
+      "id": "TF-0077"
+    }
+  ],
+  "created_at": "2026-09-24T11:07:30.743341Z",
+  "proposal_id": "TFP-tf0072-shim-fix-final-2026-09-24",
+  "rationale": "本轮交付完成并提交（commit 13279f5）：exec 启动 shim 缺陷已修复并有回归测试与 C18 门禁、失败分解工具与 C18/C19 登记、修复后同口径复测、9 份产物重生成、三项门禁全绿。收口 TF-0073 与 TF-0077，保留 TF-0078（步骤数不对称）为 ready。",
+  "session_id": "ses_verseshell-tf0072-shimfix-2026-09-24",
+  "status": "applied"
+}
