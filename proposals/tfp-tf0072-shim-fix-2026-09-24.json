@@ -1,0 +1,457 @@
+{
+  "applied_at": "2026-09-24T11:06:31.147626Z",
+  "base_graph_hash": "2aa61bc5b799c1d41190e411ebd07c759176b417583929b93393059d986668fb",
+  "base_summary": {
+    "edge_count": 114,
+    "node_count": 72,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "shimfix-round",
+      "node": {
+        "acceptance_criteria": [
+          "给出失败 exec 的逐任务/逐 profile 分解，并区分任务固有失败与模型试错",
+          "若改 reducer 或提示，必须用 live 实验证明成功率不掉、token 下降",
+          "结论写进 C15 或新声明",
+          "门禁全绿、森林收口、改动提交"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "继续缩小 D/A token 比",
+          "validation_plan": [
+            "失败分解",
+            "根因验证",
+            "修复 + 单测",
+            "修复后 live 复测"
+          ],
+          "why_not_enough": "步骤数仍是 A 的 1.40 倍",
+          "why_this_task": "读取侧被压下去后 exec 成为差距最大项（49.4%），其 81.7% 来自失败命令"
+        },
+        "confidence": 0.85,
+        "desired_outcomes": [
+          "失败 exec 的构成有可复现分解",
+          "区分「任务固有」「模型试错」「产品缺陷」三类，并给出各自证据",
+          "缺陷被修复且有回归测试与门禁",
+          "修复后按同一口径复测并更新声明"
+        ],
+        "difficulty": "high",
+        "display_order": 1801,
+        "evidence": [
+          "失败分解（修复前，with 臂）：45 次失败 @101.44 tok = 81.7% 的 exec token，first_diagnostic 89.3%、toolchain_probe 10.7%、repeat 0",
+          "根因：cargo.exe/rustc.exe/cargo-clippy.exe/rustfmt.exe 都是指向 rustup.exe 的符号链接（st_reparse_tag=0xa000000c），而 resolve_candidate 调用 canonicalize 把链接解析掉",
+          "缺陷指纹：cargo check → exit 100 且报「0 error(s), 0 warning(s)」；cargo build → 「invalid value 'build' for '[+toolchain]'」；cargo --version → 打印 rustup 1.29.1；直接子进程同样命令全部 rc=0",
+          "修复：executable 保留 PATH 解析出的启动路径（shim 名不丢），audited_executable 仍 canonical（审计身份与安全判定不变）；新增 2 个回归测试，cargo test 全量 exit 0",
+          "修复后同口径 live 复测（两臂 × 3 seeds，120 行，api_error 0）：D 177.27 vs A 202.43 tok/run（D/A 0.8757），成功率 0.6333 vs 0.6333",
+          "exec.run 由 76 次/5585 tok 降到 50 次/2121 tok；失败由 45 次/4565 tok 降到 21 次/1735 tok，Rust 任务归零",
+          "差距分桶由 exec +70.43 翻转为 exec −74.63（总差距 −17.17 tok/run，D 更省）",
+          "门禁：claim_gate 14/14 exit 0（C12 9/9 fresh、C18 1.0）、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "execution_hints": [
+          "先分解再下结论：这批失败既不是任务固有也不是试错，而是环境缺陷",
+          "凡是「命令在 A 能跑、在 D 跑不了」的差异，先怀疑 spawn 路径而不是模型"
+        ],
+        "kind": "global_task",
+        "next_action": "无。剩余不对称见 step-count-gap 节点。",
+        "non_goals": [
+          "不在没有分解数据前改 reducer",
+          "不为了让数字好看而隐藏失败"
+        ],
+        "priority": 3,
+        "purpose": "把「D 的 exec 为什么贵」查到底，并在过程中修掉真正的原因。",
+        "source_sessions": [
+          "ses_verseshell-tf0072-shimfix-2026-09-24"
+        ],
+        "status": "in_progress",
+        "summary": "失败 exec 分解后发现问题不在模型也不在任务，而在产品：exec 启动时把 rustup 的软链 shim canonicalize 掉，使 D 无法运行 cargo/rustc（A 走 cmd 不受影响）。修复后 D 的观察 token 首次低于 A（177.27 vs 202.43，D/A 0.876），exec 从差距最大正项翻转成最大负项（−74.63）。此前所有 D 侧 exec 数字受该缺陷污染，已在 C13/C15/C18/C19 写明。",
+        "title": "TF-0072 收口：exec 失败分解与 shim 启动缺陷修复"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "failure-tool",
+      "node": {
+        "acceptance_criteria": [
+          "tools/exec_failure_breakdown.py 只用已存产物分解失败 exec，并区分 first_diagnostic / repeat / toolchain_probe",
+          "同一工具带 shim_probe：通过真实 exec.run 重跑 cargo/rustc 命令，缺陷回归即失败",
+          "产物 eval/exec_failure_breakdown.json 带指纹并纳入 C12（9 份）",
+          "docs 新增 C19（无门槛）与 C18（有门槛）"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "可复现证据",
+          "validation_plan": [
+            "python tools/exec_failure_breakdown.py",
+            "claim_gate exit 0"
+          ],
+          "why_not_enough": "分类是启发式；shim 检测依赖本机有 rustup 软链",
+          "why_this_task": "没有分解就发现不了根因，也没有回归检测"
+        },
+        "confidence": 0.9,
+        "difficulty": "medium",
+        "display_order": 1802,
+        "evidence": [
+          "tools/exec_failure_breakdown.py：失败三分类 + 逐任务 + 失败命令表 + shim_facts（软链事实）+ shim_probe（真实 exec.run 重跑）",
+          "eval/exec_failure_breakdown.json：修复后 with 失败 21 次/1735 tok、100% first_diagnostic；shim_probe.pass=true",
+          "tools/claim_gate.py：新增 C18（==1.00，fail-closed 要求本机确有此类 shim），EVIDENCE_ARTIFACTS 扩到 9 份"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不把启发式分类当作精确归因"
+        ],
+        "priority": 3,
+        "purpose": "把「失败是诊断、试错还是缺陷」变成可复现的判断，并把缺陷固化成回归检测。",
+        "source_sessions": [
+          "ses_verseshell-tf0072-shimfix-2026-09-24"
+        ],
+        "status": "done",
+        "summary": "新增 tools/exec_failure_breakdown.py：分解失败 exec（first_diagnostic / repeat / toolchain_probe）并记录 shim 事实与 shim 探针。探针通过真实 exec.run 重跑 cargo --version / cargo check / rustc --version，一旦启动名再被 canonicalize 破坏即失败——C18 由此进门禁。C19 登记分解结论（无门槛）。",
+        "title": "步骤45：exec 失败分解工具与 C18/C19 登记"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "shim-fix",
+      "node": {
+        "acceptance_criteria": [
+          "启动路径保留 PATH 解析出的名字，canonicalize 只用于审计身份",
+          "新增回归测试覆盖软链 shim 与普通可执行文件两种情形",
+          "cargo test 全量绿",
+          "端到端验证：同一 argv 经 exec.run 与直接子进程结果一致"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.95,
+          "user_goal": "产品正确性",
+          "validation_plan": [
+            "cargo test",
+            "exec.run 端到端对比"
+          ],
+          "why_not_enough": "只在 Windows + rustup 软链形态下触发",
+          "why_this_task": "它是 D 无法运行 cargo/rustc 的直接原因"
+        },
+        "confidence": 0.95,
+        "difficulty": "medium",
+        "display_order": 1803,
+        "evidence": [
+          "src/process_command.rs：resolve_candidate 不再 canonicalize（返回 PATH 解析出的启动路径）；resolve_process_command 单独计算 canonical_identity 作为 audited_executable；ResolvedProcessCommand::executable 的文档写明为什么不能跟随最后的软链",
+          "新增测试 keeps_a_dispatching_symlink_name_for_launch_but_audits_the_real_path 与 launches_a_plain_executable_by_its_resolved_path（无 symlink 权限时前者退化为 no-op，故 C18 额外要求本机确有此类 shim）",
+          "端到端：cargo --version → cargo 1.98.1（修复前为 rustup 1.29.1）；cargo check → exit 0（修复前 exit 100）；cargo build → exit 0（修复前被读成 +build）",
+          "cargo test 全量 exit 0（process_command 4 passed）"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不改安全判定所依据的审计身份（仍 canonical）",
+          "不改批处理（.cmd/.bat）路径"
+        ],
+        "priority": 3,
+        "purpose": "让 exec 忠实地启动调用者指定的程序，同时不削弱审计与安全。",
+        "source_sessions": [
+          "ses_verseshell-tf0072-shimfix-2026-09-24"
+        ],
+        "status": "done",
+        "summary": "修复 exec 启动名被 canonicalize 破坏的缺陷：启动用 PATH 解析出的路径（shim 名保留），审计身份另算 canonical。rustup 的 cargo/rustc 在 D 下恢复正常（cargo check exit 0），A 侧不受影响。两个回归测试 + C18 门禁。",
+        "title": "步骤46：修复 exec 启动 shim 缺陷与 C18 门禁"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "remeasure",
+      "node": {
+        "acceptance_criteria": [
+          "两臂 × 3 seeds 跑满并合并，api_error 0",
+          "更新 C13/C15/C16/C17/C19 的数字与边界",
+          "明确写出「修复前的 D 侧数字不可比」",
+          "C12 覆盖的产物全部重生成"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "结论可引用",
+          "validation_plan": [
+            "claim_gate exit 0"
+          ],
+          "why_not_enough": "单模型单端点",
+          "why_this_task": "修复改变了被测对象，旧数字全部作废"
+        },
+        "confidence": 0.85,
+        "difficulty": "medium",
+        "display_order": 1804,
+        "evidence": [
+          "复测：两臂 × 3 seeds，120 行，api_error 0（3 格上游 500 由 splice_live_cells.py 补跑）",
+          "结果：with A 0.6333/3.23/202.43、D 0.6333/4.53/177.27（D/A 1.4025/0.8757）；without A 0.60/3.23/169.20、D 0.5333/4.07/139.50（D/A 1.2601/0.8245）",
+          "重生成产物：latest_live.json、live_ab_without_read_files.json、latest.json（mock）、jev_obs_report、cross_shell、tf45_envelope_replay、exec_token_breakdown、read_path_breakdown、read_usage_audit、exec_failure_breakdown",
+          "README 跨 shell 表同步为 worst 0.2301（C10 逐行校验）"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不把修复前的数字与修复后混在一张表里比较"
+        ],
+        "priority": 3,
+        "purpose": "修复后重建全部证据，并让声明口径与之一致。",
+        "source_sessions": [
+          "ses_verseshell-tf0072-shimfix-2026-09-24"
+        ],
+        "status": "done",
+        "summary": "修复后按同一口径重跑两臂 × 3 seeds 并重生成全部 9 份受指纹保护的产物；C13/C15/C16/C17/C19 更新，并在 C13 失效边界第 ① 条写明「修复前的 D 侧 exec 数字受 C18 污染、不可与修复后比较」。",
+        "title": "步骤47：修复后同口径 live 复测与声明更新"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-commit",
+      "node": {
+        "acceptance_criteria": [
+          "claim_gate exit 0（C12 9/9 fresh）、readme_claims_check 17/17、cargo test exit 0",
+          "森林记录与提交完成，工作区干净"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "收口",
+          "validation_plan": [
+            "三项门禁",
+            "git status 为空"
+          ],
+          "why_not_enough": "无",
+          "why_this_task": "根策略 §6 的固定收尾动作"
+        },
+        "confidence": 0.9,
+        "difficulty": "low",
+        "display_order": 1805,
+        "evidence": [
+          "收口前门禁：claim_gate 14/14 exit 0、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "kind": "task",
+        "next_action": "提交修复、工具、声明与森林记录，再回填 commit hash。",
+        "non_goals": [
+          "不改写 git 历史"
+        ],
+        "priority": 3,
+        "purpose": "按根策略 §6 完成 proposal-save → apply → validate → export 与提交。",
+        "source_sessions": [
+          "ses_verseshell-tf0072-shimfix-2026-09-24"
+        ],
+        "status": "in_progress",
+        "summary": "收口：重跑三项门禁、回填证据、导出森林并提交。",
+        "title": "步骤48：森林收口与提交"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step-count-gap",
+      "node": {
+        "acceptance_criteria": [
+          "给出 D 与 A 的步骤构成对比（哪些 op 贡献了 D 多出的步骤）",
+          "区分「typed op 的必要拆分」与「可合并的重复调用」",
+          "若改动，必须用 live 实验证明成功率不掉、token 不升"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.8,
+          "user_goal": "继续缩小 D/A 差距",
+          "validation_plan": [
+            "步骤构成分解",
+            "live 实验验证"
+          ],
+          "why_not_enough": "还没分解过步骤构成",
+          "why_this_task": "token 已经比 A 省（0.876），剩下唯一不对称的是步骤数 1.40×"
+        },
+        "confidence": 0.6,
+        "difficulty": "medium",
+        "display_order": 1901,
+        "evidence": [
+          "修复后 with 臂：D 4.53 tools/run vs A 3.23（1.4025×），而观察 token 0.8757×（D 更省）",
+          "D 的 op 构成（with 臂，30 次运行）：exec.run 50、file.view 21、file.replace_exact 22、task_complete 25、repo.summary 14、file.read_many 13、file.write 13、repo.search 3",
+          "差距分桶（修复后）：exec −74.63、read +16.20、edit +27.77、meta +5.50（总 −17.17 tok/run）",
+          "success 相同（0.6333 vs 0.6333），所以步骤多不是靠牺牲正确性换来的"
+        ],
+        "kind": "follow_up",
+        "next_action": "先分解 D 与 A 的步骤构成（按 op、按任务），区分必要的 typed-op 拆分与可合并的重复调用（例如 repo.summary 14 次、task_complete 25 次），再决定是否值得改工具描述或系统提示，并用 live 实验验证。",
+        "non_goals": [
+          "不为减少步骤而牺牲成功率",
+          "不把 token 已经更省当作停止的理由"
+        ],
+        "priority": 3,
+        "purpose": "token 侧已经反超 A，把最后的不对称（步骤数 1.40×）变成可执行的下一步。",
+        "source_sessions": [
+          "ses_verseshell-tf0072-shimfix-2026-09-24"
+        ],
+        "status": "ready",
+        "summary": "修复 C18 之后，D 在观察 token 上已经低于 raw shell（177.27 vs 202.43，D/A 0.876）且成功率相同，剩下的唯一不对称是步骤数：D 4.53 tools/run vs A 3.23（1.40×）。D 的步骤构成里除 exec.run（50）外还有 file.view 21、file.replace_exact 22、task_complete 25、repo.summary 14 等；需要先分解哪些是 typed op 的必要拆分、哪些是可合并的重复调用，再用 live 实验验证。",
+        "title": "缺口：D 的步骤数仍是 A 的 1.40 倍（token 已更省）——步骤从哪来"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "失败分解是本轮起点"
+      },
+      "from": "failure-tool",
+      "to": "shimfix-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "缺陷修复是本轮主交付"
+      },
+      "from": "shim-fix",
+      "to": "shimfix-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "复测是修复的验收"
+      },
+      "from": "remeasure",
+      "to": "shimfix-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口是最后一步"
+      },
+      "from": "close-commit",
+      "to": "shimfix-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "先分解才能定位缺陷"
+      },
+      "from": "shim-fix",
+      "to": "failure-tool",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "先修复才能复测"
+      },
+      "from": "remeasure",
+      "to": "shim-fix",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口要等复测与声明更新"
+      },
+      "from": "close-commit",
+      "to": "remeasure",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "本轮收口的正是 TF-0072"
+      },
+      "from": "shimfix-round",
+      "to": "TF-0072",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "步骤不对称由修复后的复测暴露"
+      },
+      "from": "step-count-gap",
+      "to": "TF-0072",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.8,
+        "reason": "承接 exec 主题，但结论已从「exec 贵」翻转为「exec 更省」"
+      },
+      "from": "step-count-gap",
+      "to": "TF-0058",
+      "type": "related_to"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 180
+      },
+      "id": "shimfix-round"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 10
+      },
+      "id": "failure-tool"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 20
+      },
+      "id": "shim-fix"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 30
+      },
+      "id": "remeasure"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 40
+      },
+      "id": "close-commit"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 190
+      },
+      "id": "step-count-gap"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "失败分解（修复前，with 臂）：45 次失败 @101.44 tok = 81.7% 的 exec token；first_diagnostic 89.3%、toolchain_probe 10.7%、repeat 0，且集中在 Rust 任务",
+          "根因：cargo.exe/rustc.exe/cargo-clippy.exe/rustfmt.exe 均是指向 rustup.exe 的符号链接（st_reparse_tag=0xa000000c），resolve_candidate 的 canonicalize 把链接解析掉，进程名变成 rustup.exe",
+          "缺陷指纹（修复前）：cargo check → exit 100 且报「0 error(s), 0 warning(s)」；cargo build → 「invalid value 'build' for '[+toolchain]'」；cargo --version → rustup 1.29.1；同 argv 直接子进程全部 rc=0",
+          "修复（src/process_command.rs）：启动路径保留 PATH 解析结果，canonical 仅用于 audited_executable；2 个回归测试；cargo test 全量 exit 0",
+          "修复后端到端：cargo --version → cargo 1.98.1、cargo check → exit 0、rustc --version → rustc 1.98.1",
+          "修复后复测（两臂 × 3 seeds，120 行，api_error 0）：D 177.27 vs A 202.43 tok/run（D/A 0.8757），成功率 0.6333 vs 0.6333；exec.run 76→50 次、5585→2121 tok；失败 45→21 次、4565→1735 tok，Rust 任务归零",
+          "差距分桶翻转：exec 由 +70.43 变为 −74.63，总差距 −17.17 tok/run（D 更省）",
+          "登记：新增 C18（有门槛，==1.00，fail-closed）与 C19（无门槛）；C13 失效边界第 ① 条写明修复前 D 侧数字不可比；C12 覆盖 9 份产物",
+          "门禁：claim_gate 14/14 exit 0（C12 9/9 fresh）、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "next_action": "无。剩余不对称见 step-count-gap 节点（D 步骤数 1.40×，token 已 0.876×）。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "TF-0072 完成，但结论与原假设不同：失败 exec 既不是「任务固有」也不是「模型试错」，而是产品缺陷——exec 启动时把 rustup 的软链 shim canonicalize 掉，使条件 D 在本机根本无法运行 cargo/rustc（A 走 cmd 不受影响）。修复后同口径复测：D 177.27 vs A 202.43 tok/run（D/A **0.876**，五轮来首次低于 1），成功率相同（0.6333）；exec.run 由 76 次/5585 tok 降到 50 次/2121 tok，失败由 45 次降到 21 次且 Rust 任务归零；差距分桶里 exec 从最大正项翻转为最大负项（−74.63）。此前所有 D 侧 exec 数字受该缺陷污染，已在 C13/C15/C18/C19 写明边界。剩余唯一不对称是步骤数 1.40×，已开 step-count-gap。"
+      },
+      "id": "TF-0072"
+    }
+  ],
+  "created_at": "2026-09-24T11:06:31.023355Z",
+  "proposal_id": "TFP-tf0072-shim-fix-2026-09-24",
+  "rationale": "TF-0072 要求分解失败 exec 并区分「任务固有」与「模型试错」。分解过程中发现真正的原因既不是前者也不是后者，而是产品缺陷：src/process_command.rs 的 resolve_candidate 把 PATH 解析出的可执行文件 canonicalize，而 rustup 的 cargo.exe/rustc.exe 是指向 rustup.exe 的符号链接，rustup 依据被调用名选择工具——于是 D 在这台机器上根本无法运行 cargo/rustc，A 走 cmd 不受影响。修复后同口径复测，D 的观察 token 首次低于 A（177.3 vs 202.4，比值 0.876）。收口 TF-0072 并把「步骤数仍为 1.40 倍」开成新的 follow_up。",
+  "session_id": "ses_verseshell-tf0072-shimfix-2026-09-24",
+  "status": "applied"
+}
