@@ -1,0 +1,53 @@
+{
+  "applied_at": "2026-09-24T11:42:18.319186Z",
+  "base_graph_hash": "7f0f40304c79c20948f481552fc04a26e540705b99e89876e30d4314bceaa357",
+  "base_summary": {
+    "edge_count": 130,
+    "node_count": 82,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "构成：D 4.533 步/run（170.60 tok）vs A 3.233 步/run（194.43 tok），比值 1.402 / 0.877",
+          "D 按类别：exec 1.667、edit 1.167、read 1.133、meta 0.567；A 全部是 run_command 3.233",
+          "A 的多合一命令 34/97（35.0%）：read+run 11、read+write 10、run+write 10、三合一 3——typed op 无法合并，这是步骤差的主要来源",
+          "可合并重复调用：D 12 次（8.8% 的步骤、13.02 tok/run）；逐条核对后 4 次是编辑后重跑同一条 pytest（状态已变，合法复验），其余约 8 次是 ts_fix_type_error 的 tsc 探测链",
+          "失败观察 leave-one-out：error 560、diagnostics 325、stats 103、ok 52、stderr_summary 48、stdout_summary 48、exit_code 34 字符；可裁字段合计约 20% 但各自带信号，评估后不动",
+          "门禁：claim_gate 14/14 exit 0（C12 10/10 fresh）、readme_claims_check 17/17、cargo test exit 0",
+          "提交：commit 19caa89（内容 7 文件）+ 72527b3（森林记录）；工作区干净"
+        ],
+        "next_action": "无。任务集边界见 TF-0082。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "本轮完成：分解 D 与 A 的步骤构成后确认，D 多出的步骤是 typed-op 拆分本身（A 有 35% 的命令一次做多件事），可合并的重复调用只占 8.8% 且大多合法或属环境探测，失败观察的可裁字段约 20% 但都带信号。因此判断「没有值得动手的合并空间」，本轮不做事后干预，只把结论登记为 C20 并开出 ts fixture 的任务集边界 follow_up。三项门禁全绿。"
+      },
+      "id": "TF-0079"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "claim_gate：14/14 gated claims pass，exit 0（C12 由 9 份扩到 10 份，全部 fresh）",
+          "readme_claims_check：17/17 pass",
+          "cargo test：exit 0",
+          "森林：proposal-save → proposal-apply --yes → validate（校验通过）→ export",
+          "提交：commit 19caa89（内容）+ 72527b3（森林记录）；提交前后工作区均干净",
+          "本轮未改动任何产品代码或 harness 行为，因此不需要 live 复测（判断为「无可动空间」）"
+        ],
+        "next_action": "无。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "收口完成：三项门禁全绿、森林校验通过并导出、内容提交 19caa89、森林记录 72527b3、工作区干净。"
+      },
+      "id": "TF-0081"
+    }
+  ],
+  "created_at": "2026-09-24T11:42:18.183619Z",
+  "proposal_id": "TFP-tf0078-step-gap-final-2026-09-24",
+  "rationale": "本轮交付完成并提交（commit 19caa89）：步骤构成分解工具与 C20 登记、C12 扩到 10 份产物、三项门禁全绿。结论是「没有值得动手的合并空间」，故本轮不做事后干预（省下一轮 live），只收口并保留 TF-0082（ts fixture 任务集边界）。",
+  "session_id": "ses_verseshell-tf0078-stepgap-2026-09-24",
+  "status": "applied"
+}
