@@ -1,0 +1,312 @@
+{
+  "applied_at": "2026-09-24T11:41:34.173001Z",
+  "base_graph_hash": "8f93bde4bc0a1137eadbe3455351fab3b3c3dfcba961953eb4754a71748bb44f",
+  "base_summary": {
+    "edge_count": 124,
+    "node_count": 78,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "stepgap-round",
+      "node": {
+        "acceptance_criteria": [
+          "给出 D 与 A 的步骤构成对比（哪些 op 贡献了 D 多出的步骤）",
+          "区分「typed op 的必要拆分」与「可合并的重复调用」",
+          "若改动，必须用 live 实验证明成功率不掉、token 不升",
+          "结论登记进声明矩阵并收口"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "继续缩小 D/A 差距",
+          "validation_plan": [
+            "步骤构成分解",
+            "重复调用逐条核对"
+          ],
+          "why_not_enough": "结论是「无可动的浪费」，本轮不做事后干预",
+          "why_this_task": "token 已 0.877×，剩下唯一不对称是步骤数 1.402×"
+        },
+        "confidence": 0.8,
+        "desired_outcomes": [
+          "步骤差有可复现归因",
+          "「重复调用」被证明是上界而非浪费",
+          "失败观察的可裁字段被量化并给出是否动手的判断",
+          "结论进声明矩阵"
+        ],
+        "difficulty": "medium",
+        "display_order": 2001,
+        "evidence": [
+          "构成：D 4.533 步/run（170.60 tok）vs A 3.233 步/run（194.43 tok），比值 1.402 / 0.877",
+          "D 按类别：exec 1.667、edit 1.167、read 1.133、meta 0.567；A 全部是 run_command 3.233",
+          "A 的多合一命令 34/97（35.0%）：read+run 11、read+write 10、run+write 10、三合一 3——typed op 无法合并，这就是步骤差的主要来源",
+          "可合并重复调用：D 12 次（8.8% 的步骤、13.02 tok/run）；逐条核对后 4 次是编辑后重跑同一条 pytest（状态已变，合法复验），其余约 8 次是 ts_fix_type_error 的 tsc 探测链",
+          "失败观察 leave-one-out：error 560、diagnostics 325、stats 103、ok 52、stderr_summary 48、stdout_summary 48、exit_code 34 字符；可裁字段合计约 20% 但各自带信号，评估后不动",
+          "门禁：claim_gate 14/14 exit 0（C12 10/10 fresh）、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "execution_hints": [
+          "重复调用判据看不到状态变化，必须逐条核对再下结论",
+          "先问「这是不是 surface 本身」，再问「能不能合并」"
+        ],
+        "kind": "global_task",
+        "next_action": "无。任务集边界见 ts-fixture-gap 节点。",
+        "non_goals": [
+          "不为减少步骤而牺牲成功率",
+          "不在没有 live 证据前改提示或工具描述"
+        ],
+        "priority": 3,
+        "purpose": "把最后的不对称（步骤数）查清，判断它是否可动。",
+        "source_sessions": [
+          "ses_verseshell-tf0078-stepgap-2026-09-24"
+        ],
+        "status": "in_progress",
+        "summary": "步骤构成分解完成：D 的步骤差主要来自 typed-op 拆分本身（A 有 35% 的命令一次做多件事，D 不能合并）；可合并的重复调用只占 8.8% 且大多合法；失败观察里可裁字段约 20% 但都带信号。结论是「没有值得动手的合并空间」，登记为 C20，并把发现的 ts fixture 任务集边界开成 follow_up。",
+        "title": "TF-0078 收口：步骤构成分解与 typed-op 拆分结论"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step-tool",
+      "node": {
+        "acceptance_criteria": [
+          "tools/step_composition.py 只用已存产物给出构成、多合一、可合并调用三段分解",
+          "失败观察的 leave-one-out 归因可复现",
+          "产物 eval/step_composition.json 带指纹并纳入 C12（10 份）",
+          "docs 新增 C20 并同步 C12"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "可复现证据",
+          "validation_plan": [
+            "python tools/step_composition.py",
+            "claim_gate exit 0"
+          ],
+          "why_not_enough": "多合一是关键词启发式；失败观察是代表性复现",
+          "why_this_task": "没有分解就只能猜步骤差"
+        },
+        "confidence": 0.9,
+        "difficulty": "medium",
+        "display_order": 2002,
+        "evidence": [
+          "tools/step_composition.py：构成（按 op / 按类别）+ 多合一分类 + 可合并重复调用（按 token 分摊）+ 失败观察 leave-one-out",
+          "eval/step_composition.json：D 4.533 步/run、A 3.233；多合一 34/97；重复调用 12 次/13.02 tok/run",
+          "tools/claim_gate.py：EVIDENCE_ARTIFACTS 扩到 10 份"
+        ],
+        "kind": "task",
+        "non_goals": [
+          "不把启发式分类当作精确归因"
+        ],
+        "priority": 3,
+        "purpose": "把「步骤多是不是浪费」变成可复现判断。",
+        "source_sessions": [
+          "ses_verseshell-tf0078-stepgap-2026-09-24"
+        ],
+        "status": "done",
+        "summary": "新增 tools/step_composition.py：给出 D/A 步骤构成、A 的多合一命令占比、可合并重复调用（含 token 分摊）与失败观察的 leave-one-out 归因。C20 登记（无门槛），产物入 C12。",
+        "title": "步骤49：步骤构成分解工具与 C20 登记"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-commit",
+      "node": {
+        "acceptance_criteria": [
+          "claim_gate exit 0（C12 10/10 fresh）、readme_claims_check 17/17、cargo test exit 0",
+          "森林记录与提交完成，工作区干净"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "收口",
+          "validation_plan": [
+            "三项门禁",
+            "git status 为空"
+          ],
+          "why_not_enough": "无",
+          "why_this_task": "根策略 §6 的固定收尾动作"
+        },
+        "confidence": 0.9,
+        "difficulty": "low",
+        "display_order": 2003,
+        "evidence": [
+          "收口前门禁：claim_gate 14/14 exit 0、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "kind": "task",
+        "next_action": "提交分解工具、C20 登记与森林记录，再回填 commit hash。",
+        "non_goals": [
+          "不改写 git 历史"
+        ],
+        "priority": 3,
+        "purpose": "按根策略 §6 完成 proposal-save → apply → validate → export 与提交。",
+        "source_sessions": [
+          "ses_verseshell-tf0078-stepgap-2026-09-24"
+        ],
+        "status": "in_progress",
+        "summary": "收口：重跑三项门禁、回填证据、导出森林并提交。",
+        "title": "步骤50：森林收口与提交"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "ts-fixture-gap",
+      "node": {
+        "acceptance_criteria": [
+          "量化 ts 任务因缺 tsc 产生的额外步骤与 token（含探测链）",
+          "给出三种处置（补 node_modules / 改 prompt / 保持现状并写明边界）的代价与可比性影响",
+          "若改任务集，必须重跑基线并说明与历轮的不可比性",
+          "结论写进 C13/C20 或新声明"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.8,
+          "user_goal": "让测量反映能力而不是环境",
+          "validation_plan": [
+            "探测链量化",
+            "方案对比",
+            "必要时 live 复测"
+          ],
+          "why_not_enough": "还没做方案对比，也没评估改任务集的可比性代价",
+          "why_this_task": "ts_fix_type_error 占 21 次失败里的 9 次、1735 tok 里的 697 tok，根因是 fixture 没有 node_modules"
+        },
+        "confidence": 0.65,
+        "difficulty": "medium",
+        "display_order": 2101,
+        "evidence": [
+          "bench/aci/fixtures/ts_fix_type_error 只含 package.json / tsconfig.json / src / TASK.md / GOLDEN，没有 node_modules",
+          "任务 prompt 承诺「Fix the TypeScript type error so tsc --noEmit succeeds」，optional_verify 是 npx tsc --noEmit exit 0；success 谓词本身是文件内容检查",
+          "逐 seed 轨迹显示探测链：npx tsc → node node_modules/typescript/bin/tsc → npm install → node .../npm-cli.js → 再试 tsc（3/3 seeds 都出现重复的 tsc 调用）",
+          "ts_fix_type_error 的失败 exec：9 次 / 697 tok（占全部失败 token 的 40%）；ts_package_script_fail 另有 3 次 / 144 tok",
+          "交接说明已把「本机 tsc 缺失」列为 C13 的既有边界，但当时未量化它造成的步骤与 token"
+        ],
+        "kind": "follow_up",
+        "next_action": "量化 ts 任务的探测链成本，对比「fixture 补 node_modules（离线可验证，但要加二进制并重跑全部基线）」「改 prompt 不再承诺 tsc（改动任务定义）」与「保持现状、把边界写清楚」三种处置，再决定。",
+        "non_goals": [
+          "不在没有可比性说明的情况下改任务集",
+          "不为了让 ts 任务好看而放松成功判定"
+        ],
+        "priority": 3,
+        "purpose": "把「环境缺失被算进 D 的成本」这条边界量化，并决定是否值得动任务集。",
+        "source_sessions": [
+          "ses_verseshell-tf0078-stepgap-2026-09-24"
+        ],
+        "status": "ready",
+        "summary": "ts_fix_type_error 的 fixture 不含 node_modules，但任务 prompt 承诺 tsc --noEmit 会成功，于是模型在 3/3 seeds 里都走了同一条探测链（npx tsc → node 路径 → npm install → npm-cli.js）。该任务贡献了 21 次失败 exec 中的 9 次、1735 tok 中的 697 tok（40%）。这是任务集/环境边界而非 ACI 缺陷；是否补 node_modules 需要先评估「加二进制 + 重跑全部基线」的可比性代价。",
+        "title": "缺口：ts_fix_type_error 的 fixture 不含 node_modules，却承诺 tsc --noEmit succeeds"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "分解工具是本轮交付"
+      },
+      "from": "step-tool",
+      "to": "stepgap-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口是最后一步"
+      },
+      "from": "close-commit",
+      "to": "stepgap-round",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "收口要等分解与登记落地"
+      },
+      "from": "close-commit",
+      "to": "step-tool",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "本轮收口的正是 TF-0078"
+      },
+      "from": "stepgap-round",
+      "to": "TF-0078",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "ts 边界由本轮的重复调用核对暴露"
+      },
+      "from": "ts-fixture-gap",
+      "to": "TF-0078",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.8,
+        "reason": "同属「环境缺陷被算进 D 的成本」这一类，与 C18 同源"
+      },
+      "from": "ts-fixture-gap",
+      "to": "TF-0072",
+      "type": "related_to"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 200
+      },
+      "id": "stepgap-round"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 10
+      },
+      "id": "step-tool"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 20
+      },
+      "id": "close-commit"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 210
+      },
+      "id": "ts-fixture-gap"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "构成：D 4.533 步/run（170.60 tok）vs A 3.233 步/run（194.43 tok），比值 1.402 / 0.877",
+          "D 按类别：exec 1.667、edit 1.167、read 1.133、meta 0.567；A 全部是 run_command 3.233",
+          "A 的多合一命令 34/97（35.0%）：read+run 11、read+write 10、run+write 10、三合一 3",
+          "可合并重复调用：D 12 次（8.8% 的步骤、13.02 tok/run）；逐条核对后 4 次是编辑后重跑 pytest（合法复验），约 8 次是 ts_fix_type_error 的 tsc 探测链",
+          "失败观察 leave-one-out：error 560、diagnostics 325、stats 103、ok 52、stderr_summary 48、stdout_summary 48、exit_code 34 字符；可裁字段合计约 20% 但各自带信号，评估后不动",
+          "登记：docs/claims-and-evidence.md 新增 C20（含 5 条失效边界）；C12 覆盖 10 份产物",
+          "门禁：claim_gate 14/14 exit 0（C12 10/10 fresh）、readme_claims_check 17/17、cargo test exit 0"
+        ],
+        "next_action": "无。任务集边界见 ts-fixture-gap 节点。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "TF-0078 完成：D 的步骤差主要是 surface 本身——A 有 35% 的命令一次做多件事（read+run / read+write / run+write / 三合一），typed op 无法合并；可合并的重复调用只占 8.8% 的步骤（13.02 tok/run），逐条核对后大多是合法复验或环境探测，不是浪费；失败观察的可裁字段约 20% 但各自带信号。结论：没有值得动手的合并空间，本轮不做事后干预，登记为 C20；同时把发现的 ts fixture 任务集边界开成 follow_up（TF-0082）。"
+      },
+      "id": "TF-0078"
+    }
+  ],
+  "created_at": "2026-09-24T11:41:34.034977Z",
+  "proposal_id": "TFP-tf0078-step-gap-2026-09-24",
+  "rationale": "TF-0078 要分解 D 与 A 的步骤构成。结论是：步骤差主要是 surface 本身（A 有 35% 的命令一次做多件事，typed op 不能合并），可合并的重复调用只有 8.8% 的步骤且大多不是浪费；失败观察里可裁字段约 20% 但都带信号。因此本轮不做事后干预，只登记诊断结论（C20）并开出一个任务集边界 follow_up（ts fixture 不含 node_modules）。",
+  "session_id": "ses_verseshell-tf0078-stepgap-2026-09-24",
+  "status": "applied"
+}
