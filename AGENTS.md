@@ -90,3 +90,9 @@ VerseShell 是**更大系统的一个子模块**（ACI runtime，供宿主/其�
 
 仅当用户**明确、逐次**授权「正式研究 / 发表级」时，才可突破上表；
 且授权只对那一次有效，不成为后续默认。
+
+## Task Forest 数据只留本地
+
+`.agent-workbench/`（Task Forest 图/事件/快照/提案/导出）**不推送到云端**，已加入 `.gitignore`。
+它体积大（约 178MB）且属本地工作记录。备份见 `docs/task-forest-policy.md` §7。
+不要为了同步森林而把它重新提交进版本库。

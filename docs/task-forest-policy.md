@@ -56,12 +56,20 @@
 
 | 内容 | 进版本库 | 理由 |
 |------|----------|------|
-| `.agent-workbench/task-forest/`（图、事件流、快照、提案、导出） | 是 | 第三方审计与回放需要 |
-| `proposals/`（提案可读副本） | 是 | 与森林内提案一一对应 |
+| `.agent-workbench/task-forest/`（图、事件流、快照、提案、导出） | **否（仅本地）** | 体积大（约 178MB，含 59MB `events.jsonl`），且属本地工作记录；见下方备份 |
+| `proposals/`（提案可读副本） | 是 | 与森林内提案一一对应，体积小 |
 | `tools/*.py`（`claim_gate` / `jev_obs_judge` / `validate_manifest`） | 是 | 验收门禁必须能被 clone 后直接跑 |
 | `bench/aci/**/*.py`（数据集 fixture 代码、`runners/`、`scorers/`） | 是 | 数据集与 runner 是 C1/C2 的 source；缺了它们复现命令跑不起来 |
 | `eval/`、`examples/`（指标、探针、复现入口） | 是 | 声明的 source 与复现命令 |
 | `.mimocode/skills/task-forest/`（森林 CLI 本体） | 否 | 本地工具安装，可重装；规则源以本文件为准 |
 | `.trae/`、`.ae/`、`target/`（编辑器笔记、运行期产物） | 否 | 本地草稿与缓存 |
+
+**Task Forest 数据只保留在本地，不推送到云端**（2026-10-12 决策）。`.gitignore` 已包含
+`.agent-workbench/`。备份位置：
+
+- 本地分支 `backup/pre-tf-removal-2026-10-12`（含剥离前的完整历史）；
+- 目录副本 `D:/VerseShellLive/tf-backup-20261012/task-forest/`。
+
+若需在另一台机器上恢复森林，从上述备份复制即可；不要为了同步森林而把它重新提交进版本库。
 
 `.gitignore` 的 `*.py` 规则原本是一次性清理脚本的历史遗留，已用 `!tools/*.py` 精确放行门禁脚本；**不要**再整体放开 `*.py`（会把本地工具与草稿一起卷进版本库）。
