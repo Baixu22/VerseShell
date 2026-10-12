@@ -67,3 +67,28 @@ test_lock.txt.ae_lock
 # Local agent tool installs (e.g. the task-forest CLI). The forest DATA lives in
 # .agent-workbench/ and is committed; see docs/task-forest-policy.md §7.
 .mimocode/
+
+# Generated run artifacts (never commit: 35k+ files, per-run outputs)
+# Keep only curated top-level results files and the explicitly whitelisted
+# tf* result dirs; ignore every other per-run output directory.
+bench/aci/results/*/
+!bench/aci/results/tf45/
+!bench/aci/results/tf62/
+!bench/aci/results/tf67/
+!bench/aci/results/tf72/
+!bench/aci/results/tf83/
+!bench/aci/results/tf84/
+!bench/aci/results/tf85/
+
+# Local audit scratch (has its own byte-pinned package; not the rest)
+audit-r12-scratch/
+!audit-r12-scratch/verify_core.py
+!audit-r12-scratch/verify_part2.py
+!audit-r12-scratch/verify_part3.py
+!audit-r12-scratch/verify_part4.py
+!audit-r12-scratch/audit_inputs.py
+!audit-r12-scratch/r12-inputs.json
+!audit-r12-scratch/r12-reference/
+!audit-r12-scratch/r12-reference/*.json
+!audit-r12-scratch/r12-inputs/
+!audit-r12-scratch/r12-inputs/*.json

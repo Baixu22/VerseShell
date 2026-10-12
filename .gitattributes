@@ -1,0 +1,6 @@
+# Preserve the byte-pinned historical R12 audit package across Git checkouts.
+audit-r12-scratch/verify_*.py text eol=lf
+audit-r12-scratch/audit_inputs.py text eol=lf
+audit-r12-scratch/r12-inputs.json -text
+audit-r12-scratch/r12-reference/*.json -text
+audit-r12-scratch/r12-inputs/*.json -text
