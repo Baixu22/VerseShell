@@ -64,9 +64,13 @@ test_lock.txt.ae_lock
 # Editor planning notes
 .trae/
 
-# Local agent tool installs (e.g. the task-forest CLI). The forest DATA lives in
-# .agent-workbench/ and is committed; see docs/task-forest-policy.md §7.
+# Local agent tool installs (e.g. the task-forest CLI).
 .mimocode/
+
+# Task Forest data stays LOCAL only (never pushed to the cloud).
+# Backups: D:/VerseShellLive/tf-backup-20261012/ and local branch
+# backup/pre-tf-removal-2026-10-12.
+.agent-workbench/
 
 # Generated run artifacts (never commit: 35k+ files, per-run outputs)
 # Keep only curated top-level results files and the explicitly whitelisted
