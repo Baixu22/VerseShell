@@ -1,0 +1,93 @@
+{
+  "applied_at": "2026-09-27T13:01:55.071814Z",
+  "base_graph_hash": "f6b297e6186c60554c929ca6772e3f3b34694f02b913053786bc465999d4e65d",
+  "base_summary": {
+    "edge_count": 180,
+    "node_count": 119,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "endpoint-ceiling",
+      "node": {
+        "acceptance_criteria": [
+          "`docs/acceptance-criteria.md` §0.5 写明该端点的硬上限与实测证据（已随本条落地）",
+          "TF-0105 的候选任务在生成/准入阶段带一条“预算敏感”标注，并给出判定方式",
+          "`docs/claims-and-evidence.md` 的 C13 失效边界写明：本轮 A′ 被 completion 上限截断 13.3%，且该上限在本端点不可抬高"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "bench",
+          "harness",
+          "claims"
+        ],
+        "desired_outcomes": [
+          "任务设计（TF-0105 的扩充批次）避开需要超预算 reasoning 的任务形态，或把它们显式标记为“预算敏感”",
+          "预注册里写明本端点的预算上限，以及撞上限时的处置（由 TF-0118 落成规则）",
+          "若将来换端点，这条约束必须重新测量而不是继承"
+        ],
+        "difficulty": "low",
+        "display_order": 500,
+        "evidence": [
+          "探测工具：`audit-r12-scratch/probe_cap_raise.py`；结果 `audit-r12-scratch/cap_probe/results.jsonl` 与汇总 `audit-r12-scratch/cap_probe_summary.py`",
+          "**11 个被截断单元格用 `--max-tokens 32768` 原权重跑**（同模型/同 seed/同任务/同条件）：**通过 2、仍长度截断 0、HTTP 502 9**。失败墙钟全部聚在 ~300s（302.1/301.3/302.0/303.5/303.7/304.0/304.4/306.1/308.1/311.9s）",
+          "502 报文：`HTTP 502: {\"error\":{\"message\":\"非流式响应超时(300秒)\",\"type\":\"proxy_error\"}}`",
+          "**为什么 502 比截断更糟**：`bench/aci/runners/merge_live_runs.py` 遇到任何 `api_error` 行即 exit 2 拒绝合并——所以抬上限会把「可分析的截断产物」变成「无法合并的产物」",
+          "**截断高度集中在任务上**：11 个单元格里 10 个落在 4 个任务——`python_config_reader_686653a1`、`rust_window_fold_scanner_3d213f38`、`typescript_missing_await_result_order_c58cafb6`、`typescript_reduce_shared_accumulator_d80f462d`，且每个 seed 都复现。这些恰是较难的任务，**所以「排除截断行」会顺带排除难任务，改变构造效度**",
+          "**同一配置的截断率是跑间变量**：第 12 轮 A′ 15%、第 13 轮首跑 7%、第 13 轮重跑 13.3%。所以「本轮预算没构成约束」很可能是运气",
+          "本轮 A′ 原始成功率 0.7867、剔除截断行后 0.9077；而 A 从 0.8667 到 0.8784——**剔除后 A vs A′ 的符号翻转**，说明这个假象足以颠倒结论"
+        ],
+        "kind": "requirement",
+        "next_action": "在 TF-0105 的扩充批次里给候选任务加“预算敏感”标注；并在下一轮预注册里写下本端点的预算上限。",
+        "non_goals": [
+          "不为了绕开上限而删除难任务（那会改变构造效度，见 evidence 第 2 条）",
+          "不把 502 当成模型失败计入成功率"
+        ],
+        "priority": 1,
+        "purpose": "§0.5 的第 1 条补救（任一侧撞上限 >10% 就抬上限重跑）在这条端点上不可执行；抬上限会把长度截断换成 HTTP 502，而 502 会让 merge 直接拒绝产物。设计必须建立在这个硬上限之上，而不是假设总能抬预算。",
+        "status": "ready",
+        "summary": "端点的 300 秒非流式响应上限 × 推理模型的 reasoning 消耗 = 可达 completion 预算被锁死，没有安全余量。",
+        "title": "要求：端点 300 秒非流式上限约束了可达的 completion 预算，必须作为任务与预算设计的约束"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "端点硬上限是本轮复核暴露的环境约束"
+      },
+      "from": "endpoint-ceiling",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 260
+      },
+      "id": "endpoint-ceiling"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "`tools/three_arm_report.py` 现在同时输出全量与 `harness_crash_excluded` 两套成功率与比值，但**没有规则说头条用哪套**",
+          "`audit-r12-scratch/gap_check.py` 第 4 节：`tools/claim_gate.py` 完全不提 `harness_crash`；`eval/acceptance_power.json` 也不排除故障行",
+          "第 12 轮的教训：A/A′ 各有 11%/15% 的轮次被 completion 上限截断，而**被截断的轮次不发工具调用、直接记失败**，把基线压低、放大了 D 的优势——当时的头条并没有对此作任何处置",
+          "**本条现在从「应该做」变成「必须做」**：2026-09-27 的实测证明 §0.5 的补救（抬上限重跑）在本端点**不可执行**——11 个被截断单元格改用 `max_tokens=32768` 重跑后 **0 个仍长度截断、9 个变成 HTTP 502**（proxy 300 秒非流式上限），而 502 会让 `merge_live_runs.py` 拒绝合并。**既然无法通过抬上限来消除截断，就必须有一条预先写死的处置规则**",
+          "**第 13 轮重跑就是活样本**：with 臂 A′ 截断 16%/12%/12%（合计 13.3%）→ §0.5 判为「上限构成约束」。**原始口径下 A′ 0.7867 比 A 0.8667 差；剔除截断行后 A′ 0.9077 反而比 A 0.8784 好——符号翻转**。规则必须决定头条用哪一套，并且必须同时报告另一套",
+          "规则设计时的已知约束：截断集中在 **4 个较难任务**上（见 `endpoint-ceiling` 节点的 evidence），所以「排除截断行」不是无代价的清理，它会改变构造效度"
+        ],
+        "next_action": "把规则写进 `docs/acceptance-criteria.md` §0.5 之下并在 `tools/acceptance_power.py` 里落成可复算字段；规则必须同时给出「全量」与「排除」两个口径，且排除率本身要过 §0.5 的 10% 门槛才允许主张。**必须写在下一轮 live 之前。**",
+        "priority": 1
+      },
+      "id": "TF-0118"
+    }
+  ],
+  "created_at": "2026-09-27T13:01:54.864362Z",
+  "proposal_id": "TFP-cap-ceiling-2026-09-27",
+  "rationale": "第 13 轮 with 臂重跑的 A′ completion 截断率 13.3%（>10%）本应按 §0.5 抬上限重跑，但实测证明本条端点上「提高上限」不可用：11 个被截断单元格改用 max_tokens=32768 重跑后，0 个仍长度截断，9 个变成 HTTP 502（proxy 300 秒非流式上限）。这把 §0.5 的补救变成了一条**必须预注册规则**的事，直接抬高 TF-0118 的优先级，并把「端点 300 秒上限」登记为设计约束。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

@@ -28,7 +28,7 @@ pub fn specs() -> Vec<OperationSpec> {
             name: "file.view",
             mcp_name: "file_view",
             description:
-                "View a window of lines around a cursor with total_lines and content hash.",
+                "View a centered line window; returns start_line, end_line, total_lines, content hash and next_cursor for continuation.",
             effect: "fs.read",
             capability: "file.read",
             input_schema: schema_view,
@@ -154,8 +154,9 @@ fn schema_view() -> Value {
         "type":"object","required":["path"],
         "properties":{
             "path":{"type":"string"},
-            "cursor":{"type":"integer","default":1},
-            "window":{"type":"integer","default":80}
+            "cursor":{"type":"integer","minimum":1,"default":1,
+                "description":"1-based center line, not start line. Use returned next_cursor with the same window to continue. Beyond EOF returns the last window."},
+            "window":{"type":"integer","minimum":1,"maximum":500,"default":80}
         }
     })
 }
@@ -313,7 +314,7 @@ fn execute_view(req: &OperationRequest) -> Observation {
     if from >= all.len() && !all.is_empty() {
         from = all.len().saturating_sub(window);
     }
-    let to = (from + window).min(all.len());
+    let to = from.saturating_add(window).min(all.len());
     let slice = if all.is_empty() {
         &[][..]
     } else {
@@ -329,6 +330,7 @@ fn execute_view(req: &OperationRequest) -> Observation {
             "start_line": if all.is_empty() { 0 } else { from + 1 },
             "end_line": to,
             "total_lines": all.len(),
+            "next_cursor": if to < all.len() { Some(to + 1 + half) } else { None },
             "content_hash": hash,
             "hash": short_hash(&hash),
             "lines": numbered_lines(slice, if all.is_empty() { 0 } else { from + 1 })

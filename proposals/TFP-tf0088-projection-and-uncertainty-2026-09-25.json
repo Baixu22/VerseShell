@@ -1,0 +1,420 @@
+{
+  "applied_at": "2026-09-24T21:22:06.500643Z",
+  "base_graph_hash": "f5e463973c45aab7dbb0f8d795d4bf139bfac54b1554bdf764783b3b04ac8ab4",
+  "base_graph_hash_note": "注释字段（非 CLI 字段）：本值不是抄自最近一份提案，而是 2026-09-25 从当前图重新算出来的——`.agent-workbench/task-forest/config.json::graph_hash` = f5e46397…，并用 CLI 自己的算法（`task_forest.py::graph_hash` = sha256(canonical_json({\"nodes\",\"edges\",\"schema_version\"}))，sort_keys+无空格+ensure_ascii=False）对 `graph/nodes.json` + `graph/edges.json` 独立复算，两者逐位相同；`config.json::updated_at` = 2026-09-24T17:23:16Z（= TF-0087 收口那次 apply），之后图未再变动，`next_node_number` = 88。**apply 前必须重算**：本会话期间另有 session 在改 `tools/claim_gate.py` / 证据产物，若它们先 apply 了提案，此 hash 会失效（默认拒绝应用，属预期行为，重算后重提案即可）。同理，本文件里的 `TF-0088…TF-0092` 是**按 next_node_number=88 预留的 id**；若 apply 时编号已前移，请删掉各 node 的显式 `id` 字段让 CLI 自动分配（`add_node` 会取 `config.next_node_number`），别名不变。另：文件名用本地日期 2026-09-25（UTC+08:00），`created_at` 用 UTC，与仓库其它记录一致。",
+  "base_summary": {
+    "edge_count": 136,
+    "node_count": 87,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "projection-defect-fix",
+      "node": {
+        "acceptance_criteria": [
+          "`repo.search`（模型侧 `search_content`，描述承诺 \"Returns matching files and lines\"）的成功投影必须带 `match_count` + `matches[{path,line,text}]` + `truncated`，不能再只回 `{\"ok\": true}`",
+          "`repo.summary`（模型侧 `list_files`，描述承诺 \"top-level directory listing\"）的成功投影必须带 `top_level`，且**不得**泄漏宿主 `workspace` 路径",
+          "`E_AMBIGUOUS` 的失败投影必须带结构化 `matches[{path,line,offset,snippet}]` + `match_count`（C4「一步恢复」的前提），失败路径其余部分保持逐字节不变",
+          "回归检查可复现且全过：`python tools/_dbg_projection_regress.py` → 5/5 PASS",
+          "用已存 live 产物给出改动前的影响量化（调用次数 / 观察 token / 裸 shell 回退次数），命令与数字可复算"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "让 ACI 的观察质量成为可测量的事实，而不是只在服务端成立",
+          "validation_plan": [
+            "跑 `python tools/_dbg_projection_regress.py` 5/5",
+            "用 `_dbg_projection_audit.py` / `_dbg_ambiguous.py` 做真实调用核对",
+            "用 `_dbg_search_usage.py` 量化改动前影响",
+            "把检查升级成正式工具/声明并让 claim_gate 转绿（TF-0092）"
+          ],
+          "why_not_enough": "回归检查与声明登记还没进门禁，改动也没提交，因此按 §3 四条硬门槛尚不满足",
+          "why_this_task": "三个字段都是服务端已发、工具描述已承诺、模型却拿不到的：这会让「工具可用性」在 surface 上被误判成「模型不用工具」（with 臂 repo.search 0 次 vs raw_shell 11 次 grep 就是证据）"
+        },
+        "confidence": 0.9,
+        "context_tags": [
+          "bench",
+          "aci",
+          "observation-envelope",
+          "projection"
+        ],
+        "difficulty": "medium",
+        "display_order": 270,
+        "evidence": [
+          "缺陷 1（成功路径 `repo.search`）：`bench/aci/runners/live_agent_loop.py::format_aci_result` 里 `repo.search` 原先没有专属分支，落到通用成功分支只回 `{\"ok\": true}`——匹配全丢。现改为：`matches[:50]` 逐条投影 `{path,line,text}`，带 `match_count`（缺省取投影条数）与 `truncated`（仅当 `data.truncated` 为真）",
+          "缺陷 2（成功路径 `repo.summary`）：原过滤器是 `if \"branch\" in data:` 且键列表为 `[\"branch\",\"dirty_files\",\"entries\"]`，而服务端给的是 `top_level`，于是 `list_files` 承诺的目录清单被静默丢掉；现条件改为 `if \"branch\" in data or \"top_level\" in data:`、键列表加入 `top_level`，并**刻意不取** `workspace`（不泄漏宿主路径）",
+          "缺陷 3（失败路径 `E_AMBIGUOUS`）：失败分支在拷贝 `data.matches[]` 之前就 `return json.dumps(clean…)`，所以服务端发来的 line/offset/snippet 候选点从未到达模型（C4 声称的一步恢复因此没有数据面）；现在在返回前投影 `matches`（最多 10 条，只留 `path/line/offset/snippet`）+ `match_count`",
+          "回归输出（`python tools/_dbg_projection_regress.py`，2026-09-25，5/5 PASS）：`PASS repo.search success now carries matches: {\"ok\": true, \"match_count\": 2, \"matches\": [{\"path\": \"src/a.rs\", \"line\": 1, \"text\": \"// TODO x\"}, {\"path\": \"src/b.rs\", \"line\": 9, \"text\": \"// TODO y\"}]}`；`PASS repo.summary success now carries top_level: {\"ok\": true, \"repo\": {\"branch\": \"main\", \"dirty_files\": 2, \"top_level\": [{\"kind\": \"dir\", \"name\": \"src\"}, {\"kind\": \"file\", \"name\": \"Cargo.toml\"}]}}`；`PASS truncated search is signalled`；`PASS E_AMBIGUOUS failure path unchanged: {\"ok\": false, \"error\": {\"code\": \"E_AMBIGUOUS\", \"message\": \"old string appears 3 times\"}, \"matches\": [{\"line\": 3, \"offset\": 10, \"snippet\": \"return a * b;\"}], \"match_count\": 1}`；`PASS empty search reports zero matches`；末行 `all projection regression checks passed`",
+          "影响量化（改动前，命令 `python tools/_dbg_search_usage.py`，只读已存产物）：`bench/aci/results/latest_live.json`（with 臂，30 行）→ `repo.search calls: 0`、`raw_shell grep-ish commands: 11`；`bench/aci/results/live_ab_without_read_files.json`（without 臂，30 行）→ `repo.search calls: 2 {('repo.search', 3): 2}`，两次调用的 `observation_tokens` 都是 **3**（即 `{\"ok\": true}` 的代价），而同一份产物里 raw_shell 的 grep 类命令只有 2 次——with 臂把搜索需求全部转移到裸 shell（11 次 grep 类命令），因为 typed op 拿不回任何匹配",
+          "真实调用探针（非 mock）：`python tools/_dbg_projection_audit.py` 对每个模型可见工具逐条比对「工具描述承诺」与「投影实际返回」，打印信封里有而投影里没有的键；`python tools/_dbg_ambiguous.py` 打印 `E_AMBIGUOUS` 的原始信封与投影，并断言投影含 `matches`",
+          "改动位置与状态：`bench/aci/runners/live_agent_loop.py`（`git status` 显示为 modified，尚未提交）；`git diff -U6 -- bench/aci/runners/live_agent_loop.py` 即上述三处",
+          "`cargo test` 全量绿：16 suites / 286 passed / 0 failed / 1 ignored（本轮实测；本轮未改 Rust 代码，仅确认无回归）",
+          "**未完成（按根策略 §3 不能转 done）**：①这 5 条回归检查目前还是 `tools/_dbg_projection_regress.py` 下划线草稿，没进 `tools/claim_gate.py` 的产物清单、也没有对应声明；②改动未提交；③`python tools/claim_gate.py` 当前会红（C5/C25 的新产物未落地、C12 因此判陈旧），见 TF-0092"
+        ],
+        "id": "TF-0088",
+        "kind": "follow_up",
+        "next_action": "把 5 条回归检查从 `tools/_dbg_projection_regress.py` 升级为正式工具并登记成声明（编号按登记时的下一可用号，本文件不预先占用），提交 `live_agent_loop.py`，`claim_gate` 转绿后本节点可转 `done`；收口缺口见 TF-0092。",
+        "non_goals": [
+          "不改产品侧（Rust）信封本身——服务端一直发这些字段，本轮只修参考客户端的投影",
+          "不放宽 `E_AMBIGUOUS` 的歧义判定，也不为了让 search 好用去改 `repo.search` 的语义",
+          "不为了消掉 raw_shell 的 grep 回退而禁用 exec 路径"
+        ],
+        "priority": 2,
+        "progress": 90.0,
+        "progress_source": "manual",
+        "purpose": "让模型看到的观察等于 op 描述承诺的内容：ACI 的主张是观察质量（搜得到、看得见目录、歧义时拿到候选点），投影层丢掉这些字段等于让工具在 surface 上不存在。",
+        "source_sessions": [
+          "ses_verseshell-tf0088-projection-2026-09-25"
+        ],
+        "status": "in_progress",
+        "title": "缺口：参考客户端在投影层丢掉 repo.search / repo.summary / E_AMBIGUOUS 的承诺字段，模型看不到自己请求的内容"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "c5-learning-probe",
+      "node": {
+        "acceptance_criteria": [
+          "给出 C5 的可复现指标定义：只把 `docs/quickstart/aci-mcp.md` 当 system prompt（不给 tool schema），一次性要求模型输出 JSON-RPC op 行，每一行都过真实 `ae --serve --agent` 执行，再用任务自己的谓词判终态",
+          "记录四个数字：`first_attempt_op_acceptance`、`op_acceptance_given_ops_emitted`（门槛 ≥0.70）、`task_success`、`hash_handoff_rate`，并说明哪一个被门槛、哪一个只报告",
+          "quickstart 的占位符缺陷修掉后重测，前后各有一份真实调用产物，且能逐格指出失效模式的变化",
+          "`tools/claim_gate.py` 侧把 C5 从「无门槛（N/A）」升级为有门槛声明（已落地），并且 `eval/aci_learning_probe.json` 必须由**当前版本**工具重生成（含 `op_acceptance_given_ops_emitted`）"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "让「文档够不够用」成为可测事实，而不是自评",
+          "validation_plan": [
+            "读工具协议确认只给文档、不给 schema",
+            "跑修复前/后两次真实调用并逐格比对",
+            "用当前工具重跑并覆盖 `eval/aci_learning_probe.json`",
+            "登记 C5 门槛与失效边界，claim_gate 转绿（TF-0092）"
+          ],
+          "why_not_enough": "门禁读的那个字段在两个已存产物里都不存在，声明也还没登记，所以现在只有「测量方法 + 前后真实调用」而没有「可引用的门槛数字」",
+          "why_this_task": "C5 是本仓库唯一没有指标的对外主张，且 quickstart 里的占位符会主动把 doc-only 模型教成 `E_STALE_HASH`——修文档与立指标是同一件事的两半"
+        },
+        "confidence": 0.85,
+        "context_tags": [
+          "docs",
+          "quickstart",
+          "claims",
+          "learning-cost"
+        ],
+        "difficulty": "medium",
+        "display_order": 280,
+        "evidence": [
+          "工具：`tools/aci_learning_probe.py`（新）。协议写在文件头：模型只拿到 `docs/quickstart/aci-mcp.md` 作 system prompt，没有 tool schema、没有额外示例；5 个探针任务（`write_file` / `read_window` / `exact_edit` / `search_then_report` / `exec_and_report`）；每行 op 都过真实 `ae --serve --agent`；`hash_handoff` 子检查专门测「文档说的 expected_hash 要来自前一次读取」这一条",
+          "修复前（真实调用，`python tools/aci_learning_probe.py --out eval/aci_learning_probe.json`，模型 `sn-glm-5-3-flash`，本机 3065 端点）：`first_attempt_op_acceptance = 0.4`（5 格、0 api_error）、`task_success = 0.4`、`hash_handoff_rate = 1.0`（1 格）；逐格：`write_file` ✓ / `read_window` ✓ / `exact_edit` ✗ / `search_then_report` ✗ / `exec_and_report` ✗",
+          "文档缺陷（本轮修复）：`docs/quickstart/aci-mcp.md` 的 read→edit 例子原文是 `{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"file.replace_exact\",\"args\":{…,\"expected_hash\":\"<from file.view>\"}}`——占位符就是字面量。doc-only 模型逐字照抄，得到 `E_STALE_HASH`：`eval/aci_learning_probe.json` 的 `exact_edit` 行 `n_ops=3`、`all_ops_accepted=false`、`hash_handoff_ok=true`，reply 文本第 2 行正是 `\"expected_hash\":\"<from file.view>\"`",
+          "文档修复内容：占位符换成真实 16-hex 示例 `e3b0c44298fc1c14`，并加一段明确警告「`expected_hash` 必须是前一次读取返回的字面哈希；上面是示例值，不是要发送的内容；发送占位符或与当前内容不符的哈希会 `E_STALE_HASH` 并回 `data.actual_hash`/`data.expected_hash`，陈旧哈希永远不是退回 shell 重定向的理由」（`git diff -- docs/quickstart/aci-mcp.md`；同 diff 还顺带删掉了文件首行的 UTF-8 BOM）",
+          "修复后（真实调用，`python tools/aci_learning_probe.py --out eval/_probe_after.json`）：`first_attempt_op_acceptance = 0.8`、`task_success = 0.6`、`hash_handoff_rate = 0.0`；逐格：`write_file` ✓ / `read_window` ✓ / `exact_edit` ✗（`n_ops=0`，模型这一格干脆没输出 op，`hash_handoff_ok=false`——占位符照抄这一失效模式消失）/ `search_then_report` accepted ✓ 但 `task_success=false` / `exec_and_report` ✓",
+          "按当前工具的定义（`no_ops_emitted` 的行排除在条件分母外）重算被门槛的 `op_acceptance_given_ops_emitted`：修复前 2/5 = **0.4**（<0.70 不达标）→ 修复后 4/4 = **1.0**（≥0.70 达标）。两个已存产物都生成于该字段加入之前，所以产物里没有这个键，必须用当前工具重跑（见下）",
+          "门禁侧（本会话只读核对，未修改）：`tools/claim_gate.py::THRESHOLDS` 已有 `\"C5\": {desc: quickstart-only learning: first-attempt op acceptance, op: \">=\", value: 0.70}`；取值是 `summary.op_acceptance_given_ops_emitted`，并且 fail-closed（`measured = value is not None and scored > 0 and api_errors == 0`）；`EVIDENCE_ARTIFACTS` 已把 `eval/aci_learning_probe.json` 纳入 C12",
+          "**未完成（按根策略 §3 不能转 done）**：①`eval/aci_learning_probe.json` 仍是修复前的 0.4，且缺 `op_acceptance_given_ops_emitted` → 现在跑 `claim_gate` 会因 C5 fail-closed 判红；②该产物指纹已陈旧：记录的 `evidence.fingerprint` = `5c52e050b9482521e390e0ddb04b9cb64341c48cf4543ff40a32160f4b016a42`，当前（globs = `docs/quickstart/**/*` + `tools/aci_learning_probe.py`）算出来是 `0dbcf3a6624bf73a126c8fb042f2b24dfcfe7c82717403c6e9bdcf7aefbb2013`，C12 会判 stale；③`docs/claims-and-evidence.md` 的 C5 仍是「门槛数字：无（暂无确定性指标）／样本量：未测量／状态：未证实」"
+        ],
+        "id": "TF-0089",
+        "kind": "follow_up",
+        "next_action": "用当前版本工具重跑并覆盖门禁读的那份产物（与 `claim_gate` 的复现命令一致：`python tools/aci_learning_probe.py --repeat 3 --out eval/aci_learning_probe.json`），确认 `op_acceptance_given_ops_emitted ≥ 0.70`、`api_error_rows = 0`，再登记 C5 的门槛与失效边界（TF-0092），`claim_gate` 转绿后本节点可转 `done`。",
+        "non_goals": [
+          "不把 `task_success` 当门槛——它还取决于模型能力，不只取决于文档",
+          "不为了让数字好看去改探针任务集或放宽谓词",
+          "不在本节点内改 `docs/claims-and-evidence.md`（另有 session 在改），登记留给 TF-0092"
+        ],
+        "priority": 2,
+        "progress": 80.0,
+        "progress_source": "manual",
+        "purpose": "让 C5「只读 quickstart 就能正确使用主合同」从主观声明变成可复现数字，并顺带修掉 quickstart 里会主动教坏模型的占位符。",
+        "source_sessions": [
+          "ses_verseshell-tf0088-projection-2026-09-25"
+        ],
+        "status": "in_progress",
+        "title": "缺口：C5（只读 quickstart 的学习成本）此前没有指标；新增 doc-only 探针把 0.4 抬到 0.8，但门禁产物未换代"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "c25-uncertainty-audit",
+      "node": {
+        "acceptance_criteria": [
+          "`tools/live_uncertainty.py` 只用已存 live 产物（不调 API）给出：每个条件的 Wilson 95% 区间、成功率的合并两比例 z 检验、配对 (task, seed, run_index) 单元的 McNemar 精确检验、逐指标配对 t 区间、headline D/A 比值的 bootstrap CI、以及 `n_for_80pct_power`",
+          "用 `rows[]` 重算产物自带的聚合，任何不一致必须报出来（聚合不得与原始行漂移）",
+          "结论必须写清对 `docs/v1.1-freeze.md` 两条数值门槛（≤0.7 工具比 / ≤0.6 观察 token 比）的含义，并且不得把「不显著」写成「无差异」",
+          "产物进门禁：`eval/live_uncertainty.json` + 声明 C25（门槛 `== 1.00`，只门槛「不确定度存在」而不门槛「结果好看」）"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "让结论可被第三方只读复现，且数字自带不确定度",
+          "validation_plan": [
+            "跑 `python tools/live_uncertainty.py`（无 API）",
+            "核对每个区间/检验/功效数字",
+            "把产物写进 `eval/live_uncertainty.json` 并登记 C25",
+            "claim_gate 转绿（TF-0092）"
+          ],
+          "why_not_enough": "产物还没落盘、声明还没登记，门禁因此仍红",
+          "why_this_task": "冻结承诺的两条数值门槛未达标、唯一通过的一支统计上不显著；在把数字对外之前必须先说清样本量能支持什么"
+        },
+        "confidence": 0.9,
+        "context_tags": [
+          "bench",
+          "live",
+          "statistics",
+          "evidence"
+        ],
+        "difficulty": "medium",
+        "display_order": 290,
+        "evidence": [
+          "工具：`tools/live_uncertainty.py`（新，无 API 调用）。方法写在产物的 `method` 字段：Wilson score interval (95%)；two-proportion pooled z-test, two-sided；McNemar exact binomial on discordant success pairs + paired t interval for continuous metrics；paired unit = (task_id, seed, run_index)；power target = 0.80 at alpha=0.05 two-sided",
+          "复现命令（本会话核对时输出到临时路径，未改仓库）：`python tools/live_uncertainty.py --out $env:TEMP\\lu_check.json`，读的是 `bench/aci/results/latest_live.json`（第九次复测，task set v1.3.0，n_rows = 60）与 `bench/aci/results/live_ab_without_read_files.json`",
+          "with 臂（`latest_live.json`，n_rows=60，模型 `sn-glm-5-3-flash`，seeds [42,43,44]）：raw_shell 成功率 **0.6333**（19/30）Wilson95 **[0.4551, 0.7813]**；verseshell_aci **0.8**（24/30）Wilson95 **[0.6269, 0.9049]**；未验证行 0",
+          "with 臂显著性：合并 z 检验 **z=1.4325, p=0.152008** → 成功率差 **不显著**（alpha=0.05）；配对 McNemar 不一致格 **0 个 A-only vs 5 个 D-only, p=0.0625** → 配对口径下同样**不显著**；配对成功率 delta=0.1667、sd=0.379、ci95=[0.0254, 0.308]、**n_for_80pct_power = 41**（即要把这个效应做到 80% 功效，需要约 41 对，而现在是 30 对）",
+          "with 臂比值 bootstrap：`tool_call_ratio` 点估计 **0.9919**、CI95 **[0.8085, 1.2427]**、`P(<0.7) = 0.0003`；`observation_token_ratio` 点估计 **0.8855**、CI95 **[0.6589, 1.2067]**、`P(<0.6) = 0.0044`；配对 t 区间：tool_calls delta=−0.0333（sd=2.4842, ci95=[−0.9595, 0.8928], n_for_80%=43594）、observation_tokens delta=−20.3333（sd=146.4411, ci95=[−74.929, 34.2623], n_for_80%=408）",
+          "对 `docs/v1.1-freeze.md` 第 32 行的含义：冻结承诺是「higher success **and/or** ≤0.7 tool calls **and/or** ≤0.6 observation tokens」。当前工具比 0.9919、token 比 0.8855 → **两条数值门槛都没过**（bootstrap 给出 token 比 <0.6 的概率只有 0.44%，工具比 <0.7 的概率只有 0.03%）；gate 目前只靠 success_rate_D > success_rate_A（0.80 vs 0.6333）这一支通过，而这一支恰恰是统计上最弱的一支（z 检验 p=0.152、McNemar p=0.0625）。结论：**「D 的成功率明显高于 A」在当前样本量下站不住**，要么把 `--repeat` 提到 ≥11（约 41 对才有 80% 功效），要么按冻结文本分开报告两条数值门槛而不是用 OR 合并",
+          "without 臂（对照，`live_ab_without_read_files.json`）：raw_shell 0.6333（Wilson95 [0.4551,0.7813]）vs verseshell_aci 0.5333（[0.3614,0.6977]）；z=−0.7856, p=0.432111；McNemar 8 A-only vs 5 D-only, p=0.581055；tool_call_ratio 0.7244 [0.5226,0.9474]、token_ratio 0.5372 [0.3604,0.7543]——**方向与 with 臂相反**，所以本节点的结论必须按臂分开写",
+          "聚合一致性：两臂的 `stored_aggregate_mismatches` 都是空数组 → 产物自带的聚合与 `rows[]` 重算结果一致（不是手工编辑过的数字）",
+          "**未完成（按根策略 §3 不能转 done）**：①`eval/live_uncertainty.json` **尚不存在**（本会话为避免动仓库产物，只写到临时路径），所以 `claim_gate` 的 C25 分支会走 `missing evidence artifact` 判红；②`docs/claims-and-evidence.md` 里没有 C25 段落；③`eval/evidence.json` 最后一次生成于 2026-09-24T17:48Z，C5 还是 N/A、完全没有 C25"
+        ],
+        "id": "TF-0090",
+        "kind": "follow_up",
+        "next_action": "把审计产物正式写到 `eval/live_uncertainty.json`（`python tools/live_uncertainty.py --out eval/live_uncertainty.json`），登记 C25（门槛 `== 1.00`，只门槛不确定度存在）并把「不显著 / 门槛未达标」写进失效边界（TF-0092），`claim_gate` 转绿后本节点可转 `done`。",
+        "non_goals": [
+          "不改 `docs/v1.1-freeze.md` 的门槛数字",
+          "不为了让门槛通过而换更松的区间或换口径",
+          "不把 without 臂（隐藏 `file.read_many` 的配对对照臂）与 with 臂混进同一张结论表"
+        ],
+        "priority": 2,
+        "progress": 85.0,
+        "progress_source": "manual",
+        "purpose": "让每个对外数字都自带不确定度，并让门禁说清「这个样本量能支持什么结论」——而不是让一个不显著的差值以点估计的形式进 README。",
+        "source_sessions": [
+          "ses_verseshell-tf0088-projection-2026-09-25"
+        ],
+        "status": "in_progress",
+        "title": "缺口：live 数字此前只有点估计；新增不确定度审计给出区间/检验/功效，并证明成功率领先不显著、两条冻结数值门槛未达标"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "live-remeasure-after-projection-fix",
+      "node": {
+        "acceptance_criteria": [
+          "6 次 `bench/aci/runners/live_agent_loop.py --full`（seeds 42/43/44 × with/without `--exclude-tools read_files`）跑满，再 `merge_live_runs.py` 合并两份产物；任一行 `api_error` 必须按 `splice_live_cells.py` 补格后合并",
+          "随 live 基线变化的确定性派生产物一并重生成，并按 C12 全部判 fresh（`exec_token_breakdown` / `read_usage_audit` / `exec_failure_breakdown` / `step_composition` / `ts_fixture_audit` / `read_path_breakdown` / `tf45_envelope_replay` 等）",
+          "重登记 C13 与相关声明，并逐条写明与第九次复测（task set v1.3.0：A 0.6333 / D 0.80，D/A 0.9919 步 / 0.8855 token）的不可比性——变的是参考客户端的投影，不是任务集与模型",
+          "重跑后再跑一次 TF-0090 的不确定度审计，说明新基线是否改变了「成功率不显著」与「两条数值门槛未达标」这两条结论"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "让测量反映当前代码，而不是反映改动前的代码",
+          "validation_plan": [
+            "跑满 6 次 `--full` 并合并",
+            "核对 `api_error` 为 0",
+            "重生成受指纹保护的产物",
+            "重登记 C13 + 复跑不确定度审计"
+          ],
+          "why_not_enough": "重跑未完成、未合并、未重登记",
+          "why_this_task": "投影修复直接改变了模型看到的观察，旧基线不再描述被测对象；不重跑就无法引用任何 live 数字"
+        },
+        "confidence": 0.6,
+        "context_tags": [
+          "bench",
+          "live",
+          "re-measurement"
+        ],
+        "difficulty": "medium",
+        "display_order": 300,
+        "evidence": [
+          "状态：本轮定版复测**正在运行**，数字**尚未产生**，因此本节点不登记任何 A/D 数字。运行痕迹：产物目录 `bench/aci/results/tf88/`（`with_seed42.json` 已落盘）、运行日志 `bench/aci/results/scratch/tf88_round.log` 与 `bench/aci/results/scratch/tf89_round.log`（两次运行，均从 `with seed=42` 开始）",
+          "规模与口径（沿用 TF-0085 的同一口径）：模型 `sn-glm-5-3-flash`、temperature 0、max_turns 8、10 任务 × 2 条件 × 3 seeds × 2 臂（with / without `--exclude-tools read_files`），凭据取 gitignored 的 `.env.local`",
+          "为什么必须重跑：本轮改的是 `bench/aci/runners/live_agent_loop.py::format_aci_result`，而 `bench/aci/results/latest_live.json` 的 C12 指纹 globs 含 `bench/aci/runners/live_agent_loop.py` —— 投影一改，旧 live 产物即判陈旧，任何引用都必须等新基线",
+          "上游依据：TF-0085 已确立「产品侧或口径一改就必须一次同口径全量重跑」的做法；TF-0087 的第九次复测是当前唯一可引用的 with 臂基线",
+          "**未完成**：三 seeds × 两臂尚未合并，`api_error` 未核对，C13 与派生产物未重登记"
+        ],
+        "id": "TF-0091",
+        "kind": "follow_up",
+        "next_action": "等运行结束后：核对 120 行 `api_error` 0 → 重生成全部受指纹保护的产物 → 重登记 C13 → 复跑 `python tools/live_uncertainty.py`（TF-0090）→ `claim_gate` 与 `readme_claims_check` 全绿。若 apply 本提案时重跑已完成，请按实际产物把本节点改判 `done` 并把数字写进 `evidence`。",
+        "non_goals": [
+          "不引用未合并的中间日志或部分 seed 当结论",
+          "不换模型（端点也提供 `glm-5.3-flash`，换模型会破坏与前几轮的可比性）",
+          "不改任务集/谓词来让数字好看"
+        ],
+        "priority": 1,
+        "progress": 30.0,
+        "progress_source": "manual",
+        "purpose": "投影修复改变了参考客户端交给模型的内容，旧基线因此不再描述当前被测对象；用一次同口径全量重跑把 live 数字重新变成可引用的证据。",
+        "source_sessions": [
+          "ses_verseshell-tf0088-projection-2026-09-25"
+        ],
+        "status": "in_progress",
+        "title": "缺口：投影修复后的定版 live 复测尚未跑完，本轮不登记任何新数字"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "claim-registration-and-gate-green",
+      "node": {
+        "acceptance_criteria": [
+          "`eval/aci_learning_probe.json` 用**当前版本** `tools/aci_learning_probe.py` 重生成（必须含 `op_acceptance_given_ops_emitted`），`eval/live_uncertainty.json` 正式落盘",
+          "投影修复的 5 条回归检查从 `tools/_dbg_projection_regress.py` 草稿升级为正式工具（`tools/` 下无下划线前缀），并登记成声明（含 `pristine/契约` 级别的失效边界）",
+          "`docs/claims-and-evidence.md` 按 §3 的 `### Cxx` 格式登记：C5（门槛 ≥0.70 + 复现命令 + 失效边界，从「未证实」改判）、C25（门槛 ==1.00 + 只门槛不确定度存在）、以及投影声明",
+          "`python tools/claim_gate.py` **exit 0**（C5/C25/C12 全部转绿）、`python tools/readme_claims_check.py` 全 PASS；涉及对外数字的行按 §4 取更严一侧"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.85,
+          "user_goal": "让本轮结论第三方可审计（有命令、有 source、有失效边界）",
+          "validation_plan": [
+            "重生成两份门禁产物",
+            "把投影检查升级成正式工具",
+            "按 §3 格式登记 C5/C25/投影声明",
+            "claim_gate + readme_claims_check 全绿"
+          ],
+          "why_not_enough": "两条新产物没落盘、三条声明没登记、投影检查还是草稿",
+          "why_this_task": "§3 的四条硬门槛里第 2、3 条明确要求「涉及对外数字的已登记 + claim_gate exit 0」，缺了这两条，三个成果节点都只能停在 in_progress"
+        },
+        "confidence": 0.8,
+        "context_tags": [
+          "docs",
+          "claims",
+          "gate",
+          "evidence"
+        ],
+        "difficulty": "medium",
+        "display_order": 310,
+        "evidence": [
+          "门禁代码侧已就位（本会话只读核对）：`tools/claim_gate.py` 的 `THRESHOLDS` 已有 `C5`（`>= 0.70`）与 `C25`（`== 1.0`）；`EVIDENCE_ARTIFACTS` 已扩到 14 份，含 `eval/aci_learning_probe.json` 与 `eval/live_uncertainty.json`",
+          "缺口 1：`eval/live_uncertainty.json` **不存在** → C25 走 `missing evidence artifact` 分支判红",
+          "缺口 2：`eval/aci_learning_probe.json` 是修复前的产物（`first_attempt_op_acceptance = 0.4`），缺 `op_acceptance_given_ops_emitted` → C5 的 `measured = value is not None and scored > 0 and api_errors == 0` 为假，fail-closed 判红",
+          "缺口 3：该产物的 C12 指纹已陈旧（记录 `5c52e050b9482521e390e0ddb04b9cb64341c48cf4543ff40a32160f4b016a42` vs 当前 `0dbcf3a6624bf73a126c8fb042f2b24dfcfe7c82717403c6e9bdcf7aefbb2013`）→ C12 判 stale；`eval/live_uncertainty.json` 缺失同样进 C12",
+          "缺口 4：`eval/evidence.json` 最后一次生成于 2026-09-24T17:48Z（当时 17/17 gated pass，C5 记 `[N/A] value=- threshold=None`，没有 C25）——即「绿」的那份证据早于本轮新增的两条声明，不能当本轮的门禁结果",
+          "缺口 5：投影修复的回归检查是 `tools/_dbg_projection_regress.py`（下划线草稿，未进 `EVIDENCE_ARTIFACTS`、无声明），按 §7 的口径它不是可 clone 后直接跑的验收门禁"
+        ],
+        "id": "TF-0092",
+        "kind": "follow_up",
+        "next_action": "落两件产物（`eval/aci_learning_probe.json` 重生成、`eval/live_uncertainty.json` 写盘）→ 投影检查升级为正式工具 → 按 `docs/claims-and-evidence.md` §3 格式登记三条声明 → 跑 `claim_gate` 与 `readme_claims_check` 到 exit 0，然后把 TF-0088/0089/0090 转 `done`。",
+        "non_goals": [
+          "不改任何门槛数字去迁就现状（尤其不把 ≤0.7 / ≤0.6 放宽）",
+          "不把「gate 只靠统计上最弱的一支通过」写成「已达标」",
+          "不在本节点内改 `README.md` / `CHANGELOG.md` 的数字口径（另有 session 在改）"
+        ],
+        "priority": 1,
+        "progress": 0.0,
+        "progress_source": "manual",
+        "purpose": "按根策略 §3 把 TF-0088/TF-0089/TF-0090 的产物落成机检声明，让三条证据从「对话里的结论」变成「clone 后能跑的检查」。",
+        "source_sessions": [
+          "ses_verseshell-tf0088-projection-2026-09-25"
+        ],
+        "status": "ready",
+        "title": "缺口：本轮证据还没落成机检声明，claim_gate 现在是红的（C5/C25/C12）"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "created_from_session": "ses_verseshell-tf0088-projection-2026-09-25",
+        "reason": "投影层三处丢字段是在 TF-0087 收口后核对参考客户端「工具描述承诺 vs 实际投影」时发现的同类缺陷（承诺与服务端已发内容之间断了）"
+      },
+      "from": "TF-0088",
+      "to": "TF-0087",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.8,
+        "created_from_session": "ses_verseshell-tf0088-projection-2026-09-25",
+        "reason": "同一类缺陷的两半：TF-0088 是参考客户端丢掉服务端已发的字段，TF-0089 是 quickstart 主动教模型发送占位符（都会让「合同可用性」在 surface 上失真）"
+      },
+      "from": "TF-0089",
+      "to": "TF-0088",
+      "type": "related_to"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "created_from_session": "ses_verseshell-tf0088-projection-2026-09-25",
+        "reason": "不确定度审计直接读 TF-0087 第九次复测的产物（`bench/aci/results/latest_live.json`，n_rows=60），用来判断那批数字能支持什么结论"
+      },
+      "from": "TF-0090",
+      "to": "TF-0087",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "blocking": true,
+        "confidence": 0.9,
+        "created_from_session": "ses_verseshell-tf0088-projection-2026-09-25",
+        "reason": "投影修复改变了模型看到的观察，重跑必须建立在修复后的 `live_agent_loop.py` 之上，否则新基线仍带旧投影口径"
+      },
+      "from": "TF-0091",
+      "to": "TF-0088",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "created_from_session": "ses_verseshell-tf0088-projection-2026-09-25",
+        "reason": "同一口径的第十次复测：与第九次（task set v1.3.0）只差参考客户端投影，用来给出「改投影后」的可比数字"
+      },
+      "from": "TF-0091",
+      "to": "TF-0087",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "created_from_session": "ses_verseshell-tf0088-projection-2026-09-25",
+        "reason": "根策略 §3 的收口缺口：TF-0088 的回归检查与证据还没落成机检声明"
+      },
+      "from": "TF-0092",
+      "to": "TF-0088",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "created_from_session": "ses_verseshell-tf0088-projection-2026-09-25",
+        "reason": "C5 的门禁产物缺 gated 字段且指纹陈旧，声明也未登记"
+      },
+      "from": "TF-0092",
+      "to": "TF-0089",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "created_from_session": "ses_verseshell-tf0088-projection-2026-09-25",
+        "reason": "C25 的产物 `eval/live_uncertainty.json` 尚未落盘、声明未登记"
+      },
+      "from": "TF-0092",
+      "to": "TF-0090",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "blocking": true,
+        "confidence": 0.8,
+        "created_from_session": "ses_verseshell-tf0088-projection-2026-09-25",
+        "reason": "`claim_gate` 要求 C12 全部 fresh，而 `bench/aci/results/latest_live.json` 只有在定版重跑完成后才能判 fresh，所以门禁转绿依赖 TF-0091"
+      },
+      "from": "TF-0092",
+      "to": "TF-0091",
+      "type": "depends_on"
+    }
+  ],
+  "created_at": "2026-09-24T18:27:23.980589Z",
+  "proposal_id": "TFP-tf0088-projection-and-uncertainty-2026-09-25",
+  "rationale": "本轮（TF-0088/TF-0089）修掉了三处「承诺与投影不一致」的真实缺陷，并给两条此前没有数据的主张补上了真实测量：①参考客户端 `format_aci_result` 在成功/失败路径上分别丢掉 `repo.search` 的 `matches[]`、`repo.summary` 的 `top_level`、`E_AMBIGUOUS` 的 `data.matches[]`，即 op 描述与 C4 承诺的字段服务端都发了、模型却看不到（已存 live 产物里 `repo.search` 只回 3 token 的 `{\"ok\": true}`，with 臂 0 次使用、raw_shell 用 grep 类命令 11 次）；②`docs/quickstart/aci-mcp.md` 的 read→edit 例子写着字面占位符 `\"<from file.view>\"`，doc-only 探针里 5 格有 1 格逐字照抄并拿到 `E_STALE_HASH`；③C5（只读 quickstart 的学习成本）此前**没有任何指标**、只能登记为未证实，新增 `tools/aci_learning_probe.py` 用真实模型 + 真实 `ae --serve --agent` 把它变成可复现数字（文档修复前 0.4 → 修复后 0.8）；④新增 `tools/live_uncertainty.py`（不调 API）给 live 数字补上 Wilson 区间、合并 z 检验、配对 McNemar、配对 t 区间、bootstrap CI 与 `n_for_80pct_power`，并揭示第九次复测的成功率领先（A 0.6333 / D 0.80）在统计上**不显著**、`docs/v1.1-freeze.md` 的两条数值门槛（≤0.7 工具比 / ≤0.6 token 比）**未达标**——门禁目前只靠统计上最弱的一支（成功率）通过。按根策略 §3，这四个节点目前都**不能**自动转 done：`tools/claim_gate.py` 侧虽然已经加了 C5（≥0.70，fail-closed）与 C25（==1.00）并把手写工具产物纳入 C12，但 `eval/live_uncertainty.json` 还不存在、`eval/aci_learning_probe.json` 仍是改动前的 0.4 且缺 `op_acceptance_given_ops_emitted` 字段（指纹也已陈旧），投影修复的回归检查还停在 `tools/_dbg_*.py` 草稿；因此本提案把三件事登记为 `in_progress`（证据写全）、把「定版 live 复测」登记为 `in_progress`（正在跑、数字未产生）、并另开一个 `follow_up` 承载 §3 的收口缺口。这样任何一条都能被第三方只读复现，且没有把「未完成的复测」写成结论。本文件是**提案记录**，未 apply、未改动任何既有节点（不改 `tools/claim_gate.py`、`bench/aci/**`、`docs/claims-and-evidence.md`、`README.md`、`CHANGELOG.md`，这些文件另有 session 在改）。",
+  "session_id": "ses_verseshell-tf0088-projection-2026-09-25",
+  "status": "applied"
+}

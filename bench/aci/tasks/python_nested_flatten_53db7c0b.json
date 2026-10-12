@@ -1,0 +1,58 @@
+{
+  "id": "python_nested_flatten_53db7c0b",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "The test suite for `nested_flatten.py` fails. Stops recursing after two nesting levels, so elements buried three or more levels deep remain as nested sublists in the returned list. Fix the module so the suite passes, without changing test_nested_flatten.py.",
+  "golden": {
+    "nested_flatten.py": "\"\"\"nested_flatten.py\n\nRecursively flatten arbitrarily nested lists and tuples into a single\nflat list, preserving element order. Strings (and bytes) are treated as\natomic elements and are never split into individual characters.\n\nExported API:\n    flatten -- flatten a nested structure into a flat list\n\"\"\"\n\n__all__ = [\"flatten\"]\n\n\ndef flatten(nested):\n    \"\"\"Recursively flatten *nested* lists and tuples into a flat list.\n\n    Any element that is not a list or a tuple (including strings,\n    bytes, numbers, dicts, sets, generators, and None) is treated as\n    an atomic value and appears in the result unchanged.\n\n    Args:\n        nested: An arbitrarily nested structure of lists and tuples,\n            or any single atomic value.\n\n    Returns:\n        list: A new flat list containing the atomic elements of\n        *nested* in their original order.\n\n    Examples:\n        >>> flatten([1, (2, [3, \"abc\"]), [[4], []]])\n        [1, 2, 3, 'abc', 4]\n        >>> flatten(\"hello\")\n        ['hello']\n        >>> flatten([])\n        []\n        >>> flatten((((5,),),))\n        [5]\n    \"\"\"\n    if not isinstance(nested, (list, tuple)):\n        return [nested]\n\n    flat = []\n    for item in nested:\n        flat.extend(flatten(item))\n    return flat\n\n\nif __name__ == \"__main__\":\n    import doctest\n\n    doctest.testmod(verbose=False)\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest"
+        ],
+        "timeout_sec": 300
+      },
+      {
+        "type": "file_contains",
+        "path": "test_nested_flatten.py",
+        "contains": "def test_deeply_nested_numbers():"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task author (TDD-ordered, locally self-verified)",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written from the spec and tests, never from the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      }
+    ],
+    "plan_index": 2,
+    "tier": "large",
+    "self_verified": {
+      "tests_pass_on_correct": true,
+      "tests_fail_on_buggy": true,
+      "variants_verified": 2
+    },
+    "generated_at": "2026-09-27T17:36:00.919464+00:00"
+  },
+  "workspace_fixture": "python_nested_flatten_53db7c0b",
+  "promoted_from": "bench/aci/candidates/python_nested_flatten_53db7c0b",
+  "promoted_at": "2026-09-28T04:37:02.594488+00:00"
+}

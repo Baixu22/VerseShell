@@ -1,0 +1,245 @@
+{
+  "applied_at": "2026-09-27T06:21:30.815682Z",
+  "base_graph_hash": "2cb14e2ddb816e6661d72a0f0a8445e42be19c936c9b89604836d164cd1340f6",
+  "base_summary": {
+    "edge_count": 176,
+    "node_count": 115,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "c14c16-decision",
+      "node": {
+        "acceptance_criteria": [
+          "不在看到数据之后放宽 C14/C16 的阈值（纪律 1）",
+          "新声明的口径、阈值、验证数据集在**看数据之前**写入 `docs/acceptance-criteria.md` 与 `docs/claims-and-evidence.md`",
+          "新声明必须在不同于第 12/13 轮的数据上验证（下一任务集版本或留出集）"
+        ],
+        "confidence": 0.85,
+        "context_tags": [
+          "claims",
+          "gate",
+          "decision"
+        ],
+        "difficulty": "low",
+        "display_order": 460,
+        "evidence": [
+          "门禁现状：`python tools/claim_gate.py` → 23/25，**仅 C14（0.0533 < 0.15）与 C16（0.0855 < 0.10）失败**",
+          "无人负责的核查：`audit-r12-scratch/gap_check.py` 显示提到 C14/C16 的节点有 23 个，**未完成的 0 个**",
+          "为什么不是「加样本可解」：C14/C16 的门槛是「占读桶总量的百分比」，而这个占比随读法混合漂移——修完 C30 后 D 的读法变成内容主导，开销占比从约 22% 降到约 18%，于是总量口径的节省掉到门槛以下。门槛未达成**不是代码回退**",
+          "已有的事实基础：投影确实去掉了 **45.5% 的命名信封开销**（`line_wrapper` 与可推导的 `counts`），但折算到总量只有 8.3%",
+          "处置理由：放宽阈值＝事后挑选；继续用同一批数据证明新口径＝分叉花园。两者都违反 `docs/acceptance-criteria.md` §3.1"
+        ],
+        "kind": "decision",
+        "next_action": "无（决策已下）。执行见「c14c16-execute」节点。",
+        "non_goals": [
+          "不把 C14/C16 的阈值从 0.15 / 0.10 调低",
+          "不用发现 45.5% 信封削减的同一批数据去证明新声明"
+        ],
+        "priority": 1,
+        "progress": 100.0,
+        "progress_source": "agent",
+        "purpose": "claim_gate 现在唯一的两个红就是 C14/C16，而**全森林没有任何一个未完成节点负责它们**（23 个提到 C14/C16 的节点全部是 done）。这是唯一在门禁上红着却无人负责的工作。",
+        "status": "done",
+        "summary": "门槛不放宽：C14/C16 按原口径留红；把「信封开销削减」登记成新声明，在新任务集/留出集上验证，而不是用发现 45.5% 的同一批数据证明。",
+        "title": "决策：C14/C16 保持原阈值红，另登记「信封开销削减 ≥40%」为新声明并在新数据上验证"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "c14c16-execute",
+      "node": {
+        "acceptance_criteria": [
+          "`docs/acceptance-criteria.md` 与 `docs/claims-and-evidence.md` 预先登记新声明的口径/阈值/数据集（在第 14 轮 live 之前写好）",
+          "新声明在新数据（下一任务集版本或留出集）上验证；旧数据只作历史行保留",
+          "C16 的 token 数字补上真实口径对照，或写明「本声明的数字是 `len//4` 代理口径」的失效边界",
+          "`tools/claim_gate.py` 中新增声明的门禁项，并在新数据上给出 pass/fail"
+        ],
+        "confidence": 0.8,
+        "context_tags": [
+          "claims",
+          "gate",
+          "docs"
+        ],
+        "difficulty": "medium",
+        "display_order": 470,
+        "evidence": [
+          "现状数字：C14 = 0.0533（阈值 ≥0.15）、C16 = 0.0855（阈值 ≥0.10）；信封口径为 45.5%",
+          "C16 的声明目前只用 observation token（`len//4` 代理）口径，**没有真实 tokenizer 对照**——`audit-r12-scratch/gap_check.py` 第 3 节显示 C15/C16 的 `real_terms=False`",
+          "验证必须在留出集或新任务集上（TF-0105 会产出），否则等于用发现问题的同一批数据证明修复"
+        ],
+        "kind": "task",
+        "next_action": "与 TF-0104（标签/freeze）和 TF-0105（扩充+留出集）合并执行：先把新声明写进预注册，再用下一轮 live 的数据验证。",
+        "non_goals": [
+          "不在验证通过前宣布已达标",
+          "不为让门禁转绿而删除 C14/C16"
+        ],
+        "priority": 1,
+        "purpose": "把 c14c16-decision 的决定落成可机检的声明，让门禁的两个红有明确的、不作假出路。",
+        "status": "ready",
+        "summary": "按预注册写新声明（信封开销削减 ≥40%，门槛与数据集先定），并在下一任务集版本上验证；同时把 C16 的 token 数字重定到真实口径或显式登记失效边界。",
+        "title": "步骤69：执行 C14/C16 处置——登记新声明并在新数据上验证"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "harness-fault-rule",
+      "node": {
+        "acceptance_criteria": [
+          "`docs/acceptance-criteria.md` 明确写出规则：harness 故障行（`harness_crash`）与撞 completion 上限行分别**排除**还是**计入**，以及排除后必须同时报告什么",
+          "`tools/acceptance_power.py` 与 `tools/three_arm_report.py` 按同一规则产出头条，不再各报一套",
+          "`tools/claim_gate.py` 新增/扩展检查：头条数字所用的行集合必须与规则一致",
+          "规则必须写在下一轮 live 之前"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "claims",
+          "statistics",
+          "gate"
+        ],
+        "difficulty": "low",
+        "display_order": 480,
+        "evidence": [
+          "`tools/three_arm_report.py` 现在同时输出全量与 `harness_crash_excluded` 两套成功率与比值，但**没有规则说头条用哪套**",
+          "`audit-r12-scratch/gap_check.py` 第 4 节：`tools/claim_gate.py` 完全不提 `harness_crash`；`eval/acceptance_power.json` 也不排除故障行（`excludes harness faults: False`）",
+          "第 12 轮的教训：A/A′ 各有 11%/15% 的轮次被 completion 上限截断，而**被截断的轮次不发工具调用、直接记失败**，把基线压低、放大了 D 的优势——当时的头条并没有对此作任何处置",
+          "第 13 轮：harness 崩溃 0/0/0、completion 截断 3%/7%/4%，所以这一轮的结论不受影响；但规则仍须先写死，否则下一轮又会事后决定"
+        ],
+        "kind": "requirement",
+        "next_action": "写进 `docs/acceptance-criteria.md` 的 §3.1 纪律 1 之下，并在 `acceptance_power.py` 里落成可复算字段。",
+        "non_goals": [
+          "不在看到下一轮结果后挑一个对自己有利的规则"
+        ],
+        "priority": 1,
+        "purpose": "现在有 harness 故障行的**测量**（`harness_crash`、`completion_truncated_turns`）与两种口径的数字（全量与排除后），但**没有任何预注册规则**规定头条该用哪一个。口径必须在看数据之前写死——这正是 §3.1 纪律 1 的要求。",
+        "status": "ready",
+        "summary": "把「harness 故障行如何处置」写成预注册规则，并让门禁按该规则检查头条数字。",
+        "title": "要求：预注册「harness 故障行的处置规则」（排除还是计入）"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "c12-cover-inputs",
+      "node": {
+        "acceptance_criteria": [
+          "`bench/aci/results/live_ab_without_read_files.json` 要么进入 C12 的检查面，要么在 `eval/evidence.json` 里有一条显式的「输入性产物过期」检查项",
+          "检查必须能判定它与对应 with 臂的**组成一致**（seed 集合、行数、runner 版本）",
+          "写一条负对照：把一个 seed 数不匹配的 without 臂指给门禁，必须判红"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "gate",
+          "evidence",
+          "bench"
+        ],
+        "difficulty": "low",
+        "display_order": 490,
+        "evidence": [
+          "**当前真实状态**：`live_ab_without_read_files.json` = **75 行、仅 seed 42、`repeat=1`、generated_at 2026-09-26T01:56**（第 12 轮、**有 cp936 崩溃缺陷的 harness**）；而 with 臂 `latest_live.json` = **225 行、seeds [42,43,44]**（第 13 轮修复后）。**两个臂的组成不对等**",
+          "**7 个工具从它派生**：`acceptance_power.py`、`exec_failure_breakdown.py`、`exec_token_breakdown.py`、`live_uncertainty.py`、`read_usage_audit.py`、`step_composition.py`、`three_arm_report.py`",
+          "`docs/claims-and-evidence.md` C12 条目的失效边界明写：「`live_ab_without_read_files.json` 是配对对照臂，**按设计不进 C12**」——也就是说上述 7 份产物显示为 fresh，而它们的消融输入是旧的、单 seed 的、有缺陷的那一份",
+          "这条既不在外部审计清单里，也不在本轮既有节点里；属于完整性（integrity）问题而非改进问题"
+        ],
+        "kind": "requirement",
+        "next_action": "先落成显式的门禁检查项（判定组成一致性），再随 TF-0105 的下一轮 without 臂重跑把它刷新到 3 seed。",
+        "non_goals": [
+          "不把 without 臂的指纹塞进 C13（它的重跑时机与 with 臂不同）"
+        ],
+        "priority": 1,
+        "purpose": "C12 按设计**不检查**没有指纹/不在清单里的输入性产物，于是一个失效的输入可以让一整片「fresh」的派生产物全部建立在其上而无人察觉。现在就处于这个状态。",
+        "status": "ready",
+        "summary": "把 without 臂基线纳入新鲜度检查面（或显式登记其失效边界并让门禁报出来）。",
+        "title": "要求：C12 的证据新鲜度必须覆盖「输入性产物」（如 without 臂基线）"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "门禁唯一红的处置决策"
+      },
+      "from": "c14c16-decision",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "上述决策的执行"
+      },
+      "from": "c14c16-execute",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "预注册口径缺口"
+      },
+      "from": "harness-fault-rule",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "证据链完整性缺口"
+      },
+      "from": "c12-cover-inputs",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 220
+      },
+      "id": "c14c16-decision"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 230
+      },
+      "id": "c14c16-execute"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 240
+      },
+      "id": "harness-fault-rule"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 250
+      },
+      "id": "c12-cover-inputs"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已在执行**：`python tools/live_round.py --tag tf0100 --arms without --seeds 42,43,44 --max-turns 20`（与第 13 轮同设置，便于配对）",
+          "**seed 42（23:23）与 seed 43（00:35）成功**；**seed 44 于 01:25 挂死**在 `rust_borrow_fix_longest_word_a4c895ec` 的 D 臂——模型发出 `open('CON','r').read()`，在非交互子进程里永久阻塞，而 `subprocess.run(timeout=)` 对此无效；挂 11.5 小时后被杀，且因整轮才落盘而丢掉已完成的 61 行。详见 TFD-a21ebaa5ce 与 `docs/audit-brief-r13.md` §5.2",
+          "**P7 结论（据 2 个 seed / 50 个配对格）：撤回。** D with 批量读 vs D without：成功率 **0.8600（43/50） vs 0.8600（43/50）**，仅 with 赢 3 / 仅 without 赢 3，**McNemar 精确 p = 1.0000**；工具/轮 **3.76 → 4.54（×1.2074）**；观察 token/轮 558.1 → 543.4（×0.9736）。**逐 seed 方向相反**：seed 42 为 0.80→0.88（+0.08），seed 43 为 0.92→0.84（−0.08）",
+          "**含义**：去掉 `read_files`（=`file.read_many` 批量读；`read_file`=`file.view` 仍可用）在设备类命令挂死之前的两个 seed 上，唯一方向一致的代价是多约 21% 的工具调用；成功率无可检出的下降；观察 token 基本不变。**注意 2 个 seed 的样本量下「唯一稳定代价」这个措辞偏强，已按外部审计意见在文档里软化**",
+          "**本轮新增的关键发现（原计划未覆盖）**：`live_ab_without_read_files.json` 至今仍是**第 12 轮那份 75 行 / 仅 seed 42 / 由有缺陷 harness 产出**的文件，而**有 7 个工具从它派生**（`acceptance_power` / `exec_failure_breakdown` / `exec_token_breakdown` / `live_uncertainty` / `read_usage_audit` / `step_composition` / `three_arm_report`）。C12 按设计不检查它，所以那 7 份产物在门禁上显示为 fresh，**其消融输入却是旧的、单 seed 的、有缺陷的**——这已落成 requirement 节点 `c12-cover-inputs`",
+          "**未完成**：seed 44 的重跑（被依赖 `step64-shell-timeout` 挡住）；三臂两个预算的截断率核对；`live_ab_without_read_files.json` 的合并与由此牵动的派生产物重刷"
+        ],
+        "next_action": "先完成 `step64-shell-timeout`（修超时 + 断点续跑），再重跑消融 seed 44 得 3 seed；然后合并 `live_ab_without_read_files.json`、核对三臂两个预算的截断率、重刷派生产物，最后把 P7 的正式替换文本（「批量读多 21% 工具调用、成功率两 seed 方向相反」）写进 `docs/claims-and-evidence.md` 与 `docs/audit-brief.md`；同时让 `c12-cover-inputs` 的门禁项覆盖这份文件。"
+      },
+      "id": "TF-0103"
+    }
+  ],
+  "created_at": "2026-09-27T06:21:30.663793Z",
+  "proposal_id": "TFP-r12-gap-nodes-2026-09-27",
+  "rationale": "回答「该建新节点还是在现计划上继续」：核查后发现 4 处既不在外部审计清单、也不在现有计划里的缺口，其中两处是完整性问题而不是改进问题。本条把它们落成节点，并修正 TF-0103 的 evidence——不另开一条并行主线，现计划顺序不变。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

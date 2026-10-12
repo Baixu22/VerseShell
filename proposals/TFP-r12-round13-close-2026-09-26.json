@@ -1,0 +1,139 @@
+{
+  "applied_at": "2026-09-26T12:48:54.958179Z",
+  "base_graph_hash": "3ee72a7536f375df1fd9cfc9e6e79356ecf635d4cda34dcab47014437e21c04c",
+  "base_summary": {
+    "edge_count": 168,
+    "node_count": 107,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "修 `bench/aci/runners/live_agent_loop.py::execute_shell_cmd`：`subprocess.run(..., text=True)` 补 `encoding=\"utf-8\", errors=\"replace\"`，`out = r.stdout` 改成 `out = r.stdout or \"\"`；逐行新增 `harness_fault` / `harness_crash`",
+          "新契约工具 `tools/harness_encoding_contract.py` + 门禁项 **C31**（3/3 PASS）：等价于裸 shell 侧的 `projection_contract`，用真实 `type` 读含 U+2014 的 UTF-8 文件，并用与主机无关的 `mechanism_control` 证明该字节在 cp936 下不可解码；pre-fix 调用形态在同一产物里复现出 `stdout_is_none=true` + 读取线程 `UnicodeDecodeError: 'gbk' codec can't decode byte 0x94`",
+          "**真实运行确认（这是本节点收口的依据）**：`python tools/live_round.py --tag tf0100 --arms with --seeds 42,43,44 --max-turns 20` 共 **225 行、`api_error` 0**，**三臂 `harness_crash` 全为 0**（第 12 轮是 raw_shell 3、raw_shell_coached 2）。那个曾经让 A 崩溃 3/3 的任务 `typescript_reduce_shared_accumulator_d80f462d` 现在 **A 三个 seed 全 PASS**",
+          "**C12 首次转绿**：改动前 `bench/aci/results/latest_live.json` 因指纹覆盖 runner 而合法 stale；重跑后它由修好的 runner 产出，22 项被门禁检查的产物**全部 fresh**，`python tools/claim_gate.py` → **23/25**（只剩 C14/C16 两个既有产品缺口）",
+          "方向性影响（第 12 轮口径）：崩溃行排除后 D−A 由 0.120 降到 0.0833、D−A′ 由 0.160 降到 0.1370；`tools/three_arm_report.py` 现在会自行单列并给出排除后的成功率与比值",
+          "历史行按「有 `last_error` 且 `trajectory` 为空」识别，**未改写任何已存产物**；`is_harness_crash()` 定义在 `tools/live_uncertainty.py` 供两个工具共用"
+        ],
+        "next_action": "无（已关闭）。后续每次改 runner 都会让 live 基线 stale（C12 fails closed），这是设计而非故障；重跑 live 是唯一的刷新途径。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0100"
+    },
+    {
+      "action": "add_node",
+      "alias": "step63-budget-cap",
+      "node": {
+        "acceptance_criteria": [
+          "`tools/three_arm_report.py` 同时量步数上限与 completion 上限，`cap_ok` 由两者共同决定，`verdict` 点名是哪一个在约束",
+          "对同一份产物给出两个上限的逐臂数字与判定，且不改变既有字段语义之外的任何门槛"
+        ],
+        "confidence": 0.95,
+        "context_tags": [
+          "bench",
+          "live",
+          "gate",
+          "evidence"
+        ],
+        "difficulty": "medium",
+        "display_order": 350,
+        "evidence": [
+          "**发现**：`tools/three_arm_report.py` 的 `at_cap` 只判 `turns >= max_turns`，**完全没量 `max_tokens`**。于是简报 §4.1「`cap_ok = true`（三臂 0% 截断）——这是第一次预算不构成约束」只对步数上限成立",
+          "**量化（第 12 轮定版）**：步数上限 0%/0%/0%，**completion 上限 A 8/75 = 11%、A′ 11/75 = 15%、D 0/75 = 0%** —— 两条都越过 10% 门槛，而且**全部落在裸 shell 一侧**",
+          "**为什么这不是形式问题**：被 `finish_reason == \"length\"` 截断的那一轮**不会发出工具调用**，整行被记成普通任务失败，所以这个截断**压低 A/A′**、**放大 D 的优势**。与 D2 记录的是同一类现象，第 12 轮只堵了步数那一半",
+          "**修复**：`three_arm_report` 现在输出 `turn_cap_binding` / `token_cap_binding` / `at_token_cap_rate`，`cap_ok` 由两者共同决定；用新口径复算第 12 轮 → **`cap_ok = false`**",
+          "**第 13 轮（tf0100）验证**：步数上限 0%/0%/0%、completion 上限 **3%/7%/4%（全部 ≤10%）**、`harness_crash` 全 0 → **第一次真正通过 §3.3**。同一批数据里 **D−A 成功率由 +0.12 缩到 +0.04**、D−A′ 由 +0.16 缩到 +0.04，与「截断压低 A/A′」的推断方向一致",
+          "写入 `docs/audit-r12-verification.md` §5.3 与 §5.3.1、`docs/acceptance-criteria.md` §6 的口径警告与状态总表"
+        ],
+        "kind": "task",
+        "next_action": "无（已关闭）。此后任何一轮只要任一侧任一预算 >10%，`cap_ok` 即为 false，结论不得直接引用。",
+        "non_goals": [
+          "不放宽 §3.3 的 10% 门槛",
+          "不为了保住第 12 轮的结论而只报步数上限"
+        ],
+        "priority": 1,
+        "progress": 100.0,
+        "progress_source": "agent",
+        "purpose": "§3.3 把「每次运行的预算上限」明确写成 `max_turns` / `max_tokens` 两个，但工具只量了前者——这正是 D2 那条教训（「上限不是中立参数」）没被堵完的那一半。",
+        "status": "done",
+        "summary": "把 completion 上限也纳入 cap_binding 判定；补上之后第 12 轮定版由 cap_ok=true 变成 cap_ok=false，而重跑一轮后头条成功率差从 +0.12/+0.16 掉到 +0.04/+0.04。",
+        "title": "步骤63：把 §3.3 的预算纪律补全到 completion 上限"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "预算纪律补全属于本轮「R12 复核收口」"
+      },
+      "from": "step63-budget-cap",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 140
+      },
+      "id": "step63-budget-cap"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已完成 · with 臂重跑**：`python tools/live_round.py --tag tf0100 --arms with --seeds 42,43,44 --max-turns 20` → `bench/aci/results/tf0100/with_seed{42,43,44}.json` 合并为 `bench/aci/results/latest_live.json`：**225 行、`api_error` 0**，三臂 **A 0.8400 / A′ 0.8400 / D 0.8800**；两个预算都不构成约束（步数 0/0/0%、completion 3%/7%/4%）、`harness_crash` 全 0",
+          "**已完成 · 全部派生产物重刷**：`tools/refresh_live_artifacts.py` 全链（11 步，含约 63 分钟的 tokenizer 校准）+ `tools/three_arm_report.py` + `tools/cross_shell_bench.py` + `tools/acceptance_power.py`；**`python tools/claim_gate.py` → 23/25，C12 首次转绿**",
+          "**本轮结论（已写入 `docs/claims-and-evidence.md` C13 与 `docs/acceptance-criteria.md` §6）**：观察 token L1/L2/**L3（冻结 ≤0.60）** 全部可主张；**D/A′ = 0.7990 [0.6503, 0.9788]，上界首次低于 1.0**；成功率 Δ 由 +0.12/+0.16 缩到 **+0.04/+0.04**，且样本功效达标（需 40 对、有 75 对）→ 可以说「**未检出成功率优势**」而不是「样本不足」；真实 tokenizer 口径仍相反（总 token D/A 1.0761 跨 1.0、**D/A′ 1.2654 整段 >1.0**）",
+          "**未完成 · 任务集扩充**：预注册要求 30 个生成任务（现 15 个），尚未开始；必须先解决端点生成稳定性（D6 的 300s/502 与空回复）",
+          "**未完成 · 留出任务集**：尚未构造「从未参与调参」的留出集",
+          "**未完成 · without 臂（消融）**：未重跑，属 TF-0103（抬高 `max_tokens` 后重跑或撤回 P7）"
+        ],
+        "next_action": "顺序：先做 TF-0104 剩下的任务集标签/freeze 修复（会改 `bench/aci/tasks/*.json`），再补生成任务与留出集，最后跑下一轮 live —— 标签修改与 live 必须批处理，否则刚才转绿的 C12 会立刻再红一次。",
+        "progress": 60.0,
+        "status": "in_progress"
+      },
+      "id": "TF-0105"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已完成 · 交叉引用（7 处 + 1 处悬空）**：`docs/audit-brief.md` 的「§5 列出 5 个」→ **7 个**；「§3.3 给出三臂设计」→ **§2.1**（§3.3 是预算纪律），并补「方向性偏袒记在 §5 的 D3」；「见 §7 问题 P6」→ **§6**；「见 §6 缺陷 D6」→ **§5**；悬空的「§0.5」→ 改成**对应 `docs/acceptance-criteria.md` 的 §0.5**；「理由见 §7 问题 P1」→ **§6**；「未修，见 §7 P1」→ **§6**。改完复核全部 17 处内部引用，逐条正确",
+          "**已完成 · 缺陷计数对齐**：§0 与 §10 的「3 个各自单独足以翻转」对齐为 §5 的实际内容——**列出 7 个缺陷 D1–D7，其中 D2 与 D4 各自曾单独翻转结论，另有 D1–D3 造成方向性偏袒**",
+          "**已完成 · 标签语义**：§2.2 的「语言分布」改成「**`lang` 字段取值分布**」（`windows` 是任务类别，`ts`/`typescript` 是同一门语言的两种写法），并给「existing 20」补上出处（tier 桶默认值，20 = 10 手写 + 10 未带 `tier` 的生成任务）",
+          "**已完成 · 协议分母**：`docs/task-generation-protocol.md` 与 `tools/task_generate_v2.py` 的 A2/A3 数字加上**批次标注**（第 11 轮那批 32 个候选）并并列当前口径 **A2 17/33、A3 15/33**；顺带修掉两份文档之间 A2/A3 对调的一处矛盾",
+          "**验收标准第 4 条的前提已被修正**：原写「协议文档的 A2/A3 分母同步为 33」，实读后确认那段是 **v2 第一版顺序缺陷的历史叙述**，31 是当时那批的分母，不是过期的现值声明。直接改成 33 会抹掉「当时失败了多少」这个证据，故采用「保留历史 + 标注批次 + 并列现值」",
+          "**未完成 · 任务集标签与 freeze 记录（改为与下一轮 live 批处理）**：`bench/aci/tasks/*.json` 的 `lang` 统一与 `eval/task_set_freeze.json` 的 `promoted`/`kept_existing` 修复会改变任务集指纹，而 `latest_live.json` 的指纹覆盖 `bench/aci/tasks/*.json`——**现在做会立刻把刚转绿的 C12 再判红**。故这两条排到下一轮 live 之前作为第一步执行",
+          "门禁：`python tools/claim_gate.py` → **23/25**（C12 已转绿，只剩 C14/C16 两个既有产品缺口）；`python tools/readme_claims_check.py` → 17/17"
+        ],
+        "next_action": "在下一轮 live 之前作为**第一步**执行剩下两条：①`bench/aci/tasks/*.json` 的 `lang` 统一（`ts`→`typescript` 合并；`windows` 改放 `platform`，`lang` 取该 fixture 的真实语言）；②修 `eval/task_set_freeze.json` 的 `promoted: []` 与 `kept_existing`（当前列了全部 25 个，使冻结记录无法区分 10 手写与 15 生成）。改完立即跑 live，使新指纹与新任务集一致。",
+        "progress": 60.0
+      },
+      "id": "TF-0104"
+    },
+    {
+      "action": "remove_edge",
+      "id": "TFE-0170"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "下一轮 live 必须跑在标签修好、freeze 记录修好的任务集上；原 TF-0104 depends_on TF-0105（不要在 live 进行中改任务文件）的前提已经满足，方向翻转为 TF-0105 等 TF-0104"
+      },
+      "from": "TF-0105",
+      "to": "TF-0104",
+      "type": "depends_on"
+    }
+  ],
+  "created_at": "2026-09-26T12:48:54.845695Z",
+  "proposal_id": "TFP-r12-round13-close-2026-09-26",
+  "rationale": "第 13 轮（tag tf0100）跑完并全部重刷：C12 首次转绿，门禁只剩两个既有产品缺口（C14/C16）。TF-0100 的代码与门禁部分早已完成，现在凭「修好的 runner 产出的基线 + harness_crash 三臂全 0」收口。新增一个已完成的 task 节点记录本轮最重要的单项发现：§3.3 的预算纪律此前只量了步数上限，把 completion 上限补上之后第 12 轮定版被判 cap_ok=false，且修复后头条成功率差从 +0.12/+0.16 掉到 +0.04/+0.04。TF-0104 的剩余部分（改 bench/aci/tasks/*.json）改为与下一轮 live 批处理，因此把依赖方向翻成 TF-0105 depends_on TF-0104。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

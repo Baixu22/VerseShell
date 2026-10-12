@@ -1,0 +1,306 @@
+{
+  "proposal_id": "TFP-cost-attribution-node-dev-2026-10-09",
+  "session_id": "cost-attribution-node-dev-2026-10-09",
+  "status": "proposed",
+  "rationale": "继续推进全部剩余节点。实现 TF-0138 的同配对双估计量、任务等权敏感性、开销覆盖与不改请求字节的记录，四组真实旧值复核一致；真实报告链暴露共享 Cargo target 评分串用，修复两条评分路径后当前 fixture 35/35 和四阶段收尾链通过。22 项新增控制、298 项 Python 中295通过/3跳过、Rust289通过；产品24/31未闭合，不自动done。继续由TF-0139核验143格基础异常并集及额外Rust成功样本风险。按根策略保存、应用、校验、导出，保留旧结果及首次失败证据。",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0124",
+      "fields": {
+        "status": "in_progress",
+        "summary": "2026-10-09推进TF-0138：同配对成本口径与请求构成记录完成，真实收尾链发现并修复评分副本共享Cargo target问题。Python295通过/3跳过、Rust289通过、当前fixture35/35；产品24/31。25个开放节点仍需各自验收，不以局部通过关闭总目标。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json",
+          "docs/cost-attribution-repairs-2026-10-09.md",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-cost.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-crosscheck.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08",
+          "cost-attribution-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0127",
+      "fields": {
+        "status": "in_progress",
+        "summary": "TF-0137严格标签保持；TF-0138双估计量、任务等权敏感性与开销覆盖已实现并回放1050行。下一步TF-0139基础异常并集143格，另核查共享构建缓存的历史环境与成功样本；TF-0140/0141仍开放。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json",
+          "docs/cost-attribution-repairs-2026-10-09.md",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-cost.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-crosscheck.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08",
+          "cost-attribution-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0138",
+      "fields": {
+        "status": "in_progress",
+        "progress": 85,
+        "summary": "工程与只读回放完成：四组有效配对174/175/174/172，总量比值0.165479–0.265806而cell等权均值1.247022–1.547065；任务等权敏感性仍方向相反。新输入profile不改请求字节，历史覆盖0保持unknown。22专项、全量298中295通过/3跳过；隔离四阶段链完成，产品24/31不done。",
+        "next_action": "新冻结开发试点验证真实端点上的profile覆盖与停止行为，保留总量/cell等权两估计量；优化只在独立开发范围选取。TF-0140/0141承接正式声明和源码落地；不后验挑选口径。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/analysis-20261008/cost-analysis.json",
+          "tools/study_inference.py",
+          "bench/aci/studies/prelive-v1/analysis-plan.json",
+          "docs/cost-attribution-repairs-2026-10-09.md",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-cost.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-crosscheck.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/bundle-baseline-isolated/refresh-status.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/cost-tests-with-grading.log"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "cost-attribution-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0136",
+      "fields": {
+        "status": "in_progress",
+        "progress": 85,
+        "summary": "既有最终输入冻结/复核链保留，本批补评分副本环境隔离：共享Cargo target曾令同一GOLDEN exit101，独立target exit0；command_exit_0及rust_behavior已修复，当前fixture35/35。不能据此追认旧轮评分或0/1050的历史快照覆盖。",
+        "next_action": "进度提案已应用，不再等待确认。使用新冻结版本验证最终快照、评分环境及请求profile；由TF-0139核查历史环境和成功样本，保留TF-0140/0141正式验收与落地缺口。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-baseline/task_set_audit.json",
+          "tools/trajectory_replay.py",
+          "tools/task_set_audit.py:198",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json",
+          "docs/final-workspace-repairs-2026-10-08.md",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/node-change-manifest.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/node-change-manifest.diff",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/change-manifest.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/logs/python-tests-final.log",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/offline-independent-rescore.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/historical-final-workspaces.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/historical-candidate-coverage.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/final-summary.json",
+          "docs/cost-attribution-repairs-2026-10-09.md",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-cost.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-crosscheck.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/rust-environment-repro.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/bundle-baseline/task_set_audit.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/bundle-baseline-isolated/task_set_audit.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08",
+          "cost-attribution-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0139",
+      "fields": {
+        "summary": "只读清点：139失败、141截断、5 usage缺口的并集为143格（失败/截断交集138）。本批另发现评分共享Cargo target风险，评分路径已修复，但旧轮环境与模型工具构建环境未核验；不能只分析143格或把未检出当无风险。",
+        "next_action": "逐格登记143个基础异常的可复现原因或unknown；对Rust模型工具执行环境和历史成功样本做额外反向检查。区分本机已复现评分缓存串用、旧轮实际是否继承共享目录以及无法重建的样本。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/latest_live.json",
+          "docs/cost-attribution-repairs-2026-10-09.md",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-cost.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-crosscheck.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/tf0139-scope-audit.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/rust-environment-repro.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-cargo-env-source.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "cost-attribution-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0140",
+      "fields": {
+        "summary": "2026-10-09产品门禁仍24/31，C12/C14/C16/C24/C34/C35/C36失败；新独立评分环境下当前fixture35/35和离线链完成，但旧canonical C24产物及其他历史声明未替换，不能用新局部测量直接升级产品结论。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/prelive-ready-2026-10-06.md",
+          "docs/claims-and-evidence.md",
+          "tools/claim_gate.py",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/readme-claims-final.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/claim-gate-final.log",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json",
+          "docs/cost-attribution-repairs-2026-10-09.md",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-cost.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-crosscheck.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08",
+          "cost-attribution-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0141",
+      "fields": {
+        "status": "in_progress",
+        "progress": 20,
+        "summary": "本批精确编辑基线/diff及失败到修复证据均存D盘；无提交、暂存、合并。再次fetch因127.0.0.1:7890代理不可达exit128；check-landing按缓存origin/master仍44项历史发现、exit1，远端新状态未证实。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/task-forest-20261008/landing-before.json",
+          "docs/task-forest-policy.md",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/check-landing.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/git-fetch-direct.exit",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/check-landing.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/git-fetch.json",
+          "docs/cost-attribution-repairs-2026-10-09.md",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-cost.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-crosscheck.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/check-landing.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/git-fetch.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08",
+          "cost-attribution-node-dev-2026-10-09"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "id": "node_envconfig_validate_dd681123",
+  "kind": "capability",
+  "lang": "typescript",
+  "prompt": "The test suite for `envConfig.mjs` fails. Returns the config object early whenever options.preview is truthy, skipping the required-field validation so missing or empty values pass silently. Fix the module so the suite passes, without changing check.mjs.",
+  "golden": {
+    "envConfig.mjs": "/**\n * envConfig.mjs\n *\n * Loads, validates, and assembles the application's environment configuration.\n * Every required field must be a non-empty string, otherwise a descriptive\n * Error is thrown listing all offending fields.\n */\n\n/**\n * The shape of the validated configuration object.\n *\n * @typedef {Object} EnvConfig\n * @property {string} DATABASE_URL Connection string for the primary database.\n * @property {string} JWT_SECRET   Secret used to sign authentication tokens.\n * @property {string} PORT         Port the HTTP server listens on.\n * @property {string} API_KEY      Key for the external API.\n * @property {string} NODE_ENV     Runtime environment (e.g. \"development\").\n * @property {string} LOG_LEVEL    Logging verbosity (e.g. \"info\").\n */\n\n/**\n * Declaration of a single environment variable.\n *\n * @typedef {Object} FieldSpec\n * @property {keyof EnvConfig} key      Environment variable name.\n * @property {boolean}         required Whether it must be a non-empty string.\n * @property {string}          [fallback] Value used when an optional field is absent.\n */\n\n/** @type {ReadonlyArray<FieldSpec>} */\nconst SCHEMA = Object.freeze([\n  { key: 'DATABASE_URL', required: true },\n  { key: 'JWT_SECRET', required: true },\n  { key: 'PORT', required: true },\n  { key: 'API_KEY', required: true },\n  { key: 'NODE_ENV', required: false, fallback: 'development' },\n  { key: 'LOG_LEVEL', required: false, fallback: 'info' },\n]);\n\n/**\n * Builds a human-readable description of a raw value for error messages.\n *\n * @param {unknown} value\n * @returns {string}\n */\nfunction describeValue(value) {\n  if (value === undefined) return 'undefined';\n  if (value === null) return 'null';\n  if (typeof value === 'string') return JSON.stringify(value);\n  return `${typeof value} (${String(value)})`;\n}\n\n/**\n * Validates the environment and returns the assembled config object.\n *\n * Every required field must be present and a non-empty string; if any fail,\n * a single descriptive Error is thrown naming each problem. Optional fields\n * fall back to their declared defaults when absent or invalid. The returned\n * object is frozen so the configuration cannot be mutated after load.\n *\n * @param {Record<string, string | undefined>} [source]\n *     Env-like map to read from; defaults to `process.env`. Useful for tests.\n * @returns {Readonly<EnvConfig>} The frozen, fully validated configuration.\n * @throws {Error} If any required field is missing, not a string, or empty.\n */\nexport function loadConfig(source = process.env) {\n  /** @type {Record<string, string>} */\n  const config = {};\n\n  /** @type {string[]} */\n  const problems = [];\n\n  for (const { key, required, fallback } of SCHEMA) {\n    const raw = source?.[key];\n    const isNonEmptyString =\n      typeof raw === 'string' && /** @type {string} */ (raw).trim().length > 0;\n\n    if (isNonEmptyString) {\n      config[key] = /** @type {string} */ (raw);\n    } else if (required) {\n      problems.push(\n        `\"${key}\" must be a non-empty string, but got ${describeValue(raw)}.`\n      );\n    } else {\n      config[key] = /** @type {string} */ (fallback ?? '');\n    }\n  }\n\n  if (problems.length > 0) {\n    throw new Error(\n      `Invalid environment configuration (${problems.length} problem${\n        problems.length === 1 ? '' : 's'\n      }):\\n  - ${problems.join('\\n  - ')}`\n    );\n  }\n\n  return Object.freeze(config);\n}\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "node",
+          "check.mjs"
+        ],
+        "timeout_sec": 300
+      },
+      {
+        "type": "file_contains",
+        "path": "check.mjs",
+        "contains": "assert.deepStrictEqual({ ...cfg }, FULL);"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task author (TDD-ordered, locally self-verified)",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written from the spec and tests, never from the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      }
+    ],
+    "plan_index": 30,
+    "tier": "small",
+    "self_verified": {
+      "tests_pass_on_correct": true,
+      "tests_fail_on_buggy": true,
+      "variants_verified": 2
+    },
+    "generated_at": "2026-09-27T20:31:39.009639+00:00"
+  },
+  "workspace_fixture": "node_envconfig_validate_dd681123",
+  "promoted_from": "bench/aci/candidates/node_envconfig_validate_dd681123",
+  "promoted_at": "2026-09-28T04:37:02.575006+00:00"
+}

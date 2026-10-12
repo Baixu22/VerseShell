@@ -1,7 +1,7 @@
 {
   "id": "ts_fix_type_error",
   "version": "1.2.0",
-  "lang": "ts",
+  "lang": "typescript",
   "platform": [
     "any"
   ],

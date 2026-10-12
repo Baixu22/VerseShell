@@ -1,0 +1,52 @@
+{
+  "base_graph_hash": "bed0c65cbed6233384547f7cd6ea4b356039a5195c6a70cd21ae2df3e9fa69fb",
+  "base_summary": {
+    "edge_count": 233,
+    "node_count": 141,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/control/run-live.ps1:42",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/storage-watch-final.json",
+          "D:/VerseShellLive/analysis-20261008/report-generation.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/historical-inputs.json",
+          "tools/live_control.py",
+          "tools/refresh_live_artifacts.py",
+          "D:/VerseShellLive/freeze-live-20261010/control-entry-integration-verification.json",
+          "D:/VerseShellLive/freeze-live-20261010/recovery-coverage-tests-afterfix.log",
+          "C:/Users/27933/Desktop/verseshell/verseshell/tests/test_live_control.py",
+          "C:/Users/27933/Desktop/verseshell/verseshell/docs/collection-recovery-coverage-2026-10-10.md",
+          "D:/VerseShellLive/node-freeze-20261010-01a120ce/workspace/bench/aci/results/step5p-dev-20261010-r2/control/e8b8ff0f9c6a4050853d392a16cd2602/collection-exit.json",
+          "D:/VerseShellLive/node-freeze-20261010-01a120ce/workspace/bench/aci/results/step5p-dev-20261010-r2/control/822eae5ac53449dab1b03f3fee926a91/collection-exit.json"
+        ],
+        "next_action": "控制与报告入口工程收尾完成。产品声明与默认分支落地仍由 TF-0140/TF-0141 承接；研究结论仍由 TF-0112/0114/0115/0123 承接，本节点完成不代表产品验收。",
+        "progress": 100.0,
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "freeze-live-2026-10-10"
+        ],
+        "status": "done",
+        "summary": "2026-10-10 在新冻结候选上完成实际接入验证：tools/live_control.py、live_round.py、refresh_live_artifacts.py、live_storage.py、live_journal.py、merge_live_runs.py 均在 readiness 源码清单内且字节一致。真实运行两条回执分别为 unknown_or_conflicting_exit→failed(2) 与 process_and_terminal→completed(0)，证明未知终态不被当作成功；两个变体报告 complete、exit_code=0、各有源摘要与 manifest 摘要。离线控制回归 103 passed，无付费调用。"
+      },
+      "id": "TF-0133"
+    }
+  ],
+  "created_at": "2026-10-10T05:16:55Z",
+  "proposal_id": "TFP-tf0133-done-frozen-entry-2026-10-10",
+  "rationale": "TF-0133 收口：新入口连同 runner/存储策略已纳入 2026-10-10 冻结 checkout，6 个控制入口文件同时在 readiness 源码清单内且与工作区字节一致；真实运行给出两条控制回执——被杀那次 resolved=2/failed/unknown_or_conflicting_exit，恢复那次 resolved=0/completed/process_and_terminal，未知退出没有被静默当成功；两个变体报告各带终态、退出码与 3 项源摘要，report-only 重试不覆盖旧报告；离线子进程回归 103 passed（含 15 项控制用例），无需付费模型调用，orchestrator_sha256 已写入冻结 collection。TF-0140/0141 缺口保持开放。",
+  "session_id": "freeze-live-2026-10-10",
+  "status": "proposed"
+}

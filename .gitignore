@@ -23,6 +23,14 @@ Thumbs.db
 *.py
 # ...except the repo's own evidence gates: claim_gate / jev_obs_judge / validate_manifest
 !tools/*.py
+# Offline regression checks must travel with the tools they verify.
+!tests/test_*.py
+# Four historical audit entrypoints and their shared pinned-input loader only.
+!audit-r12-scratch/verify_core.py
+!audit-r12-scratch/verify_part2.py
+!audit-r12-scratch/verify_part3.py
+!audit-r12-scratch/verify_part4.py
+!audit-r12-scratch/audit_inputs.py
 # ...and the ACI-Bench dataset itself: fixture code, runners and scorers.
 # Without these a fresh clone has the task descriptions but not the code they edit.
 !bench/aci/**/*.py
@@ -32,6 +40,10 @@ Thumbs.db
 # Error logs from pruning
 *_errors*.txt
 full_errors.txt
+
+# Coverage artifacts
+.coverage
+*.coverage
 
 # Temp test files
 _ae_test.txt

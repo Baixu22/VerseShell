@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.exec-failure-breakdown/v1",
-  "generated_at": "2026-09-24T17:14:00.715680+00:00",
+  "generated_at": "2026-09-30T01:07:55.736520+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
@@ -23,7 +23,7 @@
       "bench/aci/results/live_ab_without_read_files.json",
       "tools/exec_failure_breakdown.py"
     ],
-    "fingerprint": "ef000b38a327266368d45d7cd7a77bdbf986f3cb8a196d7854bc7697ac5852b4"
+    "fingerprint": "9fa2e820770d36d6dbe73b510cdca2651dbe59a611c7b58bd29db7b3b5ab7874"
   },
   "shim_facts": [
     {
@@ -78,7 +78,7 @@
       "cargo check": {
         "ok": true,
         "exit_code": 0,
-        "output_head": "Checking bench_fix v0.1.0 (C:\\Users\\27933\\AppData\\Local\\Temp\\tf45-replay-rust_fix_compile_error-smjdzn8j)\n    Finished `",
+        "output_head": "Checking bench_fix v0.1.0 (C:\\Users\\27933\\AppData\\Local\\Temp\\tf45-replay-rust_fix_compile_error-72de0kdq)\n    Finished `",
         "answered_as_rustup": false
       },
       "rustc --version": {
@@ -281,79 +281,51 @@
   },
   "with_read_files": {
     "ok": {
-      "calls": 29,
-      "tokens": 351,
-      "tokens_per_call": 12.1
+      "calls": 117,
+      "tokens": 2872,
+      "tokens_per_call": 24.55
     },
     "failed": {
-      "calls": 8,
-      "tokens": 861,
-      "tokens_per_call": 107.62,
-      "share_of_exec_tokens": 0.7104
+      "calls": 14,
+      "tokens": 1431,
+      "tokens_per_call": 102.21,
+      "share_of_exec_tokens": 0.3326
     },
     "classes": {
       "first_diagnostic": {
-        "calls": 8,
-        "tokens": 861,
+        "calls": 14,
+        "tokens": 1431,
         "share_of_failure_tokens": 1.0
       }
     },
     "per_task_failed": {
-      "python_edit_and_retest": {
-        "calls": 4,
-        "tokens": 396
+      "python_csvlite_parse_80d158b2": {
+        "calls": 3,
+        "tokens": 535
       },
       "python_fix_pytest_fail": {
-        "calls": 3,
-        "tokens": 300
+        "calls": 4,
+        "tokens": 400
       },
-      "rust_add_unit_test": {
+      "python_edit_and_retest": {
+        "calls": 3,
+        "tokens": 297
+      },
+      "rust_window_fold_scanner_3d213f38": {
         "calls": 1,
-        "tokens": 165
-      }
-    },
-    "top_failing_commands": [
-      [
-        "pytest -q",
-        4
-      ],
-      [
-        "pytest -q tests/test_greet.py",
-        3
-      ],
-      [
-        "powershell -Command Get-Content 'src/lib.rs' | Out-String | Format-Hex",
-        1
-      ]
-    ]
-  },
-  "without_read_files": {
-    "ok": {
-      "calls": 18,
-      "tokens": 259,
-      "tokens_per_call": 14.39
-    },
-    "failed": {
-      "calls": 7,
-      "tokens": 696,
-      "tokens_per_call": 99.43,
-      "share_of_exec_tokens": 0.7288
-    },
-    "classes": {
-      "first_diagnostic": {
-        "calls": 7,
-        "tokens": 696,
-        "share_of_failure_tokens": 1.0
-      }
-    },
-    "per_task_failed": {
-      "python_edit_and_retest": {
-        "calls": 4,
-        "tokens": 396
+        "tokens": 102
       },
-      "python_fix_pytest_fail": {
-        "calls": 3,
-        "tokens": 300
+      "ts_fix_type_error": {
+        "calls": 1,
+        "tokens": 36
+      },
+      "ts_package_script_fail": {
+        "calls": 1,
+        "tokens": 35
+      },
+      "ts_chunk_batches_233e9e44": {
+        "calls": 1,
+        "tokens": 26
       }
     },
     "top_failing_commands": [
@@ -362,7 +334,91 @@
         6
       ],
       [
-        "pytest -q tests/",
+        "python -m pytest",
+        3
+      ],
+      [
+        "pytest -q .",
+        1
+      ],
+      [
+        "",
+        1
+      ],
+      [
+        "tsc --noEmit",
+        1
+      ],
+      [
+        "ls -la .ae",
+        1
+      ],
+      [
+        "cargo test",
+        1
+      ]
+    ]
+  },
+  "without_read_files": {
+    "ok": {
+      "calls": 116,
+      "tokens": 3073,
+      "tokens_per_call": 26.49
+    },
+    "failed": {
+      "calls": 12,
+      "tokens": 1606,
+      "tokens_per_call": 133.83,
+      "share_of_exec_tokens": 0.3432
+    },
+    "classes": {
+      "first_diagnostic": {
+        "calls": 12,
+        "tokens": 1606,
+        "share_of_failure_tokens": 1.0
+      }
+    },
+    "per_task_failed": {
+      "python_csvlite_parse_80d158b2": {
+        "calls": 5,
+        "tokens": 635
+      },
+      "js_leaderboard_rank_b1603acf": {
+        "calls": 2,
+        "tokens": 470
+      },
+      "python_fix_pytest_fail": {
+        "calls": 3,
+        "tokens": 300
+      },
+      "rust_window_fold_scanner_3d213f38": {
+        "calls": 1,
+        "tokens": 102
+      },
+      "python_edit_and_retest": {
+        "calls": 1,
+        "tokens": 99
+      }
+    },
+    "top_failing_commands": [
+      [
+        "pytest -q",
+        4
+      ],
+      [
+        "python -m pytest",
+        4
+      ],
+      [
+        "node check.mjs",
+        2
+      ],
+      [
+        "python -c import test_csvlite as t, traceback\nfor n in dir(t):\n    if n.startswith('test_'):\n        try:\n            getattr(t, n)(); print('PASS', n)\n        except Exception:\n            print('FAIL', n); traceback.print_exc(limit=1)",
+        1
+      ],
+      [
+        "cargo test",
         1
       ]
     ]

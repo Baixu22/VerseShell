@@ -33,6 +33,8 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from fixture_deps import materialize_deps  # noqa: E402
+from live_agent_loop import run_bounded  # noqa: E402
+from grading_contract import freeze_verifiers, guarded_success
 
 ROOT = Path(__file__).resolve().parents[3]
 BENCH = ROOT / "bench" / "aci"
@@ -50,6 +52,7 @@ EVIDENCE_GLOBS = [
     "bench/aci/tasks/*.json",
     "bench/aci/fixtures/**/*",
     "bench/aci/runners/run_suite.py",
+    "bench/aci/runners/live_agent_loop.py",
     "bench/aci/scorers/*.py",
 ]
 
@@ -118,7 +121,7 @@ def check_success(pred: dict, workspace: Path) -> tuple[bool, str]:
         p = workspace / pred["path"]
         if not p.exists():
             return False, f"missing {pred['path']}"
-        body = p.read_text(encoding="utf-8-sig", errors="replace").rstrip("\r\n")
+        body = p.read_text(encoding="utf-8-sig", errors="replace").strip()
         try:
             matched = re.fullmatch(pred.get("pattern", ""), body) is not None
         except re.error as error:
@@ -127,18 +130,15 @@ def check_success(pred: dict, workspace: Path) -> tuple[bool, str]:
     if t == "command_exit_0":
         argv = pred.get("argv") or []
         try:
-            r = subprocess.run(
-                argv,
-                cwd=str(workspace),
-                capture_output=True,
-                text=True,
-                timeout=int(pred.get("timeout_sec", 120)),
-            )
-            return (r.returncode == 0, f"command_exit_0 {argv} -> {r.returncode}")
+            # Only the exit code is evidence here. Keep arbitrary output as bytes
+            # and use the same process-tree timeout as the live predicate path.
+            rc, _out, _err, timed_out = run_bounded(
+                argv, cwd=workspace, timeout=int(pred.get("timeout_sec", 120)))
+            if timed_out:
+                return False, f"timeout: {argv}"
+            return (rc == 0, f"command_exit_0 {argv} -> {rc}")
         except FileNotFoundError:
             return False, f"command not found: {argv}"
-        except subprocess.TimeoutExpired:
-            return False, f"timeout: {argv}"
     return False, f"unknown predicate {t}"
 
 
@@ -266,6 +266,7 @@ def run_condition(
     start = time.time()
     notes: list[str] = []
     ws = prepare_workspace(task["workspace_fixture"])
+    grading_contract = freeze_verifiers(task['success'], ws)
     applied = False
     try:
         if apply_golden_flag:
@@ -276,7 +277,7 @@ def run_condition(
         tool_calls = len([t for t in traj if t.get("op") != "golden.apply"])
         observation_tokens = sum(int(t.get("observation_tokens", 0)) for t in traj)
 
-        ok, reason = check_success(task["success"], ws)
+        ok, reason = guarded_success(task["success"], ws, grading_contract, check_success)
         verify = None
         if run_optional_verify and task.get("optional_verify"):
             vok, vreason = check_success(task["optional_verify"], ws)

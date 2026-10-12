@@ -15975,7 +15975,11 @@ fn bi_sys_info(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
 fn bi_sys_hostname(_args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     #[cfg(target_os = "windows")]
     {
-        if let Ok(name) = std::env::var("COMPUTERNAME") {
+        if let Some(name) = std::env::var("COMPUTERNAME")
+            .ok()
+            .filter(|name| !name.is_empty())
+            .or_else(sysinfo::System::host_name)
+        {
             return Ok(Value::Str(name));
         }
     }

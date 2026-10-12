@@ -61,6 +61,29 @@ pub fn resolve_process_command(
         });
     }
 
+    // cmd parses its /C or /K tail itself, not with the Windows CRT argv rules.
+    // Preserve an explicitly supplied command string, including its inner quotes.
+    #[cfg(windows)]
+    if resolved.file_name().is_some_and(|name| name.eq_ignore_ascii_case("cmd.exe")) {
+        if let Some(index) = argv.iter().position(|arg|
+            arg.eq_ignore_ascii_case("/c") || arg.eq_ignore_ascii_case("/k"))
+        {
+            if argv.len() == index + 2 {
+                let mut switches = argv[1..=index].to_vec();
+                if !switches.iter().any(|arg| arg.eq_ignore_ascii_case("/s")) {
+                    switches.insert(switches.len() - 1, "/S".into());
+                }
+                return Ok(ResolvedProcessCommand {
+                    executable: resolved,
+                    args: switches,
+                    windows_raw_arg: Some(format!("\"{}\"", argv[index + 1])),
+                    audited_executable: audited,
+                    interpreter: None,
+                });
+            }
+        }
+    }
+
     Ok(ResolvedProcessCommand {
         executable: resolved,
         args: argv[1..].to_vec(),

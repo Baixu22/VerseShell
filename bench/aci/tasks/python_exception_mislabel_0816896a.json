@@ -1,0 +1,55 @@
+{
+  "id": "python_exception_mislabel_0816896a",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "The record parsers in intake.py have faulty exception handling: one path mislabels a missing field as an invalid value, and parse_scores swallows every error raised while reading or converting scores, silently returning partial results. Make both functions honour the contracts documented in intake.py. The tests define the expected behaviour and must not be modified.",
+  "golden": {
+    "intake.py": "\"\"\"Field parsers for raw intake records.\n\nContracts\n---------\nparse_age(record) -> int\n    Returns record[\"age\"] converted to int.\n    Raises MissingFieldError(\"missing field: age\") when the \"age\" key is absent.\n    Raises FieldError(\"invalid age: ...\") when the value cannot be converted.\n\nparse_scores(record) -> list[int]\n    Returns every entry of record[\"scores\"] converted to int, in order.\n    Raises FieldError(\"invalid scores: ...\") when an entry cannot be converted.\n    Errors raised while iterating the scores value itself (e.g. by a broken\n    sequence object) must propagate unchanged.\n\"\"\"\n\n\nclass FieldError(ValueError):\n    \"\"\"A field's value is present but invalid.\"\"\"\n\n\nclass MissingFieldError(LookupError):\n    \"\"\"A required field is absent from the record.\"\"\"\n\n\ndef parse_age(record):\n    try:\n        raw = record[\"age\"]\n    except KeyError:\n        raise MissingFieldError(\"missing field: age\") from None\n    except (TypeError, ValueError) as exc:\n        raise FieldError(f\"invalid age: {exc}\") from exc\n    try:\n        return int(raw)\n    except (TypeError, ValueError) as exc:\n        raise FieldError(f\"invalid age: {exc}\") from exc\n\n\ndef parse_scores(record):\n    scores = []\n    for raw in record[\"scores\"]:\n        try:\n            scores.append(int(raw))\n        except (TypeError, ValueError) as exc:\n            raise FieldError(f\"invalid scores: {exc}\") from exc\n    return scores\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "timeout_sec": 120
+      },
+      {
+        "type": "file_contains",
+        "path": "test_intake.py",
+        "contains": "with pytest.raises(ProbeError):"
+      },
+      {
+        "type": "file_contains",
+        "path": "test_intake.py",
+        "contains": "\"missing field: age\" in str(excinfo.value)"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_and_golden_author",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "generated_at": "2026-09-25T01:53:31.003405+00:00"
+  },
+  "workspace_fixture": "python_exception_mislabel_0816896a",
+  "promoted_from": "bench/aci/candidates/python_exception_mislabel_0816896a",
+  "promoted_at": "2026-09-25T08:29:13.933658+00:00"
+}

@@ -1,0 +1,55 @@
+{
+  "schema": "verseshell.harness_exec_contract/v1",
+  "generated_at": "2026-09-29T13:28:39.173446+00:00",
+  "subject": "bench/aci/runners/live_agent_loop.py::run_bounded / execute_shell_cmd",
+  "mechanism": "Popen + Job Object (KILL_ON_JOB_CLOSE) + TerminateJobObject, then taskkill /T /F as a second belt",
+  "why_not_subprocess_run": "subprocess.run(timeout=) kills only the direct child; communicate() still blocks on a pipe the grandchild holds",
+  "why_not_device_blacklist": "a bounded tree kill also stops infinite loops and pipe-holding grandchildren, which a name blacklist would not; and `> NUL` is a legitimate redirect",
+  "checks": [
+    {
+      "id": "bounded_console_command",
+      "detail": "hostile CON command under run_bounded(timeout=8) -> {'seconds': 8.331706299999496, 'rc': None, 'timed_out': True, 'out': ''}",
+      "pass": true
+    },
+    {
+      "id": "bounded_grandchild",
+      "detail": "pipe-holding grandchild under run_bounded -> {'seconds': 8.329865499996231, 'rc': None, 'timed_out': True}",
+      "pass": true
+    },
+    {
+      "id": "normal_command_unaffected",
+      "detail": "echo command -> rc=0 timed_out=False stdout_has_text=True stderr_has_text=True",
+      "pass": true
+    },
+    {
+      "id": "execute_shell_cmd_reports_timeout",
+      "detail": "execute_shell_cmd on the hostile command -> '[TIMEOUT after 8s]'",
+      "pass": true
+    },
+    {
+      "id": "incremental_checkpoint_flushed",
+      "detail": "row is flushed immediately (2 lines readable mid-run)",
+      "pass": true
+    },
+    {
+      "id": "negative_control_pre_fix_shape_still_hangs",
+      "detail": "the pre-fix `subprocess.run(timeout=6)` shape did NOT return under the runner's control (probe had to be killed) -> the bounded path is what makes the difference",
+      "pass": true
+    },
+    {
+      "id": "orphans_reaped_after_negative_control",
+      "detail": "marker=44c89b6338; orphaned process(es) reaped after the negative control: 1 (expected: the control's own grandchild, which the pre-fix mechanism cannot kill)",
+      "pass": true
+    }
+  ],
+  "passed": 7,
+  "total": 7,
+  "ok": true,
+  "evidence": {
+    "globs": [
+      "bench/aci/runners/live_agent_loop.py",
+      "tools/harness_exec_contract.py"
+    ],
+    "fingerprint": "748ba948668c17011e044747521c670835a5e1d52e550187702cbbd088dd670c"
+  }
+}

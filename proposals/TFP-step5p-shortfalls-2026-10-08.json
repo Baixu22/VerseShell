@@ -1,0 +1,1877 @@
+{
+  "proposal_id": "TFP-step5p-shortfalls-2026-10-08",
+  "session_id": "step5p-findings-2026-10-08",
+  "status": "proposed",
+  "rationale": "用户明确要求把问题沉淀为节点。遵循 docs/task-forest-policy.md 与 TF-0014/TF-0017：保存提案后自主应用；18 个新增节点（1 总目标、3 分支、14 具体任务），复用更新 7 个未完成节点，不把任何修复标 done。",
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "root",
+      "node": {
+        "title": "修复 Step 5 实测暴露的问题并完成可信验收",
+        "kind": "global_task",
+        "status": "in_progress",
+        "summary": "完整首轮与证据核验已完成；本分支追踪新增缺陷、测量盲区及正式验收依赖，尚不宣称所有问题已定位或修复。",
+        "purpose": "完整首轮与证据核验已完成；本分支追踪新增缺陷、测量盲区及正式验收依赖，尚不宣称所有问题已定位或修复。",
+        "acceptance_criteria": [
+          "新增修复节点和关联的七个历史未完成节点逐条有证据；确认缺陷、行为现象和未知风险分开登记。",
+          "修复后在独立开发任务验证工具契约、恢复和预算；新冻结版本的重复实验与留出集满足各自前置要求。",
+          "产品声明、严格门禁、Task Forest 状态及源码默认分支落地一致；结果不支持收益时如实写明。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P0"
+        ],
+        "confidence": 1.0,
+        "priority": 5,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 540,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "完整首轮与证据核验已完成；本分支追踪新增缺陷、测量盲区及正式验收依赖，尚不宣称所有问题已定位或修复。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "新增修复节点和关联的七个历史未完成节点逐条有证据；确认缺陷、行为现象和未知风险分开登记。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "interface",
+      "node": {
+        "title": "修正模型可见的工具契约",
+        "kind": "milestone",
+        "status": "ready",
+        "summary": "消除文件窗口、命令输出和平台指导中的不一致，再核验重复调用与停止行为。",
+        "purpose": "消除文件窗口、命令输出和平台指导中的不一致，再核验重复调用与停止行为。",
+        "acceptance_criteria": [
+          "本分支五个修复节点有契约测试和对应真实异常轨迹的回放证据。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 1.0,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 10,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "消除文件窗口、命令输出和平台指导中的不一致，再核验重复调用与停止行为。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "本分支五个修复节点有契约测试和对应真实异常轨迹的回放证据。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "interface",
+      "to": "root",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "reliability",
+      "node": {
+        "title": "补齐采集收尾与证据恢复",
+        "kind": "milestone",
+        "status": "ready",
+        "summary": "完成退出码、磁盘保护、重试用量和轨迹重建的剩余可靠性验收。",
+        "purpose": "完成退出码、磁盘保护、重试用量和轨迹重建的剩余可靠性验收。",
+        "acceptance_criteria": [
+          "本分支四个节点完成；历史端点与恢复需求 TF-0120、TF-0122 的剩余范围有独立证据。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 1.0,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 20,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "完成退出码、磁盘保护、重试用量和轨迹重建的剩余可靠性验收。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "本分支四个节点完成；历史端点与恢复需求 TF-0120、TF-0122 的剩余范围有独立证据。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "reliability",
+      "to": "root",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "acceptance",
+      "node": {
+        "title": "统一成本解释与正式验收",
+        "kind": "milestone",
+        "status": "ready",
+        "summary": "保留双估计量与严格门禁，追踪全量异常、历史声明和默认分支落地；复用既有重复实验与独立任务节点。",
+        "purpose": "保留双估计量与严格门禁，追踪全量异常、历史声明和默认分支落地；复用既有重复实验与独立任务节点。",
+        "acceptance_criteria": [
+          "本分支五个节点与关联的研究前置节点逐条核验，不能用原始 PASS 或单轮完成代替正式验收。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 1.0,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 30,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "保留双估计量与严格门禁，追踪全量异常、历史声明和默认分支落地；复用既有重复实验与独立任务节点。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "本分支五个节点与关联的研究前置节点逐条核验，不能用原始 PASS 或单轮完成代替正式验收。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "acceptance",
+      "to": "root",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "cursor",
+      "node": {
+        "title": "统一文件读取窗口的参数语义",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "已确认 schema 将 cursor 称作起始行、实现却按窗口中心取值；实测同一窗口重复读取 77 次，循环因果仍需验证。",
+        "purpose": "已确认 schema 将 cursor 称作起始行、实现却按窗口中心取值；实测同一窗口重复读取 77 次，循环因果仍需验证。",
+        "acceptance_criteria": [
+          "模型 schema、产品算子和参考客户端采用一致且明确的 cursor 语义，返回真实 start/end/total 及可继续读取的位置。",
+          "以 106 行文件、cursor=100、window=10 复现实际范围；覆盖首尾、空文件、超范围和完整遍历无遗漏。",
+          "保留原失败轨迹并验证修复后的调用方不会因契约差异漏读末尾，不把单个样本推广为全部循环根因。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:172",
+          "src/ops/file.rs:312",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed42.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P0"
+        ],
+        "confidence": 1.0,
+        "priority": 5,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 10,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [
+          "先检查当前已有 start_line/end_line 字段，复用既有分页机制。"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "已确认 schema 将 cursor 称作起始行、实现却按窗口中心取值；实测同一窗口重复读取 77 次，循环因果仍需验证。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "模型 schema、产品算子和参考客户端采用一致且明确的 cursor 语义，返回真实 start/end/total 及可继续读取的位置。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "cursor",
+      "to": "interface",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "projection",
+      "node": {
+        "title": "显式标记命令输出截断并保留执行结论",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "已确认成功输出只投影 stdout 前 300 字符和 stderr 前 200 字符；一次已成功的测试命令重复执行 66 次，完整 envelope 与模型可见结果不一致。",
+        "purpose": "已确认成功输出只投影 stdout 前 300 字符和 stderr 前 200 字符；一次已成功的测试命令重复执行 66 次，完整 envelope 与模型可见结果不一致。",
+        "acceptance_criteria": [
+          "成功与失败输出均保留必要执行状态、截断信息、测试结论和可用的完整输出取回途径，不发明不存在的读取能力。",
+          "回放 leaderboard 的 2662 字节测试输出，模型可见结果能辨认 exit 0、遗漏范围及如何取得剩余输出。",
+          "覆盖 stdout/stderr、reduced/full、超长输出和空输出，不破坏现有按需读取合同。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:1195",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed43.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P0"
+        ],
+        "confidence": 1.0,
+        "priority": 5,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 20,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "已确认成功输出只投影 stdout 前 300 字符和 stderr 前 200 字符；一次已成功的测试命令重复执行 66 次，完整 envelope 与模型可见结果不一致。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "成功与失败输出均保留必要执行状态、截断信息、测试结论和可用的完整输出取回途径，不发明不存在的读取能力。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "projection",
+      "to": "interface",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "dialect",
+      "node": {
+        "title": "明确 Windows shell 与 argv 的调用方式",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "实测出现 POSIX 命令用于 cmd，以及将重定向符号放入 argv；提示中的 cmd、POSIX、PowerShell 示例存在混用。",
+        "purpose": "实测出现 POSIX 命令用于 cmd，以及将重定向符号放入 argv；提示中的 cmd、POSIX、PowerShell 示例存在混用。",
+        "acceptance_criteria": [
+          "对三条件和两个描述变体核对实际执行器与模型 schema，分别说明 cmd、显式 PowerShell 和直接 argv 的规则。",
+          "用含空格路径、引号、重定向和管道的最小用例证明指导与执行一致；不能静默把 argv 改成 shell 执行。",
+          "保存历史不匹配轨迹；任何提示调整进入新冻结版本，对照组指导保持可比。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:355",
+          "bench/aci/runners/live_agent_loop.py:503",
+          "bench/aci/runners/compact_prompts.py"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 1.0,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 30,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "实测出现 POSIX 命令用于 cmd，以及将重定向符号放入 argv；提示中的 cmd、POSIX、PowerShell 示例存在混用。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "对三条件和两个描述变体核对实际执行器与模型 schema，分别说明 cmd、显式 PowerShell 和直接 argv 的规则。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "dialect",
+      "to": "interface",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "encoding",
+      "node": {
+        "title": "保留 Windows 命令输出的可读诊断",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "2202 条 shell 观测含替换字符，抽查 cmd 中文错误发生乱码；现有 UTF-8 replace 避免了崩溃，但未解决诊断可读性。",
+        "purpose": "2202 条 shell 观测含替换字符，抽查 cmd 中文错误发生乱码；现有 UTF-8 replace 避免了崩溃，但未解决诊断可读性。",
+        "acceptance_criteria": [
+          "在 UTF-8、Windows 本地编码及不可解码字节用例中不崩溃，并记录实际编码依据与替换情况；不假称混合编码可无损自动识别。",
+          "覆盖 stdout/stderr、中文路径和 Python UTF-8 子进程；raw 与 ACI 的处理规则及差异明确。",
+          "历史替换字符不逆向猜回原文；未来需要重放的原始字节有有界、可核验的保存方式。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:1265",
+          "eval/harness_encoding_contract.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 1.0,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 40,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "2202 条 shell 观测含替换字符，抽查 cmd 中文错误发生乱码；现有 UTF-8 replace 避免了崩溃，但未解决诊断可读性。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "在 UTF-8、Windows 本地编码及不可解码字节用例中不崩溃，并记录实际编码依据与替换情况；不假称混合编码可无损自动识别。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "encoding",
+      "to": "interface",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "stopping",
+      "node": {
+        "title": "验证重复调用与任务成功后的停止行为",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "已观察到 77 次重复读取、66 次重复执行以及测试通过后仍耗尽 completion；尚不能把这些行为都归因于同一个缺陷。",
+        "purpose": "已观察到 77 次重复读取、66 次重复执行以及测试通过后仍耗尽 completion；尚不能把这些行为都归因于同一个缺陷。",
+        "acceptance_criteria": [
+          "对三个 ACI 异常样本给出逐回合状态、调用、观察与停止原因，区分已知契约缺陷与模型行为。",
+          "开发集验证修复后是否仍存在无进展重复；如需引入提醒或停止策略，预先定义所有条件一致的规则、预算及失败分类。",
+          "已有成功测试不能直接替代独立评分；不事后改写原轮评分或仅为 ACI 放宽预算。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed42.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed43.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed44.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 0.95,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 50,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "已观察到 77 次重复读取、66 次重复执行以及测试通过后仍耗尽 completion；尚不能把这些行为都归因于同一个缺陷。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "对三个 ACI 异常样本给出逐回合状态、调用、观察与停止原因，区分已知契约缺陷与模型行为。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "stopping",
+      "to": "interface",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "stopping",
+      "to": "cursor",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "stopping",
+      "to": "projection",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "stopping",
+      "to": "dialect",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "controller",
+      "node": {
+        "title": "可靠记录采集退出码并完成报告收尾",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "本轮 Python 终态 exit 0，但 PowerShell 收尾记录 exit_code=null，条件分支跳过了自动报告；离线报告已经手工补齐，脚本缺陷尚未修复。",
+        "purpose": "本轮 Python 终态 exit 0，但 PowerShell 收尾记录 exit_code=null，条件分支跳过了自动报告；离线报告已经手工补齐，脚本缺陷尚未修复。",
+        "acceptance_criteria": [
+          "覆盖成功、非零退出、未知退出码及匹配 generation 的持久终态，未知状态不能静默当成功或直接跳过报告。",
+          "两个变体的报告各有明确终态、工具退出码与源摘要；任何一步失败保留证据并可恢复，避免混用新旧报告。",
+          "用本机离线子进程完成收尾回归，不需付费模型调用；记录可复用控制脚本的源码位置和摘要。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/control/run-live.ps1:42",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/storage-watch-final.json",
+          "D:/VerseShellLive/analysis-20261008/report-generation.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 1.0,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 10,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "本轮 Python 终态 exit 0，但 PowerShell 收尾记录 exit_code=null，条件分支跳过了自动报告；离线报告已经手工补齐，脚本缺陷尚未修复。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "覆盖成功、非零退出、未知退出码及匹配 generation 的持久终态，未知状态不能静默当成功或直接跳过报告。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "controller",
+      "to": "reliability",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "storage",
+      "node": {
+        "title": "验证 D 盘存储保护的暂停与恢复路径",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "D 盘首轮完成证明当前空间足够；D<15GiB 或 C<2GiB 的保护分支尚未实测，C 盘曾因空间不足中断采集。",
+        "purpose": "D 盘首轮完成证明当前空间足够；D<15GiB 或 C<2GiB 的保护分支尚未实测，C 盘曾因空间不足中断采集。",
+        "acceptance_criteria": [
+          "使用可控磁盘读数或隔离故障注入覆盖 D/C 阈值、写入失败及 STOP 标记传播，不以真实填满磁盘制造故障。",
+          "当前格收束后在下一格前暂停，已提交行完整、退出原因可读，不能误判完成或自动清除暂停标记。",
+          "恢复沿用相同身份并无重复格；TEMP、缓存、构建与评分副本均核对位于 D 盘，原 C 失败证据保留。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/control/run-live.ps1",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/storage-policy.json",
+          "bench/aci/results/step5p-r1-20261006/"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 1.0,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 20,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "D 盘首轮完成证明当前空间足够；D<15GiB 或 C<2GiB 的保护分支尚未实测，C 盘曾因空间不足中断采集。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "使用可控磁盘读数或隔离故障注入覆盖 D/C 阈值、写入失败及 STOP 标记传播，不以真实填满磁盘制造故障。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "storage",
+      "to": "reliability",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "storage",
+      "to": "controller",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "usage",
+      "node": {
+        "title": "核对重试用量缺口并统一成本报告分母",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "5 项已正确标记 usage 不完整，涉及 6 个回合、7 次无响应传输尝试；收到的 134271140 tokens 不能称作完整账单。",
+        "purpose": "5 项已正确标记 usage 不完整，涉及 6 个回合、7 次无响应传输尝试；收到的 134271140 tokens 不能称作完整账单。",
+        "acceptance_criteria": [
+          "逐项记录 attempt、已收到 usage、未知用量及有效配对数；所有成本入口一致拒绝把缺失用量补零。",
+          "若端点提供可核对账单则按请求身份核对；无法取得时明确 unknown，保留缺口并限制完整成本主张。",
+          "任务评分与计费完整性分开；合成重试用例证明未知尝试不会被写成零成本或完整 usage。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:1488",
+          "tools/live_uncertainty.py:249"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 1.0,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 30,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "5 项已正确标记 usage 不完整，涉及 6 个回合、7 次无响应传输尝试；收到的 134271140 tokens 不能称作完整账单。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "逐项记录 attempt、已收到 usage、未知用量及有效配对数；所有成本入口一致拒绝把缺失用量补零。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "usage",
+      "to": "reliability",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "replay",
+      "node": {
+        "title": "补齐最终工作区重建与评分复核覆盖",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "35/35 pristine/GOLDEN 审计已通过，但它不是全量 live 重评分；旧谓词对比里 TypeScript 仅 17/30 条轨迹可重建。",
+        "purpose": "35/35 pristine/GOLDEN 审计已通过，但它不是全量 live 重评分；旧谓词对比里 TypeScript 仅 17/30 条轨迹可重建。",
+        "acceptance_criteria": [
+          "列出不可重建样本及具体原因，区分原始评分有效性与事后独立复核能力，不能把缺失重建当作失败或成功。",
+          "明确未来最终文件或写入日志的最小冻结范围和可信评分边界，在 D 盘保存并验证摘要。",
+          "对可重建范围做独立评分对照，报告覆盖分母；历史缺失无法恢复时保留限制，不伪造完整覆盖。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-baseline/task_set_audit.json",
+          "tools/trajectory_replay.py",
+          "tools/task_set_audit.py:198"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 1.0,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 40,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "35/35 pristine/GOLDEN 审计已通过，但它不是全量 live 重评分；旧谓词对比里 TypeScript 仅 17/30 条轨迹可重建。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "列出不可重建样本及具体原因，区分原始评分有效性与事后独立复核能力，不能把缺失重建当作失败或成功。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "replay",
+      "to": "reliability",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "gates",
+      "node": {
+        "title": "让所有验收入口使用一致的严格判定",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "原始 merged comparison 的 meets_acceptance=true 与严格报告的 claimable=false 同时存在，旧 PASS 可能被消费者误当正式通过。",
+        "purpose": "原始 merged comparison 的 meets_acceptance=true 与严格报告的 claimable=false 同时存在，旧 PASS 可能被消费者误当正式通过。",
+        "acceptance_criteria": [
+          "清点 CLI、Markdown、JSON、README 与产品门禁的 PASS 消费点，把描述性改善与正式资格分开。",
+          "用当前真实轮证明超 10% 截断率时所有正式入口都不可主张，输出具体原因。",
+          "覆盖 partial、缺 usage、未知评分、未达重复数与未校正分析等拒绝路径；保留历史产物及阈值。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:1800",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-baseline/three_arm_report.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-compact_all/three_arm_report.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 1.0,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 10,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "原始 merged comparison 的 meets_acceptance=true 与严格报告的 claimable=false 同时存在，旧 PASS 可能被消费者误当正式通过。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "清点 CLI、Markdown、JSON、README 与产品门禁的 PASS 消费点，把描述性改善与正式资格分开。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "gates",
+      "to": "acceptance",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "cost",
+      "node": {
+        "title": "解释总量节省与逐项开销分歧",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "总 token 比值为 0.17–0.27，但逐项比值均值为 1.25–1.55；不能从总量优势推导任务普遍节省。",
+        "purpose": "总 token 比值为 0.17–0.27，但逐项比值均值为 1.25–1.55；不能从总量优势推导任务普遍节省。",
+        "acceptance_criteria": [
+          "在同一有效配对集报告总量比值、cell 等权比值及任务等权敏感性、缺失分母、分位数与长循环贡献。",
+          "拆解首轮输入、工具 schema、重发历史、工具输出和回合数的可观测开销，不能以 token 数编造 reasoning 或金额。",
+          "优化只在独立开发范围选择；确证方案同时保留两估计量，结果反向或不确定时不能挑有利口径。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/analysis-20261008/cost-analysis.json",
+          "tools/study_inference.py",
+          "bench/aci/studies/prelive-v1/analysis-plan.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 1.0,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 20,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "总 token 比值为 0.17–0.27，但逐项比值均值为 1.25–1.55；不能从总量优势推导任务普遍节省。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "在同一有效配对集报告总量比值、cell 等权比值及任务等权敏感性、缺失分母、分位数与长循环贡献。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "cost",
+      "to": "acceptance",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "coverage",
+      "node": {
+        "title": "完成全部异常归因并核验未覆盖的风险",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "本轮完整性已核对，但根因分析仅深入了部分异常；不能据此保证全项目所有问题均已定位。",
+        "purpose": "本轮完整性已核对，但根因分析仅深入了部分异常；不能据此保证全项目所有问题均已定位。",
+        "acceptance_criteria": [
+          "覆盖 139 个评分失败与 141 个截断样本的并集，以及 5 个 usage 缺口；逐格登记可复现原因或 unknown，避免重复计数。",
+          "按任务、语言、条件、变体、seed 归类，区分平台/接口、评分、模型、端点与预算，不从共现推断因果。",
+          "修复后抽取成功样本做反向检查，并明确过程树清理、磁盘边界、重建覆盖、未测平台和旧数据的剩余盲区。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/latest_live.json"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P1"
+        ],
+        "confidence": 0.95,
+        "priority": 4,
+        "difficulty": "medium",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 30,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "本轮完整性已核对，但根因分析仅深入了部分异常；不能据此保证全项目所有问题均已定位。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "覆盖 139 个评分失败与 141 个截断样本的并集，以及 5 个 usage 缺口；逐格登记可复现原因或 unknown，避免重复计数。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "coverage",
+      "to": "acceptance",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "product",
+      "node": {
+        "title": "重新对齐历史产品声明与当前验收边界",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "进入 live 的 readiness 和本轮原始高成功率都不能代替历史产品门禁；C12/C14/C16/C34/C36 的既有缺口仍需逐项复核。",
+        "purpose": "进入 live 的 readiness 和本轮原始高成功率都不能代替历史产品门禁；C12/C14/C16/C34/C36 的既有缺口仍需逐项复核。",
+        "acceptance_criteria": [
+          "建立当前声明到实际输入、版本和证据的映射，区分历史、已验证、未验证及当前不满足门槛的声明。",
+          "保留原阈值并重验相关产品门禁；未达标时如实报告或明确撤回/限制声明，不用替换旧报告使其变绿。",
+          "正式结论必须消费完整重复与独立任务节点的证据；研究得到负结果也可按真实范围完成验收。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/prelive-ready-2026-10-06.md",
+          "docs/claims-and-evidence.md",
+          "tools/claim_gate.py"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P2"
+        ],
+        "confidence": 1.0,
+        "priority": 3,
+        "difficulty": "high",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 40,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "进入 live 的 readiness 和本轮原始高成功率都不能代替历史产品门禁；C12/C14/C16/C34/C36 的既有缺口仍需逐项复核。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "建立当前声明到实际输入、版本和证据的映射，区分历史、已验证、未验证及当前不满足门槛的声明。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "product",
+      "to": "acceptance",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "landing",
+      "node": {
+        "title": "核对历史完成状态与默认分支源码落地",
+        "kind": "follow_up",
+        "status": "ready",
+        "summary": "刷新远程引用后 check-landing 报 44 项历史发现，HEAD 有 44 个提交不可达 origin/master；历史已完成父节点下仍有未完成子项，须核对闭环范围。",
+        "purpose": "刷新远程引用后 check-landing 报 44 项历史发现，HEAD 有 44 个提交不可达 origin/master；历史已完成父节点下仍有未完成子项，须核对闭环范围。",
+        "acceptance_criteria": [
+          "逐项解释 check-landing 的历史发现和当前任务关联，不能把全部历史分支自动归责于本轮。",
+          "核对历史 done 的验收范围、开放子节点与实际提交；需要纠正时用新提案和事件，不重写历史。",
+          "保存本轮精确改动与默认分支可达性证据；保护既有脏改动，不自动 reset、stash、清理、强推或合并。"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。"
+        ],
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/task-forest-20261008/landing-before.json",
+          "docs/task-forest-policy.md"
+        ],
+        "context_tags": [
+          "step5p-shortfalls-20261008",
+          "severity:P2"
+        ],
+        "confidence": 1.0,
+        "priority": 3,
+        "difficulty": "high",
+        "progress": 0,
+        "progress_source": "manual",
+        "display_order": 50,
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ],
+        "execution_hints": [],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 1.0,
+          "user_goal": "把已知问题和待验证短板沉淀为可执行、可验收的 Task Forest 节点。",
+          "why_this_task": "刷新远程引用后 check-landing 报 44 项历史发现，HEAD 有 44 个提交不可达 origin/master；历史已完成父节点下仍有未完成子项，须核对闭环范围。",
+          "why_not_enough": "单一节点完成不代表全部产品或统计主张通过。",
+          "validation_plan": [
+            "逐项解释 check-landing 的历史发现和当前任务关联，不能把全部历史分支自动归责于本轮。"
+          ]
+        }
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "landing",
+      "to": "acceptance",
+      "type": "child_of",
+      "edge": {
+        "reason": "该任务是此分支的具体交付",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0112",
+      "fields": {
+        "title": "完成独立重复采集并验证运行间不确定性",
+        "summary": "2026-10-08：区间校准与预注册代码已有离线证据；Step 5 当前只有一份完整采集，五个 seed 不等于五次重复，正式复验仍未完成。",
+        "acceptance_criteria": [
+          "至少一个配置有 ≥3 次**完整**重跑（同任务集、同 seed、同预算），逐次保留原始产物",
+          "`live_uncertainty.py` / `acceptance_power.py` 支持分层 bootstrap（先抽运行、再抽任务）或方差成分估计，并输出含跑间方差的区间",
+          "重算 D/A′ 的观察 token 与真实 token 头条，**明确报告余量在纳入跑间方差后是否仍存在**",
+          "`docs/acceptance-criteria.md` §6 的稳健性更正块按结果更新",
+          "新 study 至少 30 题、5 seed、3 份完整采集并匹配冻结计划；预算、缺用量及多重比较限制先通过，不能复制或拼接数据冒充重复。"
+        ],
+        "evidence": [
+          "**已完成 · 新增 `tools/run_variance.py`**：用**同一配置的三次运行**（`bench/aci/results/tf0114/with_seed{42,43,44}.json`，同任务集 v3.0.0、同模型、同提示、同预算，仅 seed 不同）直接估计跑间方差，并与已发布的**任务聚类** CI95 半宽比较。产物 `eval/run_variance.json`，已接进 `tools/refresh_live_artifacts.py` 的末尾（它读 live_uncertainty 与逐 seed 原始文件）。",
+          "**实测（本轮最有价值的新发现）**：成功率差 D−A 逐 seed 为 **+0.0286 / −0.0857 / −0.1429** —— **符号在 seed 之间翻转**。跑间 sd = 0.0873，跑间 SE = 0.0504，是已发布半宽 0.0664 的 **0.76 倍**。",
+          "观察 token 比 D/A 逐 seed 为 **0.7182 / 0.6220 / 0.5817**（跨度 0.137，约 21% 相对），跑间 sd 0.0701、SE 0.0405，是已发布半宽 0.1314 的 **0.31 倍**。工具调用比逐 seed 0.8831 / 0.7829 / 0.7415。",
+          "**为什么这条重要**：已发布区间按**任务**重采样，只建模「抽到了哪些任务」。端点接受 `seed` 但不复现（C13 边界③），而第 12↔13 轮之间实测过 D/A′ 观察 token 比漂移 **0.2577**，是当时主张余量 0.0212 的 **10.4 倍**。本轮把这条从「审计的怀疑」变成了**同轮内的直接测量**。",
+          "**照实登记的限制**：三个 seed 给出的是 **2 个自由度**的 sd，所以这是问题的**下界**而非标定过的方差成分——它能证明已发布区间偏窄，**不能**给出应当替代它的区间。该限制写在产物 `method.limitation` 与 verdict 里。",
+          "**对第 14 轮解读的直接后果**：`[−0.1331, −0.0003]` 不含 0，但**不得**读成「D 显著更差」——同配置三 seed 的符号会翻转。这条已写进 `docs/tf0114-round-notes.md` §5.5 与 §6 的禁止写法。",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/prelive-ready-2026-10-06.md",
+          "bench/aci/studies/prelive-v1/analysis-plan.json"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。",
+          "历史验收条件按其原端点/轮次适用；当前扩展范围以 2026-10-08 追加条件为准。"
+        ],
+        "context_tags": [
+          "statistics",
+          "bench",
+          "live",
+          "step5p-shortfalls-20261008",
+          "reused-existing-node"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0112",
+      "to": "acceptance",
+      "type": "contributes_to",
+      "edge": {
+        "reason": "复用既有节点，保留主父节点与历史证据，避免重复建项",
+        "blocking": false,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0114",
+      "fields": {
+        "title": "构建独立困难任务并验证难度与观察覆盖",
+        "summary": "2026-10-08：只有 18 个开发槽和 30 个留出槽的蓝图；旧 35 题的未截断样本接近成功率天花板，不能支持外部能力提升主张。",
+        "acceptance_criteria": [
+          "新任务集里基线成功率有明确下降（目标区间需先预注册，例如落在 0.4–0.7），使 MDE 0.15 不再贴着天花板",
+          "large tier（pristine 观察 ≥1000 token）占比达到预注册的 1/3",
+          "难度调整**必须与留出集构造一起做**，且不得在看到 live 结果后调难度",
+          "重算成功率 MDE 的可达性：报告 MDE 占可用余量的比例",
+          "0.40–0.70 难度目标只在开发集使用；正式留出集独立冻结，即使仍有天花板也不事后删题或换题。"
+        ],
+        "evidence": [
+          "**难度目标未达成且方向相反**：第 14 轮 with 臂 A 臂成功率 **0.9048**（目标 0.40–0.70，上一轮 0.8400），可用余量 0.0952 < 预注册 MDE 0.15 → `MDE/余量 = 1.58`，成功率支**结构上不可能检出**。",
+          "**large 占比 7/35 = 20%**（目标 ≥1/3）。**关键新结论：补齐预注册里剩余 5 个 large 槽位也只到 12/40 = 30.0%，仍不达标**；达到 1/3 需要 **7** 个额外 large 任务（14/42 = 33.3%）。所以本节点真正需要的不是「补到 30 个」，而是**改观察机制 + 重新推导组合目标**（已另立节点承接）。",
+          "**留出集已达标且已被真实使用**：`eval/task_set_freeze.json` 的 `holdout` = 10 个本轮新提升任务，全部进了 live 并出现在逐任务统计中。",
+          "**第 14 轮必须与结论一起说的三条**：①D 臂 completion 截断率 14.3%（A/A′ 为 0），按 §0.6.3 使两条成功率对比不可主张；②全量与 analysable 两个口径**符号相反**（D 更差 6.7pp vs D 更好 1.6pp）；③真实 tokenizer 口径下 D 总 token 比 1.3583 [1.0303, 1.8986]，CPST 0.6852 但**非劣不成立**。",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/studies/prelive-v1/task-blueprint.json",
+          "docs/task-generation-protocol.md"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。",
+          "历史验收条件按其原端点/轮次适用；当前扩展范围以 2026-10-08 追加条件为准。"
+        ],
+        "context_tags": [
+          "dataset",
+          "bench",
+          "claims",
+          "step5p-shortfalls-20261008",
+          "reused-existing-node"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0114",
+      "to": "acceptance",
+      "type": "contributes_to",
+      "edge": {
+        "reason": "复用既有节点，保留主父节点与历史证据，避免重复建项",
+        "blocking": false,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0115",
+      "fields": {
+        "title": "核验任务作者与被测模型的来源独立性",
+        "summary": "2026-10-08：历史同源风险尚未完成闭环；Step 5 的模型别名与 relay 元数据不能单独证明作者和被测模型异源。",
+        "acceptance_criteria": [
+          "量化并登记该风险的实际暴露面（多少任务由同一端点家族生成、变体模型与被测模型的关系）",
+          "给出一条可执行的缓解措施（例如：留出集的一部分用**非该端点家族**的模型生成，或引入公开数据集任务）",
+          "在 `docs/claims-and-evidence.md` 的 C13/C29 失效边界里写明这条风险",
+          "对新候选记录可核验来源、独立正确变体、拒绝原因及 unknown 家族；缺独立来源时限制能力与泛化声明。"
+        ],
+        "evidence": [
+          "`docs/audit-brief-r13.md` §2.2 与 §6 第 6 条：15/25 为 LLM 生成，生成器与变体模型来自同一端点家族",
+          "`eval/task_admissibility.json` 的 A7_provenance 检查只验证 provenance 字段存在与自洽，**不验证生成器与被测模型的独立性**",
+          "该风险同时影响成功率与 token 两类结论，故审计建议的优先级高于我们原先的 §6 第 6 条",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/shortfall-remediation-strategy-2026-10-06.md"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。",
+          "历史验收条件按其原端点/轮次适用；当前扩展范围以 2026-10-08 追加条件为准。"
+        ],
+        "context_tags": [
+          "dataset",
+          "claims",
+          "risk",
+          "step5p-shortfalls-20261008",
+          "reused-existing-node"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0115",
+      "to": "acceptance",
+      "type": "contributes_to",
+      "edge": {
+        "reason": "复用既有节点，保留主父节点与历史证据，避免重复建项",
+        "blocking": false,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0120",
+      "fields": {
+        "title": "按实际端点验证预算边界并冻结开发试点",
+        "summary": "2026-10-08：历史 relay 的 300 秒限制不能继承给 StepFun；本轮主要问题是 140 个轮次截断，另有 1 个 completion 截断，下一版本需重新设计开发试点。",
+        "acceptance_criteria": [
+          "`docs/acceptance-criteria.md` §0.5 写明该端点的硬上限与实测证据（已随本条落地）",
+          "TF-0105 的候选任务在生成/准入阶段带一条“预算敏感”标注，并给出判定方式",
+          "`docs/claims-and-evidence.md` 的 C13 失效边界写明：本轮 A′ 被 completion 上限截断 13.3%，且该上限在本端点不可抬高",
+          "区分历史 relay 限制和当前 StepFun 实测；先修接口和停止行为，再在开发集核验轮次、completion、重试及总预算。",
+          "正式开跑前固定预算和处置规则；不得仅删难题或看到结果后追加预算。"
+        ],
+        "evidence": [
+          "探测工具：`audit-r12-scratch/probe_cap_raise.py`；结果 `audit-r12-scratch/cap_probe/results.jsonl` 与汇总 `audit-r12-scratch/cap_probe_summary.py`",
+          "**11 个被截断单元格用 `--max-tokens 32768` 原权重跑**（同模型/同 seed/同任务/同条件）：**通过 2、仍长度截断 0、HTTP 502 9**。失败墙钟全部聚在 ~300s（302.1/301.3/302.0/303.5/303.7/304.0/304.4/306.1/308.1/311.9s）",
+          "502 报文：`HTTP 502: {\"error\":{\"message\":\"非流式响应超时(300秒)\",\"type\":\"proxy_error\"}}`",
+          "**为什么 502 比截断更糟**：`bench/aci/runners/merge_live_runs.py` 遇到任何 `api_error` 行即 exit 2 拒绝合并——所以抬上限会把「可分析的截断产物」变成「无法合并的产物」",
+          "**截断高度集中在任务上**：11 个单元格里 10 个落在 4 个任务——`python_config_reader_686653a1`、`rust_window_fold_scanner_3d213f38`、`typescript_missing_await_result_order_c58cafb6`、`typescript_reduce_shared_accumulator_d80f462d`，且每个 seed 都复现。这些恰是较难的任务，**所以「排除截断行」会顺带排除难任务，改变构造效度**",
+          "**同一配置的截断率是跑间变量**：第 12 轮 A′ 15%、第 13 轮首跑 7%、第 13 轮重跑 13.3%。所以「本轮预算没构成约束」很可能是运气",
+          "本轮 A′ 原始成功率 0.7867、剔除截断行后 0.9077；而 A 从 0.8667 到 0.8784——**剔除后 A vs A′ 的符号翻转**，说明这个假象足以颠倒结论",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/collection.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-baseline/three_arm_report.json"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。",
+          "历史验收条件按其原端点/轮次适用；当前扩展范围以 2026-10-08 追加条件为准。"
+        ],
+        "context_tags": [
+          "bench",
+          "harness",
+          "claims",
+          "step5p-shortfalls-20261008",
+          "reused-existing-node"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0120",
+      "to": "reliability",
+      "type": "contributes_to",
+      "edge": {
+        "reason": "复用既有节点，保留主父节点与历史证据，避免重复建项",
+        "blocking": false,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0121",
+      "fields": {
+        "title": "按双预算与双口径限制被截断的比较",
+        "summary": "2026-10-08：保留第 14 轮历史问题；本轮四个 shell 对照的截断率为 25.7%、23.4%、18.3%、11.4%，严格比较均不可主张。",
+        "acceptance_criteria": [
+          "在 `docs/claims-and-evidence.md` 的 C13 条目下登记第 14 轮的两个口径数字与截断率，并注明该对比按 §0.6.3 不可主张",
+          "查明为什么截断只在 D 侧发生（假设：D 的系统提示 + 工具 schema 更大，reasoning 预算更容易被烧穿）并给出可复现的判定",
+          "给出缓解方案：要么调小 D 侧提示体积，要么把 turn-1 截断与「模型真的在思考」区分开；不得靠抬 max_tokens（端点 300 秒上限不可抬高）",
+          "下一轮 live 之前把该帧写成预注册（避免看到结果后再决定是否排除）",
+          "每个变体及每个对照单独报告轮次/completion 截断、analysable/ITT 与门禁原因，不跨组稀释。",
+          "用量、双估计量和因果归因独立处理；当前完成采集不代表成功率比较合格。"
+        ],
+        "evidence": [
+          "**归因已完成（原假设「large tier 任务导致」被证伪）**：逐臂均值 —— 每行输入提示 token：A **9,015** / A′ **9,924** / **D 11,393**；每行 completion token：A 1,593 / A′ 1,610 / **D 3,017**。即 D 的提示比 A 大约 **26%**、推理输出约 **2 倍**。15 行截断的 `llm_completion_tokens` 全部落在 **16,424–16,453**（撞满 16384 上限）。",
+          "**截断与任务规模无关**：12 个被截断任务的 pristine 观察量跨度是 **141–1559 token**，其中 `typescript_missing_await_result_order`(141)、`python_scheduler_cancel_transition`(192)、`ts_chunk_batches`(221)、`rust_error_source_propagation`(259)、`ts_narrow_vs_cast`(308) 都属于 small/medium 档；反过来说，本轮新增的 large 任务里只有 1 个被截断。**所以这不是「新任务太难」，而是 D 条件本身的提示体积与推理量。**",
+          "对照：A′ 的提示（9,924）与 A（9,015）相当，但 completion 均值也≈1,600——提示词等量并不能解释 D 的 3,017。可推断 D 的 typed-op 提示与工具 schema 促使模型做更多推理。",
+          "**已实测（第 14 轮 with 臂，`bench/aci/results/latest_live.json`，315 行，`api_error_rows=3`）**：按 §0.6.1 分类后逐臂 endpoint/cap/排除率与两个口径成功率：A `3/2/4.8%`、0.9048（全量）vs 0.9400（analysable）；A′ `0/0/0.0%`、0.8762 vs 0.8762；**D `0/15/14.3%`、0.8381 vs 0.9556**。",
+          "**符号翻转**：全量（ITT）口径 D−A = −0.0667（D 更差），剔除截断行后 D−A = +0.0156（D 更好）。§0.6.3 第 1 条（任一侧 cap >10%）使该对比不可主张；第 3 条（`api_error` 行数为 0）另因 A 臂 3 行端点失败而不满足。",
+          "对照：round 13（v2.0.0）D 的 completion 截断率是 3%/7%/4%（合计 ≤10%），本轮 14.3%。归因结果表明差异**不在任务集**，而在 D 条件的提示/推理体积——下一轮若要降低它，应从那两处入手。",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-baseline/three_arm_report.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-compact_all/three_arm_report.json"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。",
+          "历史验收条件按其原端点/轮次适用；当前扩展范围以 2026-10-08 追加条件为准。"
+        ],
+        "context_tags": [
+          "bench",
+          "live",
+          "harness",
+          "claims",
+          "step5p-shortfalls-20261008",
+          "reused-existing-node"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0121",
+      "to": "acceptance",
+      "type": "contributes_to",
+      "edge": {
+        "reason": "复用既有节点，保留主父节点与历史证据，避免重复建项",
+        "blocking": false,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0122",
+      "fields": {
+        "title": "验证采集中断、恢复与不完整证据的边界",
+        "summary": "2026-10-08：受管启动、恢复与 partial 守卫已有离线证据，D 盘首轮 1050 项无记录的 harness crash；磁盘异常和退出码收尾仍有独立后续节点，不以正常完成代替故障路径验收。",
+        "acceptance_criteria": [
+          "把「单格端点失败」的处置写进预注册：明确什么时候允许 partial 合并、产物如何标记、哪些对比因此不可主张",
+          "让 `merge_live_runs.py` 的 `--allow-api-errors` 与 §0.6 对齐（当前它只写一个计数，不产出逐行分类），使下游工具能机检",
+          "让门禁能区分「因端点失败而 partial」与「正常完整」的产物，并在 partial 时报出受影响的行与对比",
+          "为「预算敏感任务」建立准入期标注（与 TF-0120 的 id 对应），使这类任务在生成阶段就可被识别",
+          "逐条对照原恢复验收要求和最新 readiness，记录已覆盖与剩余故障场景，不以新增报告替代验证。",
+          "未知历史尝试的费用仍标不完整；恢复不修改格身份、不重复提交或丢失已提交行。"
+        ],
+        "evidence": [
+          "**阻塞已消除**：那最后一格 `python_csvlite_parse_80d158b2 [raw_shell] seed=44` 再次补跑时**一次成功**（返回普通 FAIL 行：2 tools / 1348 obs_tok），三份 with 臂 seed 文件现在 **0 行 api_error**。",
+          "**因此 with 臂以干净状态重新合并**：`merge_live_runs.py`（**不需要** `--allow-api-errors`）→ 315 行、`api_error_rows = 0`。旧的部分合并产物备份在 `audit-r12-scratch/latest_live_round14_partial_backup.json`。",
+          "**C35 由 FAIL 转 PASS**，即两臂现在在 seed 集合、任务集合、行数、`git_rev`、`task_set_version` 上完全一致。",
+          "**这同时修正了本节点原先的记录**：早先「6 次补跑全部失败」是**端点状态相关**的（同一格在 without 臂与后续重试中都能成功），不是该任务结构性不可用。**不能把它当成结构性结论**——这一点比结论本身重要。",
+          "**仍然有效的部分**：一个格的端点失败会让**整轮** live 无法合并、全部派生产物永久陈旧，这个管道缺陷依然存在（`--allow-api-errors` 只记计数、不产出行分类），仍待与 §0.6 对齐。",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/readiness-ready/readiness.json"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。",
+          "历史验收条件按其原端点/轮次适用；当前扩展范围以 2026-10-08 追加条件为准。"
+        ],
+        "context_tags": [
+          "bench",
+          "harness",
+          "gate",
+          "live",
+          "step5p-shortfalls-20261008",
+          "reused-existing-node"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0122",
+      "to": "reliability",
+      "type": "contributes_to",
+      "edge": {
+        "reason": "复用既有节点，保留主父节点与历史证据，避免重复建项",
+        "blocking": false,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0123",
+      "fields": {
+        "title": "验证有实际意义的大观察任务机制与占比",
+        "summary": "2026-10-08：历史补 7 题的算式仅针对旧集合；新集合须按实际分母重算至少三分之一，并避免人为堆日志制造 large。",
+        "acceptance_criteria": [
+          "ts：给出同时满足「失败不终止 + 长载荷断言」的机制并实测 pristine 转储 ≥1000 token（探针基线：收集全部失败 = 665 token，需再乘约 1.5 倍）",
+          "rust：让每条失败用例打印长 payload，并实测在同一批被拒候选上能越过 1000 token",
+          "用同一批被拒候选复测 A8：报告有几个能越过 1000 token（不预设是 5 个）",
+          "把新的组合目标**在看数据之前**写进 `docs/task-generation-protocol.md`，数值由算式给出",
+          "改观察机制会改变 live 证据面，必须与下一轮 live 一起做；不得只改任务集就跑结论",
+          "保留历史拒绝候选的回放；新任务的 pristine 观察与难度独立测量，固定工具/代理口径和真实分母。",
+          "观察扩展须来自真实行为断言与诊断需要；不得按 ACI 擅长的形式筛题或仅堆长日志过门槛。"
+        ],
+        "evidence": [
+          "**用户裁定（2026-09-29）**：接受「生成任务 25/30」的已登记缺口并结束本目标。理由被采纳：①§5 规定看过第 14 轮 token 结果后不得再按结果增删任务，补那 5 个槽位会突破该窗口；②补槽会改任务集指纹，作废刚做干净的第 14 轮证据链（两臂 `api_error_rows=0`、门禁 29/31），需重跑约 13 小时 live；③即使付这两个代价，large 占比也只到 12/40 = 30.0%，仍达不到它要服务的 1/3（需 7 个额外 large 任务）。",
+          "**因此本节点的定位明确为「后继目标的第一步」，不是本目标的未完成工作。**",
+          "**本目标结束时的最终状态**：完整门禁 **29/31**（仅 C14 = 0.0422、C16 = 0.0768 按 TF-0116 决策保持原阈值）；任务集 `3.0.0`（35 任务 = 10 手写 + 25 生成，留出集 10）；两臂各 315 行且 `api_error_rows = 0`；统计交叉核对 34/34；跑间方差已实测（成功率差符号在 seed 间翻转）。",
+          "**本目标内已完成**：TF-0104、TF-0117、TF-0114（预注册部分）、TF-0113、TF-0111、TF-0119、TF-0105、TF-0106、TF-0120；新增门禁 C34/C35/C36/C37；新增工具 `statistics_crosscheck.py`、`run_variance.py`。",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/shortfall-remediation-strategy-2026-10-06.md",
+          "bench/aci/studies/prelive-v1/task-blueprint.json"
+        ],
+        "requirements": [
+          "本轮完成问题登记，不代表代码修复或正式验收通过。",
+          "工程测试、临时工作区、缓存和新增大体积证据放在 D:/VerseShellLive；Task Forest 仍以本仓库为权威。",
+          "保留 step5p-d-r1-20261007 原始结果；变更源码、提示、预算或分析方案后使用新冻结版本，禁止拼接补跑使旧轮通过。",
+          "历史验收条件按其原端点/轮次适用；当前扩展范围以 2026-10-08 追加条件为准。"
+        ],
+        "context_tags": [
+          "dataset",
+          "bench",
+          "claims",
+          "step5p-shortfalls-20261008",
+          "reused-existing-node"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0123",
+      "to": "acceptance",
+      "type": "contributes_to",
+      "edge": {
+        "reason": "复用既有节点，保留主父节点与历史证据，避免重复建项",
+        "blocking": false,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0120",
+      "to": "cursor",
+      "type": "depends_on",
+      "edge": {
+        "reason": "先验证工具/存储边界，再为新冻结版本选择正式预算",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0120",
+      "to": "projection",
+      "type": "depends_on",
+      "edge": {
+        "reason": "先验证工具/存储边界，再为新冻结版本选择正式预算",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0120",
+      "to": "dialect",
+      "type": "depends_on",
+      "edge": {
+        "reason": "先验证工具/存储边界，再为新冻结版本选择正式预算",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0120",
+      "to": "encoding",
+      "type": "depends_on",
+      "edge": {
+        "reason": "先验证工具/存储边界，再为新冻结版本选择正式预算",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0120",
+      "to": "stopping",
+      "type": "depends_on",
+      "edge": {
+        "reason": "先验证工具/存储边界，再为新冻结版本选择正式预算",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0120",
+      "to": "storage",
+      "type": "depends_on",
+      "edge": {
+        "reason": "先验证工具/存储边界，再为新冻结版本选择正式预算",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0112",
+      "to": "TF-0120",
+      "type": "depends_on",
+      "edge": {
+        "reason": "重复采集和确证分析需要先满足测量资格",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0112",
+      "to": "TF-0121",
+      "type": "depends_on",
+      "edge": {
+        "reason": "重复采集和确证分析需要先满足测量资格",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0112",
+      "to": "usage",
+      "type": "depends_on",
+      "edge": {
+        "reason": "重复采集和确证分析需要先满足测量资格",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0112",
+      "to": "gates",
+      "type": "depends_on",
+      "edge": {
+        "reason": "重复采集和确证分析需要先满足测量资格",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0114",
+      "to": "TF-0115",
+      "type": "depends_on",
+      "edge": {
+        "reason": "独立来源是正式留出集的前置条件",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0114",
+      "to": "TF-0123",
+      "type": "depends_on",
+      "edge": {
+        "reason": "任务覆盖与实际观察占比需在留出冻结前核验",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "product",
+      "to": "gates",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "product",
+      "to": "cost",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "product",
+      "to": "coverage",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "product",
+      "to": "replay",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "product",
+      "to": "landing",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "product",
+      "to": "TF-0112",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "product",
+      "to": "TF-0114",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "product",
+      "to": "TF-0115",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "product",
+      "to": "TF-0123",
+      "type": "depends_on",
+      "edge": {
+        "reason": "前置结果影响后续执行与验收",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0122",
+      "to": "controller",
+      "type": "depends_on",
+      "edge": {
+        "reason": "当前扩展后的恢复验收需要收尾、存储与未知用量证据",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0122",
+      "to": "storage",
+      "type": "depends_on",
+      "edge": {
+        "reason": "当前扩展后的恢复验收需要收尾、存储与未知用量证据",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "add_edge",
+      "from": "TF-0122",
+      "to": "usage",
+      "type": "depends_on",
+      "edge": {
+        "reason": "当前扩展后的恢复验收需要收尾、存储与未知用量证据",
+        "blocking": true,
+        "confidence": 1.0,
+        "created_from_session": "step5p-findings-2026-10-08"
+      }
+    },
+    {
+      "action": "record_deviation",
+      "deviation": {
+        "id": "TFD-5d20261008",
+        "kind": "automatic_report_skipped",
+        "summary": "成功采集后自动报告未生成。",
+        "reason": "控制脚本将空退出码用于成功分支判断；持久 Python 状态为 exit 0。",
+        "correction": "保留原始终态及已手工补齐报告；通过对应修复节点验证控制器。",
+        "related_task_ids": [
+          "controller",
+          "root"
+        ],
+        "status": "open",
+        "created_at": "2026-10-08T03:29:39.959978+00:00"
+      }
+    },
+    {
+      "action": "record_deviation",
+      "deviation": {
+        "id": "TFD-6d20261008",
+        "kind": "acceptance_label_conflict",
+        "summary": "描述性 PASS 与严格不可主张结果并存。",
+        "reason": "旧汇总判定未使用严格的预算、完整性与推断资格。",
+        "correction": "统一正式消费者，并保留旧数据和全部拒绝原因。",
+        "related_task_ids": [
+          "gates",
+          "product"
+        ],
+        "status": "open",
+        "created_at": "2026-10-08T03:29:39.959978+00:00"
+      }
+    }
+  ]
+}

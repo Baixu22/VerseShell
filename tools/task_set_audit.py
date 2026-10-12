@@ -19,9 +19,9 @@ GOLDEN patch:
   * **registered equivalent variant** -> it must PASS (the predicate scores what the
     prompt asked for, not one fixed wording).
 
-It also re-scores the stored live runs of the tasks whose predicate changed, under
-both the legacy and the declared predicate, so a fix can show what it did to the
-runs that were already recorded.
+It also compares inferred single-file candidates under the legacy and declared
+predicates. A candidate over a pristine fixture is not the original final workspace,
+so this sensitivity analysis cannot independently re-certify a stored live score.
 
 Usage:
     python tools/task_set_audit.py --out eval/task_set_audit.json
@@ -45,13 +45,20 @@ RESULTS = BENCH / "results"
 
 sys.path.insert(0, str(BENCH / "runners"))
 sys.path.insert(0, str(ROOT / "tools"))
+from grading_contract import freeze_fixture_verifiers, guarded_success
 from fixture_deps import materialize_deps  # noqa: E402
 from live_agent_loop import check_success  # noqa: E402
 from trajectory_replay import reconstruct  # noqa: E402
+from task_sets import load_tasks as load_versioned_tasks  # noqa: E402
 
 # A correct answer written differently from GOLDEN. If the declared predicate
 # rejects one of these, it is scoring wording rather than behaviour.
 EQUIVALENT_VARIANTS = {
+    "windows_batch_capture_diag": {
+        "path": "ERR.txt",
+        "content": "src/main.rs:12  \r\n",
+        "why": "cmd echo redirection adds trailing whitespace to the correct location",
+    },
     "ts_fix_type_error": {
         "path": "src/index.ts",
         "content": ("export function add(a: number, b: number): number {\n"
@@ -91,8 +98,14 @@ REPLAY_TARGETS = {
 
 EVIDENCE_GLOBS = [
     "bench/aci/tasks/*.json",
+    "bench/aci/task_sets/*.json",
+    "bench/aci/runners/task_sets.py",
     "bench/aci/fixtures/**/*",
     "bench/aci/runners/live_agent_loop.py",
+    "bench/aci/runners/managed_launch.py",
+    "bench/aci/runners/semantic_checks.py",
+    "bench/aci/runners/grading_contract.py",
+    "bench/aci/runners/fixture_deps.py",
     "bench/aci/results/latest_live.json",
     "tools/task_set_audit.py",
     "tools/trajectory_replay.py",
@@ -139,16 +152,10 @@ def make_workspace(fixture: Path, workdir: Path, *, golden: bool = False,
 
 def verdict(pred: dict, fixture: Path, workdir: Path, **kw) -> dict:
     """Evaluate a predicate exactly the way the live runner does."""
+    frozen = freeze_fixture_verifiers(pred, fixture)
     workspace = make_workspace(fixture, workdir, **kw)
-    ok, reason = check_success(pred, workspace)
+    ok, reason = guarded_success(pred, workspace, frozen, check_success)
     return {"pass": ok, "ran": ok is not None, "reason": reason}
-
-
-def load_tasks(manifest: dict) -> dict[str, dict]:
-    out = {}
-    for task_id in manifest["tasks"]:
-        out[task_id] = json.loads((TASKS / f"{task_id}.json").read_text(encoding="utf-8"))
-    return out
 
 
 def fixture_consistency(tasks: dict[str, dict], work: Path) -> dict:
@@ -156,12 +163,16 @@ def fixture_consistency(tasks: dict[str, dict], work: Path) -> dict:
     for task_id, task in tasks.items():
         fixture = FIXTURES / task["workspace_fixture"]
         if not (fixture / "GOLDEN").is_dir():
+            out[task_id] = {'task': task_id, 'predicate': task['success'],
+                            'pristine': {'pass': None}, 'golden': {'pass': None},
+                            'pass': False, 'reason': 'missing required GOLDEN fixture'}
             continue
         pred = task["success"]
         entry: dict = {
             "task": task_id,
             "task_version": task.get("version"),
             "predicate": pred,
+            "protected_verifiers": freeze_fixture_verifiers(pred, fixture),
             "pristine": verdict(pred, fixture, work / f"{task_id}-pristine"),
             "golden": verdict(pred, fixture, work / f"{task_id}-golden", golden=True),
         }
@@ -205,6 +216,8 @@ def predicate_changes(tasks: dict[str, dict], rows: list[dict], work: Path) -> d
                 "seed": row.get("seed"),
                 "recorded_success": row.get("success"),
                 "reconstructed": body is not None,
+                "reconstruction_scope": "single-file candidate, not complete final workspace",
+                "independent_live_rescore": False,
                 "how": how,
             }
             if body is not None:
@@ -221,6 +234,9 @@ def predicate_changes(tasks: dict[str, dict], rows: list[dict], work: Path) -> d
             "declared_predicate": task["success"],
             "runs_scored": len(runs),
             "runs_reconstructed": sum(1 for r in runs if r["reconstructed"]),
+            "independent_live_rescore": False,
+            "note": "predicate sensitivity on candidate text over a pristine fixture; not full live re-scoring; "
+                    "legacy runs_scored counts stored rows inspected, runs_reconstructed counts inferred candidates",
             "legacy_pass": sum(1 for r in runs if r.get("legacy", {}).get("pass")),
             "declared_pass": sum(1 for r in runs if r.get("declared", {}).get("pass")),
             "runs": runs,
@@ -231,11 +247,12 @@ def predicate_changes(tasks: dict[str, dict], rows: list[dict], work: Path) -> d
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument("--task-set", type=Path, default=BENCH / "task_sets/3.1.0.json")
+    ap.add_argument("--with-arm", type=Path, default=RESULTS / "latest_live.json")
     args = ap.parse_args(argv)
 
-    manifest = json.loads((TASKS / "manifest.json").read_text(encoding="utf-8-sig"))
-    tasks = load_tasks(manifest)
-    rows = json.loads((RESULTS / "latest_live.json").read_text(encoding="utf-8-sig"))["rows"]
+    manifest, tasks = load_versioned_tasks(TASKS, args.task_set)
+    rows = json.loads(args.with_arm.read_text(encoding="utf-8-sig"))["rows"]
     work = Path(tempfile.mkdtemp(prefix="task-set-audit-"))
     try:
         consistency = fixture_consistency(tasks, work)
@@ -248,14 +265,16 @@ def main(argv: list[str] | None = None) -> int:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "task_set_version": manifest.get("task_set_version"),
         "method": {
-            "inputs": ["bench/aci/tasks/manifest.json", "bench/aci/results/latest_live.json"],
+            "inputs": ["bench/aci/tasks/manifest.json", str(args.task_set), str(args.with_arm)],
             "evaluator": "live_agent_loop.check_success — the same function the live run uses",
             "fixture_consistency": "pristine must fail, GOLDEN must pass, a registered "
                                    "equivalent variant must pass",
-            "predicate_changes": "reconstruct the artifact each stored run left behind and "
-                                 "score it under both the legacy and the declared predicate",
+            "predicate_changes": "score inferred single-file candidates over pristine fixtures; "
+                                 "not independent full-workspace live re-scoring",
         },
-        "evidence": {"globs": EVIDENCE_GLOBS, "fingerprint": evidence_fingerprint(EVIDENCE_GLOBS)},
+        "evidence": {"globs": EVIDENCE_GLOBS, "fingerprint": evidence_fingerprint(EVIDENCE_GLOBS),
+                     "input_sha256": {str(p): hashlib.sha256(p.read_bytes()).hexdigest()
+                                      for p in (args.task_set, args.with_arm)}},
         "fixture_consistency": consistency,
         "predicate_changes": changes,
     }
@@ -278,7 +297,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  {task_id}: stored runs {entry['runs_scored']} "
               f"(reconstructed {entry['runs_reconstructed']}) | "
               f"legacy pass {entry['legacy_pass']} | declared pass {entry['declared_pass']}")
-    return 0
+    return 0 if consistency and all(e["pass"] for e in consistency.values()) else 1
 
 
 if __name__ == "__main__":

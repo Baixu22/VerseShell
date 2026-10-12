@@ -447,6 +447,8 @@ def success_report() -> dict:
                 "recorded_success": row.get("success"),
                 "recorded_reason": row.get("success_reason"),
                 "reconstructed": body is not None,
+                "reconstruction_scope": "single-file candidate, not complete final workspace",
+                "independent_live_rescore": False,
                 "how": how,
             }
             if body is not None:
@@ -490,6 +492,7 @@ def success_report() -> dict:
         "optional_verify": task.get("optional_verify"),
         "baseline": baseline,
         "per_run": per_run,
+        "independent_live_rescore": False,
         "legacy_predicate_pass_by_condition": by_condition(lambda r: r.get("legacy_predicate_pass")),
         "tsc_pass_by_condition": by_condition(lambda r: r.get("tsc", {}).get("pass")),
         "recorded_success_by_condition": by_condition(lambda r: r.get("recorded_success")),
@@ -501,7 +504,7 @@ def success_report() -> dict:
         "note": "the v1.2.0 predicate runs the command the prompt names (`tsc --noEmit`) "
                 "through the fixture's pinned TypeScript, so an equivalent fix passes and a "
                 "non-fix fails. The v1.1.0 predicate was a literal golden-patch match; this "
-                "section re-scores the same stored runs under both, and the `tsc` verdict is a "
+                "section scores inferred single-file candidates over pristine fixtures, not the original complete workspaces; the `tsc` verdict is a "
                 "real run of the compiler rather than a language judgement.",
     }
 
@@ -574,8 +577,7 @@ def main(argv: list[str] | None = None) -> int:
             "sensitivity": "replace only D's ts task with the counterfactual; A pays the same "
                            "boundary inside its own commands, so the band is a lower bound on "
                            "the post-fix step ratio",
-            "success": "mirror of check_success for the file predicates, replayed on the final "
-                       "file each run left behind",
+            "success": "predicate sensitivity on inferred single-file candidate text; not independent full-workspace live re-scoring",
         },
         "evidence": {"globs": EVIDENCE_GLOBS, "fingerprint": evidence_fingerprint(EVIDENCE_GLOBS)},
         "fixture": fixture_facts(),

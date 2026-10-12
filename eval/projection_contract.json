@@ -1,0 +1,252 @@
+{
+  "schema": "verseshell.projection_contract/v1",
+  "generated_at": "2026-09-29T13:27:41.197075+00:00",
+  "generator": "tools/projection_contract.py",
+  "protocol": "every check runs a real op through `ae --serve --agent` and inspects the projection format_aci_result hands to the model",
+  "evidence": {
+    "globs": [
+      "bench/aci/runners/live_agent_loop.py",
+      "tools/projection_contract.py"
+    ],
+    "fingerprint": "4da1a627b51d5dd97af79adb62a27b8be35c93fa9ebcc9fe7b105c2ac014cce2"
+  },
+  "summary": {
+    "checks": 8,
+    "passed": 8,
+    "failed": 0,
+    "pass": true
+  },
+  "checks": [
+    {
+      "check": "search_content returns matches",
+      "op": "repo.search",
+      "args": {
+        "query": "TODO"
+      },
+      "server_ok": true,
+      "server_data_keys": [
+        "glob",
+        "match_count",
+        "matches",
+        "query",
+        "scanned_files",
+        "truncated"
+      ],
+      "projection": {
+        "ok": true,
+        "match_count": 1,
+        "matches": [
+          {
+            "path": "src/other.rs",
+            "line": 1,
+            "text": "// TODO(fix-me) here"
+          }
+        ]
+      },
+      "pass": true,
+      "detail": "matches carry path/line/text"
+    },
+    {
+      "check": "search_content reports zero hits honestly",
+      "op": "repo.search",
+      "args": {
+        "query": "zzz-no-such-symbol-zzz"
+      },
+      "server_ok": true,
+      "server_data_keys": [
+        "glob",
+        "match_count",
+        "matches",
+        "query",
+        "scanned_files",
+        "truncated"
+      ],
+      "projection": {
+        "ok": true,
+        "match_count": 0,
+        "matches": []
+      },
+      "pass": true,
+      "detail": "zero-hit search reports match_count 0"
+    },
+    {
+      "check": "list_files returns the top-level listing",
+      "op": "repo.summary",
+      "args": {},
+      "server_ok": true,
+      "server_data_keys": [
+        "branch",
+        "dirty_files",
+        "top_level",
+        "workspace"
+      ],
+      "projection": {
+        "ok": true,
+        "repo": {
+          "branch": null,
+          "dirty_files": 0,
+          "top_level": [
+            {
+              "kind": "dir",
+              "name": ".ae"
+            },
+            {
+              "kind": "dir",
+              "name": "src"
+            }
+          ]
+        }
+      },
+      "pass": true,
+      "detail": "top_level carried, no host path leak: ['.ae', 'src']"
+    },
+    {
+      "check": "E_AMBIGUOUS keeps its candidate sites",
+      "op": "file.replace_exact",
+      "args": {
+        "path": "src/dup.rs",
+        "old": "let a = 1;",
+        "new": "let a = 2;"
+      },
+      "server_ok": false,
+      "server_data_keys": [
+        "match_count",
+        "matches",
+        "path"
+      ],
+      "projection": {
+        "ok": false,
+        "error": {
+          "code": "E_AMBIGUOUS",
+          "message": "old text matches 3 times; must be unique",
+          "recoverable": true
+        },
+        "matches": [
+          {
+            "line": 1,
+            "offset": 0,
+            "snippet": "let a = 1;"
+          },
+          {
+            "line": 2,
+            "offset": 12,
+            "snippet": "let a = 1;"
+          },
+          {
+            "line": 3,
+            "offset": 24,
+            "snippet": "let a = 1;"
+          }
+        ],
+        "match_count": 3
+      },
+      "pass": true,
+      "detail": "3 candidate site(s) with line/offset/snippet"
+    },
+    {
+      "check": "replace_in_file returns a digest",
+      "op": "file.replace_exact",
+      "args": {
+        "path": "src/lib.rs",
+        "old": "return a * b;",
+        "new": "return a + b;"
+      },
+      "server_ok": true,
+      "server_data_keys": [
+        "applied",
+        "content_hash",
+        "path",
+        "replacements"
+      ],
+      "projection": {
+        "ok": true,
+        "content_hash": "sha256:f4e7def96add308aec74d7f775f208dd5201bd9d34e647cdbfe0cae5a78d4b48"
+      },
+      "pass": true,
+      "detail": "digest present"
+    },
+    {
+      "check": "read_file returns content",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "server_ok": true,
+      "server_data_keys": [
+        "content_hash",
+        "cursor",
+        "end_line",
+        "hash",
+        "lines",
+        "path",
+        "start_line",
+        "total_lines",
+        "window"
+      ],
+      "projection": {
+        "ok": true,
+        "content_hash": "f4e7def96add308a",
+        "text": "pub fn mul(a: i32, b: i32) -> i32 {\n    return a + b;\n}"
+      },
+      "pass": true,
+      "detail": "content present"
+    },
+    {
+      "check": "default window view returns content",
+      "op": "file.view",
+      "args": {
+        "path": "src/long.rs"
+      },
+      "server_ok": true,
+      "server_data_keys": [
+        "content_hash",
+        "cursor",
+        "end_line",
+        "hash",
+        "lines",
+        "path",
+        "start_line",
+        "total_lines",
+        "window"
+      ],
+      "projection": {
+        "ok": true,
+        "content_hash": "983b924f11a2e65d",
+        "text": "pub const K1: i32 = 1;\npub const K2: i32 = 2;\npub const K3: i32 = 3;\npub const K4: i32 = 4;\npub const K5: i32 = 5;\npub const K6: i32 = 6;\npub const K7: i32 = 7;\npub const K8: i32 = 8;\npub const K9: i32 = 9;\npub const K10: i32 = 10;\npub const K11: i32 = 11;\npub const K12: i32 = 12;\npub const K13: i32 = 13;\npub const K14: i32 = 14;\npub const K15: i32 = 15;\npub const K16: i32 = 16;\npub const K17: i32 = 17;\npub const K18: i32 = 18;\npub const K19: i32 = 19;\npub const K20: i32 = 20;\npub const K21: i32 = 21;\npub const K22: i32 = 22;\npub const K23: i32 = 23;\npub const K24: i32 = 24;\npub const K25: i32 = 25;\npub const K26: i32 = 26;\npub const K27: i32 = 27;\npub const K28: i32 = 28;\npub const K29: i32 = 29;\npub const K30: i32 = 30;\npub const K31: i32 = 31;\npub const K32: i32 = 32;\npub const K33: i32 = 33;\npub const K34: i32 = 34;\npub const K35: i32 = 35;\npub const K36: i32 = 36;\npub const K37: i32 = 37;\npub const K38: i32 = 38;\npub const K39: i32 = 39;\npub const K40: i32 = 40;\npub const K41: i32 = 41;\npub const K42: i32 = 42;\npub const K43: i32 = 43;\npub const K44: i32 = 44;\npub const K45: i32 = 45;\npub const K46: i32 = 46;\npub const K47: i32 = 47;\npub const K48: i32 = 48;\npub const K49: i32 = 49;\npub const K50: i32 = 50;\npub const K51: i32 = 51;\npub const K52: i32 = 52;\npub const K53: i32 = 53;\npub const K54: i32 = 54;\npub const K55: i32 = 55;\npub const K56: i32 = 56;\npub const K57: i32 = 57;\npub const K58: i32 = 58;\npub const K59: i32 = 59;\npub const K60: i32 = 60;"
+      },
+      "pass": true,
+      "detail": "content present for a default window"
+    },
+    {
+      "check": "read_many returns content",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "src/long.rs"
+        ]
+      },
+      "server_ok": true,
+      "server_data_keys": [
+        "count",
+        "deferred",
+        "errors",
+        "files",
+        "lines_returned",
+        "max_total_lines"
+      ],
+      "projection": {
+        "ok": true,
+        "files": [
+          {
+            "path": "src/long.rs",
+            "content_hash": "983b924f11a2e65d",
+            "text": "pub const K1: i32 = 1;\npub const K2: i32 = 2;\npub const K3: i32 = 3;\npub const K4: i32 = 4;\npub const K5: i32 = 5;\npub const K6: i32 = 6;\npub const K7: i32 = 7;\npub const K8: i32 = 8;\npub const K9: i32 = 9;\npub const K10: i32 = 10;\npub const K11: i32 = 11;\npub const K12: i32 = 12;\npub const K13: i32 = 13;\npub const K14: i32 = 14;\npub const K15: i32 = 15;\npub const K16: i32 = 16;\npub const K17: i32 = 17;\npub const K18: i32 = 18;\npub const K19: i32 = 19;\npub const K20: i32 = 20;\npub const K21: i32 = 21;\npub const K22: i32 = 22;\npub const K23: i32 = 23;\npub const K24: i32 = 24;\npub const K25: i32 = 25;\npub const K26: i32 = 26;\npub const K27: i32 = 27;\npub const K28: i32 = 28;\npub const K29: i32 = 29;\npub const K30: i32 = 30;\npub const K31: i32 = 31;\npub const K32: i32 = 32;\npub const K33: i32 = 33;\npub const K34: i32 = 34;\npub const K35: i32 = 35;\npub const K36: i32 = 36;\npub const K37: i32 = 37;\npub const K38: i32 = 38;\npub const K39: i32 = 39;\npub const K40: i32 = 40;\npub const K41: i32 = 41;\npub const K42: i32 = 42;\npub const K43: i32 = 43;\npub const K44: i32 = 44;\npub const K45: i32 = 45;\npub const K46: i32 = 46;\npub const K47: i32 = 47;\npub const K48: i32 = 48;\npub const K49: i32 = 49;\npub const K50: i32 = 50;\npub const K51: i32 = 51;\npub const K52: i32 = 52;\npub const K53: i32 = 53;\npub const K54: i32 = 54;\npub const K55: i32 = 55;\npub const K56: i32 = 56;\npub const K57: i32 = 57;\npub const K58: i32 = 58;\npub const K59: i32 = 59;\npub const K60: i32 = 60;"
+          }
+        ],
+        "errors": 0
+      },
+      "pass": true,
+      "detail": "1/1 entries carry content"
+    }
+  ]
+}

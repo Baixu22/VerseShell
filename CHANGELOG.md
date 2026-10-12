@@ -2,7 +2,199 @@
 
 ## Unreleased
 
+### Round 14 — task set v3.0.0, live-chain repairs, two new gated claims
+
+- **Frozen task set v3.0.0: 35 tasks (10 hand-written + 25 generated and admitted).**
+  `eval/task_set_freeze.json` now reports the promoted/kept-existing split from each
+  shipped task's own metadata instead of from "what this run happened to promote", so
+  the record can answer *which* tasks are hand-written (10) and *which* are generated
+  (25) no matter how many promotion runs happened. `per_tier` stopped folding
+  generated-but-untagged tasks into a bucket named `existing` (that bucket merged 10
+  generated tasks with 10 hand-written ones and made the tier composition unreadable);
+  it now reports `handwritten` / the declared tier / `untiered_generated` separately.
+  The record also carries a `holdout` block: the 10 tasks promoted in this batch are the
+  holdout, because they were generated *after* C30 and D1–D7 were found and fixed on the
+  previous set — the previous 25 cannot serve as a holdout for defects found on them.
+  The pre-registration asked for 30 generated; **25 were admitted**. The five missing
+  slots are all `large` (rust 5/6/7, typescript 9/10) and all failed A8's
+  `>=1000-token pristine observation` gate at 277–590 tokens, while the same batch's
+  python large tasks reached 1559–3496. Two structural reasons are recorded in
+  `docs/task-generation-protocol.md` §4.7: a plain-node `check.mjs` aborts at the first
+  failed assertion so the remaining failures never print, and `cargo test` prints short
+  per-test summaries rather than pytest-style long diffs. Large-tier share is therefore
+  **7/35 = 20%**, still under the pre-registered 1/3 (it was 16%). Recorded, not smoothed.
+- **`lang` labels unified in `bench/aci/tasks/*.json`.** `ts` → `typescript` and
+  `windows` moved out of the language field (`platform` already carried it) → `shell`.
+  Verified first that no gate reads `lang`: `ts_fixture_audit` keys off task *ids*, and
+  C23/C29 use ids and `kind`. Distribution is now python 13 / rust 6 / typescript 4 / shell 2.
+- **Claim C34 — mixture-invariant envelope saving, pre-registered.** C14/C16 gate the
+  saving as a share of the whole read bucket, and that share moves with the read mix
+  (after C30 the mix became content-dominated, so the same projection showed 8.3% of the
+  total while removing ~half of the named overhead). Rather than move those thresholds
+  after seeing the data, `docs/acceptance-criteria.md` §4.5 registers a *separate* claim:
+  `(legacy(line_wrapper+counts) − current(line_wrapper+counts)) / legacy ≥ 0.40`, read
+  from `eval/read_path_breakdown.json`. **The "must be verified on a task set newer than
+  2.0.0" requirement is part of the gate**: C34 reads `task_set_version` and fails while
+  the artifact still comes from 2.0.0, even though the ratio (0.594) clears the bar. C14
+  and C16 keep their original thresholds and stay FAIL.
+- **Claim C35 — the paired control arm must match the with arm in composition.**
+  C12 fingerprints each artifact against the *code*, so an artifact built on a stale
+  *input* still reads fresh — and the without-arm control is deliberately outside C12's
+  fingerprinted list. C35 compares the two arms on seed set, task set, row count,
+  `git_rev` and `task_set_version`, and requires zero `api_error` rows. Negative control
+  run: dropping seed 44's rows from the control makes C35 FAIL with
+  `seed sets differ: with=[42, 43, 44] without=[42, 43] | row counts differ: with=225 without=150`
+  (`audit-r12-scratch/evidence_negctl_C35.json`, `--without-arm` override added for it).
+- **Round-14 difficulty targets pre-registered** (`docs/task-generation-protocol.md` §4.6),
+  written before any round-14 result existed: baseline success rate in **0.40–0.70**,
+  `MDE / headroom ≤ 0.50`, large-tier share **≥ 1/3**, holdout **≥10** never-tuned tasks.
+  The reason is arithmetic: round 13's A/A′ success rates were both 0.8400, leaving 0.16
+  of headroom against a pre-registered MDE of 0.15 — 94% of the headroom.
+
+### Fixed
+- **`tools/run_task_plan.py` declared convergence while slots were still empty.** The
+  slot counter collected the `plan_index` of *every* candidate under
+  `bench/aci/candidates/` and never intersected it with the current plan, so the 15-slot
+  remainder plan was scored against unrelated FULL_PLAN candidates: `absent` reached
+  **−19** and the driver printed *"all 15 plan slots have an admitted candidate"* and
+  exited 0 with **10/15 actually covered**. It now counts per *slot* (a slot is covered
+  when any of its candidates was admitted) and intersects with the plan's own indices.
+  The "25/30 generated" numbers in §4.7 come from the corrected counter.
+- **`tools/task_generate_v2.py`, four defects that each wasted a whole slot or run.**
+  (1) A spec-step reply that named a *path* as the module (`src/lib.rs`) was pasted into
+  `Cargo.toml` as the package name, so all three test attempts failed to compile and the
+  slot was skipped; the name is now reduced to a bare identifier. (2) The `correct`
+  module was never checked for *compiling* on its own — a truncated module (dangling doc
+  comment) burned three *test* attempts and then skipped the slot without ever telling
+  the model its module was broken; a minimal smoke suite now gates it and regenerates the
+  module. (3) Variants were written to `<tid>/variants/` while `task.json` went to
+  `<tid>_<seed>/` (the variant directory's creation made the later `cdir.exists()` branch
+  fire), so A3 saw **zero** variants and rejected otherwise-passing candidates — the
+  candidate directory is now chosen before anything is written. (4) A rust variant's
+  `src/lib.rs` had no parent directory, crashing the generator process with
+  `FileNotFoundError` and losing the whole round.
+- **`tools/claim_gate.py` gained `--without-arm`** so C35's negative control can point the
+  gate at a deliberately mismatched control, matching the existing override pattern of
+  C28/C33.
+
 ### Added
+- **Frozen task set v2.0.0: 25 tasks (10 existing + 15 generated and admitted).**
+  `eval/task_set_freeze.json` records the exact task list, the promoted ids, the
+  per-tier counts and a content fingerprint over the tasks and fixtures, so "the
+  task set was frozen before measurement" is checkable rather than asserted. The
+  pre-registration asked for 30 generated tasks; **15** were admitted, because the
+  endpoint's empty-completion rate makes generation slow and intermittent (see the
+  protocol's engineering section). The composition rules were not relaxed — 3
+  languages, every generated task has ≥2 independently written correct variants
+  verified to pass, and each was locally self-checked (tests pass on the correct
+  module, fail on the buggy one) before being written. Two consequences are
+  recorded honestly rather than smoothed over: the large-observation share is
+  **16% (4/25), below the pre-registered 1/3**, so the token claim still rests
+  mostly on small observations; but the sample is adequate — 25 tasks × 5 seeds =
+  **125 pairs**, above the ~122 the token L2 claim needs.
+- **Task-generation pipeline + claim C29**: `tools/task_generate.py` builds  candidate tasks with an LLM under an independence protocol (the generation
+  prompt carries no VerseShell/ACI context; correct variants are written by models
+  that never see the golden patch, at least one from a different model family),
+  and `tools/task_admissibility.py` decides mechanically whether a candidate may
+  enter the capability set: pristine fails, GOLDEN passes, ≥2 independently
+  written correct answers pass, **neutering the task's own verifier must still
+  fail**, verdicts are stable, the prompt does not quote the golden diff, and
+  provenance is declared. `docs/task-generation-protocol.md` pre-registers the
+  composition (≥30 tasks, ≥3 languages, ≥4 categories) and the freeze rule that
+  forbids adding or removing tasks after seeing token results.
+  The first pilot rejected its own candidate for a real reason: the prompt said
+  "do not change `test_batches.py`" but nothing enforced it, so replacing that
+  test with `assert True` made the predicate pass — the task measured nothing. It
+  is also why the LLM-produced "shortcut" is informational rather than a gate:
+  the model asked to cheat *wrote a correct fix instead*, so "shortcut passed"
+  cannot distinguish a gameable predicate from a model that declined to game.
+  The fix needs no product change (a `file_contains` guard on a distinctive line
+  of the verifier suffices), so the live evidence chain is not invalidated.
+  A pre-registered 10-candidate pilot then ran the whole pipeline end to end:  **9 candidates written in 30.1 min**, **20/20 independently written correct
+  answers parsed** (two different model families, neither shown the golden patch),
+  and **10/10 admitted** with A1–A7 all passing. The 0% rejection rate is not a
+  dead gate — stripping the guard from an admitted candidate and re-auditing makes
+  A4a reject it immediately, so the generator had simply learned the requirement
+  from the system prompt. The pilot's real result is a **construct-validity**
+  finding: the tasks it produces are the same size as the existing ones (mean
+  78 lines), and the measured observations are tiny (per-call p50 **25–28**
+  observation tokens, per-run p50 ~122–128), so the ACI's actual claim — shrinking
+  *large* build/test output — is barely exercised. Expanding 10 tasks to 30 of the
+  same shape would raise power without fixing that, so the protocol now
+  pre-registers a **size tier** (≥1/3 of tasks must drive raw-shell observations
+  to ≥1000 tokens per run) and forbids calling any small-observation ratio "the
+  ACI saves tokens".
+- **Decomposed generator `tools/task_generate_v2.py` + `tools/run_task_plan.py` +
+  `tools/freeze_task_set.py`.** The one-shot generator is infeasible on this
+  endpoint for a measured reason: asked to design a task plus fixture plus golden
+  plus predicate in one completion, the model spent **16381 of 16384** completion
+  tokens on `reasoning_content` and emitted **0 characters** — and a larger cap is
+  unavailable because a request past ~300s returns 502. v2 splits the job into
+  low-reasoning steps (spec → buggy file → fixed file → failing tests), asks for
+  *code blocks* rather than nested JSON, and assembles the predicate **in
+  program** from the command plus a guard line lifted from the generated test
+  file, so the verifier guard can no longer be forgotten. `run_task_plan.py`
+  converges generate-then-gate over multiple rounds (a gate-rejected candidate is
+  deliberately *not* treated as done, so its plan slot can be regenerated), and
+  `freeze_task_set.py` promotes only admitted `kind=capability` candidates and
+  writes an `eval/task_set_freeze.json` fingerprint record, making "the task set
+  was frozen before measurement" checkable instead of asserted.
+- **Acceptance criteria + claim C28 + `tools/acceptance_power.py`**: a
+  pre-registered answer to "when are we allowed to make this claim at all?".
+  `docs/acceptance-criteria.md` fixes the MDE (success difference: 0.15
+  absolute), the precision targets (the token-ratio ladder), the control-group
+  design, and an anti-pattern list; `acceptance_power.py` re-derives the required
+  sample from the stored variance and refuses to let an interval that does not
+  clear its threshold be quoted as a result. Its sharpest rule: when the point
+  estimate is already on the wrong side of a cap, **more data cannot rescue the
+  claim** — it is reported as a product gap, not a data gap. Applied to the
+  current baseline it records that the success-rate difference is underpowered
+  (30 pairs vs 45 needed; at n=30 only |Δ|≥0.187 is detectable and 0.067 was
+  observed), that "D is cheaper in observation tokens" is short by 7 pairs, that
+  "saves ≥15%" needs ~122 pairs, that the frozen ≤0.60 target is a **product
+  gap**, and that the only currently claimable items are the cross-shell ones
+  (5/5 operations strictly faster and >2× faster, worst case 0.2535 with CI95
+  [0.2424, 0.2704]).
+- Claim C27 + `tools/token_proxy_calibration.py`: every observation-token number
+  in this repo (the D/A ratio, claims C13–C17, C19, C20) comes from
+  `estimate_tokens(text) = max(1, len(text)//4)`, which had **never** been
+  validated. This calibrates it against a real BPE tokenizer (`cl100k_base`) on
+  the observation texts replayed from the stored live run, and the measured
+  verdict is that the proxy is **not** an upper bound: on these JSON/code
+  envelopes it **under-counts by ~33%** (mean `real/proxy` 1.5617, 59/60
+  samples above 1). The error is shape-dependent, so no single correction factor
+  exists — English prose is *over*-counted 12–39%, while a hex digest is
+  under-counted 1.8×, base64 2.6× and CJK 4.1×. The tool also documents that the
+  **endpoint's own `usage.prompt_tokens` is unusable as ground truth**: it is
+  cached per input content (the same text returns the same value even when that
+  value is wrong) and a large fraction of cache-missing requests are inflated by
+  a constant ~+171, which the tool neutralises with a unique nonce per request
+  and a min-over-draws estimator.
+- Claim C26 + `tools/projection_contract.py`: the reference client
+  (`format_aci_result`) must project the payload each tool's own description
+  promises. It runs six real ops through `ae --serve --agent` and checks what
+  actually reaches the model, and it exists because real calls showed three
+  fields being silently dropped — see Fixed below.
+- Claim C25 + `tools/live_uncertainty.py`: every live number now carries an
+  interval. Wilson intervals per success rate, a pooled z-test and a paired
+  **McNemar** test on `(task, seed, run_index)` cells, paired t intervals for the
+  continuous metrics, a bootstrap interval for the headline D/A ratios with
+  `P(ratio < frozen target)`, and a recomputation of each stored aggregate from
+  `rows[]` (so an aggregate cannot drift from its rows). It gates the *presence*
+  of uncertainty, not its favourability: on the current sample it reports that the
+  A/D success-rate difference is **not significant** and that the frozen ≤0.7 /
+  ≤0.6 targets are not met with any confidence — which is the honest result, and
+  still passes.
+- Claim C5 now has a metric instead of a status. `tools/aci_learning_probe.py`
+  gives a real model **only** `docs/quickstart/aci-mcp.md` as its system prompt
+  (no tool schemas), asks for JSON-RPC op lines, executes every emitted op through
+  the real server, and checks the workspace against the task predicate. Gated
+  number: first-attempt op acceptance **conditional on the agent emitting a
+  documented shape** (so a model that answers in prose is reported separately
+  instead of being scored as a rejected contract). Real-call result: **0.4 before
+  the quickstart fix → 0.8 after**.
+- `--max-tokens` on the live runner (default raised 4096 → 16384), and every row
+  now records `completion_truncated_turns`.
 - Claim C21 + `tools/ts_fixture_audit.py`: a deterministic audit of the two
   boundaries around `ts_fix_type_error`. It splits the task's toolchain chain
   (15 `exec.run` calls / 754 tokens over three D runs) into **6 calls / 288
@@ -61,7 +253,155 @@
   the same 0.6 success rate — the ACI did not reduce steps or tokens there.
   Single-run variance is large, so the direction is the finding, not the ratio.
 
+### Changed
+- **C14 and C16 now register as NOT meeting their thresholds, and the thresholds were
+  deliberately left alone.** Both are client-side envelope optimizations whose benefit
+  is proportional to *envelope overhead*, not to content. On the post-C30-fix v2.0.0
+  read mix the measured savings are **5.1%** and **8.3%** against registered **15%**
+  and **10%**. The mechanism, stated mix-invariantly: the compact projection removes
+  **45.5% of the named envelope overhead** (`line_wrapper` plus the derivable
+  `counts`), but overhead is now only ~18% of the payload because D finally receives
+  real file content, so the total-bucket percentage falls. This is a **mix change, not
+  a code regression** — the v1.3.0 read mix was overhead-dominated and measured 20.4%.
+  Moving a registered threshold after seeing the number is the exact failure mode this
+  repo exists to prevent, so `claim_gate` is **red on C14 and C16**, and both claims
+  are annotated with the failing number *and* the mix-invariant one. Whether to
+  re-register them against envelope overhead (rather than the total read bucket) is a
+  product decision that needs the threshold changed deliberately in
+  `docs/claims-and-evidence.md` and `tools/claim_gate.py` with the reason recorded.
+
+  Final gate state after a full refresh: **22/24** (C14, C16 failing).
+
 ### Fixed
+- **The reference client withheld file content from the model, which invalidated
+  the headline D-vs-A comparison (claim C30).** `format_aci_result` gated its read
+  projection on `len(lines) <= 10`: any window longer than ten lines was dropped
+  entirely, leaving only `{ok, content_hash, total_lines}`. `file.view`'s default
+  window is **80**, so a plain `file.view` of any real source file handed the model
+  a hash and nothing else — while the tool description promises "a window of lines
+  around a cursor". Measured on the v2.0.0 live run: **180 of 204 `file.view` calls
+  returned metadata only**, **45% re-viewed a path the agent had already viewed**
+  (because the first look showed nothing), and D fell back to `repo.search`
+  (**301 calls / 65.7k tokens**) plus shell reads to see file content at all. That
+  is the client starving the agent, not an ACI cost. The fix carries the window the
+  tool actually returns (`file.view` and `file.read_many`), and the tool's own
+  `window` clamp is the only bound.
+
+  The reason this shipped unnoticed is the more useful lesson: `tools/projection_contract.py`
+  tested `file.view` on a **3-line** fixture, which fell inside the ten-line cutoff,
+  so the check was green while the defect was live. Two checks using a **60-line file
+  with default arguments** were added, **with a negative control** — restoring the old
+  rule makes them FAIL — and C30 is gated separately so a too-small fixture cannot
+  hide it again. `tools/three_arm_report.py` and the fixed projection mean the live
+  run must be re-measured; until then the v2.0.0 numbers in C13/C16 are known to be
+  contaminated by this defect and are labelled as such.
+
+  **The re-measurement reverses the headline result.** With the client fixed
+  (25 tasks × 3 conditions × 3 seeds = 225 rows, 0 API errors, and — for the first
+  time — **0% cap binding on all three arms**):
+
+  | arm | at cap | success | tools | obs tokens |
+  |---|---|---|---|---|
+  | `raw_shell` (A) | 0% | 0.7067 | 3.60 | 888.1 |
+  | `raw_shell_coached` (A') | 0% | 0.6667 | 3.72 | 576.0 |
+  | `verseshell_aci` (D) | 0% | **0.8267** | 3.63 | 608.6 |
+
+  D's success is now **above** both baselines (+0.12 vs A, 16 D-only wins vs 7;
+  +0.16 vs A'), its observation tokens are **significantly below A** (D/A = 0.6853,
+  CI95 [0.5601, 0.8551] — entirely below 1.0), and it is **indistinguishable from A'
+  on tokens** (D/A' = 1.0567, CI95 [0.8435, 1.379] — crosses 1.0). Tool counts are
+  now equal across arms; the previous "D uses 3× the calls" was entirely the
+  starved-client artifact. The honest statement is therefore narrower than either
+  earlier round: **the ACI solves more tasks than a raw shell and uses fewer
+  observation tokens than an un-prompted one, but under a prompt-matched control its
+  token advantage disappears** — so "the interface itself saves tokens" remains
+  unproven, while "it succeeds more often" is now supported.
+- **The live turn budget (`max_turns=8`) bound condition D far more than A, which
+  confounded the whole D/A comparison.** Measured on the frozen 25-task set:
+
+  | arm | runs hitting the cap | avg tool calls |
+  |---|---|---|
+  | `raw_shell` (A) | **0/25 = 0%** | 3.04 |
+  | `raw_shell_coached` (A') | 3/25 = 12% | 3.84 |
+  | `verseshell_aci` (D) | **16/25 = 64%** | 8.12 |
+
+  D was truncated in two thirds of its runs and A never was, so D's success rate
+  and token count were only a post-truncation lower bound — the comparison
+  measured call granularity, not the interface (typed ops are finer-grained, while
+  one shell command can read, edit and run at once). This is the same class of
+  defect as the 4096 completion cap recorded earlier, and it is now a
+  pre-registered control-validity requirement in
+  `docs/acceptance-criteria.md` §0.5: measure each arm's cap-binding rate before
+  the definitive run, treat >10% on any arm as the cap being binding, raise it,
+  and always report the three rates next to the headline numbers. The run was
+  redone at `max_turns=20`.
+- **Condition A was handed a prompt for tools it does not have, which biased every
+  previous D/A comparison in D's favour.** Condition A is `run_command`-only
+  (`RAW_SHELL_TOOLS = [run_command, task_complete]`), yet both conditions received
+  the *same* system prompt, whose rule 0 says "`read_file` output IS the
+  authoritative file state" and whose rule 7 says "`run_command` is for
+  BUILD/TEST/INSTALL only. **Use `read_file` to read files.**" For condition A that
+  is self-contradictory: it is told to use a tool that does not exist and told not
+  to use its only tool for reading. The stored live evidence shows A did read
+  through `run_command` anyway (`type`-style commands account for ~58 observation
+  tokens per run), so the model partly ignored it — but the briefing was unfair and
+  the baseline cannot be called a best-effort raw shell while that prompt is in
+  place. Each condition now gets a prompt that matches its own tools:
+  `raw_shell` → `SHELL_SYSTEM_PROMPT` (shell-neutral, same rule count),
+  `verseshell_aci` → the ACI prompt. Every row records `prompt_profile` so a result
+  can always be attributed to the briefing that produced it, and the comparison now
+  emits two contrasts: `D_over_A` (status quo) and **`D_over_A_coached`**.
+- **Added the missing prompt-matched control arm (`raw_shell_coached`).** Claim C1
+  needs to separate "the interface saves tokens" from "the prompt was written
+  better". `COACHED_SHELL_PROMPT` has the same rule count and comparable length as
+  the ACI prompt, but its output-budget rule is written in *shell* terms ("pipe
+  through `more`/`head`, use `findstr`/`Select-String`, read one region at a time")
+  instead of ACI terms. Only `D_over_A_coached` can be attributed to the interface.
+  `tools/acceptance_power.py` now reports
+  `token_ratio_coached_level1_D_cheaper`, and claim C28 requires it to be present
+  (it is reported as not claimable until the arm is actually run).
+- **The reference client silently dropped three payloads the tools promise, so
+  condition D was being handicapped.** `format_aci_result` is what an agent
+  actually sees. Real calls through `ae --serve --agent` showed:
+  1. **`repo.search`** (exposed as `search_content`, described as "Returns
+     matching files and lines") projected to only `{"ok": true}` on success — every
+     match discarded. An agent that searched learned nothing, re-issued the call,
+     then fell back to a raw `grep` inside `exec.run`. In the stored runs the op
+     was called 2× at 3 observation tokens each; no with-arm run used it at all,
+     while the raw-shell arm ran `grep`-style commands 11×. Now projected as
+     `{match_count, matches:[{path,line,text}], truncated}`.
+  2. **`repo.summary`** (exposed as `list_files`, described as "branch, dirty
+     files, top-level directory listing") dropped `top_level` — the listing half of
+     its own promise. Now projected, while deliberately *not* leaking the host
+     `workspace` path.
+  3. **`E_AMBIGUOUS`** carried structured `data.matches[]` (line/offset/snippet) in
+     the server envelope — the payload claim **C4's one-step recovery depends on** —
+     but the failure branch returned before copying it, so the model never saw the
+     candidate sites. Now projected.
+  Claim C26 + `tools/projection_contract.py` gate all three against the real
+  server, and assert the projection never leaks the host workspace path.
+- **The live runner's 4096-token completion cap truncated condition D far more
+  than condition A, biasing the headline comparison.** The endpoint serves a
+  reasoning model whose `reasoning_content` is billed as completion tokens; at a
+  4096 cap the reply was cut off before any tool call was emitted, and such a row
+  was then scored as an ordinary task failure. Measured on one full round: **7/30
+  condition-D rows hit the cap, 0/30 condition-A rows** — D carries the larger
+  prompt (tool schemas + envelopes), so the truncation was systematically
+  anti-D, understating D's success rate while flattering D's token ratio (a
+  truncated row observes little). The cap is now 16384 and configurable via
+  `--max-tokens`, and each row records `completion_truncated_turns` so the
+  artifact reports how many rows the cap, rather than the model, decided. The
+  per-request HTTP timeout had to be raised with it (180s → 900s): once the cap
+  allowed a longer generation, the *same* requests legitimately exceeded the old
+  timeout and came back as `api_error: timed out` — three seeds in a row on one
+  task — so the two budgets have to move together.
+- **The quickstart's read→edit example told a doc-only reader to send a
+  placeholder.** `docs/quickstart/aci-mcp.md` contained
+  `"expected_hash":"<from file.view>"`, and a model given only that document
+  copied the placeholder verbatim, earning `E_STALE_HASH` in 1 of 5 probe cells
+  (the `hash_handoff` half of C5 measured 1.0 before the fix, 0.0 after — it was
+  copying text, not handing back a digest). The example now shows a real 16-hex
+  digest and states explicitly that the value must come from the preceding read.
 - **`exec.run` could not launch a bare `npm` / `npx`.** npm-for-Windows ships an
   extensionless `npm` (a `#!/bin/sh` script) beside `npm.cmd`, and
   `resolve_candidate` returned the bare file whenever it existed — only then trying

@@ -1,0 +1,50 @@
+{
+  "proposal_id": "TFP-tf0121-preregistration-2026-10-10",
+  "created_at": "2026-10-10T06:00:00Z",
+  "session_id": "tf0121-preregistration-2026-10-10",
+  "status": "proposed",
+  "rationale": "TF-0121 的剩余范围是「在下一轮 live 之前写死缓解方案与行处置帧」。本轮把帧写进 docs/acceptance-criteria.md §0.6.8（树内既有的预注册位置），并把分类收口到 row_budget_axis()：门禁仍是并集 ≤10%，逐轴分解只作诊断与归因，M1/M2/M3 与「不得抬 max_tokens、不得改门槛、不得按轴或子类事后改判」全部写死。新测 9 项 + 回归 126 项通过，离线复算确认 r15 的三臂两率不变。下一轮执行前置（绑定哈希、首请求前冻结）已写入 §0.6.8。",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0121",
+      "fields": {
+        "evidence": [
+          "**归因已完成（原假设「large tier 任务导致」被证伪）**：逐臂均值 —— 每行输入提示 token：A **9,015** / A′ **9,924** / **D 11,393**；每行 completion token：A 1,593 / A′ 1,610 / **D 3,017**。即 D 的提示比 A 大约 **26%**、推理输出约 **2 倍**。15 行截断的 `llm_completion_tokens` 全部落在 **16,424–16,453**（撞满 16384 上限）。",
+          "**截断与任务规模无关**：12 个被截断任务的 pristine 观察量跨度是 **141–1559 token**，其中 `typescript_missing_await_result_order`(141)、`python_scheduler_cancel_transition`(192)、`ts_chunk_batches`(221)、`rust_error_source_propagation`(259)、`ts_narrow_vs_cast`(308) 都属于 small/medium 档；反过来说，本轮新增的 large 任务里只有 1 个被截断。**所以这不是「新任务太难」，而是 D 条件本身的提示体积与推理量。**",
+          "对照：A′ 的提示（9,924）与 A（9,015）相当，但 completion 均值也≈1,600——提示词等量并不能解释 D 的 3,017。可推断 D 的 typed-op 提示与工具 schema 促使模型做更多推理。",
+          "**已实测（第 14 轮 with 臂，`bench/aci/results/latest_live.json`，315 行，`api_error_rows=3`）**：按 §0.6.1 分类后逐臂 endpoint/cap/排除率与两个口径成功率：A `3/2/4.8%`、0.9048（全量）vs 0.9400（analysable）；A′ `0/0/0.0%`、0.8762 vs 0.8762；**D `0/15/14.3%`、0.8381 vs 0.9556**。",
+          "**符号翻转**：全量（ITT）口径 D−A = −0.0667（D 更差），剔除截断行后 D−A = +0.0156（D 更好）。§0.6.3 第 1 条（任一侧 cap >10%）使该对比不可主张；第 3 条（`api_error` 行数为 0）另因 A 臂 3 行端点失败而不满足。",
+          "对照：round 13（v2.0.0）D 的 completion 截断率是 3%/7%/4%（合计 ≤10%），本轮 14.3%。归因结果表明差异**不在任务集**，而在 D 条件的提示/推理体积——下一轮若要降低它，应从那两处入手。",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-baseline/three_arm_report.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-compact_all/three_arm_report.json",
+          "**2026-10-10 预注册落地（TF-0121）**：`docs/acceptance-criteria.md` 新增 **§0.6.8 双预算 × 双口径的截断比较（预注册）**——把 §0.6.1 的单个 `cap_truncated` 拆成 `completion_cap` / `turn_cap` / `repeat_call_cap` 三轴（每轴各计一次、并集只计一次），**门禁仍是并集 ≤10%**：并集过关必然蕴含每轴过关；若改用逐轴门槛替代并集，反而允许到 20%，属于放宽，明文禁止。每个变体与每个对照都要按轴 × 口径并排报告，且不得跨 `baseline`/`compact_all` 变体合并。",
+          "**分类收口到一处（行为不变）**：`tools/live_uncertainty.py` 新增 `row_budget_axis()`，`row_class()` 改由它导出；在 r15 的 315 行 artifact 上与原实现分类差异 **0**。`row_policy()` 逐臂新增 `budget_axes`（含 `overlap` 与去重并集），逐对照新增 `cap_truncated_axes`，并加内部一致性校验（逐轴并集必须等于 `cap_truncated`）。`tools/three_arm_report.py` 本就逐臂给出 turn-cap / token-cap 两个率。",
+          "**离线证据**：新增 `tests/test_row_policy_budget_axes.py`（9 项）全绿，含两类负控——只有单一轴超标也必须判不可主张、另一轴干净不得救场。回归：`tests/test_row_policy_budget_axes.py tests/test_prelive_repairs.py tests/test_repeat_call_guard.py tests/test_repeated_run_uncertainty.py tests/test_partial_live_merge.py tests/test_anomaly_audit.py tests/test_budget_sensitivity.py tests/test_strict_live_acceptance.py` = **101 passed**；`tests/test_c20_c21_repairs.py tests/test_usage_audit.py tests/test_run_variance.py` = 25 passed。离线复算产物 `audit-r12-scratch/tf0121-three-arm.json`、`audit-r12-scratch/tf0121-acceptance-power.json`：r15 315 行上 A turn 1 / A′ completion 2 + turn 1 / D 0，全部 ≤10%，两个对照仍 eligible。",
+          "**缓解决策已写死**：§0.6.8 给出 M1（缩 D 侧提示／工具 schema，且必须先做 `docs/l1-causal-experiment-preregistration-v2.md` 的因果分离）、M2（逐轮诊断区分「模型真的在推理」与「预算被烧穿」，本轮已实现，只作标注）、M3（抬 `max_tokens`，**禁止**：端点 300s 上限把长度截断换成 HTTP 502，`merge_live_runs.py` 拒收）。决策规则：下一轮任一臂并集 >10% 即不可主张、按轴归因，D 侧缓解只能走 M1。`docs/claims-and-evidence.md` C13 失效边界已加 §0.6.8 指针。",
+          "**冻结后果（必须随下一轮执行）**：本条改了 `tools/live_uncertainty.py`，因此 `bench/aci/studies/prelive-v1/analysis-plan.json` 的 `analysis_code_sha256` 已过期；按其 `prospective_template_not_acquired` 状态与 `docs/landing-readiness-2026-10-09.md` 的做法，下一轮另存新分析计划并只更新哈希，不改样本下限与假设族。下一轮首个任务请求前须把 §0.6.8 文本、上述工具与 `max_turns`/`max_tokens`/`seeds`/`task_set_version`/`prompt_variant` 的 SHA256 绑进轮次清单。",
+          "文件 SHA256：`docs/acceptance-criteria.md` = cbfdcfe0958d53873e1eb6219d2bbaf7133624985932dac139aaa25f937de6f0（末尾追加前值）；`tools/live_uncertainty.py` = 2d9cbf075fe7f57594005fe89cb05f6eb4ce4b4d0cfa25adb08b8e1eb09689ef；`tests/test_row_policy_budget_axes.py` = d61fc950b84ecfa0b754ba03da1c75b4509573f0ca84880dce9f4fd624a82401。"
+        ],
+        "context_tags": [
+          "bench",
+          "live",
+          "harness",
+          "claims",
+          "step5p-shortfalls-20261008",
+          "reused-existing-node",
+          "tf0121-preregistration-20261010"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tf0121-preregistration-2026-10-10"
+        ],
+        "next_action": "下一轮 live 启动前按 §0.6.8 的冻结不变量绑定哈希（本文 + tools/live_uncertainty.py + tools/three_arm_report.py + tools/live_turn_diagnostics.py + max_turns/max_tokens/seeds/task_set_version/prompt_variant）。采集后按双预算 × 双口径出表；若任一臂并集 `cap_truncated` >10%，该对比不可主张、按轴归因，D 侧缓解先做 docs/l1-causal-experiment-preregistration-v2.md 的因果分离再决定 M1。不得抬 max_tokens、不得改 §0.6.3 门槛、不得按轴或子类事后改判。",
+        "progress": 100.0,
+        "status": "done",
+        "summary": "2026-10-10：§0.6.8 预注册已写入——单个 `cap_truncated` 拆成 completion/turn/repeat-call 三轴（并集仍是唯一门禁，不放松），逐臂与逐对照并排报告两口径；M1/M2/M3 缓解决策与禁止项写死。分类收口到 `row_budget_axis()`（r15 315 行零行为差异），9 项新测 + 126 项回归通过；下一轮首个请求前须绑定哈希。"
+      }
+    }
+  ]
+}

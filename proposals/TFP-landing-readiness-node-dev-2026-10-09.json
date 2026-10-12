@@ -1,0 +1,391 @@
+{
+  "proposal_id": "TFP-landing-readiness-node-dev-2026-10-09",
+  "session_id": "landing-readiness-node-dev-2026-10-09",
+  "status": "proposed",
+  "rationale": "完成TF-0141逐项落地审计并推进新冻结前置。42提交引用涉及29节点/24提交，全在当前分支不在默认分支；不批量归责本轮。TF-0093四脚本未跟踪且绝对路径，TF-0094自身29/31与显式exit0/子项完成标准冲突，需新事件重开而不改历史。独立D副本370运行时源码一致，最终345 Python无跳过、289 Rust通过、35 fixture、3150合成格及三配置校准通过。真实StepFun首请求403 real_name_required，未启动benchmark、不绕过身份认证；总目标继续开放。按根策略保存应用校验导出，无暂存/提交/合并。",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0141",
+      "fields": {
+        "status": "in_progress",
+        "progress": 85,
+        "summary": "已逐项审计44发现：42引用涉及29节点/24提交，均HEAD可达、default不可达，且没有明确default条款；另87无提交归属保持unknown。确认TF-0093可克隆脚本缺失/硬编码路径，TF-0094完成状态与自身硬验收冲突，现重开纠正。独立D验证副本不是已落地提交，当前主树未暂存/提交/合并。",
+        "next_action": "继续修复TF-0093可迁移和可克隆验收；保留TF-0094研究前置。源码默认分支仍未落地，不自动合并受保护脏工作区；按真实范围完成后再判定节点关闭。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/task-forest-20261008/landing-before.json",
+          "docs/task-forest-policy.md",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/check-landing.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/git-fetch-direct.exit",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/check-landing.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/git-fetch.json",
+          "docs/cost-attribution-repairs-2026-10-09.md",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-cost.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-crosscheck.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/check-landing.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/git-fetch.json",
+          "docs/anomaly-audit-repairs-2026-10-09.md",
+          "D:/VerseShellLive/anomaly-audit-20261009-01a11c1d/evidence/all-cell-audit-complete.json",
+          "D:/VerseShellLive/anomaly-audit-20261009-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/anomaly-audit-20261009-01a11c1d/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/anomaly-audit-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/anomaly-audit-20261009-01a11c1d/evidence/check-landing.json",
+          "D:/VerseShellLive/anomaly-audit-20261009-01a11c1d/logs/git-fetch.json",
+          "docs/claim-routing-2026-10-09.md",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/default-verified/evidence.json",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/selected-verified/evidence.json",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/evidence/final-gate-comparison.json",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/logs/python-tests-verified.log",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/logs/git-fetch-direct.json",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/evidence/check-landing-refreshed.json",
+          "docs/landing-readiness-2026-10-09.md",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/landing-audit.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/readiness.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/python-tests.log",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/final-source-postcheck.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/product-gate/evidence.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08",
+          "cost-attribution-node-dev-2026-10-09",
+          "anomaly-audit-node-dev-2026-10-09",
+          "claim-routing-node-dev-2026-10-09",
+          "landing-readiness-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0093",
+      "fields": {
+        "status": "in_progress",
+        "progress": 75,
+        "summary": "历史审计成果保留，但当前clone后复现的验收未成立：4个verify脚本本地存在，被*.py忽略、未跟踪、HEAD/default均无文件，且硬编码原C盘路径。本次不运行它们覆盖旧结果，用新事件纠正done状态。",
+        "next_action": "为原四个审计入口补可迁移路径、明确冻结输入及可克隆源码交付；在独立克隆中按原要求复验，保留旧脚本/输出的版本证据，不用当前latest替代历史R12数据。",
+        "evidence": [
+          "**缺口已逐项闭合**：头条 token 声明改为双口径（真实 tokenizer 为准）；全部对外区间按任务聚类（ICC 0.28–0.56，行级口径保留为对照）；A 臂 cp936 崩溃已修并登记为门禁 C31；消融 P7 已按重跑结果撤回。",
+          "**第 14 轮提供了最终验证**：全链重刷（`tools/refresh_live_artifacts.py`）跑通两遍，`eval/live_uncertainty.json` 与 `eval/acceptance_power.json` 都是按任务聚类的区间；真实 tokenizer 口径与代理口径的差异（`token_proxy_calibration`：本轮 `real/proxy` 均值 1.2442、**`len//4` 不是上界**、52/60 违反）已与数字一起发布。",
+          "**完整门禁 27/30**（含 cargo 测试），`eval/evidence.json` 为最新。",
+          "docs/landing-readiness-2026-10-09.md",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/landing-audit.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/readiness.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/python-tests.log",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/final-source-postcheck.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/product-gate/evidence.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "landing-readiness-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0094",
+      "fields": {
+        "status": "in_progress",
+        "progress": 80,
+        "summary": "保留历史口径修复与TF-0116决策；重新打开未完成验收。当前显式标准要求gate exit0及子项完成，但原完成证据29/31且TF-0112/0114/0115/0120仍开放。另立C34没有完成这些条件，不把负结果或后续研究包装为已验收。",
+        "next_action": "按原不放宽阈值/不换样本纪律完成开放研究与真实端点前置；逐项验证本节点的验收条件后再收口。",
+        "evidence": [
+          "**最终门禁：29/31 PASS**（含 cargo 测试）。仅两项红：**C14 = 0.0422**（门槛 ≥0.15）与 **C16 = 0.0768**（门槛 ≥0.10）——两者按 TF-0116 的决策**保持原阈值、不改度量**，并已另立 C34（混合不变口径，本轮 **PASS 0.5654**）。",
+          "**本轮新增转绿**：C35（with 臂补跑成功后两臂组成一致）、C37（统计独立重实现 34/34，含负对照）、C10（README 跨 shell 表随新产物更新——它先判红了，这正是它该做的）。",
+          "**新增工具两个**：`tools/statistics_crosscheck.py`（C37）、`tools/run_variance.py`（TF-0112 的跑间方差）。两者都接进 `tools/refresh_live_artifacts.py` 的末尾。",
+          "**本轮新增门禁一项**：C37（统计代码的独立重实现必须在 20 项以上比对中全部吻合，且必须同时含闭式与重采样两类对照）。",
+          "docs/landing-readiness-2026-10-09.md",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/landing-audit.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/readiness.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/python-tests.log",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/final-source-postcheck.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/product-gate/evidence.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "landing-readiness-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0124",
+      "fields": {
+        "status": "in_progress",
+        "summary": "2026-10-09：逐项落地审计完成首轮，纠正TF-0093/0094误关后开放节点增至27。新冻结D副本通过345 Python(0 skip)、289 Rust、35 fixture与3150合成链；真实StepFun首请求403账户认证前置，未采集benchmark。产品26/31仍未完成，保留完整目标。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json",
+          "docs/cost-attribution-repairs-2026-10-09.md",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-cost.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/historical-crosscheck.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/cost-attribution-20261009-01a11c1d/change-manifest.json",
+          "docs/anomaly-audit-repairs-2026-10-09.md",
+          "D:/VerseShellLive/anomaly-audit-20261009-01a11c1d/evidence/all-cell-audit-complete.json",
+          "D:/VerseShellLive/anomaly-audit-20261009-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/anomaly-audit-20261009-01a11c1d/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/anomaly-audit-20261009-01a11c1d/change-manifest.json",
+          "docs/claim-routing-2026-10-09.md",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/default-verified/evidence.json",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/selected-verified/evidence.json",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/evidence/final-gate-comparison.json",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/logs/python-tests-verified.log",
+          "D:/VerseShellLive/claim-routing-20261009-01a11c1d/change-manifest.json",
+          "docs/landing-readiness-2026-10-09.md",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/landing-audit.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/readiness.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/python-tests.log",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/final-source-postcheck.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/product-gate/evidence.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08",
+          "cost-attribution-node-dev-2026-10-09",
+          "anomaly-audit-node-dev-2026-10-09",
+          "claim-routing-node-dev-2026-10-09",
+          "landing-readiness-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0120",
+      "fields": {
+        "status": "in_progress",
+        "progress": 40,
+        "summary": "新冻结源码/计划与完整离线readiness已通过；预先限定2请求×1024 completion/60s的真实StepFun探针首请求收到403 real_name_required，未进入模型预算测量，第二请求未发。失败usage缺失保留，不补零；账户持有人处理前置后才能继续真实试点。",
+        "next_action": "账户持有人完成StepFun认证后，复验同一冻结候选、显式模型与预定探针预算。不要切换账号或绕过认证，也不把历史relay限制当作当前StepFun实测。",
+        "evidence": [
+          "探测工具：`audit-r12-scratch/probe_cap_raise.py`；结果 `audit-r12-scratch/cap_probe/results.jsonl` 与汇总 `audit-r12-scratch/cap_probe_summary.py`",
+          "**11 个被截断单元格用 `--max-tokens 32768` 原权重跑**（同模型/同 seed/同任务/同条件）：**通过 2、仍长度截断 0、HTTP 502 9**。失败墙钟全部聚在 ~300s（302.1/301.3/302.0/303.5/303.7/304.0/304.4/306.1/308.1/311.9s）",
+          "502 报文：`HTTP 502: {\"error\":{\"message\":\"非流式响应超时(300秒)\",\"type\":\"proxy_error\"}}`",
+          "**为什么 502 比截断更糟**：`bench/aci/runners/merge_live_runs.py` 遇到任何 `api_error` 行即 exit 2 拒绝合并——所以抬上限会把「可分析的截断产物」变成「无法合并的产物」",
+          "**截断高度集中在任务上**：11 个单元格里 10 个落在 4 个任务——`python_config_reader_686653a1`、`rust_window_fold_scanner_3d213f38`、`typescript_missing_await_result_order_c58cafb6`、`typescript_reduce_shared_accumulator_d80f462d`，且每个 seed 都复现。这些恰是较难的任务，**所以「排除截断行」会顺带排除难任务，改变构造效度**",
+          "**同一配置的截断率是跑间变量**：第 12 轮 A′ 15%、第 13 轮首跑 7%、第 13 轮重跑 13.3%。所以「本轮预算没构成约束」很可能是运气",
+          "本轮 A′ 原始成功率 0.7867、剔除截断行后 0.9077；而 A 从 0.8667 到 0.8784——**剔除后 A vs A′ 的符号翻转**，说明这个假象足以颠倒结论",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/collection.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-baseline/three_arm_report.json",
+          "docs/landing-readiness-2026-10-09.md",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/landing-audit.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/readiness.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/python-tests.log",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/final-source-postcheck.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/product-gate/evidence.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/endpoint-probe-plan.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/endpoint-probe.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "landing-readiness-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0132",
+      "fields": {
+        "status": "in_progress",
+        "progress": 33,
+        "summary": "新冻结候选已具备完整离线测试/校准/模拟链，真实开发试点尚未启动。StepFun403认证前置阻断首探针；既有重复/停止行为仍需真实独立开发任务验证，不能用345离线测试替代模型行为证据。",
+        "next_action": "认证解除后按冻结预算运行独立开发试点；所有条件使用相同停止/预算规则，保留失败和独立评分，不从历史成功测试推断当前任务成功。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed42.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed43.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed44.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/historical-tool-replay.json",
+          "tools/tool_contract_replay.py",
+          "docs/landing-readiness-2026-10-09.md",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/landing-audit.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/readiness.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/python-tests.log",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/final-source-postcheck.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/product-gate/evidence.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/endpoint-probe.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "landing-readiness-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0134",
+      "fields": {
+        "status": "in_progress",
+        "progress": 70,
+        "summary": "验证副本、冷构建、模型/评分临时路径和主要缓存置于D盘；修复tokenizer回退忽略TIKTOKEN_CACHE_DIR的问题，实际D缓存解析真实tokenizer。保留一次误写C公共缓存和两次缺辅助fixture的非最终readiness，最终无skip验证通过；真实采集存储恢复仍需后续试点。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/control/run-live.ps1",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/storage-policy.json",
+          "bench/aci/results/step5p-r1-20261006/",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/runtime-paths.json",
+          "bench/aci/runners/live_storage.py",
+          "tests/test_live_recovery.py",
+          "docs/landing-readiness-2026-10-09.md",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/landing-audit.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/readiness.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/python-tests.log",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/final-source-postcheck.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/product-gate/evidence.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/tokenizer-environment.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/validation-environment.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/auxiliary-input-postcheck.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "landing-readiness-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0115",
+      "fields": {
+        "status": "in_progress",
+        "progress": 25,
+        "summary": "静态来源暴露已量化：35任务中25声明GLM作者、10未声明；25与历史GLM被测别名相同，0与当前Step5别名相同，但family_evidence为0，不能用别名差异证明底层家族独立。未生成新能力任务，正式来源独立性继续受限。",
+        "next_action": "补齐可审阅的family evidence、独立变体来源及生成请求记录，再按既有cross_family规则生成开发/留出任务；未知来源不进入正式能力主张。",
+        "evidence": [
+          "`docs/audit-brief-r13.md` §2.2 与 §6 第 6 条：15/25 为 LLM 生成，生成器与变体模型来自同一端点家族",
+          "`eval/task_admissibility.json` 的 A7_provenance 检查只验证 provenance 字段存在与自洽，**不验证生成器与被测模型的独立性**",
+          "该风险同时影响成功率与 token 两类结论，故审计建议的优先级高于我们原先的 §6 第 6 条",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/shortfall-remediation-strategy-2026-10-06.md",
+          "docs/landing-readiness-2026-10-09.md",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/landing-audit.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/readiness.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/python-tests.log",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/final-source-postcheck.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/product-gate/evidence.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/author-exposure.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "landing-readiness-node-dev-2026-10-09"
+        ]
+      }
+    },
+    {
+      "action": "record_deviation",
+      "deviation": {
+        "id": "TFD-faef3e3231",
+        "kind": "historical_acceptance_not_met",
+        "summary": "TF-0093的clone可复现标准没有被当前Git状态支持。",
+        "reason": "四脚本未跟踪/被忽略且含绝对工作区路径。",
+        "correction": "保留历史记录，用本提案重开并补充可迁移、可克隆证据。",
+        "related_task_ids": [
+          "TF-0093",
+          "TF-0141"
+        ],
+        "status": "open",
+        "created_at": "2026-10-08T22:44:57.752Z"
+      }
+    },
+    {
+      "action": "record_deviation",
+      "deviation": {
+        "id": "TFD-f4862e4424",
+        "kind": "historical_acceptance_not_met",
+        "summary": "TF-0094完成状态与明确的gate/子项验收条件冲突。",
+        "reason": "自身记录29/31，四研究后继仍开放；TF-0116保留红阈值不是完成原条件。",
+        "correction": "保留有效历史工程证据与决策，用新事件重开未完成范围。",
+        "related_task_ids": [
+          "TF-0094",
+          "TF-0141",
+          "TF-0124"
+        ],
+        "status": "open",
+        "created_at": "2026-10-08T22:44:57.752Z"
+      }
+    }
+  ]
+}

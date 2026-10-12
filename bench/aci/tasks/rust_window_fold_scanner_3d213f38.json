@@ -1,0 +1,54 @@
+{
+  "id": "rust_window_fold_scanner_3d213f38",
+  "kind": "capability",
+  "lang": "rust",
+  "prompt": "The `scanner` crate's two helpers misbehave: `max_window_sum` returns the wrong answer whenever the best window sits at the end of the samples, and `first_hot_window` can report a later window even though an earlier one already qualified. Run `cargo test` at the workspace root to see the failures, and fix the iterator/fold logic in `src/lib.rs` so the whole suite passes; do not modify the tests.",
+  "golden": {
+    "src/lib.rs": "//! Telemetry scanning helpers.\n\n/// Largest sum over all contiguous windows of exactly `k` samples.\n///\n/// Returns `None` when `k` is zero or exceeds `samples.len()`.\npub fn max_window_sum(samples: &[i64], k: usize) -> Option<i64> {\n    if k == 0 || samples.len() < k {\n        return None;\n    }\n    samples\n        .windows(k)\n        .fold(None, |best: Option<i64>, window| {\n            let total: i64 = window.iter().sum();\n            match best {\n                Some(current) if current >= total => Some(current),\n                _ => Some(total),\n            }\n        })\n}\n\n/// Index of the first window of `k` consecutive samples whose sum is\n/// strictly greater than `limit`.\n///\n/// Returns `None` when no window qualifies, when `k` is zero, or when\n/// `k` exceeds `readings.len()`.\npub fn first_hot_window(readings: &[i64], k: usize, limit: i64) -> Option<usize> {\n    if k == 0 || readings.len() < k {\n        return None;\n    }\n    readings\n        .windows(k)\n        .enumerate()\n        .fold(None, |found: Option<usize>, (index, window)| {\n            let total: i64 = window.iter().sum();\n            match found {\n                None if total > limit => Some(index),\n                other => other,\n            }\n        })\n}\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "cargo",
+          "test",
+          "--quiet"
+        ],
+        "timeout_sec": 240
+      },
+      {
+        "type": "file_contains",
+        "path": "tests/scanner.rs",
+        "contains": "assert_eq!(max_window_sum(&[1, 2, 3], 2), Some(5));"
+      },
+      {
+        "type": "file_contains",
+        "path": "tests/scanner.rs",
+        "contains": "assert_eq!(first_hot_window(&[1, 9, 9, 1], 1, 5), Some(1));"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_and_golden_author",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "generated_at": "2026-09-25T01:59:11.858011+00:00"
+  },
+  "workspace_fixture": "rust_window_fold_scanner_3d213f38",
+  "promoted_from": "bench/aci/candidates/rust_window_fold_scanner_3d213f38",
+  "promoted_at": "2026-09-25T08:29:13.972922+00:00"
+}

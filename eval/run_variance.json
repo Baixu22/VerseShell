@@ -1,0 +1,109 @@
+{
+  "schema": "verseshell.run_variance/v1",
+  "generated_at": "2026-10-10T05:44:37.003139+00:00",
+  "generator": "tools/run_variance.py",
+  "question": "what descriptive spread is present between different seeds?",
+  "method": {
+    "design": "one collection per distinct seed: [42, 43, 44]",
+    "estimator": "sample between-seed SD and SD/sqrt(n), descriptive only",
+    "comparison": "descriptive SE divided by a task-clustered interval half-width; not a variance decomposition",
+    "limitation": "2 degrees of freedom; seed and collection effects are confounded. Not a lower bound or evidence of CI undercoverage.",
+    "includes_independent_run_variance": false,
+    "legacy_field_names": "run_to_run_se_over_published_half_width is retained for compatibility; interpret as a descriptive between-seed ratio only"
+  },
+  "runs_used": [
+    42,
+    43,
+    44
+  ],
+  "run_dir": "bench/aci/results/r15-2026-09-29",
+  "run_dir_selection": "exact source rows fingerprint match to published interval",
+  "round_pinning": {
+    "verified": true,
+    "method": "exact merged source rows fingerprint, ignoring only derived row_class",
+    "source_rows_fingerprint": "8a2f9d48fd898c6a692d4372c0a0c61edf51327b267a6a1ea87aac70e9521db5",
+    "published": "eval/live_uncertainty.json",
+    "n_rows": 315
+  },
+  "findings": {
+    "observation_token_ratio": {
+      "per_seed": [
+        0.5781,
+        0.6135,
+        0.6339
+      ],
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "mean": 0.6085,
+      "between_seed_sd": 0.0282,
+      "between_seed_se_of_mean": 0.0163,
+      "min": 0.5781,
+      "max": 0.6339,
+      "spread": 0.0558,
+      "published_task_clustered_ci95": [
+        0.5007,
+        0.7589
+      ],
+      "published_half_width": 0.1291,
+      "run_to_run_se_over_published_half_width": 0.1262,
+      "per_seed_straddles_1_0": false
+    },
+    "tool_call_ratio": {
+      "per_seed": [
+        0.7543,
+        0.9231,
+        0.8795
+      ],
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "mean": 0.8523,
+      "between_seed_sd": 0.0876,
+      "between_seed_se_of_mean": 0.0506,
+      "min": 0.7543,
+      "max": 0.9231,
+      "spread": 0.1688
+    },
+    "success_delta": {
+      "per_seed": [
+        0.0,
+        0.0,
+        0.0857
+      ],
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "mean": 0.0286,
+      "between_seed_sd": 0.0495,
+      "between_seed_se_of_mean": 0.0286,
+      "min": 0.0,
+      "max": 0.0857,
+      "spread": 0.0857,
+      "published_task_clustered_ci95": [
+        -0.0034,
+        0.0606
+      ],
+      "published_half_width": 0.032,
+      "run_to_run_se_over_published_half_width": 0.8929,
+      "per_seed_straddles_0_0": false
+    }
+  },
+  "max_run_to_run_se_over_published_half_width": 0.8929,
+  "verdict": "between-seed variation observed; independent repeated-run variance and CI coverage remain unidentified",
+  "evidence": {
+    "globs": [
+      "bench/aci/results/r15-2026-09-29/with_seed*.json",
+      "eval/live_uncertainty.json",
+      "tools/live_uncertainty.py",
+      "tools/run_variance.py"
+    ],
+    "fingerprint": "0d354d982604ed755ee8eb0bf827456e6bd474fe471b1dac1af517874f2ff635"
+  }
+}

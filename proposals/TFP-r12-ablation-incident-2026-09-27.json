@@ -1,0 +1,134 @@
+{
+  "applied_at": "2026-09-27T06:01:14.508436Z",
+  "base_graph_hash": "27161c3c97ee1e239db28e69747fe6e460b49e3a084835b37f188badefc85180",
+  "base_summary": {
+    "edge_count": 168,
+    "node_count": 108,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "record_deviation",
+      "deviation": {
+        "created_at": "2026-09-27T06:01:14.351540Z",
+        "description": "消融 without 臂的 seed 44 在 2026-09-27 01:25 挂死在任务 rust_borrow_fix_longest_word_a4c895ec 的 D 臂：模型发出的命令是 `python -c \"open('src/lib.rs','w').write(open('CON','r').read())\"`（PID 31616），CON 是 Windows 控制台设备，在非交互子进程里读它永远阻塞。`bench/aci/runners/live_agent_loop.py::execute_shell_cmd` 用的是 `subprocess.run(..., timeout=TOOL_TIMEOUT_SEC)`（120s），但超时对卡在阻塞读上的子进程无效——超时要等管道关闭，而子进程正持有管道，因此 `except subprocess.TimeoutExpired` 从未执行。挂到 12:52 才被人发现，共 11.5 小时。又因 `tools/live_round.py` 只在整轮 75 行跑完后才写 `without_seed44.json`，该 seed 已完成的 61 行结果全部随进程丢失。已杀掉挂死进程与两个 runner，确认无残留。",
+        "evidence": [
+          "挂死命令与 PID：`python  -c \"open('src/lib.rs','w').write(open('CON','r').read())\"`，PID 31616，CreationDate 2026-09-27 01:25:06，存活至 12:52 被杀",
+          "超时失效的代码位置：`bench/aci/runners/live_agent_loop.py` 的 `execute_shell_cmd`（`subprocess.run(..., capture_output=True, text=True, timeout=TOOL_TIMEOUT_SEC)`；`TOOL_TIMEOUT_SEC = 120`）",
+          "落盘时机：`tools/live_round.py` 在 seed 循环结束后才调用 merge，runner 在 `payload` 组装完成后才 `args.out.write_text(...)`；`bench/aci/results/tf0100/without_seed44.json` 至今不存在",
+          "同轮可用数据：`tf0100/without_seed42.json`（23:23）与 `without_seed43.json`（00:35）",
+          "处置：杀进程 → 确认无残留 → 未用 2 seed 冒充 3 seed、未用未完成数据凑数 → 记本 deviation"
+        ],
+        "id": "TFD-a21ebaa5ce",
+        "impact": "本轮消融只有 2 个 seed / 50 个配对格（预注册为 3 seed / 75 格），seed 44 结果永久丢失；`bench/aci/results/live_ab_without_read_files.json` 未能合并、仍是旧版本。更普遍的影响：任何一轮 live 或消融只要模型发出阻塞设备命令就会被静默挂死，而产物里看不出来（只记 completion_truncated_turns），因此历史数据是否存在同类污染的未知行无法事后判断。",
+        "related_task_ids": [
+          "TF-0103"
+        ],
+        "severity": "high"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step64-shell-timeout",
+      "node": {
+        "acceptance_criteria": [
+          "新增契约检查（建议登记为 C32）：对 `python -c \"open('CON','r').read()\"` 这类命令，通路必须在 ≤ 工具超时的有限时间内返回，且不抛异常、不挂死；含负对照（套回旧实现必须挂死/超时）",
+          "`execute_shell_cmd` 改为 Popen + 超时后 kill 整棵进程树（Windows 用 Job Object 或 `taskkill /T /F`），并加 `stdin=subprocess.DEVNULL`",
+          "`bench/aci/runners/live_round.py` / `live_agent_loop.py` 支持逐格或逐任务落盘，并可从已有的部分结果续跑",
+          "重跑消融 seed 44 不再挂死；`python tools/claim_gate.py` 不因本改动转红"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "harness",
+          "code",
+          "bench"
+        ],
+        "desired_outcomes": [
+          "任何阻塞命令都在有限时间内被终止，且终止的是整棵进程树而不是只有外层 shell",
+          "控制台/设备路径（CON、PRN、AUX、NUL、COM1..9、LPT1..9）在裸 shell 通路上被拒绝或短接",
+          "runner 每个 (task, condition) 完成即落盘，单点挂死最多丢一行"
+        ],
+        "difficulty": "medium",
+        "display_order": 360,
+        "evidence": [
+          "现场：PID 31616 于 01:25:06 启动，命令 `python  -c \"open('src/lib.rs','w').write(open('CON','r').read())\"`，存活 11.5 小时",
+          "超时失效机制：`subprocess.run(timeout=)` 的超时要等管道关闭；子进程持有管道不放 → `TimeoutExpired` 永不触发（`bench/aci/runners/live_agent_loop.py` 的 `execute_shell_cmd`）",
+          "损失：`tf0100/without_seed44.json` 从未写出，61 行结果丢失（`tools/live_round.py` 整轮结束才落盘）",
+          "与 E10（cp936 解码崩溃，已修并登记 C31）同源：都是「裸 shell 通路缺少契约保护」；TF-0100 只修了解码这一类",
+          "写入 `docs/audit-brief-r13.md` 的 E15/E16 与 §5.2"
+        ],
+        "kind": "task",
+        "next_action": "先写新契约检查并做负对照（复现挂死）→ 改 `execute_shell_cmd` 为进程树终止 → 加逐格落盘 → 重跑消融 seed 44。",
+        "non_goals": [
+          "不放宽任何验收门槛",
+          "不改任务集或 fixture 去回避该命令（那是掩盖而不是修复）"
+        ],
+        "priority": 1,
+        "purpose": "一次 open('CON','r') 就把整轮 11.5 小时和 61 行结果一起吞掉。这条通路的超时机制整体无效，且整轮只有一个落盘点——两者都会静默毁掉一整轮实验。",
+        "status": "ready",
+        "summary": "用显式 spawn + 定时杀整棵进程树代替 subprocess.run(timeout=)，禁掉控制台设备路径，并让 runner 支持逐格落盘。",
+        "title": "步骤64：给裸 shell 通路加真正的超时与断点续跑（E15/E16）"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "该修复属于本轮「R12 复核收口」发现的 harness 缺陷"
+      },
+      "from": "step64-shell-timeout",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 150
+      },
+      "id": "step64-shell-timeout"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "seed 44 的重跑必须先修好阻塞命令的超时，否则会以同样方式再次挂死整轮"
+      },
+      "from": "TF-0103",
+      "to": "step64-shell-timeout",
+      "type": "depends_on"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已在执行**：`python tools/live_round.py --tag tf0100 --arms without --seeds 42,43,44 --max-turns 20`（与第 13 轮同设置，便于配对）",
+          "**seed 42（23:23）与 seed 43（00:35）成功**；**seed 44 于 01:25 挂死**在 `rust_borrow_fix_longest_word_a4c895ec` 的 D 臂——模型发出 `open('CON','r').read()`，在非交互子进程里永久阻塞，而 `subprocess.run(timeout=)` 对此无效；挂 11.5 小时后被杀，且因整轮才落盘而丢掉已完成的 61 行。详见 TFD deviation 与 `docs/audit-brief-r13.md` §5.2",
+          "**P7 结论（据 2 个 seed / 50 个配对格）：撤回。** D with 批量读 vs D without：成功率 **0.8600（43/50） vs 0.8600（43/50）**，仅 with 赢 3 / 仅 without 赢 3，**McNemar 精确 p = 1.0000**；工具/轮 **3.76 → 4.54（×1.2074）**；观察 token/轮 558.1 → 543.4（×0.9736）。**逐 seed 方向相反**：seed 42 为 0.80→0.88（+0.08），seed 43 为 0.92→0.84（−0.08）",
+          "**含义**：去掉 `read_files`（=`file.read_many` 批量读；`read_file`=`file.view` 仍可用）的**唯一稳定代价是多约 21% 的工具调用**；成功率无可检出的下降；观察 token 基本不变。第 12 轮那个 0.32 是 completion 截断（13/25 行 0 工具调用）造成的假象",
+          "**顺带测到运行间漂移**（A/A′ 两次运行配置完全相同）：2 seed 聚合 A 成功 0.88→0.84、观察 token +2.7%；A′ 成功 0.84→0.80、观察 token +5.4%。这是预算不构成约束条件下的干净测量",
+          "**已完成 · 消融描述改正**：`docs/audit-brief.md` P7 加修订注；`docs/acceptance-criteria.md` 的消融行写明是 `file.read_many`、`file.view` 仍可用、须满足 §0.5；`docs/claims-and-evidence.md` C13 失效边界新增第 ⑬ 条",
+          "**未完成**：seed 44 的重跑（被本节点新增的依赖 `step64-shell-timeout` 挡住）；三臂两个预算的截断率核对；`live_ab_without_read_files.json` 的合并与由此牵动的派生产物重刷"
+        ],
+        "next_action": "先完成 `step64-shell-timeout`（修超时 + 断点续跑），再重跑消融 seed 44 得 3 seed；然后合并 `live_ab_without_read_files.json`、核对三臂两个预算的截断率、重刷派生产物，最后把 P7 的正式替换文本（「批量读省约 21% 工具调用、成功率无显著差异」）写进 `docs/claims-and-evidence.md` 与 `docs/audit-brief.md`。",
+        "progress": 60.0
+      },
+      "id": "TF-0103"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "本轮缺口见 TF-0093；12 个子节点 + 1 个决策节点 + 1 个新增缺陷节点（step64）",
+          "**对外交接简报已产出**：`docs/audit-brief-r13.md`（自包含，含 16 条错误清单、完整实验方案、第 13 轮结果、消融失败现场、14 条主动暴露的短板、文件清单与复现命令），交给外部 agent 做独立审计与短板分析",
+          "**本轮的关键净结果**：①第 13 轮是第一个两个预算都不构成约束的样本；②观察 token L1/L2/**L3 冻结目标** 全部可主张，D/A′ 上界首次 <1.0（余量 0.021）；③真实 tokenizer 口径方向相反（总 token D/A 1.076、**D/A′ 1.265 整段 >1**）；④成功率 +0.04 低于检出限 0.1121（未检出）；⑤与第 12 轮同条件重跑，头条成功率差由 +0.12/+0.16 掉到 +0.04/+0.04（第 12 轮 A/A′ 各被 completion 上限截断 11%/15%）；⑥P7 撤回；⑦门禁由 22/24 变为 23/25 且 C12 首次转绿"
+        ]
+      },
+      "id": "TF-0094"
+    }
+  ],
+  "created_at": "2026-09-27T06:01:14.342862Z",
+  "proposal_id": "TFP-r12-ablation-incident-2026-09-27",
+  "rationale": "消融重跑的 seed 44 被一个 open('CON','r') 命令挂死 11.5 小时，且因 runner 整轮结束才落盘而丢掉 61 行已完成结果——按根策略 §4 记 material execution drift。同时把这两条新发现的 harness 缺陷（E15/E16）落成一个 ready 节点：不修的话下一轮 live 一样可能被同样的命令挂死，而且历史上有没有被污染无法事后判断。TF-0103 据 2 个 seed 出 P7 撤回结论，但因样本未达 3 seed 且需先修 E15/E16 才能安全重跑 seed 44，保持 in_progress。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

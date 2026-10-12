@@ -1,0 +1,396 @@
+{
+  "schema": "verseshell.statistics_crosscheck/v1",
+  "generated_at": "2026-09-30T07:59:06.743894+00:00",
+  "generator": "tools/statistics_crosscheck.py",
+  "purpose": "recompute the headline statistics along a second code path — the audit's E7/E11/E12 were all analysis-code bugs found by hand, and no test caught them",
+  "method": {
+    "closed_form": "textbook formulas written out here (math.comb for the exact binomial, Wilson written explicitly); they must match the published value exactly to published rounding",
+    "resampled": "independent percentile bootstrap, 20000 iterations, seed=20260929, resampling whole TASKS; compared with a 0.02 absolute tolerance on the bounds plus a same-side-of-1.0 check, because a different seed cannot reproduce bounds exactly",
+    "tolerances": {
+      "closed_form": 0.0005,
+      "resampled": 0.02
+    },
+    "source": "bench/aci/results/latest_live.json (raw rows)",
+    "compared_against": "eval/live_uncertainty.json (with_read_files arm)"
+  },
+  "n_items": 34,
+  "n_failed": 0,
+  "items": [
+    {
+      "item": "success/raw_shell/successes",
+      "kind": "closed_form",
+      "recomputed": 95,
+      "published": 95,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "success/raw_shell/n",
+      "kind": "closed_form",
+      "recomputed": 105,
+      "published": 105,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "success/raw_shell/rate",
+      "kind": "closed_form",
+      "recomputed": 0.9048,
+      "published": 0.9048,
+      "tolerance": 0.0005,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "success/raw_shell/wilson95",
+      "kind": "closed_form",
+      "recomputed": [
+        0.8335087237779633,
+        0.9474436901365668
+      ],
+      "published": [
+        0.8335,
+        0.9474
+      ],
+      "tolerance": 0.0005,
+      "abs_delta": 4.369013656679854e-05,
+      "agree": true
+    },
+    {
+      "item": "success/verseshell_aci/successes",
+      "kind": "closed_form",
+      "recomputed": 98,
+      "published": 98,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "success/verseshell_aci/n",
+      "kind": "closed_form",
+      "recomputed": 105,
+      "published": 105,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "success/verseshell_aci/rate",
+      "kind": "closed_form",
+      "recomputed": 0.9333,
+      "published": 0.9333,
+      "tolerance": 0.0005,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "success/verseshell_aci/wilson95",
+      "kind": "closed_form",
+      "recomputed": [
+        0.8687443513174589,
+        0.9673341153439794
+      ],
+      "published": [
+        0.8687,
+        0.9673
+      ],
+      "tolerance": 0.0005,
+      "abs_delta": 4.435131745883503e-05,
+      "agree": true
+    },
+    {
+      "item": "mcnemar/both_pass",
+      "kind": "closed_form",
+      "recomputed": 95,
+      "published": 95,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "mcnemar/only_A",
+      "kind": "closed_form",
+      "recomputed": 0,
+      "published": 0,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "mcnemar/only_D",
+      "kind": "closed_form",
+      "recomputed": 3,
+      "published": 3,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "mcnemar/neither",
+      "kind": "closed_form",
+      "recomputed": 7,
+      "published": 7,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "mcnemar/p_value_exact",
+      "kind": "closed_form",
+      "recomputed": 0.25,
+      "published": 0.25,
+      "tolerance": 0.0005,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "paired_success/n_pairs",
+      "kind": "closed_form",
+      "recomputed": 105,
+      "published": 105,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "paired_success/mean_delta",
+      "kind": "closed_form",
+      "recomputed": 0.0286,
+      "published": 0.0286,
+      "tolerance": 0.0005,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "paired_success/sd",
+      "kind": "closed_form",
+      "recomputed": 0.1674,
+      "published": 0.1674,
+      "tolerance": 0.0005,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "observation_token_ratio/point",
+      "kind": "closed_form",
+      "recomputed": 0.6075,
+      "published": 0.6075,
+      "tolerance": 0.0005,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "observation_token_ratio/n_tasks",
+      "kind": "closed_form",
+      "recomputed": 35,
+      "published": 35,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "observation_token_ratio/ci_same_side_of_1",
+      "kind": "resampled",
+      "recomputed": true,
+      "published": true,
+      "agree": true,
+      "tolerance": null
+    },
+    {
+      "item": "observation_token_ratio/ci95",
+      "kind": "resampled",
+      "recomputed": [
+        0.501478792296263,
+        0.7563446783395632
+      ],
+      "published": [
+        0.5007,
+        0.7589
+      ],
+      "tolerance": 0.02,
+      "abs_delta": 0.0025553216604368156,
+      "agree": true
+    },
+    {
+      "item": "tool_call_ratio/point",
+      "kind": "closed_form",
+      "recomputed": 0.8491,
+      "published": 0.8491,
+      "tolerance": 0.0005,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "tool_call_ratio/n_tasks",
+      "kind": "closed_form",
+      "recomputed": 35,
+      "published": 35,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "tool_call_ratio/ci_same_side_of_1",
+      "kind": "resampled",
+      "recomputed": false,
+      "published": false,
+      "agree": true,
+      "tolerance": null
+    },
+    {
+      "item": "tool_call_ratio/ci95",
+      "kind": "resampled",
+      "recomputed": [
+        0.6897689768976898,
+        1.058974358974359
+      ],
+      "published": [
+        0.6877,
+        1.0576
+      ],
+      "tolerance": 0.02,
+      "abs_delta": 0.0020689768976898115,
+      "agree": true
+    },
+    {
+      "item": "cpst/A_tokens",
+      "kind": "closed_form",
+      "recomputed": 133015,
+      "published": 133015.0,
+      "tolerance": 1.0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "cpst/D_tokens",
+      "kind": "closed_form",
+      "recomputed": 80803,
+      "published": 80803.0,
+      "tolerance": 1.0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "cpst/A_successes",
+      "kind": "closed_form",
+      "recomputed": 95,
+      "published": 95,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "cpst/D_successes",
+      "kind": "closed_form",
+      "recomputed": 98,
+      "published": 98,
+      "tolerance": 0,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "cpst/A_per_success",
+      "kind": "closed_form",
+      "recomputed": 1400.158,
+      "published": 1400.158,
+      "tolerance": 0.01,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "cpst/D_per_success",
+      "kind": "closed_form",
+      "recomputed": 824.52,
+      "published": 824.52,
+      "tolerance": 0.01,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "cpst/D_over_A",
+      "kind": "closed_form",
+      "recomputed": 0.5889,
+      "published": 0.5889,
+      "tolerance": 0.0005,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "usage_token_ratio/point",
+      "kind": "closed_form",
+      "recomputed": 0.9461,
+      "published": 0.9461,
+      "tolerance": 0.0005,
+      "abs_delta": 0.0,
+      "agree": true
+    },
+    {
+      "item": "usage_token_ratio/ci95",
+      "kind": "resampled",
+      "recomputed": [
+        0.6462156441436168,
+        1.5168873531664118
+      ],
+      "published": [
+        0.6462,
+        1.5202
+      ],
+      "tolerance": 0.02,
+      "abs_delta": 0.0033126468335882286,
+      "agree": true
+    },
+    {
+      "item": "usage_token_ratio/ci_same_side_of_1",
+      "kind": "resampled",
+      "recomputed": false,
+      "published": false,
+      "agree": true,
+      "tolerance": null
+    }
+  ],
+  "recomputed_bootstraps": {
+    "observation_token_ratio": {
+      "point": 0.6074728414088637,
+      "ci95": [
+        0.501478792296263,
+        0.7563446783395632
+      ],
+      "n_tasks": 35,
+      "prob_below_1": 1.0,
+      "iterations": 20000,
+      "seed": 20260929
+    },
+    "tool_call_ratio": {
+      "point": 0.8490945674044266,
+      "ci95": [
+        0.6897689768976898,
+        1.058974358974359
+      ],
+      "n_tasks": 35,
+      "prob_below_1": 0.9196,
+      "iterations": 20000,
+      "seed": 20260929
+    },
+    "usage_token_ratio": {
+      "point": 0.9460842581882849,
+      "ci95": [
+        0.6462156441436168,
+        1.5168873531664118
+      ],
+      "n_tasks": 35,
+      "prob_below_1": 0.56015,
+      "iterations": 20000,
+      "seed": 20260929
+    }
+  },
+  "evidence": {
+    "globs": [
+      "bench/aci/results/latest_live.json",
+      "eval/live_uncertainty.json",
+      "tools/statistics_crosscheck.py"
+    ],
+    "fingerprint": "4c212928a607ef41700b1e9969d1f47db7657af0a6f97d91384eceab21320a90"
+  }
+}

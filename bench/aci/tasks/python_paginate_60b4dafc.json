@@ -1,0 +1,52 @@
+{
+  "id": "python_paginate_60b4dafc",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "The test suite for `paginate.py` fails. Computes the slice end as start+size-1, so each returned page silently drops its last item. Fix the module so the test suite passes, without changing test_paginate.py.",
+  "golden": {
+    "paginate.py": "\"\"\"Simple list pagination helpers.\"\"\"\n\nfrom typing import Any, List, Sequence\n\n\ndef paginate(items: Sequence[Any], page: int = 1, size: int = 10) -> List[Any]:\n    \"\"\"Return the items belonging to a single page.\n\n    Args:\n        items: The full sequence to paginate.\n        page: 1-based page number.\n        size: Number of items per page.\n    \"\"\"\n    if size <= 0:\n        raise ValueError(\"size must be a positive integer\")\n    if page <= 0:\n        raise ValueError(\"page must be a positive integer\")\n\n    start = (page - 1) * size\n    if start >= len(items):\n        return []\n\n    end = start + size  # end index is exclusive\n    return list(items[start:end])\n\n\ndef page_count(items: Sequence[Any], size: int = 10) -> int:\n    \"\"\"Return the number of pages needed to hold all items.\"\"\"\n    if size <= 0:\n        raise ValueError(\"size must be a positive integer\")\n    if not items:\n        return 0\n    return (len(items) + size - 1) // size\n\n\ndef all_pages(items: Sequence[Any], size: int = 10) -> List[List[Any]]:\n    \"\"\"Return every page as a list of lists.\"\"\"\n    return [\n        paginate(items, page=p, size=size)\n        for p in range(1, page_count(items, size) + 1)\n    ]\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "timeout_sec": 180
+      },
+      {
+        "type": "file_contains",
+        "path": "test_paginate.py",
+        "contains": "def test_full_page_keeps_every_item(self):"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_fixture_tests_author (decomposed 3-step protocol)",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "plan_index": 24,
+    "tier": "small",
+    "generated_at": "2026-09-25T05:58:22.997680+00:00"
+  },
+  "workspace_fixture": "python_paginate_60b4dafc",
+  "promoted_from": "bench/aci/candidates/python_paginate_60b4dafc",
+  "promoted_at": "2026-09-25T08:29:13.940633+00:00"
+}

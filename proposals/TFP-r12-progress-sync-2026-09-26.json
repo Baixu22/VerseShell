@@ -1,0 +1,54 @@
+{
+  "applied_at": "2026-09-26T15:41:06.800378Z",
+  "base_graph_hash": "bab8b3413e15c3b1c67b7805a33c6e2b82a0a78567d44d96f1da556f3705a501",
+  "base_summary": {
+    "edge_count": 169,
+    "node_count": 108,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已在执行**：`python tools/live_round.py --tag tf0100 --arms without --seeds 42,43,44 --max-turns 20`（与第 13 轮同设置，便于配对）。seed 42 已于 2026-09-26 23:23 完成（`bench/aci/results/tf0100/without_seed42.json`，75 行），seed 43 运行中，seed 44 未开始；三臂全部重跑（A/A′ 不受 `exclude_tools` 影响，但需要同轮配对与漂移对照）",
+          "**seed 42 配对结果（25 格，D with 批量读 vs D without）**：成功率 **0.8000 → 0.8800**（仅 with 赢 1 格 / 仅 without 赢 3 格）；工具 **3.48 → 4.60/轮（×1.32）**；观察 token **527.9 → 564.0/轮（×1.07）**；completion 截断 12% → 4%",
+          "**含义**：去掉批量读的代价是「多 32% 工具调用、多 7% 观察 token」，**成功率没有下降**（本 seed 反而高 0.08，在噪声内）。对照第 12 轮那次消融的 D=0.32——**那次测到的是 completion 截断（13/25 行 0 工具调用），不是工具依赖**。P7 的核心结论不成立",
+          "**顺带测到运行间漂移**（A/A′ 两次运行配置完全相同，隐藏 `read_files` 对它们无效）：A 成功率 0.88→0.84、A′ 0.88→0.80、**A′ 观察 token 844.3→661.1（−22%）**。这是在预算不构成约束的干净条件下测到的，独立复现了审计 R2 的判断",
+          "**已完成 · 消融描述改正**（验收标准第 3 条）：`docs/audit-brief.md` P7 加修订注（名称写错 + 预算混杂 + 同轮漂移，并注明重跑结果出来前不得引用）；`docs/acceptance-criteria.md` 的消融行写明是 `read_files`=`file.read_many`、`read_file`/`file.view` 仍可用、且须同时满足 §0.5；`docs/claims-and-evidence.md` C13 失效边界新增第 ⑬ 条",
+          "**未完成**：seed 43/44 的结果、三臂两个预算的截断率核对、`live_ab_without_read_files.json` 合并后的重刷（它会牵动 `read_usage_audit` / `exec_token_breakdown` / `step_composition` / `three_arm_report` / `acceptance_power` / `live_uncertainty` 的指纹）、以及最终的 P7 处置（撤回或改写）"
+        ],
+        "next_action": "等 seed 43/44 跑完 → 合并成 225 行 → 按 §3.3 核对三臂步数/completion 两个预算的截断率 → 重刷派生产物 → 出结论：把 P7 撤回并替换为实测效应（批量读省约 24% 工具调用、约 6% 观察 token，成功率无显著差异；最终数字用三个 seed 的配对结果）。",
+        "progress": 30.0,
+        "progress_source": "agent",
+        "status": "in_progress"
+      },
+      "id": "TF-0103"
+    },
+    {
+      "action": "remove_edge",
+      "id": "TFE-0168"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "progress": 80.0,
+        "progress_source": "agent"
+      },
+      "id": "TF-0093"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "progress": 80.0,
+        "progress_source": "agent"
+      },
+      "id": "TF-0094"
+    }
+  ],
+  "created_at": "2026-09-26T15:41:06.621752Z",
+  "proposal_id": "TFP-r12-progress-sync-2026-09-26",
+  "rationale": "定位本轮进度时发现森林与现实不符：TF-0103 实际已在执行（消融 without 臂三个 seed 正在跑，seed 42 已完成并得出决定性结果），但森林里仍是 ready/0%；TF-0093 与 TF-0094 作为本轮的两个根节点一直是 0%，而子树已完成 10/14；TF-0100 已 done 却仍挂着 depends_on TF-0105（该依赖在重跑完成后已满足）。本次只做同步，不改任何结论。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

@@ -6,11 +6,11 @@
       "success_rate_D": 1.0,
       "success_advantage_D": 1.0,
       "avg_tool_calls_A": 10.0,
-      "avg_tool_calls_D": 5.5,
-      "tool_call_ratio_D_over_A": 0.55,
+      "avg_tool_calls_D": 5.63,
+      "tool_call_ratio_D_over_A": 0.5629,
       "avg_observation_tokens_A": 3820.0,
-      "avg_observation_tokens_D": 405.0,
-      "token_ratio_D_over_A": 0.106,
+      "avg_observation_tokens_D": 414.86,
+      "token_ratio_D_over_A": 0.1086,
       "meets_acceptance": true
     }
   ]

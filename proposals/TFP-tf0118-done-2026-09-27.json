@@ -1,0 +1,52 @@
+{
+  "applied_at": "2026-09-27T14:05:25.887134Z",
+  "base_graph_hash": "c35e484ce29731777908c3249b058954adeb465de5d6f0eed67cba5c32ba1113",
+  "base_summary": {
+    "edge_count": 181,
+    "node_count": 120,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**规则已预注册**：`docs/acceptance-criteria.md` 新增 **§0.6 行处置规则（预注册，2026-09-27 / TF-0118）**，六小节：①行分类（`endpoint_failure` / `cap_truncated` / `analysable`，判定只看字段）②两个口径必须并排报告（`analysable` 主 + `intention_to_treat` 必报）③一条对比可主张的三个条件 ④不做的事 ⑤已知构造代价 ⑥落到代码的位置",
+          "**按「对比」而非「整轮」判定**（关键设计）：截断是单侧的（第 13 轮重跑只有 A′ 被截断 13.3%，A 1.3%、D 0.0%）。按整轮一刀切会把不受影响的 D vs A 一起作废；按对比判定才对应 §0.5 原话「**任一侧**撞上限」——「侧」就是这个对比的一侧",
+          "**单一实现**：`tools/live_uncertainty.py::row_class()` 与 `row_policy()`；两个工具都调它，不可能各写一套。`three_arm_report.py` 与 `acceptance_power.py` 不再各报一套",
+          "**`three_arm_report.py`**：新增 `row_policy`、`row_policy_claimable_comparisons`、`row_policy_blocked_comparisons`；终端输出逐臂 `excl / endpoint / cap / succ_an / succ_itt` 与逐对比判决",
+          "**`acceptance_power.py`**：新增 `row_policy`；9 个与 live 行有关的判决通过 `VERDICT_COMPARISON` 映射到所属对比，**未通过 §0.6.3 的一律 `claimable=False` 并标 `gap_type=policy_blocked`**，同时保留 `claimable_before_row_policy` 以便追溯",
+          "**本轮实测结论**（第 13 轮重跑 with 臂）：`verseshell_aci_vs_raw_shell` → **claimable=True**（endpoint 0.0%/0.0%、cap 1.3%/0.0%、succ_an +0.0416、succ_itt +0.0533、符号一致）；`verseshell_aci_vs_raw_shell_coached` → **claimable=False**，原因 `exclusion_rate_above_10pct`（A′ cap 13.3%）",
+          "**规则确实挡住了东西**：`success_paired_coached_can_claim_MDE_0.15` 原为可主张，被 §0.6 翻成 `policy_blocked`；coached 块三条判决全部不可主张，而 D-vs-A 块（L1/L2/L3、CPST、成功率 MDE）**不受影响**",
+          "**假象量级**（说明这条规则不是形式主义）：A′ 的 `succ_an` 0.9077 vs `succ_itt` 0.7867；A 为 0.8784 vs 0.8667。**原始口径说「A′ 比 A 差 0.080」，剔除后说「A′ 比 A 好 0.029」——符号被一个纯机械的截断翻了过来**",
+          "**门禁 C33**：`the headline row set follows the pre-registered row policy (§0.6)`，检查一致性——被阻断的对比不得存在 `claimable=true` 的判决、两个口径必须都已发布、两个产物的逐臂比率必须一致（同一实现）",
+          "**C33 有牙齿（负对照）**：把 `token_ratio_coached_level1_D_cheaper` 人为改成 `claimable=true` 后重跑门禁 → **C33 FAIL（19/27）**；真实产物 → **C33 PASS（21/27）**。中途发现并修掉一个自引入缺陷：C33 起初硬编码 `eval/acceptance_power.json`，忽略了 `--acceptance-power` 覆盖参数，导致负对照**误通过**——已改用与 C28 相同的覆盖解析",
+          "**验收标准对照**：①规则写明 ✅；②两个工具同一规则 ✅；③门禁机检一致性 ✅（含负对照）；④写在下一轮 live 之前 ✅（本轮即为预注册，尚未跑第 14 轮）"
+        ],
+        "next_action": "无（已关闭）。§0.6 自重：任何后续改动若让某对比的排除率超 10% 或让两个口径反向，C33 会转红。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0118"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "本轮缺口见 TF-0093；子节点含 13 个 task + 1 个 decision + 2 个 requirement + 1 个 risk",
+          "**对外交接简报**：`docs/audit-brief-r13.md`（自包含，16 条错误清单 + 完整实验方案 + 第 13 轮结果 + 消融失败现场 + 14 条主动暴露短板 + 复现命令）",
+          "**本轮关键净结果**：①第 13 轮首跑是第一个两个预算都不构成约束的样本；②后续重跑暴露 A′ 被 completion 上限截断 **13.3%**，且该上限在本端点**无法抬高**（32768 → 9/11 变 HTTP 502）；③观察 token L1/L2/L3 可主张（D vs A）；④真实 tokenizer 口径方向相反；⑤成功率 +0.04～+0.05，低于检出限；⑥P7 撤回；⑦新增两道 harness 门禁 **C32**（执行通路有界）与 **C33**（行集符合预注册规则）",
+          "**本轮新增的四条方法论结论**：①§0.5 的「抬上限重跑」在本端点不可用；②截断率本身是跑间变量（15% / 7% / 13.3%），单轮干净可能是运气；③预先写死行处置规则比反复重跑更可靠；④行处置必须按「对比」而非「整轮」判定，否则会误伤不受影响的那一半对比",
+          "**环境事故（已处置）**：2026-09-27 21:35 刷新链因 **C: 磁盘耗尽**（`Errno 28` / `WinError 112`）在 6 个步骤上失败，同一次事故也让我的一条森林提案写入失败。已确认 **0 个 JSON 产物损坏**，并回收 `target/debug/incremental`（4.07 GB，cargo 可再生缓存）后重跑；`target/debug/ae.exe` 与 `target/release/ae.exe` 均完好"
+        ]
+      },
+      "id": "TF-0094"
+    }
+  ],
+  "created_at": "2026-09-27T14:05:25.668790Z",
+  "proposal_id": "TFP-tf0118-done-2026-09-27",
+  "rationale": "TF-0118 完成：§0.6 行处置规则已按预注册写死、落成单一实现、接进两个产物的判定、并由门禁 C33 机检一致性（含负对照）。这条规则在下一轮 live 之前就位，满足验收标准第 4 条。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

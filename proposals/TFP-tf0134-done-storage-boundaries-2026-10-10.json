@@ -1,0 +1,75 @@
+{
+  "base_graph_hash": "4aea0d2e050af8f7537347b77f3717d3b0963947dee18e981495acea6149142c",
+  "base_summary": {
+    "edge_count": 233,
+    "node_count": 141,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/control/run-live.ps1",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/storage-policy.json",
+          "bench/aci/results/step5p-r1-20261006/",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/runtime-paths.json",
+          "bench/aci/runners/live_storage.py",
+          "tests/test_live_recovery.py",
+          "docs/landing-readiness-2026-10-09.md",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/landing-audit.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/readiness.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/python-tests.log",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/final-source-postcheck.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/product-gate/evidence.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/tokenizer-environment.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/validation-environment.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/auxiliary-input-postcheck.json",
+          "C:/Users/27933/Desktop/verseshell/verseshell/docs/step5p-freeze-live-2026-10-10.md",
+          "D:/VerseShellLive/freeze-live-20261010/development-plan.json",
+          "D:/VerseShellLive/freeze-live-20261010/candidate-probe/endpoint-probe.json",
+          "D:/VerseShellLive/freeze-live-20261010/launch/probe.result.json",
+          "D:/VerseShellLive/freeze-live-20261010/venv-job-kill.json",
+          "D:/VerseShellLive/freeze-live-20261010/launch/pilot.r2.resume.launch-receipt.json",
+          "D:/VerseShellLive/freeze-live-20261010/launch/pilot.r2.resume.result.json",
+          "D:/VerseShellLive/node-freeze-20261010-01a120ce/workspace/bench/aci/results/step5p-dev-20261010-r2/latest_live.json",
+          "D:/VerseShellLive/node-freeze-20261010-01a120ce/workspace/bench/aci/results/step5p-dev-20261010-r2/collection.json",
+          "D:/VerseShellLive/freeze-live-20261010/analysis-summary.json",
+          "C:/Users/27933/Desktop/verseshell/verseshell/tests/test_live_recovery.py",
+          "C:/Users/27933/Desktop/verseshell/verseshell/tests/test_live_control.py",
+          "C:/Users/27933/Desktop/verseshell/verseshell/tests/test_live_boundary_recovery.py",
+          "C:/Users/27933/Desktop/verseshell/verseshell/tests/test_remaining_node_boundaries.py",
+          "C:/Users/27933/Desktop/verseshell/verseshell/docs/collection-recovery-coverage-2026-10-10.md",
+          "D:/VerseShellLive/freeze-live-20261010/runtime-path-verification.json",
+          "D:/VerseShellLive/freeze-live-20261010/storage-boundary-tests.log",
+          "D:/VerseShellLive/freeze-live-20261010/live-recovery-tests.log"
+        ],
+        "next_action": "剩余边界只剩 POSIX 锁/终止语义未实测；本轮全部为 Windows 实测。真实采集与研究验收仍由 TF-0112/0120/0140/0141 承接，本节点完成不代表产品或研究结论。",
+        "progress": 100.0,
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "landing-readiness-node-dev-2026-10-09",
+          "freeze-live-2026-10-10"
+        ],
+        "status": "done",
+        "summary": "2026-10-10 收口：D/C 阈值与非法策略用注入读数覆盖（不填真实磁盘）；STOP 标记在 cell 边界生效——已提交行完整、退出原因 storage_reserve 可读、marker 不被自动清除，ack 前重复 resume 不推进；恢复沿用同一身份且 cell_id 无重复。运行时路径实测：18/18 构建 target 与 18/18 评分副本位于 D 盘，C 盘无该 tag 残留。新增持续写盘失败用例：磁盘一直满时不产出成功产物、不派发后续格、状态保持 failed。强制终止控制器时的三阶段跨进程回收由既有用例覆盖。"
+      },
+      "id": "TF-0134"
+    }
+  ],
+  "created_at": "2026-10-10T05:15:40Z",
+  "proposal_id": "TFP-tf0134-done-storage-boundaries-2026-10-10",
+  "rationale": "TF-0134 三条验收全部有可复现证据：AC1 用注入读数覆盖 D/C 阈值（含 free==reserve 边界）、不可用盘、非法策略、ENOSPC 写失败与 STOP 传播，未填满真实磁盘；AC2 由 cell 边界暂停用例证明：STOP 存在时 checkpoint 字节不变、重复 resume 仍 75、ack 后才完成且 cell_id 无重复；AC3 由 runtime-path-verification.json 认证 18/18 构建目录与18/18 评分副本位于 D 盘、C 盘无同 tag 残留，旧 C 失败证据未改写。同时补上此前文档自述未证明的持续写盘失败边界：新增用例断言不产出成功产物、不再派发后续格、状态保持 failed。",
+  "session_id": "freeze-live-2026-10-10",
+  "status": "proposed"
+}

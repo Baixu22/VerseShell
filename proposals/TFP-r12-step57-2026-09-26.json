@@ -1,0 +1,72 @@
+{
+  "applied_at": "2026-09-26T08:17:21.079510Z",
+  "base_graph_hash": "b51bb91a045b24885c49d3089cec870f36d745cad6baedcbff6ab678c0cf6080",
+  "base_summary": {
+    "edge_count": 166,
+    "node_count": 106,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**区间改为按任务聚类，并作为唯一对外区间**：`tools/live_uncertainty.py::ratio_bootstrap` 新增 `keys`（每对的 task id），同时算两套并只发布聚类那套——`bootstrap_ci95` = 任务聚类，`bootstrap_unit` 标出单位，行级区间保留为 `bootstrap_ci95_row` 作对照；没有 keys 时退回行级并在 `clustering_note` 里说明，**不允许悄悄把未聚类区间标成聚类**。`tools/acceptance_power.py` 的 `bootstrap_ratio` 改为委托同一个函数（原来两份实现各算一套），两个产物从此不可能对同一个量给出不同区间",
+          "**效果（第 12 轮数据）**：观察 token D/A 的发布区间由行级 [0.5601, 0.8551] 变为聚类 **[0.5509, 0.9061]**；工具比 [0.8191, 1.2521] → [0.7667, 1.3527]；D/A′ token [0.8435, 1.379] → [0.7645, 1.5675]。**直接后果：L2「省 ≥15%」的上界 0.9061 越过 0.90 门槛，判定由「可主张」改为「不可主张」**——这正是复核（`docs/audit-r12-verification.md` §2）预测的那一条",
+          "**真实 tokenizer 口径并列发布**：`three_arm_report` / `live_uncertainty` / `acceptance_power` 三处都新增 `usage_token_ratio` / `prompt_token_ratio` / `completion_token_ratio`（端点 `usage` 逐轮累加，覆盖系统提示 + 工具 schema + 重发历史 + reasoning），并各带聚类区间。第 12 轮数字：总 token **1.1932 [0.9117, 1.7419]**、输入 **1.545 [1.1103, 2.4214]**、输出 **0.1709 [0.1172, 0.3496]**——**与观察 token 代理方向相反**，按 `docs/acceptance-criteria.md` §4.2 以真实口径为准",
+          "**补上 D vs A′ 的独立判定行**（此前门禁里根本没有这一支）：`acceptance_power.json` 的 `verdicts` 新增 `success_paired_coached_can_claim_MDE_0.15`（75 对 vs 需 100 对 → 不可主张）与 `cost_per_success_coached_D_cheaper`（**0.8522 > 0.80 → 不可主张**）",
+          "**门禁能检出两种退化**：C25 新增 `ratio_bootstrap_is_task_clustered` 与 `real_tokenizer_published` 两项检查（两臂各一），C28 新增 `ratio_verdicts_are_task_clustered` 与 `real_tokenizer_published`；C28 的 `required_items` 由 9 项扩到 11 项",
+          "**负对照（已做，不是声称）**：`python audit-r12-scratch/make_degraded.py` 生成两份降级产物（把 `bootstrap_unit`/`unit` 翻成 row、删掉全部 `usage_*` 块），再用 `python tools/claim_gate.py --live-uncertainty …degraded_live_uncertainty.json --acceptance-power …degraded_acceptance_power.json --evidence audit-r12-scratch/degraded_evidence.json` 复跑：**22/25 → 20/25，C25 的 4 个子检查（2 臂 × 2 退化）与 C28 的 2 个子检查全部判红**，其余声明不受影响。降级证据写在 `audit-r12-scratch/degraded_evidence.json`，**没有污染 `eval/evidence.json`**",
+          "**文档同步**：`docs/claims-and-evidence.md` 的 C13（头条改双口径、区间改聚类、补 harness 缺陷修正行）、C25（门槛由 4 项扩到 6 项、失效边界写明必须聚类与真实口径并列）、C28（11 项验收、7 项检查、最近实测按聚类重写）；`docs/acceptance-criteria.md` §6 状态总表整表重写（含 L2 改判、L3 由产品缺口改为无证据、新增 A′ 两行与真实口径行）与「一句话」重写",
+          "`python tools/claim_gate.py` → **22/25**：本节点相关的 C25/C28/C13 登记全部 PASS；C12 红的原因是 TF-0100 改 harness 使 live 基线 stale（由 TF-0105 重跑刷新），C14/C16 红属既有产品缺口（P1），均与本节点无关",
+          "改动文件：`tools/live_uncertainty.py`、`tools/acceptance_power.py`、`tools/three_arm_report.py`、`tools/claim_gate.py`、`docs/claims-and-evidence.md`、`docs/acceptance-criteria.md`；重生成产物 `eval/live_uncertainty.json`、`eval/acceptance_power.json`、`eval/three_arm_report.json`"
+        ],
+        "next_action": "无（已关闭）。下一轮 live 重跑后需按同一顺序重刷这三个产物（`live_uncertainty` → `acceptance_power`，`three_arm_report` 独立），聚类与真实口径会自动沿用。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0101"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已启动 with 臂重跑**：`python tools/live_round.py --tag tf0100 --arms with --seeds 42,43,44 --max-turns 20`（用修好的 harness，`max_turns=20` 与第 12 轮口径一致，逐 seed 原始行写入 `bench/aci/results/tf0100/`，完成后合并覆盖 `bench/aci/results/latest_live.json`）。端点 `http://127.0.0.1:3065/v1` 实测 HTTP 200 可用",
+          "重跑的目的有两个：①让 `latest_live.json` 记录的指纹与修好的 runner 一致（C12 转绿、TF-0100 得以收口）；②让「cp936 崩溃已修」这件事有一次真实测量，而不是只靠契约检查",
+          "**未完成**：预注册要求的 30 个生成任务（现 15）与「从未参与调参的留出任务集」尚未开始——那部分需要先解决端点生成稳定性（D6 的 300s/502 约束），不能靠重跑 live 顺带完成",
+          "**未完成**：without 臂（消融）未重跑，它属 TF-0103（抬高 `max_tokens` 后重跑或撤回 P7）"
+        ],
+        "next_action": "等 3 个 seed 跑完并合并 → 按顺序重刷全部派生产物（`tools/refresh_live_artifacts.py` 全链 + `tools/projection_contract.py` + `tools/task_admissibility.py` + `tools/three_arm_report.py`）→ 复跑 `python tools/claim_gate.py` 确认 C12 转绿 → 重出本轮结论并回写 TF-0100。之后再单独做生成任务扩充与留出集。",
+        "progress": 25.0,
+        "progress_source": "agent",
+        "status": "in_progress"
+      },
+      "id": "TF-0105"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "修 `bench/aci/runners/live_agent_loop.py::execute_shell_cmd`：`subprocess.run(..., text=True)` 补 `encoding=\"utf-8\", errors=\"replace\"`，并把 `out = r.stdout` 改成 `out = r.stdout or \"\"`。UTF-8 同时让 A 臂与 ACI 侧一致（Rust 用 `from_utf8_lossy`、`execute_aci_op` 用 `errors=\"replace\"`），两臂看到同样的字节",
+          "逐行新增 `harness_fault` / `harness_crash` 两个字段：`harness_crash = bool(harness_fault) and not trajectory`，只把「harness 在记录任何工具结果之前就死了」的行标出来；`notes` 同步写入 `harness_fault:`",
+          "新契约工具 `tools/harness_encoding_contract.py` + 产物 `eval/harness_encoding_contract.json`：三条检查全 PASS——`utf8_observation_roundtrip`（真实 `type` 读含 U+2014 的 UTF-8 文件，字符原样到达且带 `[EXIT: 0]`）、`empty_and_failing_commands`（空命令／不存在命令都返回 str 且不抛）、`mechanism_control`（与主机无关地证明该 fixture 字节在 cp936 下不可解码）。本机 `locale.getpreferredencoding(False) = cp936`，`locale_control.would_have_failed = true`",
+          "缺陷复现（同一产物 `detail.prefix_call_shape`）：pre-fix 调用形态下 `stdout_is_none = true`，读取线程报 `UnicodeDecodeError: 'gbk' codec can't decode byte 0x94 in position 13`——这正是 `out += ...` 抛 TypeError、轨迹被丢弃的机制",
+          "受影响行与方向性影响（`eval/three_arm_report.json`）：`raw_shell` 3/75、`raw_shell_coached` 2/75、`verseshell_aci` 0/75；`tools/three_arm_report.py` 现在单列并给出排除后成功率（A 0.7067 → 0.7361、A′ 0.6667 → 0.6849、D 不变），并把两支对比的崩溃排除版本一并输出：**D−A 0.120 → 0.0833、D−A′ 0.160 → 0.1370**",
+          "`tools/live_uncertainty.py` 的 `recompute_aggregate` 也逐条件报 `harness_crash` 与排除后的成功数；`is_harness_crash()` 定义在该共享模块里，`tools/three_arm_report.py` 直接导入，避免两份规则漂移。历史行按「有 `last_error` 且 `trajectory` 为空」识别，因此**不改写任何已存产物**",
+          "登记为独立门禁项 **C31**（`tools/claim_gate.py` THRESHOLDS + claim 块 + EVIDENCE_ARTIFACTS + 模块 docstring），并写入 `docs/claims-and-evidence.md` 的 C31 条目。这是**裸 shell 侧的第一个契约门禁**——此前所有已登记检查都只看 ACI 侧，这正是该缺陷能静默存在三轮的原因（对应审计 R1）",
+          "`python tools/harness_encoding_contract.py` → 3/3 PASS；`python tools/claim_gate.py` → C31 PASS",
+          "**未完成的部分**：本节点改的是 `bench/aci/runners/live_agent_loop.py`，而 `bench/aci/results/latest_live.json` 记录的 `evidence.globs` 覆盖该文件，所以第 12 轮 live 基线现在**按仓库自己的规则合法地变为 stale**，C12 因此转红。刷新它必须重跑 with 臂（需要端点），属 TF-0105；**不能靠改写指纹来「修复」——那等于伪造证据出处。**",
+          "**重跑已启动**（见 TF-0105）：`python tools/live_round.py --tag tf0100 --arms with --seeds 42,43,44 --max-turns 20`，完成后 `latest_live.json` 的指纹将与修好的 runner 一致，C12 转绿，本节点即可收口"
+        ],
+        "next_action": "等 TF-0105 的 with 臂重跑合并完成、C12 转绿后关闭。期间本节点的代码与门禁部分已全部完成（C31 PASS）。"
+      },
+      "id": "TF-0100"
+    }
+  ],
+  "created_at": "2026-09-26T08:17:20.741493Z",
+  "proposal_id": "TFP-r12-step57-2026-09-26",
+  "rationale": "落地 TF-0101（把双口径与聚类区间接进产物与门禁声明）。六条验收全部满足并做了负对照：注入两种退化后 C25 的 4 个子检查与 C28 的 2 个子检查全部判红（22/25 → 20/25）。同时把 TF-0105 记为 in_progress：已用修好的 harness 启动 with 臂 3 seed 重跑（tag tf0100），这是让 C12 转绿、并让 TF-0100 收口的唯一途径。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

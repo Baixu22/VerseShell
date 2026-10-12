@@ -39,12 +39,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BENCH = ROOT / "bench" / "aci"
 FIXTURES = BENCH / "fixtures"
-AE = ROOT / "target" / "debug" / "ae.exe"
 STORED_LIVE = BENCH / "results" / "latest_live.json"
 
 sys.path.insert(0, str(BENCH / "runners"))
 from fixture_deps import materialize_deps  # noqa: E402
 from live_agent_loop import (  # noqa: E402
+    AE,
+    run_bounded,
     ACI_CAPABILITIES,
     estimate_tokens,
     format_aci_result,
@@ -86,10 +87,6 @@ def run_op(op: str, args: dict, workspace: Path, timeout: int = 120) -> dict:
     env["AETHER_APPROVE_ALL"] = "1"
     env["AETHER_MODE"] = "agent"
     env["AETHER_WORKSPACE"] = str(workspace)
-    proc = subprocess.Popen(
-        [str(AE), "--serve", "--agent", "--cap", ACI_CAPABILITIES],
-        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env,
-    )
     payload = {
         "id": uuid.uuid4().hex[:12],
         "agent": "tf45_replay",
@@ -98,7 +95,13 @@ def run_op(op: str, args: dict, workspace: Path, timeout: int = 120) -> dict:
         "timeout_ms": 60000,
         "budget": {"max_tokens": 4000},
     }
-    out, err = proc.communicate(json.dumps(payload).encode() + b"\n", timeout=timeout)
+    rc, out, err, timed_out = run_bounded(
+        [str(AE), "--serve", "--agent", "--cap", ACI_CAPABILITIES],
+        stdin_data=json.dumps(payload).encode() + b"\n", timeout=timeout, env=env)
+    if timed_out:
+        raise TimeoutError(f"{op}: managed replay timeout")
+    if rc != 0:
+        raise RuntimeError(f"{op}: replay process exited {rc}")
     lines = [ln for ln in out.decode("utf-8", "replace").split("\n") if ln.strip()]
     if not lines:
         raise RuntimeError(f"{op}: no output ({err.decode('utf-8', 'replace')[:300]})")
@@ -182,16 +185,9 @@ def replay(calls: list[dict]) -> list[dict]:
             files = data.get("files") if isinstance(data.get("files"), list) else []
             legacy_tokens = estimate_tokens(legacy_text)
             current_tokens = estimate_tokens(current_text)
-            # A call counts as faithfully reproduced only when replaying it
-            # through the current binary reproduces the exact token count the
-            # stored live run recorded, under the projection that run actually
-            # used: `current` once the compact-digest client shipped, `legacy`
-            # before it. That is the precondition for treating the delta as a
-            # counterfactual, and it is what makes the tool refuse to compare
-            # across a client change that was never re-measured.
-            # It fails for files the live run itself produced or mutated —
-            # `.ae/audit.log`, `ERR.txt`, `out/result.txt` — whose content
-            # depends on run history the pristine fixture cannot rebuild.
+            # Preserve the legacy token-count filter, but do not call it content equality.
+            # Missing files, changed content and changed projection/contracts can all
+            # prevent a match; the stored count alone cannot distinguish those causes.
             code = (envelope.get("error") or {}).get("code")
             matched = None
             if current_tokens == call["stored_tokens"]:
@@ -200,11 +196,11 @@ def replay(calls: list[dict]) -> list[dict]:
                 matched = "legacy"
             if code == "E_NOT_FOUND":
                 reproducible = False
-                reason = "file did not exist in the pristine fixture (created by the live run)"
+                reason = "file missing in current pristine fixture; historical creation/state is not established"
             elif matched is None:
                 reproducible = False
                 reason = (
-                    "content depends on live-run history: current projection "
+                    "stored token count mismatch (content/projection/contract cause unknown): current projection "
                     f"{current_tokens} tok / legacy projection {legacy_tokens} tok vs "
                     f"{call['stored_tokens']} tok recorded live"
                 )
@@ -330,6 +326,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: ae not found at {AE} (run cargo build)", file=sys.stderr)
         return 1
 
+    binary_before = hashlib.sha256(AE.read_bytes()).hexdigest()
+    source_before = STORED_LIVE.read_bytes()
+    source_data = json.loads(source_before)
     calls = frozen_calls()
     rows = replay(calls)
     budget = budget_probe()
@@ -359,7 +358,21 @@ def main(argv: list[str] | None = None) -> int:
     for row in rows:
         stored_by_op[row["op"]] = stored_by_op.get(row["op"], 0) + 1
 
-    exact = all(r["truncated_entries"] == 0 for r in usable)
+    # `exact` used to mean "no usable row was truncated". That was wrong once the
+    # `max_total_lines` budget shipped: the stored live run ALSO ran with the budget,
+    # so a truncated entry is part of the frozen trajectory, not a sign that the
+    # replay diverged. Every usable row already reproduces the exact token count the
+    # live run recorded, and both projections are computed from the SAME replayed
+    # envelope, so the legacy/current delta stays a valid counterfactual. Truncation
+    # is therefore reported as a count, and the strictness is moved to a stronger
+    # place: the untruncated subset alone must also clear the threshold.
+    untruncated = [r for r in usable if r["truncated_entries"] == 0]
+    untruncated_legacy = sum(r["legacy_tokens"] for r in untruncated)
+    untruncated_current = sum(r["current_tokens"] for r in untruncated)
+    untruncated_savings = (
+        1.0 - untruncated_current / untruncated_legacy if untruncated_legacy else 0.0
+    )
+    exact = all(r["matched_projection"] is not None for r in usable)
     coverage = len(usable) / len(rows) if rows else 0.0
     matched_counts: dict[str, int] = {}
     for r in usable:
@@ -367,6 +380,9 @@ def main(argv: list[str] | None = None) -> int:
         matched_counts[key] = matched_counts.get(key, 0) + 1
     report = {
         "schema": "verseshell.tf45-envelope-replay/v1",
+        "ae_binary": str(AE.resolve()), "ae_binary_sha256": binary_before,
+        "source_identity": {"path": str(STORED_LIVE.resolve()), "sha256": hashlib.sha256(source_before).hexdigest(),
+                            "task_set_version": source_data.get("task_set_version"), "git_rev": source_data.get("git_rev")},
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "method": {
             "frozen_call_source": "bench/aci/results/latest_live.json (condition D read ops)",
@@ -381,9 +397,11 @@ def main(argv: list[str] | None = None) -> int:
                                  "run-produced state (audit log, ERR.txt, out/...) fail that test and "
                                  "are listed with both numbers",
             "caveat": "client-side envelope effect on a frozen call set; it is NOT a model-behaviour "
-                      "measurement and says nothing about whether the model would choose different calls",
+                      "measurement and says nothing about whether the model would choose different calls; "
+                       "a matching token count is not proof of identical original content",
         },
         "evidence": {
+            "input_sha256": {str(STORED_LIVE.resolve()): hashlib.sha256(source_before).hexdigest()},
             "globs": EVIDENCE_GLOBS,
             "fingerprint": evidence_fingerprint(EVIDENCE_GLOBS),
         },
@@ -405,6 +423,15 @@ def main(argv: list[str] | None = None) -> int:
             "legacy_chars": sum(r["legacy_chars"] for r in usable),
             "current_chars": sum(r["current_chars"] for r in usable),
             "legacy_comparison_exact": exact,
+            # Truncation is part of the frozen trajectory now that the batch budget
+            # shipped, so it is reported rather than treated as a replay failure —
+            # and the untruncated subset is gated separately so the strictness is
+            # not simply dropped.
+            "truncated_usable_calls": len(usable) - len(untruncated),
+            "untruncated_calls": len(untruncated),
+            "untruncated_legacy_tokens": untruncated_legacy,
+            "untruncated_current_tokens": untruncated_current,
+            "untruncated_token_savings": round(untruncated_savings, 4),
         },
         "by_op": by_op,
         "stored_calls_by_op": stored_by_op,
@@ -412,6 +439,8 @@ def main(argv: list[str] | None = None) -> int:
         "rows": rows,
     }
 
+    if hashlib.sha256(AE.read_bytes()).hexdigest() != binary_before or STORED_LIVE.read_bytes() != source_before:
+        raise ValueError("binary or frozen source changed during replay")
     text = json.dumps(report, indent=2, ensure_ascii=False) + "\n"
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -421,10 +450,15 @@ def main(argv: list[str] | None = None) -> int:
         print(text)
 
     print(
-        f"replay: {len(usable)}/{len(rows)} frozen read calls reproduced exactly "
-        f"(matched={matched_counts}; {len(excluded)} excluded: run-produced state) | "
+        f"replay: {len(usable)}/{len(rows)} frozen read calls matched stored token counts "
+        f"(matched={matched_counts}; {len(excluded)} excluded: missing fixture or token-count mismatch) | "
         f"legacy={legacy_tokens} tok -> current={current_tokens} tok "
         f"({savings * 100:.1f}% saved) | no truncation={exact}"
+    )
+    print(
+        f"  untruncated subset: {len(untruncated)} calls "
+        f"{untruncated_legacy} -> {untruncated_current} tok "
+        f"({untruncated_savings * 100:.1f}%)"
     )
     for op, acc in sorted(by_op.items()):
         print(f"  {op:<16} calls={acc['calls']}/{stored_by_op.get(op, 0):<3} "

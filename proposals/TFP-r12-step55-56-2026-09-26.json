@@ -1,0 +1,72 @@
+{
+  "applied_at": "2026-09-26T05:47:57.018914Z",
+  "base_graph_hash": "61804000b1095acfca6fac15891b3f1701ff7519a659f2b23a85c264559accf4",
+  "base_summary": {
+    "edge_count": 166,
+    "node_count": 106,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "修 `tools/acceptance_power.py::ratio_verdict`：产品缺口改由**区间**判定——只有整个 CI95 落在门槛错误一侧（`ci95_lower > point_cap`（若声明有 point cap）否则 `> threshold`）才置 `impossible_by_sample_size=true` 且 `gap_type=product_gap`；点估计越界但区间仍跨到可达成一侧的记 `gap_type=data_gap`，并给 `n_required=null` 说明此时约束是估计值本身而不是区间宽度。函数新增 `lower` 参数与 `ci95_lower` / `point_cap` / `point_cap_met` 字段，五个调用点同步",
+          "修 `tools/acceptance_power.py` 的成功率非劣下界：`diffs` 的条件表达式补括号。原写法 `1.0 if D else 0.0 - (1.0 if A else 0.0)` 按优先级解析为 `1.0 if D else (0.0 - A)`，把 46 个「双方都成功」的格子记成 +1，于是均值 0.7333、下界 +0.5864。改用 `Z_A`（1.95996）正态分位，与 `tools/live_uncertainty.py` 报告的配对区间同源，避免两个产物对同一个量各说一套",
+          "复现（`python audit-r12-scratch/verify_part2.py` 的 `D_noninferiority_replication` 段）：产物表达式给出均值 0.7333 / 下界 0.5864，与旧 `eval/acceptance_power.json:70-71` 逐字一致；正确表达式给出均值 0.12 / 下界 −0.0085",
+          "重生成 `eval/acceptance_power.json` 后：`success_noninferiority_lower_bound` 由 **0.5864 → −0.0032**（A）、**0.6264 → 0.0421**（A′）；`success_mean_diff_D_minus_A` 由 **0.7333 → 0.12**（A）、**0.76 → 0.16**（A′）。非劣性结论不变（−0.0032 ≥ −0.10），但余量从「看起来 0.5864」回到真实的 0.0968",
+          "改判结果：`tool_ratio_level1_D_fewer_calls`（点 1.0074、CI95 [0.8191, 1.2521]）与 `token_ratio_coached_level1_D_cheaper`（点 1.0567、CI95 [0.8435, 1.379]）由 **product_gap 改为 data_gap**；`token_ratio_frozen_0.60`（点 0.6853、CI95 [0.5601, 0.8551]，区间包含 0.60）同样由 product_gap 改为 data_gap。L1/L2/CPST 的 `claimable` 与跨 shell 两条不变",
+          "同步判定契约，否则刚修好的产物会被旧规则判红：`tools/claim_gate.py::_impossible_flag_consistent` 改为按**区间**校验 `impossible_by_sample_size` 与 `gap_type`；C28 的注释、`notes`、子检查说明与 `docs/acceptance-criteria.md` §0 第 3 条、§5 反模式表、`docs/claims-and-evidence.md` C28 四处同步，并写明 2026-09-26 修订理由",
+          "`python tools/claim_gate.py` → **22/25**（C31 为本次新增且 PASS；C28 仍 PASS；C14/C16 仍红；C12 因 TF-0100 改 harness 而合法转红，见本节点与 TF-0100）",
+          "写入 `docs/audit-r12-verification.md` §3.4 与 §10 第 5、6 条"
+        ],
+        "next_action": "无（已关闭）。此后 `claimable` 与 `gap_type` 只由区间决定，点估计不再单独决定任何判定。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0099"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "修 `bench/aci/runners/live_agent_loop.py::execute_shell_cmd`：`subprocess.run(..., text=True)` 补 `encoding=\"utf-8\", errors=\"replace\"`，并把 `out = r.stdout` 改成 `out = r.stdout or \"\"`。UTF-8 同时让 A 臂与 ACI 侧一致（Rust 用 `from_utf8_lossy`、`execute_aci_op` 用 `errors=\"replace\"`），两臂看到同样的字节",
+          "逐行新增 `harness_fault` / `harness_crash` 两个字段：`harness_crash = bool(harness_fault) and not trajectory`，只把「harness 在记录任何工具结果之前就死了」的行标出来；`notes` 同步写入 `harness_fault:`",
+          "新契约工具 `tools/harness_encoding_contract.py` + 产物 `eval/harness_encoding_contract.json`：三条检查全 PASS——`utf8_observation_roundtrip`（真实 `type` 读含 U+2014 的 UTF-8 文件，字符原样到达且带 `[EXIT: 0]`）、`empty_and_failing_commands`（空命令／不存在命令都返回 str 且不抛）、`mechanism_control`（与主机无关地证明该 fixture 字节在 cp936 下不可解码）。本机 `locale.getpreferredencoding(False) = cp936`，`locale_control.would_have_failed = true`",
+          "缺陷复现（同一产物 `detail.prefix_call_shape`）：pre-fix 调用形态下 `stdout_is_none = true`，读取线程报 `UnicodeDecodeError: 'gbk' codec can't decode byte 0x94 in position 13`——这正是 `out += ...` 抛 TypeError、轨迹被丢弃的机制",
+          "受影响行与方向性影响（`eval/three_arm_report.json`）：`raw_shell` 3/75、`raw_shell_coached` 2/75、`verseshell_aci` 0/75；`tools/three_arm_report.py` 现在单列并给出排除后成功率（A 0.7067 → 0.7361、A′ 0.6667 → 0.6849、D 不变），并把两支对比的崩溃排除版本一并输出：**D−A 0.120 → 0.0833、D−A′ 0.160 → 0.1370**",
+          "`tools/live_uncertainty.py` 的 `recompute_aggregate` 也逐条件报 `harness_crash` 与排除后的成功数；`is_harness_crash()` 定义在该共享模块里，`tools/three_arm_report.py` 直接导入，避免两份规则漂移。历史行按「有 `last_error` 且 `trajectory` 为空」识别，因此**不改写任何已存产物**",
+          "登记为独立门禁项 **C31**（`tools/claim_gate.py` THRESHOLDS + claim 块 + EVIDENCE_ARTIFACTS + 模块 docstring），并写入 `docs/claims-and-evidence.md` 的 C31 条目。这是**裸 shell 侧的第一个契约门禁**——此前所有已登记检查都只看 ACI 侧，这正是该缺陷能静默存在三轮的原因（对应审计 R1）",
+          "`python tools/harness_encoding_contract.py` → 3/3 PASS；`python tools/claim_gate.py` → C31 PASS",
+          "**未完成的部分**：本节点改的是 `bench/aci/runners/live_agent_loop.py`，而 `bench/aci/results/latest_live.json` 记录的 `evidence.globs` 覆盖该文件（`['src/**/*.rs','Cargo.toml','bench/aci/tasks/*.json','bench/aci/fixtures/**/*','bench/aci/runners/live_agent_loop.py']`），所以第 12 轮 live 基线现在**按仓库自己的规则合法地变为 stale**，C12 因此转红。刷新它必须重跑 with 臂（需要端点），属 TF-0105。**不能靠改写指纹来「修复」——那等于伪造证据出处。**",
+          "已刷新的是**派生产物**（`tools/refresh_live_artifacts.py` 全链 + `tools/projection_contract.py` + `tools/three_arm_report.py` + `tools/harness_encoding_contract.py`）；`latest_live.json` 本身保持 stale 且必须保持 stale，直到真的重跑"
+        ],
+        "next_action": "重跑 with 臂以刷新 `bench/aci/results/latest_live.json` 的指纹，C12 转绿后本节点即可关闭。该重跑由 TF-0105 承担，故本节点 `depends_on TF-0105`（原 `TF-0105 depends_on TF-0100` 已删除：那条边的前提「修复前不要重跑 live」已经满足，保留它会形成环）。",
+        "progress": 70.0,
+        "progress_source": "agent",
+        "status": "in_progress"
+      },
+      "id": "TF-0100"
+    },
+    {
+      "action": "remove_edge",
+      "id": "TFE-0163"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "harness 修复使 live 基线指纹失效（C12 fails closed）；只有重跑 with 臂刷新基线后，TF-0100 的验收才算完整。原 TF-0105 depends_on TF-0100 的前提（修复前不要重跑 live）已满足，保留会形成环"
+      },
+      "from": "TF-0100",
+      "to": "TF-0105",
+      "type": "depends_on"
+    }
+  ],
+  "created_at": "2026-09-26T05:47:56.901189Z",
+  "proposal_id": "TFP-r12-step55-56-2026-09-26",
+  "rationale": "落地 TF-0099（门禁判定规则）与 TF-0100（A 臂 cp936 崩溃）。TF-0099 的四条验收全部满足且不使任何产物指纹失效，转 done。TF-0100 的代码修复、逐行标记与门禁项 C31 均已完成并验证，但它改的是 bench/aci/runners/live_agent_loop.py，而 bench/aci/results/latest_live.json 记录的指纹覆盖该文件——按仓库自己的「证据新鲜度」规则（C12 fails closed），第 12 轮 live 基线现在**合法地**变成 stale。刷新它需要重跑 with 臂（需端点），属 TF-0105。因此 TF-0100 保持 in_progress，并把依赖方向改为 TF-0100 depends_on TF-0105（原 TF-0105 depends_on TF-0100 会形成环）。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

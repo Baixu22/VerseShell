@@ -1,0 +1,69 @@
+{
+  "schema": "verseshell.harness_encoding_contract/v1",
+  "generated_at": "2026-09-29T13:27:41.457767+00:00",
+  "generator": "tools/harness_encoding_contract.py",
+  "claim": "the raw-shell observation path decodes non-ASCII output losslessly and never lets a decode fault abort the agent loop",
+  "value": 1.0,
+  "pass": true,
+  "checks": [
+    {
+      "name": "utf8_observation_roundtrip",
+      "pass": true,
+      "detail": {
+        "is_str": true,
+        "contains_em_dash": true,
+        "contains_exit_marker": true,
+        "head": "# em dash: —\nvalue = 1\n\n[EXIT: 0]"
+      }
+    },
+    {
+      "name": "empty_and_failing_commands",
+      "pass": true,
+      "detail": {
+        "no_output": {
+          "returned_str": true,
+          "has_exit_marker": true
+        },
+        "unknown_command": {
+          "returned_str": true,
+          "has_exit_marker": true
+        },
+        "empty_command": {
+          "returned_str": true,
+          "has_exit_marker": true
+        }
+      }
+    },
+    {
+      "name": "mechanism_control",
+      "pass": true,
+      "detail": {
+        "cp936_rejects_fixture": true,
+        "error": "'gbk' codec can't decode byte 0x94 in position 13: illegal multibyte sequence"
+      }
+    }
+  ],
+  "detail": {
+    "fixture_bytes_hex": "2320656d20646173683a20e280940a76616c7565203d20310a",
+    "locale_preferred_encoding": "cp936",
+    "locale_getencoding": null,
+    "locale_control": {
+      "codec": "cp936",
+      "would_have_failed": true,
+      "error": "'gbk' codec can't decode byte 0x94 in position 13: illegal multibyte sequence",
+      "note": "informational only: on a UTF-8 host the pre-fix code would not have crashed, but the defect is still present in the code"
+    },
+    "prefix_call_shape": {
+      "stdout_is_none": true,
+      "reader_thread_error": "UnicodeDecodeError: 'gbk' codec can't decode byte 0x94 in position 13: illegal multibyte sequence",
+      "note": "`None` here is exactly what made `out += ...` raise TypeError and throw the trajectory away; the reader-thread UnicodeDecodeError above is the mechanism"
+    }
+  },
+  "evidence": {
+    "globs": [
+      "bench/aci/runners/live_agent_loop.py",
+      "tools/harness_encoding_contract.py"
+    ],
+    "fingerprint": "53368e51d76a78ee837d66507b08720055b4c31787ad68153f7bfe693d623655"
+  }
+}

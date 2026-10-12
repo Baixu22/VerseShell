@@ -1,0 +1,400 @@
+{
+  "schema": "verseshell.repair_backlog/v1",
+  "generated_at": "2026-09-29T09:30:00+08:00",
+  "baseline": {
+    "task_set_version": "3.0.0",
+    "gate": "29/31 pass; red = C14, C16",
+    "with_arm": "bench/aci/results/latest_live.json (315 rows, api_error_rows=0, seeds [42,43,44])",
+    "without_arm": "bench/aci/results/live_ab_without_read_files.json (315 rows, api_error_rows=0)",
+    "human_readable_report": "docs/repair-handoff-2026-09-29.md",
+    "forest": ".agent-workbench/task-forest/exports/task-forest.html"
+  },
+  "division_of_labour": {
+    "repair_agent": "code and configuration repairs only; may run cargo tests, the local gate, and the local analysis tools",
+    "test_owner": "runs live rounds (endpoint, ~13h for both arms), re-freezes task sets, and re-measures after repairs",
+    "rule": "a repair that changes the observation surface (what the model sees) must be declared in the PR as 'requires a live re-run'"
+  },
+  "global_prohibitions": [
+    "do not edit bench/aci/tasks/*.json or bench/aci/fixtures/** — they are inside the measured fingerprint surface and void all round-14 evidence",
+    "do not lower the C14 (0.15) or C16 (0.10) thresholds — explicit decision TF-0116, moving a threshold after seeing data is the failure mode the repo exists to prevent",
+    "do not promote candidates into the task set (tools/freeze_task_set.py) — that belongs to the next pre-registered round",
+    "do not run live rounds — measurement is the test owner's job, otherwise repair and measurement contaminate each other",
+    "do not change bench/aci/runners/live_agent_loop.py in a way that alters what the model sees without declaring it"
+  ],
+  "self_check_after_repair": {
+    "must_stay_empty": "git diff --stat bench/aci/tasks bench/aci/fixtures bench/aci/results/latest_live.json",
+    "gate_baseline": "python tools/claim_gate.py --skip-tests  ->  expect 29/31 with C14 and C16 red; every other claim PASS",
+    "extra_local": [
+      "python tools/statistics_crosscheck.py --out /tmp/xc.json   # expect 34/34",
+      "python tools/run_variance.py --out /tmp/rv.json            # expect it to produce a verdict"
+    ],
+    "if_you_intentionally_changed_the_observation_surface": "then the empty-diff check is expected to fail; state 'requires a live re-run' in the PR and hand it back"
+  },
+  "items": [
+    {
+      "id": "P0-1",
+      "forest_node": "TF-0121",
+      "severity": "P0",
+      "area": "harness/product-prompt",
+      "owner": "repair_agent",
+      "title": "D-arm-only turn-1 completion truncation blocks every success-rate and token comparison",
+      "symptom": "15 of 105 D-arm cells burn the entire 16384 completion budget on the FIRST turn, emit zero tool calls, and are scored as task failures. A/A' have essentially none (cap rate 1.9% / 0.0% vs D 14.3%).",
+      "evidence": [
+        "bench/aci/results/latest_live.json — the 15 rows all have: completion_truncated_turns == 1, llm_completion_tokens ~= 16453, tool_calls == 0, observation_tokens == 0, trajectory == [], elapsed_ms in [199476, 213661], last_error is None, harness_crash == False",
+        "same artifact, per-arm means: prompt tokens A 9015 / A' 9924 / D 11393; completion tokens A 1593 / A' 1610 / D 3017",
+        "the 12 truncated task_ids span pristine observations of 141-1559 tokens (several small/medium) -> NOT a task-size effect",
+        "eval/three_arm_report.json row_policy confirms: D exclusion 14.3% > 10% -> comparisons claimable=False"
+      ],
+      "root_cause": {
+        "status": "correlation_confirmed_causation_unproven",
+        "statement": "D's prompt/tool-schema is ~26% larger and its reasoning output ~2x, and truncation appears only on D. The step 'larger prompt causes more reasoning causes budget burn' has NOT been experimentally separated."
+      },
+      "required_first_step": "causal separation experiment: re-run the same cells with D's system prompt truncated/padded to A's length. If truncation disappears it is prompt volume; if it persists it is the interface framing and shrinking the prompt will not fix it.",
+      "repair_scope": [
+        "bench/aci/runners/live_agent_loop.py (D-side system prompt and tool descriptions)",
+        "possibly endpoint-side max_tokens policy (see P0-3)"
+      ],
+      "acceptance_criteria": [
+        "causal separation experiment done BEFORE changing anything",
+        "after the fix, D-arm cap_truncated rate <= 10% (the pre-registered §0.6.3 threshold) and A/A' do not get worse",
+        "a per-row diagnostic is added that distinguishes 'the model was reasoning' from 'the budget was burned'",
+        "the mitigation is written into docs/acceptance-criteria.md BEFORE the next live round (pre-registration)"
+      ],
+      "do_not": [
+        "raise max_tokens as the remedy (the endpoint's 300s cap makes that produce unmergeable artifacts — see P0-3)",
+        "relax the §0.6.3 10% threshold"
+      ]
+    },
+    {
+      "id": "P0-2",
+      "forest_node": "TF-0115",
+      "severity": "P0",
+      "owner": "repair_agent",
+      "title": "The task generator IS the model under test — every generated task is in the evaluated model's own distribution",
+      "symptom": "All 25 generated tasks were authored by sn-glm-5-3-flash, which is also the model being evaluated. Any favourable result is unfalsifiable after the fact, and no gate catches this.",
+      "evidence": [
+        "eval/task_set_freeze.json -> promoted (25 ids); for each, bench/aci/tasks/<id>.json -> provenance.generator == 'sn-glm-5-3-flash' (25/25)",
+        "provenance.variants: sn-kimi-k3 x25, deepseek-v4.1-flash x25 (these only satisfy A3's '>=2 independent correct solutions')",
+        "bench/aci/results/latest_live.json -> live_config.model == 'sn-glm-5-3-flash'",
+        "provenance.independent_of only asserts prompt isolation, not model independence"
+      ],
+      "root_cause": {
+        "status": "confirmed",
+        "statement": "dataset construction is co-linear with the evaluated object; this is a design defect, not a code bug"
+      },
+      "repair_scope": [
+        "docs/task-generation-protocol.md (independence protocol)",
+        "tools/task_generate_v2.py (author-model selection)",
+        "holdout construction"
+      ],
+      "acceptance_criteria": [
+        "part of the next holdout is generated by a model outside the evaluated endpoint family, or comes from a public dataset",
+        "the risk and its exposure are written into docs/claims-and-evidence.md C13/C29 failure boundaries",
+        "a same-family vs different-family contrast on D/A is reported (needs one live round — test owner)"
+      ],
+      "do_not": [
+        "claim the risk is excluded",
+        "the existing 25 tasks cannot be repaired after the fact; only a new batch can contrast it"
+      ]
+    },
+    {
+      "id": "P0-3",
+      "forest_node": "TF-0120",
+      "severity": "P0",
+      "area": "endpoint",
+      "owner": "repair_agent_or_infra",
+      "title": "The endpoint's 300-second non-streaming cap locks the reachable completion budget",
+      "symptom": "Raising max_tokens does not remove truncation; it converts length-truncation into HTTP 502, and a 502 row makes merge_live_runs.py refuse the whole artifact.",
+      "evidence": [
+        "audit-r12-scratch/cap_probe/ — the 11 truncated cells re-run at --max-tokens 32768: 2 passed, 0 still length-truncated, 9 HTTP 502",
+        "all failures clustered at ~300s wall clock; the 502 body is '非流式响应超时(300秒)'",
+        "bench/aci/runners/merge_live_runs.py refuses any api_error row with exit 2"
+      ],
+      "root_cause": {
+        "status": "confirmed",
+        "statement": "proxy 300s non-streaming response timeout x reasoning-model completion consumption"
+      },
+      "repair_scope": [
+        "endpoint/proxy configuration (preferred) or streaming request strategy; not something live_agent_loop.py should work around"
+      ],
+      "acceptance_criteria": [
+        "if the endpoint cannot change: keep the written constraint in docs/acceptance-criteria.md §0.5 and make budget-sensitivity a DERIVED predicate (see P1-1)",
+        "if the endpoint can change: raise the cap or switch to streaming, and RE-MEASURE the constraint rather than inheriting the old conclusion"
+      ]
+    },
+    {
+      "id": "P1-1",
+      "forest_node": "TF-0122",
+      "severity": "P1",
+      "area": "pipeline/merge",
+      "owner": "repair_agent",
+      "title": "A single endpoint-failed cell can freeze the entire evidence chain",
+      "symptom": "One cell repeatedly returning 502 blocks the merge of the whole arm, so every derived artifact stays stale and C12 stays red.",
+      "evidence": [
+        "bench/aci/runners/merge_live_runs.py lines ~70-75: any api_error row -> print and return 2",
+        "this round: python_csvlite_parse_80d158b2 [raw_shell] failed 502 on seeds 42 and 44 (once six attempts in a row) but SUCCEEDED on the without arm and on a later retry -> endpoint-state dependent, not structurally unusable",
+        "merge_live_runs.py already has --allow-api-errors but it only writes a count (live_config.api_error_rows); it does not emit per-row classification",
+        "the §0.6 classification exists only in tools/live_uncertainty.py::row_class()"
+      ],
+      "root_cause": {
+        "status": "confirmed",
+        "statement": "the merger predates §0.6 and does not share the row-classification implementation"
+      },
+      "repair_scope": [
+        "bench/aci/runners/merge_live_runs.py",
+        "tools/claim_gate.py"
+      ],
+      "acceptance_criteria": [
+        "a merge done with --allow-api-errors carries partial: true and a per-row row_class",
+        "the gate distinguishes a partial artifact from a complete one, non-silently, and names the affected rows and comparisons",
+        "negative control: mark one row api_error and the gate must report it"
+      ],
+      "do_not": [
+        "count a 502 as a model failure in the success rate"
+      ]
+    },
+    {
+      "id": "P1-2",
+      "forest_node": null,
+      "severity": "P1",
+      "area": "pipeline/refresh",
+      "owner": "repair_agent",
+      "title": "The refresh chain omits three artifacts that change with the live baseline",
+      "symptom": "tools/refresh_live_artifacts.py exits 0 but C12 (freshness), C33 and C10 are still red.",
+      "evidence": [
+        "the CHAIN in tools/refresh_live_artifacts.py has 13 steps and does NOT include eval/three_arm_report.json, eval/cross_shell.json, or bench/aci/results/latest.json (mock bench)",
+        "all three appear in tools/claim_gate.py::EVIDENCE_ARTIFACTS, so a live re-run marks them stale",
+        "eval/cross_shell.json also reads latest_live.json's wall_clock_context; eval/three_arm_report.json reads the same live data, and C33 reports 'row_policy disagrees between the two artifacts' when it is stale",
+        "ordering trap: tools/token_proxy_calibration.py fingerprints bench/aci/results/*.json, so the mock bench MUST be regenerated before calibration or the calibration artifact is immediately stale"
+      ],
+      "root_cause": {
+        "status": "confirmed",
+        "statement": "the chain was written for the round-13 artifact set and was never extended for three_arm/cross_shell/mock"
+      },
+      "repair_scope": [
+        "tools/refresh_live_artifacts.py"
+      ],
+      "acceptance_criteria": [
+        "add run_suite.py --mode mock, three_arm_report.py and cross_shell_bench.py to the chain, all BEFORE token_proxy_calibration",
+        "re-running the script on unchanged live data leaves C12 at PASS"
+      ]
+    },
+    {
+      "id": "P1-3",
+      "forest_node": null,
+      "severity": "P1",
+      "area": "tooling/ops",
+      "owner": "repair_agent",
+      "title": "splice_live_cells.py: wrong API-key variable and all-or-nothing write semantics",
+      "symptom": "A. It only accepts DEEPSEEK_API_KEY or --api-key while the rest of the repo reads ACI_BENCH_API_KEY from .env.local, so a plain invocation always fails. B. It writes a run file only when EVERY bad cell in it succeeds; one persistent failure discards the cells that already re-ran successfully.",
+      "evidence": [
+        "bench/aci/runners/splice_live_cells.py line ~37 and ~41: default=os.environ.get('DEEPSEEK_API_KEY','')",
+        "same file lines ~65-67: on a still-failing cell it returns 2 before writing",
+        "same file line ~77: the only write_text call",
+        "this round: the same file was re-run 6 times, each time re-consuming endpoint time for cells that had already been fixed"
+      ],
+      "root_cause": {
+        "status": "confirmed",
+        "statement": "key-source inconsistency plus a batch-level transactional write"
+      },
+      "repair_scope": [
+        "bench/aci/runners/splice_live_cells.py"
+      ],
+      "acceptance_criteria": [
+        "reads ACI_BENCH_API_KEY from .env.local like the other tools (keeping --api-key as an override)",
+        "persists successfully spliced cells even when other cells in the same file still fail, and reports which ones remain"
+      ]
+    },
+    {
+      "id": "P2-1",
+      "forest_node": null,
+      "severity": "P2",
+      "area": "product/read-projection",
+      "owner": "repair_agent",
+      "title": "C14 (0.0422 < 0.15) and C16 (0.0768 < 0.10): the compact read projection barely moves the total read bucket",
+      "symptom": "Both thresholded claims fail. The projection is not a regression — it removes >56% of the NAMED envelope overhead (C34 passes at 0.5654) — but that overhead is too small a share of the total.",
+      "evidence": [
+        "eval/read_path_breakdown.json pre-change attribution (share of chars): content 78.2%, line_wrapper 10.8%, residual 4.3%, counts 2.7%, digest 2.7%, path 1.4% (corrected single-file digest attribution, 2026-09-29; total token savings unchanged)",
+        "the C16 line projection only touches line_wrapper + counts (~13.5%), so the ceiling on the total-bucket effect is of that order",
+        "eval/tf45_envelope_replay.json: 0.0422; eval/read_path_breakdown.json: 0.0768",
+        "C34 (mixture-invariant): named overhead 40702 -> 17688 chars = 0.5654, PASS"
+      ],
+      "root_cause": {
+        "status": "confirmed",
+        "statement": "the projection shrinks the envelope while content dominates the total; this is a product-design limit, not a regression"
+      },
+      "repair_scope": [
+        "product-side projection strategy (window/pagination/summary)",
+        "or a re-registered claim definition in the next round"
+      ],
+      "acceptance_criteria": [
+        "C14/C16 thresholds MUST NOT be lowered (TF-0116)",
+        "if the product changes: publish refreshed eval/read_path_breakdown.json and eval/tf45_envelope_replay.json clearing the thresholds",
+        "if the product does not change: leave them red and keep C34 as the claimable substitute",
+        "any live re-run needed after a product change is the test owner's job"
+      ]
+    },
+    {
+      "id": "P2-2",
+      "forest_node": "TF-0114",
+      "severity": "P2",
+      "area": "dataset/difficulty",
+      "owner": "repair_agent",
+      "title": "Difficulty ceiling: the tasks got LONGER but not HARDER (baseline rose to 0.9048 against a 0.40-0.70 target)",
+      "symptom": "At the fixed observed A baseline, 0.0952 of positive headroom cannot accommodate a +0.15 effect; this does not rule out smaller effects, negative effects, or different future baselines.",
+      "evidence": [
+        "eval/live_uncertainty.json: A success 0.9048 (105 pairs, 41 required -> sample adequate, detectable |delta| >= 0.0962)",
+        "docs/task-generation-protocol.md §4.6 pre-registered 0.40-0.70 before any round-14 result",
+        "7/35 tasks are confirmed >=1000 pristine proxy tokens; the admission artifact covers only 25 generated tasks, leaving 10 handwritten tasks unmeasured. Do not report 20% as a fully measured population fraction.",
+        "docs/task-generation-protocol.md §4.8: if the 10 unknown tasks are not reclassified, 5 additional confirmed-large tasks guarantee only 12/40; 7 additions guarantee 14/42. This is conditional quota arithmetic, not a claim that the unknown tasks are small."
+      ],
+      "root_cause": {
+        "status": "hypothesis",
+        "statement": "the large-tier mechanism lengthens the FAILURE DUMP, which raises the observation volume without raising the solving difficulty — 'longer' is not 'harder'. Needs a cheap stratification experiment (failure rate by task shape on the A arm) before any task-set change."
+      },
+      "repair_scope": [
+        "task generation / difficulty design in docs/task-generation-protocol.md and the candidate generator"
+      ],
+      "acceptance_criteria": [
+        "new task set's A-arm baseline falls inside a band fixed in advance",
+        "large share reaches a new target DERIVED BY ARITHMETIC, not guessed",
+        "the difficulty change is made with NO visibility of live results"
+      ]
+    },
+    {
+      "id": "P2-3",
+      "forest_node": "TF-0123",
+      "severity": "P2",
+      "area": "generator/observation-mechanism",
+      "owner": "repair_agent",
+      "title": "The observation mechanism makes the large tier unreachable for rust and typescript",
+      "symptom": "A8 requires >= 1000-token pristine failure dumps; rust/ts large candidates measure 277-590 and are all rejected, so 5 pre-registered slots stayed empty.",
+      "evidence": [
+        "rejected candidates: rust_primesieve 277, rust_chunker 390, rust_sliding_sums 443, rust_spiral_order 590, js_csvlite_parsecsv 376",
+        "same batch, python large passes easily: python_nested_flatten 3496, python_csvlite_parse 1559",
+        "mechanism probe already run on a rejected candidate (no task-set change): swapping check.mjs's 'node:assert/strict' import for a collecting wrapper gave 1 failure / 1529 chars / 382 proxy tokens -> 7 failures / 2663 chars / 665 proxy tokens",
+        "665 < 1000 -> changing ONLY the reporting mechanism is not enough; the 7 failing assertions compare 3x4 short arrays, so deepStrictEqual's diff is inherently short. Bytes depend on the assertion PAYLOAD, not on the number of failures.",
+        "Repair probe 2026-09-29: same five rejected candidates, unchanged assertion values, temporary copies only. Rust --no-fail-fast: 277/391/442/590 -> 1961/2104/1933/2325 proxy tokens; Node native test registration: 394 -> 3537, 18 tests/7 failures; GOLDEN passes 5/5. See audit-r12-scratch/repair-p2-3-2026-09-29/candidate-probe.json. This is not full admission or live acceptance."
+      ],
+      "root_cause": {
+        "status": "confirmed",
+        "statement": "Confirmed: bare-node top-level assertion calls stop at the first failure; default cargo test stops after a failing library-test target and hides the integration tests. The former short-payload diagnosis was incomplete. Native all-case reporting on the same assertions clears A8 in five temporary candidate copies; future generation still requires meaningful long payloads."
+      },
+      "repair_scope": [
+        "tools/task_generate_v2.py (TESTS prompt and large-tier instruction)",
+        "the generated check harness"
+      ],
+      "acceptance_criteria": [
+        "typescript side must do BOTH: (a) failures do not terminate the process and all print, (b) assertions compare LONG payloads (FULL_PLAN.json's large_tier_requirement already said 'assertions print long values' but it was applied to test COUNT)",
+        "rust side must make each failing test print a long payload rather than relying on cargo test's short summary",
+        "re-test A8 on the same rejected candidate pool and report HOW MANY clear 1000 tokens (do not assume it will be 5)"
+      ]
+    },
+    {
+      "id": "P2-4",
+      "forest_node": "TF-0112",
+      "severity": "P2",
+      "area": "statistics/protocol",
+      "owner": "repair_agent + test_owner",
+      "title": "Run-to-run variance is not in the published intervals — and the sign flips between seeds",
+      "symptom": "Published intervals resample TASKS only. The endpoint accepts a seed without reproducing it, and three runs of the SAME configuration disagree in the SIGN of the success-rate difference.",
+      "evidence": [
+        "eval/run_variance.json (new this round, tools/run_variance.py): success delta D-A per seed +0.0286 / -0.0857 / -0.1429; between-seed SE / published half-width = 0.76x",
+        "observation-token ratio per seed 0.7182 / 0.6220 / 0.5817; ratio = 0.31x",
+        "docs/claims-and-evidence.md C13 boundary 3: the endpoint does not reproduce the seed",
+        "round 12->13 drift of 0.2577 on the D/A' observation-token ratio versus a claim margin of 0.0212"
+      ],
+      "root_cause": {
+        "status": "confirmed",
+        "statement": "Published intervals omit independent collection variation. Distinct-seed spread is descriptive and confounds seed effects with collection noise; it cannot by itself identify a missing variance component or prove undercoverage."
+      },
+      "repair_scope": [
+        "tools/live_uncertainty.py",
+        "tools/acceptance_power.py",
+        "re-run protocol"
+      ],
+      "acceptance_criteria": [
+        ">= 3 complete re-runs per configuration (same task set, same seeds, same budget), raw artifacts kept per run",
+        "a variance-components model or stratified bootstrap merges the between-run component into the headline interval, reporting both components",
+        "any interval that does not include run-to-run variance is explicitly labelled as such",
+        "LIMIT: 3 distinct seeds give 2 degrees of freedom but do not identify independent repeated-run variance; the observed spread is neither a calibrated component nor a mathematical lower bound."
+      ]
+    },
+    {
+      "id": "P2-5",
+      "forest_node": null,
+      "severity": "P2",
+      "area": "claims/measurement-caliber",
+      "owner": "repair_agent",
+      "title": "The len//4 observation-token proxy is not an upper bound, and all token claims rest on it",
+      "symptom": "Every observation-token number uses max(1, len(text)//4). Measured against a real BPE tokenizer it under-counts, so token claims are optimistic.",
+      "evidence": [
+        "eval/token_proxy_calibration.json: mean real/proxy 1.2442, median 1.2148; 52/60 samples violate the 'proxy is an upper bound' property",
+        "ascii_only n=47 mean 1.2505; non_ascii_other n=13 mean 1.2218",
+        "endpoint tokenizer and tiktoken cl100k_base are not interchangeable on 2/11 shape-panel texts",
+        "under the REAL tokenizer D/A total-token ratio is 1.3583 [1.0303, 1.8986] — the opposite direction from the proxy's 0.6347"
+      ],
+      "root_cause": {
+        "status": "confirmed",
+        "statement": "the proxy is shape-dependent and under-counts; there is no single correction factor"
+      },
+      "repair_scope": [
+        "docs/claims-and-evidence.md (mandatory caliber labelling per token claim)",
+        "tools that publish token claims"
+      ],
+      "acceptance_criteria": [
+        "real-tokenizer caliber is the PRIMARY caliber, or every token claim carries an explicit proxy-caliber label",
+        "when the two calibers disagree in direction, the real one governs (§4.2 already requires this; make it per-claim)"
+      ]
+    }
+  ],
+  "already_fixed_this_session": [
+    {
+      "file": "tools/run_task_plan.py",
+      "defect": "slot counting scored every candidate's plan_index without intersecting the plan; 'absent' reached -19 and it exited 0 with only 10/15 covered (false convergence)",
+      "status": "fixed"
+    },
+    {
+      "file": "tools/task_generate_v2.py",
+      "defect": "spec returned a path as the module name (src/lib.rs) and it was pasted into Cargo.toml name=; no compile gate on the correct module; variants written to a different directory than task.json so A3 saw zero variants; rust variant src/lib.rs parent dir not created (crashed the whole generator run)",
+      "status": "fixed"
+    },
+    {
+      "file": "tools/freeze_task_set.py",
+      "defect": "promoted/kept_existing derived from 'what this run promoted'; per_tier folded generated-untagged tasks into the 'existing' bucket",
+      "status": "fixed"
+    },
+    {
+      "file": "tools/claim_gate.py",
+      "defect": "C34 checked only the task-set version, so bumping it would validate OLD numbers; _impossible_flag_consistent treated §0.6's policy_blocked as inconsistent",
+      "status": "fixed"
+    },
+    {
+      "file": "tools/acceptance_power.py",
+      "defect": "cross-shell verdicts carried no scoring triple, so Holm reported corrected:true while correcting nothing",
+      "status": "fixed"
+    }
+  ],
+  "new_gates_added_this_session": [
+    {
+      "id": "C34",
+      "manages": "compact read projection must remove >=40% of the NAMED envelope overhead, measured on a task set newer than 2.0.0 and on a FRESH artifact",
+      "status": "PASS 0.5654"
+    },
+    {
+      "id": "C35",
+      "manages": "paired control arm must match the with arm on seeds/tasks/rows/git_rev/task_set_version with zero api_error rows",
+      "status": "PASS (with negative control)"
+    },
+    {
+      "id": "C36",
+      "manages": "every verdict declares a hypothesis family; confirmatory families get Holm; exploratory can never be claimable",
+      "status": "PASS (with negative control)"
+    },
+    {
+      "id": "C37",
+      "manages": "headline statistics must reproduce on an independent code path (tools/statistics_crosscheck.py)",
+      "status": "PASS 34/34 (with negative control)"
+    }
+  ]
+}

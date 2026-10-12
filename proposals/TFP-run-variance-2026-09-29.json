@@ -1,0 +1,74 @@
+{
+  "applied_at": "2026-09-29T00:04:08.211946Z",
+  "base_graph_hash": "41d748e220a438bc37f498b7770bcec0e72ed57dce8b327b359942ae355e216c",
+  "base_summary": {
+    "edge_count": 181,
+    "node_count": 123,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已完成 · 新增 `tools/run_variance.py`**：用**同一配置的三次运行**（`bench/aci/results/tf0114/with_seed{42,43,44}.json`，同任务集 v3.0.0、同模型、同提示、同预算，仅 seed 不同）直接估计跑间方差，并与已发布的**任务聚类** CI95 半宽比较。产物 `eval/run_variance.json`，已接进 `tools/refresh_live_artifacts.py` 的末尾（它读 live_uncertainty 与逐 seed 原始文件）。",
+          "**实测（本轮最有价值的新发现）**：成功率差 D−A 逐 seed 为 **+0.0286 / −0.0857 / −0.1429** —— **符号在 seed 之间翻转**。跑间 sd = 0.0873，跑间 SE = 0.0504，是已发布半宽 0.0664 的 **0.76 倍**。",
+          "观察 token 比 D/A 逐 seed 为 **0.7182 / 0.6220 / 0.5817**（跨度 0.137，约 21% 相对），跑间 sd 0.0701、SE 0.0405，是已发布半宽 0.1314 的 **0.31 倍**。工具调用比逐 seed 0.8831 / 0.7829 / 0.7415。",
+          "**为什么这条重要**：已发布区间按**任务**重采样，只建模「抽到了哪些任务」。端点接受 `seed` 但不复现（C13 边界③），而第 12↔13 轮之间实测过 D/A′ 观察 token 比漂移 **0.2577**，是当时主张余量 0.0212 的 **10.4 倍**。本轮把这条从「审计的怀疑」变成了**同轮内的直接测量**。",
+          "**照实登记的限制**：三个 seed 给出的是 **2 个自由度**的 sd，所以这是问题的**下界**而非标定过的方差成分——它能证明已发布区间偏窄，**不能**给出应当替代它的区间。该限制写在产物 `method.limitation` 与 verdict 里。",
+          "**对第 14 轮解读的直接后果**：`[−0.1331, −0.0003]` 不含 0，但**不得**读成「D 显著更差」——同配置三 seed 的符号会翻转。这条已写进 `docs/tf0114-round-notes.md` §5.5 与 §6 的禁止写法。"
+        ],
+        "next_action": "要给出**标定过的**方差成分而不是下界，需要每配置 ≥3 次**完整**重跑（同任务集、同 seed、同预算），并据此做方差成分模型或分层 bootstrap；本轮只做到了「用已有三次运行给出下界」。注意重跑会让 live 证据面换代，必须整体做。",
+        "progress": 45.0,
+        "progress_source": "agent",
+        "status": "in_progress"
+      },
+      "id": "TF-0112"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**阻塞已消除**：那最后一格 `python_csvlite_parse_80d158b2 [raw_shell] seed=44` 再次补跑时**一次成功**（返回普通 FAIL 行：2 tools / 1348 obs_tok），三份 with 臂 seed 文件现在 **0 行 api_error**。",
+          "**因此 with 臂以干净状态重新合并**：`merge_live_runs.py`（**不需要** `--allow-api-errors`）→ 315 行、`api_error_rows = 0`。旧的部分合并产物备份在 `audit-r12-scratch/latest_live_round14_partial_backup.json`。",
+          "**C35 由 FAIL 转 PASS**，即两臂现在在 seed 集合、任务集合、行数、`git_rev`、`task_set_version` 上完全一致。",
+          "**这同时修正了本节点原先的记录**：早先「6 次补跑全部失败」是**端点状态相关**的（同一格在 without 臂与后续重试中都能成功），不是该任务结构性不可用。**不能把它当成结构性结论**——这一点比结论本身重要。",
+          "**仍然有效的部分**：一个格的端点失败会让**整轮** live 无法合并、全部派生产物永久陈旧，这个管道缺陷依然存在（`--allow-api-errors` 只记计数、不产出行分类），仍待与 §0.6 对齐。"
+        ],
+        "next_action": "剩下的只有「政策对齐」：把单格端点失败的处置写进预注册，并让 `merge_live_runs.py --allow-api-errors` 与 §0.6 的 `row_class()` 对齐（当前它只写一个计数、不产出逐行分类），使门禁能机检 partial 产物。本轮的实际阻塞已经消除。",
+        "progress": 60.0,
+        "progress_source": "agent",
+        "status": "in_progress"
+      },
+      "id": "TF-0122"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**最终门禁：29/31 PASS**（含 cargo 测试）。仅两项红：**C14 = 0.0422**（门槛 ≥0.15）与 **C16 = 0.0768**（门槛 ≥0.10）——两者按 TF-0116 的决策**保持原阈值、不改度量**，并已另立 C34（混合不变口径，本轮 **PASS 0.5654**）。",
+          "**本轮新增转绿**：C35（with 臂补跑成功后两臂组成一致）、C37（统计独立重实现 34/34，含负对照）、C10（README 跨 shell 表随新产物更新——它先判红了，这正是它该做的）。",
+          "**新增工具两个**：`tools/statistics_crosscheck.py`（C37）、`tools/run_variance.py`（TF-0112 的跑间方差）。两者都接进 `tools/refresh_live_artifacts.py` 的末尾。",
+          "**本轮新增门禁一项**：C37（统计代码的独立重实现必须在 20 项以上比对中全部吻合，且必须同时含闭式与重采样两类对照）。"
+        ]
+      },
+      "id": "TF-0094"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**本轮收口后的最终状态**：完整门禁 **29/31**；两臂均 `api_error_rows = 0`；`eval/evidence.json`、`eval/statistics_crosscheck.json`、`eval/run_variance.json` 均为最新且纳入 C12 新鲜度检查。",
+          "**README 的跨 shell 表已随新产物更新两次**（每次重跑 `cross_shell_bench.py` 都会让 C10 先判红——这是设计行为，不是回归）。",
+          "提案：本轮另加 `TFP-tf0111-crosscheck-2026-09-29`、`TFP-run-variance-2026-09-29`。"
+        ]
+      },
+      "id": "TF-0106"
+    }
+  ],
+  "created_at": "2026-09-29T08:40:00.000000Z",
+  "proposal_id": "TFP-run-variance-2026-09-29",
+  "rationale": "本轮两件事：①with 臂最后一格补跑成功，两臂都干净、C35 转绿、门禁 29/31；②新增 `tools/run_variance.py` 并实测出同配置三 seed 的成功率差符号会翻转（TF-0112）。",
+  "session_id": "ses_verseshell-live-chain-2026-09-28",
+  "status": "applied"
+}

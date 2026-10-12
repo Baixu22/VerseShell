@@ -1,0 +1,884 @@
+{
+  "applied_at": "2026-09-26T04:32:32.634013Z",
+  "base_graph_hash": "35422730da0aa46a017d3ab247ad399d8240d946ee52c26ae3383b3fc5214f91",
+  "base_summary": {
+    "edge_count": 145,
+    "node_count": 92,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "gap-r12-audit",
+      "node": {
+        "acceptance_criteria": [
+          "复核脚本可在 clone 后直接跑（无 API 调用）：`python audit-r12-scratch/verify_core.py`、`verify_part2.py`、`verify_part3.py`、`verify_part4.py`",
+          "每条结论有命令 + 产物路径 + 日期，且写入 `docs/audit-r12-verification.md`",
+          "审计意见中每条可验证断言都被判定为 成立 / 部分成立 / 被推翻，不留「需核对」"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "让 VerseShell 的对外数字经得起第三方只读复现",
+          "validation_plan": [
+            "跑四个复核脚本并核对数值",
+            "对照 docs/audit-r12-verification.md §0 的判定表逐条检查",
+            "跑 python tools/claim_gate.py 确认未扰动门禁"
+          ],
+          "why_not_enough": "本节点只负责「把缺口说清并给出复算证据」，修代码与重跑 live 由 TF-0094 的子任务承担",
+          "why_this_task": "审计指出的问题若只停在对话里，下一轮仍会以同一条口径对外声明；必须先固化成节点与证据"
+        },
+        "assumptions": [
+          "`bench/aci/results/latest_live.json` 每行的 `llm_prompt_tokens` / `llm_completion_tokens` 是整轮累加的端点 usage，可作为真实 tokenizer 口径",
+          "3 个 seed 之间不是完全独立（实测 ICC 0.28–0.56），因此聚类区间比行级区间更保守、应作为对外区间"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "bench",
+          "live",
+          "statistics",
+          "evidence",
+          "audit"
+        ],
+        "desired_outcomes": [
+          "头条 token 声明有代理口径与真实 tokenizer 口径两套数字，方向不一致时以真实口径为准",
+          "所有比值区间按任务聚类给出，而不是按行重抽",
+          "D vs A′ 这一支的成功率与 CPST 有独立判定行",
+          "A 臂的崩溃行被显式标记，不再静默计入失败"
+        ],
+        "difficulty": "high",
+        "display_order": 320,
+        "evidence": [
+          "复核报告 `docs/audit-r12-verification.md`（含逐条判定表与修正后数字）",
+          "复核脚本与产物：`audit-r12-scratch/verify_core.py|.json`、`verify_part2.py|.json`、`verify_part3.py|.json`、`verify_part4.py|.json`（只读产物，无 API 调用）",
+          "F1 反向证据：真实总 token/轮 A 11737.8、A′ 11741.5、D 14005.7 → D/A = 1.1932、D/A′ = 1.1928；真实输入比 1.545 / 1.627，真实输出比 0.171 / 0.149（对照代理口径 0.6853 / 1.0567）",
+          "F2 证据：`tools/live_uncertainty.py:176` 按行重抽；实测 ICC 0.282–0.563（有效样本 ≈35–42，非审计所说的 25）；D/A 观察 token 区间上界由行级 0.8563–0.8571 抬到聚类 0.898–0.900，正好压在 L2 门槛 0.90 上",
+          "F3/F4 证据：D vs A 精确 McNemar 7:16 p=0.09314；D vs A′ 5:17 p=0.01690（此前漏报）；但任务级符号翻转后 D vs A′ p=0.0643 不显著；CPST(D/A′)=0.8522 已超 0.80 门槛",
+          "R1 证据：A 臂 `bench/aci/runners/live_agent_loop.py:947` 的 `text=True` 未指定 encoding，cp936 下 `:950-953` 抛 `TypeError` 致轨迹丢失；A 3/75、A′ 2/75 崩溃、D 0/75；剔除该任务后 D−A 0.1200→0.0833",
+          "门禁未受扰动：`python tools/claim_gate.py` → 22/24（C14 0.0514<0.15、C16 0.0835<0.10 失败，与简报 §4.5 一致）"
+        ],
+        "kind": "follow_up",
+        "next_action": "按 TF-0094 的 12 个子任务推进；先做步骤55（门禁判定规则）与步骤56（A 臂崩溃），再做步骤57（区间与口径接线）。",
+        "non_goals": [
+          "不改任何预注册门槛数字去迁就现状",
+          "不把「代理口径下更省」写成「更省 token」",
+          "不替第三方审计者做它没做的判断（例如把「未检出」改写成「无差异」）"
+        ],
+        "priority": 1,
+        "purpose": "让「省 token」「成功率更高」「跨 shell 更快」三类对外声明都能对着产物复现，并把审计者标成「需核对」的部分给出确定答案。",
+        "status": "in_progress",
+        "summary": "第三方审计只能做简报的内部一致性复算；本轮在有仓库的条件下把每条断言复算了一遍，结果比审计本身更严重：头条「D 省 31.5% token」在端点真实 tokenizer 口径下反向为「D 贵 19.3%」。",
+        "title": "缺口：R12 审计复核发现头条 token 声明在真实 tokenizer 口径下反向、区间未按任务聚类、A 臂 cp936 崩溃 3/75 行"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "close-r12-audit",
+      "node": {
+        "acceptance_criteria": [
+          "`python tools/claim_gate.py` 退出码为 0（当前 C14/C16 红，需先按 §6 P1 决策：修产品或显式改声明口径）",
+          "改动 Rust 代码时 `cargo test` 全绿",
+          "每个子任务的 acceptance_criteria 逐条有可复现命令 + 产物路径 + 日期，并回写进节点 evidence",
+          "本轮对外数字在 docs/claims-and-evidence.md 登记且两处口径一致"
+        ],
+        "alignment": {
+          "fit": "aligned",
+          "fit_confidence": 0.9,
+          "user_goal": "让 VerseShell 的结论第三方可审计、可复现",
+          "validation_plan": [
+            "逐个子任务跑对应命令并记录产物",
+            "claim_gate 与 cargo test 全绿",
+            "对照 docs/audit-r12-verification.md §10 的行动清单逐条勾销"
+          ],
+          "why_not_enough": "本任务只收口，不承担把产品改到达标（例如 C14/C16 的产品侧改动）",
+          "why_this_task": "复核发现的问题全部指向同一件事：门禁与产物在「口径」和「区间」两件事上不够严，导致可主张的结论不成立"
+        },
+        "assumptions": [
+          "端点 `usage` 字段在后续 live 中继续逐轮记录（否则真实口径无法复算）",
+          "留出任务集可以在不放松组合规则的前提下从现有候选里构造"
+        ],
+        "confidence": 0.85,
+        "context_tags": [
+          "bench",
+          "live",
+          "statistics",
+          "gate",
+          "docs"
+        ],
+        "desired_outcomes": [
+          "`docs/claims-and-evidence.md` 的 token 类声明改为双口径，并写明失效边界",
+          "所有对外区间为按任务聚类的 bootstrap 区间",
+          "A 臂崩溃行在产物里显式标记并可单列/排除",
+          "消融结论（P7）要么重跑后成立，要么撤回",
+          "下一轮 live 在留出任务集上重测"
+        ],
+        "difficulty": "high",
+        "display_order": 330,
+        "evidence": [
+          "缺口来源与复算证据见 TF-0093 的 evidence 字段",
+          "进度基线：12 个子任务中 4 条已完成（步骤51–54）、8 条待落地（步骤55–62）"
+        ],
+        "kind": "global_task",
+        "next_action": "先落步骤55（acceptance_power 的两条判定规则）与步骤56（A 臂 cp936 崩溃），再落步骤57（区间与口径接线），最后重跑消融与下一轮 live。",
+        "non_goals": [
+          "不放宽任何预注册门槛",
+          "不为了让某条声明通过而更换口径或样本",
+          "不把「无证据」写成「已证伪」或「产品缺口」"
+        ],
+        "priority": 1,
+        "purpose": "让「可主张」这三个字重新有确定含义——区间越过门槛才算，而不是点估计看起来不错就算。",
+        "status": "in_progress",
+        "summary": "把审计复核的结论落成可主张状态：口径双轨、区间聚类、A 臂崩溃可排除、门禁判定规则改成区间规则，并重跑消融与下一轮 live。",
+        "title": "TF-0093 收口：重定 token 口径、区间按任务聚类、修 A 臂崩溃与门禁判定规则"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step51",
+      "node": {
+        "acceptance_criteria": [
+          "三臂真实输入/输出/总 token 与两支比值全部算出并带区间",
+          "给出逐轮分解（观察 / 输入 / 输出 / 净变化）",
+          "写清口径限定：真实总 token 含系统提示与工具 schema，是接口固定开销，与「观察 token」不是同一个量"
+        ],
+        "confidence": 0.95,
+        "context_tags": [
+          "bench",
+          "live",
+          "token",
+          "evidence"
+        ],
+        "difficulty": "medium",
+        "display_order": 340,
+        "evidence": [
+          "真实口径来源：`bench/aci/results/latest_live.json` 每行的 `llm_prompt_tokens` / `llm_completion_tokens`（`bench/aci/runners/live_agent_loop.py:1001,1027-1028,1168-1169` 逐轮累加），225/225 行齐全",
+          "三臂真实总 token/轮：A 11737.8、A′ 11741.5、D 14005.7 → **D/A = 1.1932、D/A′ = 1.1928**（聚类 CI95 分别 [0.910,1.749] / [0.849,1.803]）",
+          "真实输入比 D/A = **1.545**、D/A′ = **1.627**；真实输出比 D/A = **0.171**、D/A′ = **0.149**",
+          "逐轮分解（D vs A）：观察 −279.5、输入 +4759.3、输出 −2491.4、**净 +2267.9（+19.3%）**",
+          "对照代理口径 0.6853 / 1.0567：两个口径方向相反；按 `docs/acceptance-criteria.md:171`「两者方向不一致时以真实 tokenizer 为准」应以真实口径为准",
+          "命令：`python audit-r12-scratch/verify_core.py`、`verify_part2.py`、`verify_part4.py`；产物 `audit-r12-scratch/verify_core.json`、`verify_part2.json`、`verify_part4.json`",
+          "写入 `docs/audit-r12-verification.md` §1；日期 2026-09-26"
+        ],
+        "kind": "task",
+        "next_action": "已关闭。下游影响（重写声明）由步骤57 承担。",
+        "non_goals": [
+          "不把真实口径的结论直接等同于「观察 token 更贵」",
+          "不改预注册门槛"
+        ],
+        "priority": 1,
+        "progress": 100.0,
+        "progress_source": "agent",
+        "purpose": "预注册 D 区要求「真实 tokenizer 口径」，而头条一直用的是 len//4 代理；仓库里其实已存端点 usage，可以零 API 成本重算。",
+        "status": "done",
+        "summary": "用每行的 llm_prompt_tokens / llm_completion_tokens 重算 225 行，得到与代理口径相反的结论。",
+        "title": "步骤51：用端点 usage 重算真实 tokenizer 口径并重定头条声明"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step52",
+      "node": {
+        "acceptance_criteria": [
+          "确认 ratio_bootstrap 的重抽单位并给出代码位置",
+          "给出每个关键指标的 ICC、设计效应、有效样本量",
+          "给出行级与任务聚类两套区间，并说明门槛是否被跨越",
+          "结论经多种子 bootstrap 稳定性检验（不能是单次重抽的偶然）"
+        ],
+        "confidence": 0.95,
+        "context_tags": [
+          "bench",
+          "statistics",
+          "evidence"
+        ],
+        "difficulty": "medium",
+        "display_order": 350,
+        "evidence": [
+          "代码事实：`tools/live_uncertainty.py:176` `sample = [pairs[rng.randrange(n)] for _ in range(n)]` → 重抽单位是行 `(task_id, seed, run_index)`；该函数 docstring（`:164`）自称 resampling the (task, seed) cells，属误导",
+          "ICC/设计效应/有效样本：log 观察 token 比 D/A 0.282 / 1.48 / 41.9；工具比 D/A 0.306 / 1.57 / 42.0；log 观察 token 比 D/A′ 0.326 / 1.59 / 37.1；成功率 A 臂 0.563 / 2.13 / 35.3；成功率 D 臂 0.456 / 1.91 / 39.2",
+          "100000 次 × 5 个随机种子：D/A 观察 token 行级上界 0.8563–0.8571 → **聚类上界 0.898–0.900**；D/A′ 行级 [0.844,1.377] → 聚类 [0.762,1.564]；工具比 D/A 行级 [0.816,1.257] → 聚类 [0.767,1.353]",
+          "门槛后果：`eval/acceptance_power.json` 把「省 ≥15%（L2，上界 ≤0.90）」标为可主张，依据是行级上界 0.8551；聚类后余量 ≤0.002，**应改判为「压在门槛上、不可主张」**",
+          "命令：`python audit-r12-scratch/verify_part2.py`、`verify_part3.py`；产物同名 `.json`",
+          "写入 `docs/audit-r12-verification.md` §2；日期 2026-09-26"
+        ],
+        "kind": "task",
+        "next_action": "已关闭。把聚类区间接进产物与门禁由步骤57 承担。",
+        "non_goals": [
+          "不修改 live_uncertainty.py 的既有输出格式（接线由步骤57 做）"
+        ],
+        "priority": 1,
+        "progress": 100.0,
+        "progress_source": "agent",
+        "purpose": "审计指出 bootstrap 重抽单位是行而不是任务；需要确认并量化它对门槛判定的实际代价。",
+        "status": "done",
+        "summary": "确认按行重抽属实；实测 ICC 0.28–0.56（有效样本 ≈35–42，不是审计说的 25）；聚类后 L2 区间上界正好压在 0.90 门槛上。",
+        "title": "步骤52：按任务聚类重算全部区间并量化 ICC 与设计效应"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step53",
+      "node": {
+        "acceptance_criteria": [
+          "两支对比的成功率都有精确 McNemar p 值与不一致格",
+          "给出按任务聚类的稳健检验（符号翻转）与聚类 bootstrap 区间",
+          "CPST 两支都给点估计与区间，并明确是否达到 0.80 门槛",
+          "结论区分「名义显著」与「聚类后显著」，不得只报前者"
+        ],
+        "confidence": 0.95,
+        "context_tags": [
+          "bench",
+          "statistics",
+          "evidence"
+        ],
+        "difficulty": "medium",
+        "display_order": 360,
+        "evidence": [
+          "D vs A：仅 A 赢 7 / 仅 D 赢 16，Δ=+0.12，精确双侧 **p=0.09314**（不显著）",
+          "D vs A′：仅 A 赢 5 / 仅 D 赢 17，Δ=+0.16，精确双侧 **p=0.01690**（Bonferroni 阈值 0.025 仍成立）——`eval/live_uncertainty.json` 只存了 A 那一支，D vs A′ 属漏报",
+          "任务级符号翻转检验（100000 次）：D vs A **p=0.2072**、D vs A′ **p=0.0643**（均不显著）；聚类 bootstrap CI 分别 [−0.0267,0.280] / [0.0133,0.3067]",
+          "CPST：D/A = **0.5858**（聚类 CI95 [0.483,0.742]）；D/A′ = **0.8522 > 0.80 门槛**（聚类 CI95 [0.667,1.156]）；`eval/acceptance_power.json:117-127` 有 live_coached 的 CPST 数值但 `verdicts` 里没有对应判定行",
+          "真实 token 口径 CPST：D/A = **1.02**（聚类 [0.718,1.571]）、D/A′ = 0.962（[0.676,1.475]）→ 「每成功一次更便宜」在真实口径下也不成立",
+          "命令：`python audit-r12-scratch/verify_core.py`、`verify_part3.py`；产物同名 `.json`",
+          "写入 `docs/audit-r12-verification.md` §3；日期 2026-09-26"
+        ],
+        "kind": "task",
+        "next_action": "已关闭。把这两支写进 acceptance_power 的判定表由步骤57 承担。",
+        "non_goals": [
+          "不因 D vs A′ 名义显著就宣布可主张"
+        ],
+        "priority": 1,
+        "progress": 100.0,
+        "progress_source": "agent",
+        "purpose": "简报把成功率写成「未检出」，但漏掉了 D vs A′ 这一支的名义显著结果；同时 CPST 只对 A 报过。",
+        "status": "done",
+        "summary": "D vs A′ 精确 McNemar p=0.01690（被漏报）；但按任务聚类后 p=0.0643 也不显著；CPST(D/A′)=0.8522 已超 0.80 门槛。",
+        "title": "步骤53：补 D vs A′ 的成功率、CPST 与聚类稳健检验"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step54",
+      "node": {
+        "acceptance_criteria": [
+          "C5 的真实分子分母、被排除行及其理由都落到产物路径",
+          "候选数按当前产物重算，并说明 31 的来源版本",
+          "交叉引用逐条核对成表",
+          "任务集标签语义（existing/tier/lang）写清"
+        ],
+        "confidence": 0.95,
+        "context_tags": [
+          "docs",
+          "gate",
+          "evidence"
+        ],
+        "difficulty": "low",
+        "display_order": 370,
+        "evidence": [
+          "C5：`eval/aci_learning_probe.json:17-21` → k=10 / n=14 = 0.7143，Wilson95 **[0.4535,0.8828]**；被排除行 `:335-349`（`search_then_report` / seed 43 / `ops_emitted: []` / 空回复），与 `docs/audit-brief.md:233`「空回复必须当成失败」冲突；按失败计 C5 = 10/15 = 0.6667 < 0.70",
+          "C5 门禁只比点估计：`tools/claim_gate.py:664`，全程无区间；`eval/evidence.json` 的 `sample_size: 15` 是排除前行数而非分母",
+          "候选数：`eval/task_admissibility.json` 确认 35/15/20；A2/A3 实际只覆盖 33 个（2 个缺 task.json 被自动拒）→ 重算 **A2 17/33、A3 15/33**；`16/31`、`15/31` 是第 11 轮旧数（`docs/claims-and-evidence.md:473-474` 记 32 候选）",
+          "标签：`existing` 是 tier 默认桶（`tools/freeze_task_set.py:223` `tier = prov.get(\"tier\") or \"existing\"`），交叉表 = 手写/existing 10 + 生成/existing 10 + 生成/medium 3 + 生成/large 1 + 生成/small 1；`eval/task_set_freeze.json:34-61` 的 `promoted: []` 与 `kept_existing`（25 个全列）使冻结记录无法区分 10 与 15",
+          "交叉引用：17 处中 7 处错（`:16` 说 §5 列 5 个实际 7 个、`:17` 三臂在 §2.1、`:53` P6 在 §6、`:60` D6 在 §5、`:113` 悬空 §0.5、`:179`/`:225` P1 在 §6）",
+          "缺陷计数：§5 实列 7 个；明确说「翻转结论」的只有 D2、D4 两个",
+          "写入 `docs/audit-r12-verification.md` §4.2、§7；日期 2026-09-26"
+        ],
+        "kind": "task",
+        "next_action": "已关闭。文档清理由步骤60 承担。",
+        "non_goals": [
+          "不在本任务里改这些文档（清理由步骤60 承担）"
+        ],
+        "priority": 2,
+        "progress": 100.0,
+        "progress_source": "agent",
+        "purpose": "审计指出的「n 对不上」「35 vs 31」「交叉引用错位」等数据质量问题需要对着产物给确定答案。",
+        "status": "done",
+        "summary": "C5 实际是 10/14（Wilson95 [0.4535,0.8828]），被排除的是空回复行；候选数 A2/A3 应为 17/33、15/33；17 处交叉引用 7 处错。",
+        "title": "步骤54：核对 C5 分母、候选数版本与文档交叉引用"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step55",
+      "node": {
+        "acceptance_criteria": [
+          "`tools/acceptance_power.py:279-280` 的条件表达式补括号，`success_noninferiority_lower_bound` 改成真实配对差值下界（D vs A 应为 −0.0032 量级，而不是 0.5864）",
+          "`ratio_verdict` 的 `point > threshold` 分支改成区间规则：只有**整个 CI95 落在门槛错误一侧**才判产品缺口，否则记「无证据」",
+          "回归验证：重跑 75 对后，工具比 1.0074 与 D/A′ token 比 1.0567 必须从「产品缺口」改判为「无证据」；L3（≤0.60）保持不可主张且不得改判为已证伪",
+          "`eval/acceptance_power.json` 重生成；`python tools/claim_gate.py` 不因此转红"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "gate",
+          "statistics",
+          "code"
+        ],
+        "difficulty": "medium",
+        "display_order": 380,
+        "evidence": [
+          "bug 复现：`python audit-r12-scratch/verify_part2.py` 的 `D_noninferiority_replication` 段——产物表达式给出均值 0.7333 / 下界 0.5864（与 `eval/acceptance_power.json:70-71` 完全一致），正确表达式给出均值 0.12 / 下界 −0.0085",
+          "规则问题位置：`tools/acceptance_power.py:118-123`「point estimate ... exceeds the threshold: no interval can sit below it (product gap, not data gap)」——统计上不成立（点估计随样本变动）"
+        ],
+        "kind": "task",
+        "next_action": "改完先跑 `python tools/acceptance_power.py --out eval/acceptance_power.json` 再跑 `python tools/claim_gate.py`，把前后判定差异写进 evidence。",
+        "non_goals": [
+          "不放宽任何门槛数字",
+          "不把「无证据」写成「产品缺口」或「已证伪」"
+        ],
+        "priority": 1,
+        "purpose": "门禁里有两处判定错误：非劣性下界算的是错的量；「点估计越过门槛」被当成「产品缺口、加样本救不回来」。",
+        "status": "ready",
+        "summary": "修 tools/acceptance_power.py 的两处逻辑，让「可主张」只由区间决定。",
+        "title": "步骤55：修 acceptance_power 的非劣性优先级 bug 与产品缺口判定规则"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step56",
+      "node": {
+        "acceptance_criteria": [
+          "`bench/aci/runners/live_agent_loop.py:947` 的 `subprocess.run(..., text=True)` 补 `encoding=\"utf-8\", errors=\"replace\"`",
+          "`:950-953` 在 `stdout is None` 时不得抛 `TypeError`（改为空串 + 显式标记）",
+          "逐行新增崩溃标记字段（如 `harness_crash`），`tools/three_arm_report.py` 与 `tools/live_uncertainty.py` 支持把崩溃行单列或排除",
+          "复现：`typescript_reduce_shared_accumulator_d80f462d` 修复前 A 3/3 崩溃、D 3/3 通过；修复后重跑该任务 A 不再崩溃",
+          "量化并记录：剔除该任务后 D−A 0.1200→0.0833、D−A′ 0.1600→0.1250"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "harness",
+          "code",
+          "bench"
+        ],
+        "difficulty": "medium",
+        "display_order": 390,
+        "evidence": [
+          "机制证据（审计 R1 复核）：`bench/aci/runners/live_agent_loop.py:942-949` 无 `encoding=`/`errors=`；`:950 out = r.stdout`、`:953 out += f\"\\n[EXIT: ...]\"`；触发字节为唯一非 ASCII 文本 fixture 的 U+2014",
+          "规模：A 3/75、A′ 2/75、D 0/75；全仓库 80 个结果文件共 28 行崩溃，26/28 落在同一任务",
+          "截断那半的担心被推翻：`MAX_OUTPUT_CHARS = 64000`（`:64`）从未触发（最大观察 3119 token），而 D 的 exec.run stdout 被截到 300 字符（`:897`）"
+        ],
+        "kind": "task",
+        "next_action": "修完后用 `python tools/live_round.py` 只重跑该任务的相关格子（参考 `bench/aci/runners/splice_live_cells.py`），再重出 three_arm_report。",
+        "non_goals": [
+          "不改任务集 fixture 去回避编码问题",
+          "不把崩溃行静默丢弃而不标记"
+        ],
+        "priority": 1,
+        "purpose": "A 臂有 3/75 行因为一个 UTF-8 字符在 cp936 下解码失败而整条轨迹丢失，且被静默计为任务失败——这是方向性偏袒 D 的未登记缺陷。",
+        "status": "ready",
+        "summary": "给 run_command 补显式编码与 None 防护，并把崩溃行变成产物里的显式字段。",
+        "title": "步骤56：修 A 臂 cp936 编码崩溃并让崩溃/截断行可排除"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step57",
+      "node": {
+        "acceptance_criteria": [
+          "`tools/three_arm_report.py` 与 `tools/live_uncertainty.py` 的 ratio bootstrap 增加按任务聚类选项，并把聚类区间作为对外区间（行级保留为诊断）",
+          "产物新增真实口径字段：`llm_prompt_tokens` / `llm_completion_tokens` / 总 token 的三个比值 + 区间",
+          "`docs/claims-and-evidence.md` 重写 token 类声明：头条改双口径，写明「方向不一致时以真实 tokenizer 为准」；`docs/acceptance-criteria.md` 的状态总表同步",
+          "`eval/acceptance_power.json` 的 `verdicts` 增加 D vs A′ 的成功率行与 CPST 行",
+          "门禁能检出两种退化：区间按行重抽、缺真实口径（C13/C25/C28 相应更新）",
+          "`python tools/claim_gate.py` 复跑并记录退出码"
+        ],
+        "confidence": 0.85,
+        "context_tags": [
+          "bench",
+          "gate",
+          "docs",
+          "claims"
+        ],
+        "difficulty": "high",
+        "display_order": 400,
+        "evidence": [
+          "上游证据见 TF-0093；本任务尚无实现证据（状态 ready）",
+          "设计约束：`docs/acceptance-criteria.md:171` 已写明双口径与「以真实 tokenizer 为准」，本任务是把它执行到产物层"
+        ],
+        "kind": "task",
+        "next_action": "先改 live_uncertainty 的 bootstrap 单位，再改三个生成器，最后动声明文档；每步跑一次 claim_gate 记录差异。",
+        "non_goals": [
+          "不因为聚类区间变宽就去调门槛",
+          "不改预注册的 MDE 与门槛数字"
+        ],
+        "priority": 1,
+        "purpose": "复核的结论必须变成产物默认行为，否则下一轮又会退回「点估计 + 行级区间 + 代理口径」。",
+        "status": "ready",
+        "summary": "让 three_arm_report / acceptance_power / live_uncertainty 默认给聚类区间与真实 token 口径，并同步声明文档。",
+        "title": "步骤57：把双口径与聚类区间接进产物与门禁声明"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step58",
+      "node": {
+        "acceptance_criteria": [
+          "`tools/cross_shell_bench.py` 先验证命令输出等价（归一化比对，不只退出码）再计时",
+          "改成按迭代交错执行；对照增加 cmd.exe；补 p50/p90/p99 与冷启动/预热拆分",
+          "`tools/acceptance_power.py` 的 cross_shell 区间改成按迭代配对的 bootstrap",
+          "报告新增「shell 时间 / 端到端墙钟」比例（当前基线：A 2.85%、A′ 1.76%、D 7.36%）",
+          "预注册 B 区四条要求逐条有证据；`eval/cross_shell.json` 重生成"
+        ],
+        "confidence": 0.85,
+        "context_tags": [
+          "bench",
+          "wall_clock",
+          "gate"
+        ],
+        "difficulty": "medium",
+        "display_order": 410,
+        "evidence": [
+          "违反项（审计 F7 复核）：`tools/cross_shell_bench.py:112,120-121` 只检查退出码（违反 `docs/acceptance-criteria.md:112`）；`:157-164` 未交错（违反 `:114`）；`tools/acceptance_power.py:172-191` 独立重抽（违反 `:116`）；`eval/cross_shell.json` 无百分位与冷热拆分（违反 `:141`）",
+          "对照错位：A 臂走 `cmd.exe`（`bench/aci/runners/live_agent_loop.py:944` `shell=True`），A 的 run_command 中位 36 ms（n=270），而声明分母是 pwsh 的 180–1304 ms",
+          "迭代数澄清：n=5 是操作数，迭代数每个 (操作, shell) 格子都是 20，预注册满足"
+        ],
+        "kind": "task",
+        "next_action": "先补输出等价校验（它可能推翻现有比值），再补交错与配对区间。",
+        "non_goals": [
+          "不删除 ae vs PowerShell 的既有数字（保留为参考），但头条必须用基线臂实际使用的 shell"
+        ],
+        "priority": 2,
+        "purpose": "跨 shell 声明本身成立，但预注册 B 区被违反 4 处，而且对照是 PowerShell 而基线臂实际跑 cmd.exe。",
+        "status": "ready",
+        "summary": "补齐输出等价、交错执行、配对区间、百分位与冷热拆分，并报 shell 时间占端到端墙钟的比例。",
+        "title": "步骤58：跨 shell 协议补全并把对照改回 cmd.exe"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step59",
+      "node": {
+        "acceptance_criteria": [
+          "`bench/aci/results/live_ab_without_read_files.json` 的 D 臂撞上限行数降到 ≤10%（与 §3.3 预算纪律一致）",
+          "重跑后给出 D 的成功率、工具数、观察 token 与区间；若结论改变则更新 `docs/audit-brief.md` §6 P7 与相关声明",
+          "消融描述改正：`exclude_tools` 是 `[\"read_files\"]`（= file.read_many 批量读），不是「隐藏读工具」；`read_file`（= file.view）仍然可用",
+          "若无法在预算内重跑，则显式撤回 P7 结论并在文档写明撤回理由"
+        ],
+        "confidence": 0.85,
+        "context_tags": [
+          "bench",
+          "live",
+          "ablation"
+        ],
+        "difficulty": "medium",
+        "display_order": 420,
+        "evidence": [
+          "混杂证据：消融 D 臂 13/25 行 `completion_truncated_turns=1` 且 `llm_completion_tokens=16384`、0 次工具调用，全部失败；剔除后 D = 8/12 = 0.6667",
+          "命名证据：`bench/aci/runners/live_agent_loop.py:126`（read_file→file.view）与 `:128`（read_files→file.read_many）；消融 D 轨迹含 24 次 file.view、0 次 file.read_many",
+          "运行间漂移证据（审计 R2 修正）：同 seed 42 比较，A 成功率 0.80→0.64、A′ 0.68→0.76、A′ 观察 token 640.32→905.28（+41%）；两臂配置逐字节相同（同一 evidence fingerprint 与 git_rev），A/A′ 各有 24/25、23/25 行不同 → 漂移量级 0.16 ≈ 预注册 MDE 0.15"
+        ],
+        "kind": "task",
+        "next_action": "先确认端点能承受更高 max_tokens（D6 的 300s/502 约束），再跑 without 臂。",
+        "non_goals": [
+          "不把「13/25 行撞上限」当作 D 的真实能力测量"
+        ],
+        "priority": 2,
+        "purpose": "简报 §6 P7 用消融 D 的 0.32 得出「D 高度依赖读工具」，但消融 D 臂 13/25 行是撞 completion 上限失败，不是工具依赖。",
+        "status": "ready",
+        "summary": "抬高 max_tokens 重跑 without 臂；若 D 不再崩到 0.32，则撤回 P7 并改登记。",
+        "title": "步骤59：抬高上限重跑消融，或撤回 P7 的读工具依赖结论"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step60",
+      "node": {
+        "acceptance_criteria": [
+          "`bench/aci/tasks/*.json` 的 `lang` 统一：`ts` 与 `typescript` 合并；`windows` 移出语言字段（改用 `platform`）",
+          "`eval/task_set_freeze.json` 恢复可区分手写 10 与生成 15（`promoted` / `kept_existing`）",
+          "`docs/audit-brief.md` 修 7 处交叉引用与悬空 `§0.5`；缺陷计数与 §5 实列 7 个对齐",
+          "`docs/task-generation-protocol.md` 的 A2/A3 分母同步为 33",
+          "改动后 `python tools/claim_gate.py` 仍为 22/24（C14/C16 不变红也不变绿）"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "docs",
+          "dataset"
+        ],
+        "difficulty": "low",
+        "display_order": 430,
+        "evidence": [
+          "标签证据：`windows_path_normalize_edit.json:4` 与 `windows_batch_capture_diag.json:4` 的 `lang: \"windows\"`；`ts` 2 个（均手写）与 `typescript` 2 个（均生成）",
+          "交叉引用与计数证据见 `docs/audit-r12-verification.md` §7"
+        ],
+        "kind": "task",
+        "next_action": "先改数据（lang/freeze），再改文档；每步跑 task_set_audit 与 claim_gate。",
+        "non_goals": [
+          "不删除历史轮次的失效数字（留痕是刻意的）",
+          "不改任务内容或 fixture"
+        ],
+        "priority": 3,
+        "purpose": "标签与交叉引用问题会让任何按 lang 分组的统计和任何按章节跳转的阅读都出错。",
+        "status": "ready",
+        "summary": "统一 lang 标签、修 7 处交叉引用与悬空 §0.5、修 freeze 记录、同步 A2/A3 分母与缺陷计数。",
+        "title": "步骤60：任务集标签与文档一致性清理"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step61",
+      "node": {
+        "acceptance_criteria": [
+          "生成任务数从 15 提升到预注册的 30（组合规则不放松）",
+          "新建从未参与调参的留出任务集，并记录其冻结指纹",
+          "下一轮 live 报出留出集上的 D/A、D/A′、CPST 与聚类区间",
+          "补样本方向写明理由：ICC 0.28–0.56 下补 seed 的设计效应接近 1，补任务才增加独立信息量",
+          "D6 的端点 502/300s 约束先解决，否则生成数上不去"
+        ],
+        "confidence": 0.8,
+        "context_tags": [
+          "bench",
+          "live",
+          "dataset"
+        ],
+        "difficulty": "high",
+        "display_order": 440,
+        "evidence": [
+          "样本缺口：预注册 30 任务 × 5 seeds ≈450 行，实际 25 × 3 = 225 行；成功率 MDE 0.15 需要 105 对，只有 75 对",
+          "调参污染证据：C30 是在同一批 25 个冻结任务的 live 轨迹里发现并修掉的；`docs/audit-brief.md` 的 D1–D7 全部发生在该任务集上",
+          "补样本方向证据：ICC 与设计效应见 TF-0093 evidence（有效样本 ≈35–42）"
+        ],
+        "kind": "task",
+        "next_action": "先解决端点生成稳定性，再补 15 个生成任务并冻结留出集，最后跑 live。",
+        "non_goals": [
+          "不为凑数放松准入规则（≥3 语言、每任务 ≥2 独立正确解、观察量分层、规模上限）"
+        ],
+        "priority": 2,
+        "purpose": "预注册要 30 个生成任务（现 15），且客户端缺陷是在同一批冻结任务上修的——必须在从未看过的任务上重测。",
+        "status": "ready",
+        "summary": "优先补任务而不是补 seed，并构造留出集做最终确认。",
+        "title": "步骤61：建留出任务集并补任务，下一轮 live 重测"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "step62",
+      "node": {
+        "acceptance_criteria": [
+          "`python .mimocode/skills/task-forest/scripts/task_forest.py validate` 通过",
+          "`export` 成功，`exports/task-forest.html` 已刷新",
+          "`proposals/` 下的可读副本与森林内提案一致",
+          "`CHANGELOG.md` 与 `docs/tf*-round-notes.md` 增补本轮记录",
+          "报告给出：提案路径、HTML 路径、节点状态变化、门禁命令与结果、遗留缺口节点 ID"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "forest",
+          "docs"
+        ],
+        "difficulty": "low",
+        "display_order": 450,
+        "evidence": [
+          "上游子任务完成后回写"
+        ],
+        "kind": "task",
+        "next_action": "等步骤55–61 完成后执行。",
+        "non_goals": [
+          "不把发布（publish/部署）作为本任务前置条件"
+        ],
+        "priority": 1,
+        "purpose": "按根策略 §6 的固定收尾动作把本轮变更落成可审计的提案与导出。",
+        "status": "ready",
+        "summary": "proposal-save → proposal-apply → validate → export，并把证据回写进节点。",
+        "title": "步骤62：森林收口与提交"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "本缺口是上一轮收口（TF-0092，把证据落成机检声明）之后、由第三方审计复核暴露出来的口径与判定问题"
+      },
+      "from": "gap-r12-audit",
+      "to": "TF-0092",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "TF-0090 建立了不确定度审计（区间/检验/功效）；本缺口证明它的区间口径按行重抽、需要改成按任务聚类"
+      },
+      "from": "gap-r12-audit",
+      "to": "TF-0090",
+      "type": "related_to"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "收口任务由该缺口派生"
+      },
+      "from": "close-r12-audit",
+      "to": "gap-r12-audit",
+      "type": "derived_from"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "真实 tokenizer 口径重算属于本轮收口"
+      },
+      "from": "step51",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "按任务聚类重算区间属于本轮收口"
+      },
+      "from": "step52",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "补 D vs A′ 两支判定属于本轮收口"
+      },
+      "from": "step53",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "数据质量核对属于本轮收口"
+      },
+      "from": "step54",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "门禁判定规则修复属于本轮收口"
+      },
+      "from": "step55",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "A 臂编码崩溃修复属于本轮收口"
+      },
+      "from": "step56",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "口径与区间接线属于本轮收口"
+      },
+      "from": "step57",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "跨 shell 协议补全属于本轮收口"
+      },
+      "from": "step58",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "消融重跑或撤回属于本轮收口"
+      },
+      "from": "step59",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "任务集与文档一致性清理属于本轮收口"
+      },
+      "from": "step60",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "留出集与下一轮 live 属于本轮收口"
+      },
+      "from": "step61",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "森林收口属于本轮收口"
+      },
+      "from": "step62",
+      "to": "close-r12-audit",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "把区间与口径接进产物和门禁之前，必须先把 acceptance_power 的判定规则改对，否则接线会把错误判定固化"
+      },
+      "from": "step57",
+      "to": "step55",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "A 臂崩溃未修就重跑 live，等于把已知的方向性偏袒再测量一次"
+      },
+      "from": "step61",
+      "to": "step56",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "下一轮 live 的对外数字必须按新口径与新区间产出"
+      },
+      "from": "step61",
+      "to": "step57",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "消融结论未定就重跑 live，会把 P7 的错误结论带进新一轮"
+      },
+      "from": "step61",
+      "to": "step59",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "收口需要下一轮 live 的结果"
+      },
+      "from": "step62",
+      "to": "step61",
+      "type": "depends_on"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.8,
+        "reason": "收口前文档一致性必须已清理"
+      },
+      "from": "step62",
+      "to": "step60",
+      "type": "depends_on"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 10
+      },
+      "id": "step51"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 20
+      },
+      "id": "step52"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 30
+      },
+      "id": "step53"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 40
+      },
+      "id": "step54"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 50
+      },
+      "id": "step55"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 60
+      },
+      "id": "step56"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 70
+      },
+      "id": "step57"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 80
+      },
+      "id": "step58"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 90
+      },
+      "id": "step59"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 100
+      },
+      "id": "step60"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 110
+      },
+      "id": "step61"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 120
+      },
+      "id": "step62"
+    }
+  ],
+  "created_at": "2026-09-26T04:32:27.144682Z",
+  "proposal_id": "TFP-r12-audit-plan-2026-09-26",
+  "rationale": "第三方对 docs/audit-brief.md 的审计意见（该审计者拿不到仓库，大量结论标为「需核对」）在本仓库被逐条独立复核。复核确认审计的 F1/F2/F4/F5/F6/R1 成立、F3/F7/R2 部分成立、R3 被推翻，并发现审计未提到的 4 条新问题。按 docs/task-forest-policy.md §1/§2，agent 自行把结论落成开发进度方案：4 条零成本复算已完成并带可复现证据记为 done，其余 8 条待落地记为 ready，由本 global_task 收口。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

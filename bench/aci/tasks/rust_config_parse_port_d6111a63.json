@@ -1,0 +1,57 @@
+{
+  "id": "rust_config_parse_port_d6111a63",
+  "kind": "capability",
+  "lang": "rust",
+  "prompt": "The test suite for `src/lib.rs` fails. Unwraps the parse result directly so an absent or non-numeric value panics instead of yielding the 8080 default. Fix the module so the suite passes, without changing tests/config_test.rs.",
+  "golden": {
+    "src/lib.rs": "//! Small helper module for reading a port number from configuration.\n\n/// Port returned when the configured value is absent or invalid.\nconst DEFAULT_PORT: u16 = 8080;\n\n/// Parses the port from the config value string.\n///\n/// Returns `8080` as the default when the value is absent (`None`)\n/// or is not a valid `u16`.\n///\n/// # Examples\n///\n/// - `parse_port(Some(\"3000\"))` -> `3000`\n/// - `parse_port(None)` -> `8080`\n/// - `parse_port(Some(\"hello\"))` -> `8080`\n/// - `parse_port(Some(\"70000\"))` -> `8080` (out of `u16` range)\npub fn parse_port(value: Option<&str>) -> u16 {\n    match value {\n        Some(raw) => raw.parse::<u16>().unwrap_or(DEFAULT_PORT),\n        None => DEFAULT_PORT,\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn parses_valid_port() {\n        assert_eq!(parse_port(Some(\"3000\")), 3000);\n        assert_eq!(parse_port(Some(\"80\")), 80);\n        assert_eq!(parse_port(Some(\"65535\")), 65535);\n    }\n\n    #[test]\n    fn defaults_when_absent() {\n        assert_eq!(parse_port(None), DEFAULT_PORT);\n        assert_eq!(parse_port(None), 8080);\n    }\n\n    #[test]\n    fn defaults_when_invalid() {\n        assert_eq!(parse_port(Some(\"\")), 8080);\n        assert_eq!(parse_port(Some(\"not-a-port\")), 8080);\n        assert_eq!(parse_port(Some(\"-1\")), 8080);\n        assert_eq!(parse_port(Some(\"70000\")), 8080);\n        assert_eq!(parse_port(Some(\"3.5\")), 8080);\n        assert_eq!(parse_port(Some(\" 8080\")), 8080);\n    }\n}\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "cargo",
+          "test"
+        ],
+        "timeout_sec": 300
+      },
+      {
+        "type": "file_contains",
+        "path": "tests/config_test.rs",
+        "contains": "assert_eq!(parse_port(Some(\"3000\")), 3000);"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task author (TDD-ordered, locally self-verified)",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written from the spec and tests, never from the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      }
+    ],
+    "plan_index": 25,
+    "tier": "small",
+    "self_verified": {
+      "tests_pass_on_correct": true,
+      "tests_fail_on_buggy": true,
+      "variants_verified": 2
+    },
+    "generated_at": "2026-09-27T20:12:02.888815+00:00"
+  },
+  "workspace_fixture": "rust_config_parse_port_d6111a63",
+  "promoted_from": "bench/aci/candidates/rust_config_parse_port_d6111a63",
+  "promoted_at": "2026-09-28T04:37:02.602949+00:00"
+}

@@ -1,0 +1,90 @@
+{
+  "applied_at": "2026-09-27T18:12:01.198041Z",
+  "base_graph_hash": "9e1228014da12a6bc4e204abf873c9a4f1b3a218bb4f6d083661e9cf24a66995",
+  "base_summary": {
+    "edge_count": 181,
+    "node_count": 120,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已完成 · `lang` 标签统一（4 个文件）**：`ts_fix_type_error` / `ts_package_script_fail` 的 `lang: \"ts\"` → `\"typescript\"`；`windows_path_normalize_edit` / `windows_batch_capture_diag` 的 `lang: \"windows\"` → `\"shell\"`，`platform` 字段本来就已经是 `[\"windows\", \"any\"]`，所以任务类别信息没有丢。改后取值分布为 python 13 / rust 6 / typescript 4 / shell 2，不再有同一门语言的两种写法。",
+          "**改前先确认没有门禁依赖旧取值**：全仓 grep `lang` 的读取点只有展示与 plan 匹配（`tools/freeze_task_set.py`、`tools/task_admissibility.py`、`audit-r12-scratch/expansion_feasibility.py`）；`tools/ts_fixture_audit.py` 用**任务 id** 而非 `lang`（`TS_TASKS` 常量）；`tools/claim_gate.py` 的 C23/C29 也只按 id 与 `kind` 判定。所以这次改标签不改变任何判据。",
+          "**已完成 · `eval/task_set_freeze.json` 的 promoted/kept_existing（从根上修，不是手改一次）**：缺陷在 `tools/freeze_task_set.py` —— `promoted` 写的是 `new_ids`（**本次运行**提升了什么），`kept_existing` 写的是提升前的 manifest。后果是：`--record-only` 重跑时 `promoted` 变空；下一批提升时它只剩那一批，而先前所有生成任务悄悄落进 `kept_existing`。改法是按**每个已发布任务自身的元数据**分类（生成任务 = `kind=capability` 且带 `provenance`/`promoted_from`；手写任务两者都没有），因此不会随运行次数漂移。",
+          "**实测结果**：`promoted` = **15 个生成任务**、`kept_existing` = **10 个手写任务**，两者不相交、合计 25 = `n_tasks`（脚本内断言通过）。新增 `n_promoted` / `n_kept_existing` / `promoted_in_this_run` 三个字段，把「批次」与「分类」分开，避免再次混淆。",
+          "**顺带修掉 `per_tier` 的假桶**：原来 `prov.get(\"tier\") or \"existing\"` 把 **10 个「生成了但没写 tier 字段」的任务和 10 个手写任务合并进同一个 `existing` 桶**，使 tier 组成完全不可读——而那 10 个正是预注册里被分配了 tier 的槽位。现改为 `handwritten` / 声明的 tier / `untiered_generated` 三态，当前输出：`{'handwritten': 10, 'medium': 3, 'untiered_generated': 10, 'large': 1, 'small': 1}`。**元数据缺口现在是可见的，而不是被合并掉的。**",
+          "**未改动也没有掩盖的**：那 10 个生成任务**确实**缺 `tier` 字段（PILOT 批次按设计不带 tier），本节点只把分类改正确，**没有**回填一个猜出来的 tier。tier 组成的真实残差写在 `docs/task-generation-protocol.md` §4.6。",
+          "**验证**：`python tools/freeze_task_set.py --record-only --version 2.0.0` 重写记录；`eval/task_set_freeze.json` 断言 15/10 不相交且合计 25 通过；任务集指纹从 `06c7866e…` 变为 `1ca39ab3…`。"
+        ],
+        "next_action": "无（已关闭）。注意这两条改动了 `bench/aci/tasks/*.json`，因此 `bench/aci/results/latest_live.json` 与全部派生产物按 C12 判为陈旧——这是预期状态，必须由第 14 轮 live + 全链重刷转绿。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0104"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已完成 · 新增门禁 C35「配对臂组成一致性」**（`tools/claim_gate.py`）。它把 `bench/aci/results/live_ab_without_read_files.json` 与 `bench/aci/results/latest_live.json` 逐项比对：seed 集合、task_id 集合、行数、`git_rev`、`task_set_version`，并要求两臂 `api_error` 行数为 0。",
+          "**为什么必须单独有这一条**：C12 是「产物 vs 代码」的指纹检查，而**控制臂按设计不在 C12 的指纹清单里**——所以一个失效的输入可以让一整片「fresh」的派生产物建立在其上。TF-0119 记录的就是这个状态（without 臂曾是 75 行 / 单 seed / 带 cp936 崩溃缺陷的 harness，而 with 臂已是 225 行 / 3 seed），而 `read_usage_audit`、`exec_token_breakdown`、`exec_failure_breakdown`、`step_composition`、`live_uncertainty`、`acceptance_power` 等**七个工具**都读它。C12 在原理上看不见这件事。",
+          "**负对照（验收标准第 3 条，已跑）**：把 without 臂去掉 seed 44 的所有行（225 → 150 行，seeds `[42,43,44]` → `[42,43]`）后指向门禁 → **C35 FAIL（21/29）**，`notes` 精确报出 `seed sets differ: with=[42, 43, 44] without=[42, 43] | row counts differ: with=225 without=150`。产物留档在 `audit-r12-scratch/evidence_negctl_C35.json`，触发输入在 `audit-r12-scratch/negative_control_without_arm_seed_mismatch.json`。",
+          "**正向对照**：指向真实产物 → **C35 PASS（22/29）**。为让负对照可复现，`claim_gate.py` 新增 `--without-arm <path>` 覆盖参数——与 C28/C33 既有的覆盖参数写法一致，避免「负对照其实没生效」这类自引入缺陷（TF-0118 中途正好抓到过一次同类问题：C33 起初硬编码路径，导致负对照误通过）。",
+          "**顺带确认的当前事实**：without 臂**已经被刷新过**（`generated_at = 2026-09-27T08:30:00Z`，225 行、seeds `[42,43,44]`、`git_rev a8d4c56c…`），与 with 臂（`generated_at = 2026-09-27T13:00:45Z`，同 225 行同 seeds 同 rev）组成一致。所以本节点登记的**不是**「现在数据错」，而是「没有任何机检会告诉你它错了」——现在有了。",
+          "**验收标准对照**：①显式的输入性产物检查项 ✅（C35，落在 `eval/evidence.json`）；②判定组成一致（seed 集合、行数、runner 修订）✅ 并额外覆盖 task 集合与 task_set_version；③负对照必须判红 ✅（实测 FAIL）。"
+        ],
+        "next_action": "无（已关闭）。C35 会在下一轮 live 双臂重跑后自动复核组成；若两条臂的 seed/行数/修订/任务集版本任一不一致，C35 会转红。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0119"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已完成 · 声明口径写死**：`docs/acceptance-criteria.md` 新增 **§4.5 信封开销声明（预注册）**。口径逐字固定：命名信封开销 = `line_wrapper` + `counts` **两个分项**的字符数；被比较的是 `format_aci_result(compact=False)` 与 `compact=True`（**真实投影器**，不重新实现）；比值 = `(legacy − current) / legacy`；读取位置 = `eval/read_path_breakdown.json` 的 `totals.legacy_parts` / `totals.current_parts`。",
+          "**已完成 · 门禁项 C34**（`tools/claim_gate.py`）：阈值 `>= 0.40`，与 C14/C16 **并列而不是替换**。C14/C16 按原口径保持 FAIL、门槛不动（TF-0116 的决策），C34 是额外登记的新声明。",
+          "**「必须在新数据上验证」写进了门禁本身**，不是附注：C34 读 `eval/task_set_freeze.json` 的 `task_set_version`，与发现该数字的版本 `DISCOVERY_VERSION = \"2.0.0\"` 比较；相等则 `validated_on_new_data = false`，**即使比值达标也判 FAIL**。当前实测 `value = 0.594`（23905 → 9706 字符）却判 FAIL，原因正是这一条——这是设计行为，不是缺陷。",
+          "**为什么不是形式主义**：弦外之音是「用发现问题的同一批数据证明修复」＝分叉花园。45.5% 那个数字（`legacy` 30440 → `current` 16583 字符）就是在这批 2.0.0 数据上看到的，所以同一批数据上的 59.4% 不构成新证据。",
+          "**失效边界已与数字一起登记**（§4.5）：①这是冻结调用集上的**客户端渲染效应**，不是模型行为测量，也不说明总 token 是否更省；②同一次优化在 2.0.0 上对总量只有 **8.3%**（C16 口径）——两个数都对，回答的是不同问题；③**不能替代 C14/C16**，那两条保持 FAIL；④`≥0.40` 是产品决策（TF-0116），不是从数据里挑出来的。",
+          "**待办（本节点未完成的部分）**：①新任务集上的验证（依赖第 14 轮 live + 全链重刷）；②C16 的 token 数字补真实 tokenizer 对照，或显式写明「本声明数字是 `len//4` 代理口径」的失效边界——**这一条还没写**。"
+        ],
+        "next_action": "等第 14 轮 live 与全链重刷之后复核 C34：它在**新任务集版本**上会由 FAIL 转为 PASS/FAIL（当前必然是 FAIL，因为门禁要求「在比 2.0.0 更新的任务集上测」）。同时把 C16 的真实 tokenizer 口径对照补齐或写明代理口径失效边界。",
+        "progress": 70.0,
+        "progress_source": "agent",
+        "status": "in_progress"
+      },
+      "id": "TF-0117"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已完成 · 预注册写死**：`docs/task-generation-protocol.md` 新增 **§4.6 第 14 轮：难度与大观察占比**，写这条时**第 14 轮 live 还没跑**，全部数字都是目标而非测量。目标：基线成功率落在 **0.40–0.70**、`MDE / 可用余量 ≤ 0.50`（即 `0.15 / (1 − 基线成功率)`）、large tier 占比 **≥ 1/3**、留出集 **≥10 个从未参与调参的任务**。",
+          "**为什么加样本救不了**：第 13 轮 A / A′ 成功率**都是 0.8400**，可用余量只有 **0.16**，而预注册 MDE 是 **0.15** —— `0.15 / 0.16 = 94%`。加 n 只能缩小检出限，缩不到「比 0.16 更小」的效应上；天花板是任务太易，不是样本量问题。",
+          "**已完成 · 补齐 15 个槽位的选取规则可复算**：`bench/aci/candidates/REMAINDER_PLAN.json`。缺口按**语言**算（python 10/12、rust 3/9、typescript 2/9 → 缺 python 2、rust 6、typescript 7，合计 15），槽位在**未被占用**的 FULL_PLAN 槽里按 **large → small → medium** 再按 index 升序取：python 2,3；rust 5,6,7,25,26,27；typescript 8,9,10,19,28,29,30。",
+          "**「未占用」不是猜的，有证据链**：`provenance.plan_index` 直接给出 5 个（1,12,13,14,24）；PILOT_PLAN 的 10 个槽位与 FULL_PLAN 的 medium 槽 11–20 逐槽同语言且 topic 高度重合（Jaccard 已逐槽记进计划文件：1.00 / 0.82 / 0.60 / 0.73 / 0.19 / 0.80 / 0.50 / 0.50 / 0.31 / 0.62），所以它们覆盖 11–18 与 20；PILOT 第 9 槽（typescript medium, type narrowing）`exit 1` 没有产出，故 FULL_PLAN 19 仍算未占用。",
+          "**已知且未掩盖的残差**（写进 §4.6）：PILOT 那 10 个任务**按设计没有 tier 字段**，所以配额补齐后 tier 组成会落在 **large 10 / medium 13 / small 7** 而非 10/10/10。**large 这一档正好命中 10/30 = 33%** —— 它才是 token 声明依赖的那一档，所以目标仍可达，但残差照实写。",
+          "**另一条如实记录的风险**：`audit-r12-scratch/expansion_feasibility.py` 显示 20 个被拒候选里 **18 个挂在 A2/A3**，而那批候选是**生成器改成 TDD 顺序之前**产出的。本轮用修好的 `tools/task_generate_v2.py` 重生成，所以「能不能准入」本身也是本轮要测的东西，不能预先假定 15/15 通过。",
+          "**待办（本节点未完成的部分）**：基线成功率与 large tier 占比都**只能**在第 14 轮 live 之后核对；本节点此前 0% 进度是因为预注册这一步缺失，现在补上了。"
+        ],
+        "next_action": "等第 14 轮 live 出来后核对两条：①A 臂基线成功率是否落在预注册的 0.40–0.70；②large tier 是否达到 10/30 = 33%。两者都不能在看到结果之后再调任务集（§4.6 的禁止清单）。",
+        "progress": 55.0,
+        "progress_source": "agent",
+        "status": "in_progress"
+      },
+      "id": "TF-0114"
+    }
+  ],
+  "created_at": "2026-09-28T00:00:00.000000Z",
+  "proposal_id": "TFP-live-chain-tf0104-0119-2026-09-28",
+  "rationale": "第 14 轮 live 的前置工作落地：TF-0104 的标签/freeze 收尾、TF-0119 的配对臂组成检查（含负对照）、TF-0117 与 TF-0114 的预注册。全部改动都发生在任何第 14 轮 live 结果存在之前。",
+  "session_id": "ses_verseshell-live-chain-2026-09-28",
+  "status": "applied"
+}

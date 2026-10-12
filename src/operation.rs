@@ -390,7 +390,8 @@ pub fn exec_input_schema() -> Value {
         "type": "object",
         "required": ["argv"],
         "properties": {
-            "argv": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+            "argv": {"type": "array", "items": {"type": "string"}, "minItems": 1,
+                "description": "Direct program and arguments, not shell syntax. Spaces stay in one argument; do not add shell quotes. On Windows invoke cmd /d /c explicitly for built-ins, pipes or redirection, or powershell -NoProfile -Command for PowerShell. .cmd/.bat files use cmd with quoted arguments."},
             "cwd": {"type": "string", "default": "."},
             "profile": {"type": "string", "default": "auto"},
             "artifact": {"type": "string", "enum": ["auto", "always", "never"], "default": "auto"},
@@ -518,6 +519,7 @@ struct StreamObservation {
     omitted_bytes: u64,
     raw_complete: bool,
     encoding: String,
+    decoding_lossy: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     artifact: Option<String>,
 }
@@ -898,6 +900,7 @@ fn observe_stream(
             omitted_bytes: 0,
             raw_complete: true,
             encoding: stream.encoding.clone(),
+            decoding_lossy: stream.encoding.ends_with("-lossy"),
             artifact: None,
         };
     }
@@ -991,6 +994,7 @@ fn observe_stream(
         omitted_bytes,
         raw_complete: stream.raw_complete,
         encoding: stream.encoding.clone(),
+        decoding_lossy: stream.encoding.ends_with("-lossy"),
         artifact,
     }
 }
@@ -1014,6 +1018,7 @@ fn query_artifact(
             "handle": metadata.handle,
             "mode": "raw",
             "encoding": encoding,
+            "decoding_lossy": encoding.ends_with("-lossy"),
             "text": text,
             "returned_bytes": end,
             "raw_bytes": metadata.bytes,
@@ -1027,7 +1032,7 @@ fn query_artifact(
         text = safety::redact_str(&text).0;
     }
     let lines: Vec<&str> = text.lines().collect();
-    let payload = match args.mode.as_str() {
+    let mut payload = match args.mode.as_str() {
         "head" => {
             let n = args.lines.max(1);
             let slice = lines.iter().take(n).cloned().collect::<Vec<_>>().join("\n");
@@ -1110,20 +1115,12 @@ fn query_artifact(
             ))
         }
     };
+    payload["decoding_lossy"] = json!(encoding.ends_with("-lossy"));
     Ok(payload)
 }
 
 fn decode_query_text(bytes: &[u8], declared: &str) -> (String, String) {
-    if declared.starts_with("windows-oem-") || declared == "utf-8" {
-        if let Ok(text) = std::str::from_utf8(bytes) {
-            return (text.to_string(), "utf-8".into());
-        }
-    }
-    if let Ok(text) = std::str::from_utf8(bytes) {
-        (text.to_string(), "utf-8".into())
-    } else {
-        (String::from_utf8_lossy(bytes).into_owned(), declared.into())
-    }
+    crate::process_runner::decode_recorded_output(bytes, declared)
 }
 
 fn head_tail_budget(text: &str, max_tokens: usize) -> (String, bool) {

@@ -1,0 +1,57 @@
+{
+  "id": "rust_username_guard_758c1a78",
+  "kind": "capability",
+  "lang": "rust",
+  "prompt": "The test suite for `src/lib.rs` fails. The whitespace guard condition is inverted, so names containing whitespace pass and names without whitespace are rejected. Fix the module so the suite passes, without changing tests/username_test.rs.",
+  "golden": {
+    "src/lib.rs": "//! Username validation.\n//!\n//! A valid username is 3–16 characters long, contains no whitespace,\n//! and starts with a letter.\n\n/// Validate a username.\n///\n/// Returns `Ok(())` if the username is between 3 and 16 characters long\n/// (inclusive), contains no whitespace, and starts with a letter.\n/// Otherwise returns `Err` with a message describing the problem.\npub fn validate_username(username: &str) -> Result<(), String> {\n    let len = username.chars().count();\n\n    if !(3..=16).contains(&len) {\n        return Err(format!(\n            \"username must be between 3 and 16 characters long (got {})\",\n            len\n        ));\n    }\n\n    if username.chars().any(|c| c.is_whitespace()) {\n        return Err(\"username must not contain whitespace\".to_string());\n    }\n\n    match username.chars().next() {\n        Some(c) if c.is_alphabetic() => Ok(()),\n        _ => Err(\"username must start with a letter\".to_string()),\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::validate_username;\n\n    #[test]\n    fn accepts_valid_usernames() {\n        for name in [\"abc\", \"alice\", \"a123456789012345\", \"x_x-x\"] {\n            assert!(validate_username(name).is_ok(), \"expected Ok for {:?}\", name);\n        }\n    }\n\n    #[test]\n    fn rejects_too_short() {\n        assert!(validate_username(\"\").is_err());\n        assert!(validate_username(\"ab\").is_err());\n    }\n\n    #[test]\n    fn rejects_too_long() {\n        assert!(validate_username(\"a1234567890123456\").is_err());\n    }\n\n    #[test]\n    fn rejects_whitespace() {\n        assert!(validate_username(\"ab c\").is_err());\n        assert!(validate_username(\"abc\\t\").is_err());\n        assert!(validate_username(\" abc\").is_err());\n    }\n\n    #[test]\n    fn rejects_non_letter_start() {\n        assert!(validate_username(\"1abc\").is_err());\n        assert!(validate_username(\"_abc\").is_err());\n    }\n}\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "cargo",
+          "test"
+        ],
+        "timeout_sec": 300
+      },
+      {
+        "type": "file_contains",
+        "path": "tests/username_test.rs",
+        "contains": "assert!(validate_username(name).is_ok(), \"expected Ok for {:?}\", name);"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task author (TDD-ordered, locally self-verified)",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written from the spec and tests, never from the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      }
+    ],
+    "plan_index": 27,
+    "tier": "small",
+    "self_verified": {
+      "tests_pass_on_correct": true,
+      "tests_fail_on_buggy": true,
+      "variants_verified": 2
+    },
+    "generated_at": "2026-09-27T20:14:33.774169+00:00"
+  },
+  "workspace_fixture": "rust_username_guard_758c1a78",
+  "promoted_from": "bench/aci/candidates/rust_username_guard_758c1a78",
+  "promoted_at": "2026-09-28T04:37:02.618583+00:00"
+}

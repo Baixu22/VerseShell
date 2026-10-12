@@ -1,0 +1,105 @@
+{
+  "proposal_id": "TFP-terminal-boundary-recovery-2026-10-09",
+  "session_id": "01a11efe-88df-72d2-a18a-2828373e1822",
+  "status": "proposed",
+  "rationale": "仅追加终止边界、冻结原子发布与异常进程清理的离线证据和来源 session；不修改状态、进度或其他字段，不升级旧 tag 证据；本轮只保存，不应用。",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0122",
+      "fields": {
+        "evidence": [
+          "**阻塞已消除**：那最后一格 `python_csvlite_parse_80d158b2 [raw_shell] seed=44` 再次补跑时**一次成功**（返回普通 FAIL 行：2 tools / 1348 obs_tok），三份 with 臂 seed 文件现在 **0 行 api_error**。",
+          "**因此 with 臂以干净状态重新合并**：`merge_live_runs.py`（**不需要** `--allow-api-errors`）→ 315 行、`api_error_rows = 0`。旧的部分合并产物备份在 `audit-r12-scratch/latest_live_round14_partial_backup.json`。",
+          "**C35 由 FAIL 转 PASS**，即两臂现在在 seed 集合、任务集合、行数、`git_rev`、`task_set_version` 上完全一致。",
+          "**这同时修正了本节点原先的记录**：早先「6 次补跑全部失败」是**端点状态相关**的（同一格在 without 臂与后续重试中都能成功），不是该任务结构性不可用。**不能把它当成结构性结论**——这一点比结论本身重要。",
+          "**仍然有效的部分**：一个格的端点失败会让**整轮** live 无法合并、全部派生产物永久陈旧，这个管道缺陷依然存在（`--allow-api-errors` 只记计数、不产出行分类），仍待与 §0.6 对齐。",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/readiness-ready/readiness.json",
+          "C:/Users/27933/Desktop/verseshell/verseshell/docs/terminal-boundary-recovery-2026-10-09.md",
+          "D:/VerseShellLive/tf-recovery-20261009-01a11efe/implementation.diff",
+          "D:/VerseShellLive/tf-recovery-20261009-01a11efe/verification-final/all-offline.stderr.log",
+          "D:/VerseShellLive/tf-recovery-20261009-01a11efe/verification-final/candidate.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "01a11efe-88df-72d2-a18a-2828373e1822"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0133",
+      "fields": {
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/control/run-live.ps1:42",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/storage-watch-final.json",
+          "D:/VerseShellLive/analysis-20261008/report-generation.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/historical-inputs.json",
+          "tools/live_control.py",
+          "tools/refresh_live_artifacts.py",
+          "C:/Users/27933/Desktop/verseshell/verseshell/docs/terminal-boundary-recovery-2026-10-09.md",
+          "D:/VerseShellLive/tf-recovery-20261009-01a11efe/implementation.diff",
+          "D:/VerseShellLive/tf-recovery-20261009-01a11efe/verification-final/all-offline.stderr.log",
+          "D:/VerseShellLive/tf-recovery-20261009-01a11efe/verification-final/candidate.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "01a11efe-88df-72d2-a18a-2828373e1822"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0134",
+      "fields": {
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/control/run-live.ps1",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/storage-policy.json",
+          "bench/aci/results/step5p-r1-20261006/",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/runtime-paths.json",
+          "bench/aci/runners/live_storage.py",
+          "tests/test_live_recovery.py",
+          "docs/landing-readiness-2026-10-09.md",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/landing-audit.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/readiness.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/readiness-final/python-tests.log",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/final-source-postcheck.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/product-gate/evidence.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/tokenizer-environment.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/validation-environment.json",
+          "D:/VerseShellLive/landing-readiness-20261009-01a11c1d/evidence/auxiliary-input-postcheck.json",
+          "C:/Users/27933/Desktop/verseshell/verseshell/docs/terminal-boundary-recovery-2026-10-09.md",
+          "D:/VerseShellLive/tf-recovery-20261009-01a11efe/implementation.diff",
+          "D:/VerseShellLive/tf-recovery-20261009-01a11efe/verification-final/all-offline.stderr.log",
+          "D:/VerseShellLive/tf-recovery-20261009-01a11efe/verification-final/candidate.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "landing-readiness-node-dev-2026-10-09",
+          "01a11efe-88df-72d2-a18a-2828373e1822"
+        ]
+      }
+    }
+  ]
+}

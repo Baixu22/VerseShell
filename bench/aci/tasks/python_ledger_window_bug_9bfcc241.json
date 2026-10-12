@@ -1,0 +1,56 @@
+{
+  "id": "python_ledger_window_bug_9bfcc241",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "Every check in test_ledger.py fails against ledger.py: the digest's window figures are wrong across the board while the rest of the report looks sane. Find the bug in ledger.py and fix it. Do not modify test_ledger.py.",
+  "golden": {
+    "ledger.py": "\"\"\"Tiny ledger analytics used by the nightly finance digest.\"\"\"\n\nHEADER = \"day,amount\"\n\n\ndef parse_log(text):\n    \"\"\"Parse 'day,amount' lines into sorted (day, amount) tuples.\"\"\"\n    rows = []\n    for line in text.strip().splitlines():\n        if line.strip() == HEADER:\n            continue\n        day, amount = line.split(\",\")\n        rows.append((int(day), int(amount)))\n    rows.sort()\n    return rows\n\n\ndef cumulative(rows):\n    \"\"\"Running total of amounts in row order.\"\"\"\n    out = []\n    total = 0\n    for _, amount in rows:\n        total += amount\n        out.append(total)\n    return out\n\n\ndef window_sums(rows, width):\n    \"\"\"Sum of each trailing window of `width` days (short at the start).\"\"\"\n    amounts = [amount for _, amount in rows]\n    out = []\n    for i in range(len(amounts)):\n        start = max(0, i - width + 1)\n        out.append(sum(amounts[start:i + 1]))\n    return out\n\n\ndef daily_report(text, width):\n    rows = parse_log(text)\n    return {\n        \"days\": [day for day, _ in rows],\n        \"totals\": cumulative(rows),\n        \"windows\": window_sums(rows, width),\n    }\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest"
+        ],
+        "timeout_sec": 120
+      },
+      {
+        "type": "file_contains",
+        "path": "test_ledger.py",
+        "contains": "assert report[\"windows\"] == ref_windows(VALS, width)"
+      },
+      {
+        "type": "file_contains",
+        "path": "test_ledger.py",
+        "contains": "def ref_windows(vals, width):"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_and_golden_author",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "plan_index": 1,
+    "tier": "large",
+    "generated_at": "2026-09-25T03:39:20.329926+00:00"
+  },
+  "workspace_fixture": "python_ledger_window_bug_9bfcc241",
+  "promoted_from": "bench/aci/candidates/python_ledger_window_bug_9bfcc241",
+  "promoted_at": "2026-09-25T08:29:13.936570+00:00"
+}

@@ -1,0 +1,58 @@
+{
+  "id": "typescript_reduce_shared_accumulator_d80f462d",
+  "kind": "capability",
+  "lang": "typescript",
+  "prompt": "Running `node check.mjs` fails: summarizing an empty cart can return leftover totals instead of zeros, and a summary object returned by one call gets changed by later calls. Fix the library in stats.mjs (leave check.mjs untouched) so every check passes.",
+  "golden": {
+    "stats.mjs": "// @ts-check\n// stats.mjs — cart summary helpers\n\n/**\n * A single cart line item.\n * @typedef {{ sku: string, price: number, qty: number }} LineItem\n */\n\n/**\n * Summarize a list of cart line items into a count of line items and the\n * total price. Each call returns a fresh, independent summary object.\n * @param {LineItem[]} items\n * @returns {{ count: number, total: number }}\n */\nexport function summarize(items) {\n  return items.reduce(\n    (acc, item) => {\n      acc.count += 1;\n      acc.total += item.price * item.qty;\n      return acc;\n    },\n    { count: 0, total: 0 },\n  );\n}\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "node",
+          "check.mjs"
+        ],
+        "timeout_sec": 120
+      },
+      {
+        "type": "file_contains",
+        "path": "check.mjs",
+        "contains": "import { summarize } from './stats.mjs';"
+      },
+      {
+        "type": "file_contains",
+        "path": "check.mjs",
+        "contains": "deepEqual(summarize([]), { count: 0, total: 0 });"
+      },
+      {
+        "type": "file_contains",
+        "path": "check.mjs",
+        "contains": "process.exit(1);"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_and_golden_author",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "generated_at": "2026-09-25T02:13:57.069111+00:00"
+  },
+  "workspace_fixture": "typescript_reduce_shared_accumulator_d80f462d",
+  "promoted_from": "bench/aci/candidates/typescript_reduce_shared_accumulator_d80f462d",
+  "promoted_at": "2026-09-25T08:29:13.980869+00:00"
+}

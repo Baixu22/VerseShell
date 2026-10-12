@@ -1,0 +1,54 @@
+{
+  "id": "rust_borrow_fix_longest_word_a4c895ec",
+  "kind": "capability",
+  "lang": "rust",
+  "prompt": "The `textlib` crate fails to compile: `longest_word` was recently changed to return a `&str` borrowed from its input instead of an owned `String`, but the body still copies words into an owned value and returns a reference to that local. Fix the body so the crate compiles and all tests pass, with the returned slice borrowing from the input.",
+  "golden": {
+    "src/lib.rs": "/// Returns the longest whitespace-separated word in `input`.\n/// The returned slice must borrow from `input` and never allocate.\npub fn longest_word(input: &str) -> &str {\n    let mut best = \"\";\n    for word in input.split_whitespace() {\n        if word.len() > best.len() {\n            best = word;\n        }\n    }\n    best\n}\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "cargo",
+          "test",
+          "--quiet"
+        ],
+        "timeout_sec": 120
+      },
+      {
+        "type": "file_contains",
+        "path": "tests/longest.rs",
+        "contains": "fn result_borrows_from_input_instead_of_cloning"
+      },
+      {
+        "type": "file_contains",
+        "path": "tests/longest.rs",
+        "contains": "assert_eq!(longest_word(\"aa bb\"), \"aa\");"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_and_golden_author",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "generated_at": "2026-09-25T01:55:37.454732+00:00"
+  },
+  "workspace_fixture": "rust_borrow_fix_longest_word_a4c895ec",
+  "promoted_from": "bench/aci/candidates/rust_borrow_fix_longest_word_a4c895ec",
+  "promoted_at": "2026-09-25T08:29:13.959971+00:00"
+}

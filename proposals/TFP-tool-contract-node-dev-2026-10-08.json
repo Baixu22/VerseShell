@@ -1,0 +1,258 @@
+{
+  "proposal_id": "TFP-tool-contract-node-dev-2026-10-08",
+  "session_id": "tool-contract-node-dev-2026-10-08",
+  "rationale": "用户要求开始已正式登记节点的开发。本批完成 TF-0128～0131 的工程实现和 217 Python/289 Rust 回归，补 TF-0132 三例 183 观测的历史诊断，并检查产品及源码落地边界。因 claim_gate 25/31、真实开发试点及源码提交仍未闭合，所有相关节点保持开放；未变更验收阈值、旧结果或既有 done 历史。现有 TF-0140/0141 已承接门禁与落地缺口，复用这些节点避免重复建项。按 docs/task-forest-policy.md 保存后直接应用、校验与导出。",
+  "status": "proposed",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0124",
+      "fields": {
+        "summary": "2026-10-08：启动首批工具契约开发，TF-0128～0131 已有工程实现、本机与全量回归；TF-0132 完成三例历史回放。产品门禁 25/31，源码尚未提交，正式研究与总目标继续进行。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0125",
+      "fields": {
+        "status": "in_progress",
+        "summary": "2026-10-08：四个工具契约节点完成首批工程实现，217 项 Python、289 项 Rust 通过；停止行为仍需新冻结开发试点，分支未验收关闭。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0127",
+      "fields": {
+        "status": "in_progress",
+        "summary": "2026-10-08：已读取当前产品门禁与刷新后的源码落地检查；保留六个产品红项及历史分支发现，完整研究与正式验收尚未完成。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0128",
+      "fields": {
+        "status": "in_progress",
+        "progress": 75,
+        "summary": "2026-10-08：统一为既有中心窗口语义，返回真实起止行、总行数与 next_cursor；106 行示例、空文件、超范围及无遗漏遍历通过。工程证据已齐，产品门禁未全绿，不自动 done。",
+        "next_action": "在新冻结版本沿用当前 schema/二进制；与 TF-0132 开发试点、TF-0140 产品门禁一并核验后再关闭。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:172",
+          "src/ops/file.rs:312",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed42.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/node-dev-20261008/logs/rust-tests.log",
+          "tests/test_tool_contracts.py",
+          "tests/aci_1_0_ops_tests.rs",
+          "D:/VerseShellLive/node-dev-20261008/evidence/historical-tool-replay.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0129",
+      "fields": {
+        "status": "in_progress",
+        "progress": 75,
+        "summary": "2026-10-08：移除客户端二次裁剪，保留 exit/timeout/统计/流元数据并开放既有 result.query。2662 字节历史样本的 pass/fail 结尾可见，超长日志 tail/slice 本机取回通过。工程完成，正式门禁未闭合。",
+        "next_action": "新冻结开发试点检验模型是否仍重复执行；维持捕获上限与 raw_complete 的限制，不宣称已修复全部循环。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:1195",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed43.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/tool-contracts-native-final.log",
+          "D:/VerseShellLive/node-dev-20261008/evidence/historical-tool-replay.json",
+          "bench/aci/runners/live_agent_loop.py"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0130",
+      "fields": {
+        "status": "in_progress",
+        "progress": 75,
+        "summary": "2026-10-08：统一三条件与描述变体的平台指导；本机发现并修复显式 cmd 命令字符串按 CRT argv 错误转义的问题。中文/空格路径、引号、管道、重定向、PowerShell 与普通 argv 字面符号均通过。",
+        "next_action": "变更进入新冻结身份；保留旧轨迹和修复前失败，不与旧提示或旧执行器结果混用。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:355",
+          "bench/aci/runners/live_agent_loop.py:503",
+          "bench/aci/runners/compact_prompts.py",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/tool-contracts-before-cmd-fix.log",
+          "D:/VerseShellLive/node-dev-20261008/logs/tool-contracts-native-final.log",
+          "src/process_command.rs"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0131",
+      "fields": {
+        "status": "in_progress",
+        "progress": 75,
+        "summary": "2026-10-08：raw shell 使用 UTF-8/OEM 回退并标记有损解码，Rust 查询沿用捕获编码；两条件保存每流最多 65536 字节的可校验观测副本。当前 Windows/CP936 实机通过，混合编码和历史字节缺失仍有限制。",
+        "next_action": "未来诊断同时检查 capture_complete、脱敏标记和 ACI raw_complete；不将当前 CP936 证据推广到未测平台。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:1265",
+          "eval/harness_encoding_contract.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/tool-contracts-native-final.log",
+          "src/process_runner.rs",
+          "src/operation.rs",
+          "bench/aci/runners/live_journal.py"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0132",
+      "fields": {
+        "status": "in_progress",
+        "progress": 33,
+        "summary": "2026-10-08：核验三个 ACI 异常样本共 183 条观测与逐回合对应。读窗口重复 77 次；同测试调用共 66 次、最长连续 65；第三例测试成功后 completion 截断。尚未进行修复后的真实模型开发试点，未增加停止策略或改变评分。",
+        "next_action": "待工具/收尾/存储前置满足后使用新冻结开发试点，验证重复与停止行为；规则和预算须对所有条件一致。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed42.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed43.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/with_seed44.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/historical-tool-replay.json",
+          "tools/tool_contract_replay.py"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0140",
+      "fields": {
+        "summary": "2026-10-08：首批工具修复后产品门禁 25/31，C12/C14/C16/C24/C34/C36 红项保留。README 17/17 本机检查通过；历史评分合同和测量陈旧不能由工程回归替代。正式声明对齐仍待前置节点完成。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/prelive-ready-2026-10-06.md",
+          "docs/claims-and-evidence.md",
+          "tools/claim_gate.py",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/readme-claims-final.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/claim-gate-final.log"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0141",
+      "fields": {
+        "status": "in_progress",
+        "progress": 20,
+        "summary": "2026-10-08：刷新 origin 后只读检查得到 44 条仓库级历史发现；HEAD 与本批开始时一致。本批 14 文件精确差异及摘要已单独保存，未覆盖既有改动或暂存区，尚未提交与合并；逐项历史范围核对仍待完成。",
+        "next_action": "逐项对照历史 done 的验收范围、开放子节点与默认分支可达性，必要时另立纠正提案；本批不得自动归并所有历史分支问题。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/task-forest-20261008/landing-before.json",
+          "docs/task-forest-policy.md",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/check-landing.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/git-fetch-direct.exit"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08"
+        ]
+      }
+    }
+  ]
+}

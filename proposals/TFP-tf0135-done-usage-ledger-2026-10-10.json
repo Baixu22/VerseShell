@@ -1,0 +1,52 @@
+{
+  "base_graph_hash": "bad3a598765493b7b78b04b914596884d4246a3d1acb846f8253d1397c62a049",
+  "base_summary": {
+    "edge_count": 233,
+    "node_count": 141,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:1488",
+          "tools/live_uncertainty.py:249",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "D:/VerseShellLive/freeze-live-20261010/usage-cost-verification-2026-10-10.json",
+          "D:/VerseShellLive/freeze-live-20261010/usage-audit.json",
+          "D:/VerseShellLive/freeze-live-20261010/cost-attribution.json",
+          "D:/VerseShellLive/freeze-live-20261010/usage-cost-tests.log",
+          "C:/Users/27933/Desktop/verseshell/verseshell/tests/test_usage_audit.py",
+          "C:/Users/27933/Desktop/verseshell/verseshell/tests/test_cost_attribution.py",
+          "D:/VerseShellLive/node-freeze-20261010-01a120ce/workspace/bench/aci/results/step5p-dev-20261010-r2/with_seed42.json"
+        ],
+        "next_action": "若后续取得提供方账单，按 attempt_id/response_id 逐条追加核对；在那之前 billing 继续 unknown，不得把 token 数当作金额、不得发布完整成本主张。产品声明与落地仍由 TF-0140/TF-0141 承接。",
+        "progress": 100.0,
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "freeze-live-2026-10-10"
+        ],
+        "status": "done",
+        "summary": "2026-10-10 新冻结采集核对：213 次 attempt 全部 usage 完整、0 次未知用量，1 行（中断不确定）被排除而不补零；received 1,308,752 tokens 仅作用量口径。端点不返回 x-request-id，逐 attempt 身份改用 attempt_id + response_id（213/213 有 response_id）。无提供方账单 → billing=unknown，保留缺口。成本归因 3/3、3/3、2/3、3/3 有效配对，两个估计量并列，claimable=false。33 项用量/成本测试通过；评分与计费完整性保持分离。"
+      },
+      "id": "TF-0135"
+    }
+  ],
+  "created_at": "2026-10-10T05:20:28Z",
+  "proposal_id": "TFP-tf0135-done-usage-ledger-2026-10-10",
+  "rationale": "TF-0135 在新冻结候选上完成用量/成本核对：AC1 逐 attempt 账本——18 行 213 次 attempt 全部 usage_complete=true、unknown_usage_attempts=0，1 行因中断不确定被排除而非补零；成本入口（单轮/重复/归因）共用同一有效性规则，33 项测试含 test_all_cost_wrappers_report_same_effective_denominator 与 test_explicit_zero_is_not_missing_and_unknown_is_not_zero。AC2 记下可核对身份：端点不返回 x-request-id（213/213 request_id 为空），逐一以 attempt_id + response_id 标识；无提供方账单，billing 保持 unknown 并附限制。AC3 评分与计费分离：null usage 不改任务评分、stale complete 标记不能掩盖未知重试、归因 claimable=false 且两个估计量并列。",
+  "session_id": "freeze-live-2026-10-10",
+  "status": "proposed"
+}

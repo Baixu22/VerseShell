@@ -1,0 +1,141 @@
+{
+  "applied_at": "2026-09-28T14:09:10.697360Z",
+  "base_graph_hash": "f7b9746696d311d568220ae40389bb0c3d35ea998ff2d238770988fccd99607c",
+  "base_summary": {
+    "edge_count": 181,
+    "node_count": 120,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "d-turn1-truncation",
+      "node": {
+        "acceptance_criteria": [
+          "在 `docs/claims-and-evidence.md` 的 C13 条目下登记第 14 轮的两个口径数字与截断率，并注明该对比按 §0.6.3 不可主张",
+          "查明为什么截断只在 D 侧发生（假设：D 的系统提示 + 工具 schema 更大，reasoning 预算更容易被烧穿）并给出可复现的判定",
+          "给出缓解方案：要么调小 D 侧提示体积，要么把 turn-1 截断与「模型真的在思考」区分开；不得靠抬 max_tokens（端点 300 秒上限不可抬高）",
+          "下一轮 live 之前把该帧写成预注册（避免看到结果后再决定是否排除）"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "bench",
+          "live",
+          "harness",
+          "claims"
+        ],
+        "difficulty": "medium",
+        "display_order": 510,
+        "evidence": [
+          "已实测（第 14 轮 with 臂，`bench/aci/results/latest_live.json`，315 行，`api_error_rows=3`）：按 §0.6.1 分类后逐臂 endpoint/cap/排除率与两个口径成功率：A `3/2/4.8%`、0.9048（全量）vs 0.9400（analysable）；A′ `0/0/0.0%`、0.8762 vs 0.8762；**D `0/15/14.3%`、0.8381 vs 0.9556**。",
+          "15 行 D 侧截断的字段签名完全一致：`completion_truncated_turns=1`、`llm_completion_tokens=16384`、`tool_calls=0`、`observation_tokens=0`、`trajectory` 为空、`elapsed_ms≈200000–213000`、`last_error=None`、`harness_crash=False`。即模型把整轮 completion 预算烧在 reasoning 上，从未发出工具调用。",
+          "**符号翻转**：全量（ITT）口径 D−A = −0.0667（D 更差），剔除截断行后 D−A = +0.0156（D 更好）。§0.6.3 第 1 条（任一侧 cap >10%）使该对比不可主张；第 3 条（`api_error` 行数为 0）另因 A 臂 3 行端点失败而不满足。",
+          "对照：round 13（v2.0.0）D 的 completion 截断率是 3%/7%/4%（合计 ≤10%），本轮升到 14.3%。差异与本轮新增的 large tier 任务同时出现，但**尚未归因**——这是本节点的待办之一。"
+        ],
+        "kind": "requirement",
+        "non_goals": [
+          "不放宽 §0.6.3 的 10% 门槛来让结论可主张",
+          "不靠抬高 max_tokens 规避（端点 300 秒上限已实测不可抬，502 会让产物无法合并）"
+        ],
+        "priority": 1,
+        "purpose": "这是 D 臂独有的、方向性偏袒 A 的机械假象：全量口径 D 比 A 低 6.7 个百分点，剔除截断行后 D 比 A 高 1.6 个百分点。若不先固化，下一轮会把其中一个口径当结论引用。",
+        "status": "ready",
+        "summary": "第 14 轮 with 臂上 D 的 cap 截断率 14.3%（15/105），全部是 turn-1 reasoning 烧穿 16384、0 工具调用；A/A′ 为 0。按 §0.6.3，两条成功率对比都不可主张。",
+        "title": "要求：D 臂专属的 completion 预算截断按 §0.6 阻塞第 14 轮成功率对比"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "endpoint-incompatible-cell",
+      "node": {
+        "acceptance_criteria": [
+          "把「单格端点失败」的处置写进预注册：明确什么时候允许 partial 合并、产物如何标记、哪些对比因此不可主张",
+          "让 `merge_live_runs.py` 的 `--allow-api-errors` 与 §0.6 对齐（当前它只写一个计数，不产出逐行分类），使下游工具能机检",
+          "让门禁能区分「因端点失败而 partial」与「正常完整」的产物，并在 partial 时报出受影响的行与对比",
+          "为「预算敏感任务」建立准入期标注（与 TF-0120 的 id 对应），使这类任务在生成阶段就可被识别"
+        ],
+        "confidence": 0.85,
+        "context_tags": [
+          "bench",
+          "harness",
+          "gate",
+          "live"
+        ],
+        "difficulty": "medium",
+        "display_order": 520,
+        "evidence": [
+          "`splice_live_cells.py` 连续 6 次补跑 `python_csvlite_parse_80d158b2 [raw_shell] seed=42` 全部返回 `HTTP 502: {\"error\":{\"message\":\"非流式响应超时(300秒)\"}}`；同一批次里 `python_batch_splitter_05613a34 [raw_shell] seed=42` 在重试中先后返回 PASS/FAIL（可恢复），说明失败是**任务特异**而非端点整体不可用。",
+          "该任务正是本轮新增的 large tier 任务之一（pristine 观察 1559 token，plan#3），也正是 TF-0120 要求标注的「预算敏感」形态；但它被冻结时没有该标注。",
+          "本次处置：`merge_live_runs.py --out bench/aci/results/latest_live.json --allow-api-errors` → 315 行、`live_config.api_error_rows=3`。旧基线已备份到 `audit-r12-scratch/latest_live_round13_backup.json`。**§0.6.3 第 3 条仍然使含 api_error 的对比不可主张**，所以这不是绕过门槛，而是让其余证据能刷新。",
+          "识别到的管道缺陷：合并脚本的 `--allow-api-errors` 只记录一个计数（`live_config.api_error_rows`），不产出逐行分类；而 §0.6 的分类实现只在 `tools/live_uncertainty.py::row_class()` 里。两者应对齐到同一实现。"
+        ],
+        "kind": "requirement",
+        "non_goals": [
+          "不把 502 当成模型失败计入成功率",
+          "不在看到结果后删除这个任务（那会改变构造效度，且违反 §5 冻结规则）"
+        ],
+        "priority": 1,
+        "purpose": "一个格的端点失败就会让整轮 live 无法合并、全部派生产物永久陈旧（C12 红）。这是管道缺陷，不是测量结论的问题——§0.6 早已把 `endpoint_failure` 定义为一等行类，但合并脚本仍按「任一行 api_error 即拒绝」处理。",
+        "status": "ready",
+        "summary": "`python_csvlite_parse_80d158b2` 的 A 臂格连续 6 次补跑全部 HTTP 502「非流式响应超时(300秒)」，使 `merge_live_runs.py` 拒绝合并整个 with 臂。",
+        "title": "要求：单个任务格与端点 300 秒上限结构性不兼容时，证据链不能被永久卡死"
+      }
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已完成 · 新声明在新数据上通过**：第 14 轮任务集（`task_set_version = 3.0.0`）的新鲜产物上，命名信封开销 `legacy 40702 → current 17688` 字符 = **0.5654 ≥ 0.40** → **C34 PASS**。此前在 2.0.0 上它按设计判 FAIL（0.594 达标但「未在新数据上验证」），这正是预注册要的效果。",
+          "**已完成 · 口径/阈值/数据集三件事都写死在 live 之前**：`docs/acceptance-criteria.md` §4.5（口径逐字固定：`line_wrapper` + `counts` 两分项、真实投影器双投影、读取 `eval/read_path_breakdown.json` 的 `totals.legacy_parts`/`current_parts`；阈值 0.40；数据集要求「比 2.0.0 更新的任务集」）。",
+          "**已完成 · 门禁项 C34 + 两道独立条件**：除任务集版本外，还要求产物**自身指纹新鲜**（否则升一次任务集版本就能让旧数字「通过」）。这条是我在实现过程中发现的自身漏洞并补上的。",
+          "**已完成 · `docs/claims-and-evidence.md` 新增 C34 条目**（口径、门槛、数据集要求、实测对照、五条失效边界），并在 C14/C16 的状态行加上指向 C34 的交叉引用——C14/C16 的阈值**未动**，仍按原口径判 FAIL（本轮 0.0422 / 0.0768）。",
+          "**已完成 · 失效边界与数字一起登记**：①冻结调用集上的客户端渲染效应，不是模型行为测量；②同一优化对总量只有 7.7%（C16 口径，本轮）；③不能替代 C14/C16；④≥0.40 是产品决策（TF-0116），不是从数据里挑的。",
+          "**C16 的 token 口径边界**：C16 条目失效边界⑤已写明「token 仍是 `len(text)//4` 估算」，C34 条目同样写明「这是确定性重投影，不是抽样估计，p 值/区间口径不适用」。"
+        ],
+        "next_action": "无（已关闭）。C34 会随每轮 live 重刷自动复核；若某轮产物陈旧或任务集退回 2.0.0，C34 会转红。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0117"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**实测结果：预注册的难度目标未达成，且方向相反。** 第 14 轮 with 臂（v3.0.0，35 任务 × 3 seed）A 臂成功率 **0.9048**（round 13 是 0.8400），A′ **0.8762**，D **0.8381**（analysable 口径 D 0.9556）。目标是 0.40–0.70。",
+          "**后果比上一轮更严重**：可用余量 = 1 − 0.9048 = **0.0952**，而预注册 MDE = **0.15** → `MDE / 余量 = 1.58 > 1`，即成功率这一支**不是难检出，而是结构上不可能检出**。上一轮该比值是 94%。",
+          "**large tier 占比仍未达标**：冻结集 35 任务里 pristine 观察 ≥1000 token 的只有 **7 个 = 20%**（目标 ≥1/3）。5 个未补齐的槽位全是 large，全部卡 A8（277–590 token），原因见 `docs/task-generation-protocol.md` §4.7。",
+          "**留出集已声明并在本轮被真实使用**：`eval/task_set_freeze.json` 的 `holdout` = 本轮新提升的 10 个任务（`js_leaderboard_rank_b1603acf`、`node_envconfig_validate_dd681123`、`node_slugify_771d856c`、`python_csvlite_parse_80d158b2`、`python_nested_flatten_53db7c0b`、`rust_config_parse_port_d6111a63`、`rust_grade_threshold_502d9b26`、`rust_username_guard_758c1a78`、`ts_chunk_batches_233e9e44`、`ts_narrow_vs_cast_824b51c8`）。结论必须在这 10 个上单独复核。",
+          "**新的、必须与结论一起说的发现**：本轮 D 臂 completion 截断率 14.3%（A/A′ 为 0），按 §0.6.3 使两条成功率对比不可主张；且全量与 analysable 两个口径**符号相反**（D 更差 6.7pp vs D 更好 1.6pp）。已另立节点。"
+        ],
+        "next_action": "难点已被实测证伪方向：基线不降反升到 0.90，余量 0.10 < MDE 0.15。若要让成功率支可检出，需要的不是更多样本而是**更难的子集**（或改用配对设计下更敏感的终点）。这是新的预注册决定，不得在看到结果后临时改 §4.6 的目标区间。",
+        "progress": 90.0,
+        "progress_source": "agent",
+        "status": "in_progress"
+      },
+      "id": "TF-0114"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**任务集已冻结并跑完一轮 live**：v3.0.0、35 任务、留出集 10；with 臂三 seed 全部完成并合并为 `bench/aci/results/latest_live.json`（315 行，`api_error_rows=3`，以 `--allow-api-errors` 合并且已标注 partial）。",
+          "**with 臂三 seed 单臂耗时**：seed42 13:15→14:51、seed43 14:51→17:59、seed44 17:59→20:58，合计约 7.7 小时；实测约 0.96–2.4 分钟/格（端点抖动区间）。",
+          "**未补齐 5 个 large 槽位的实际代价已量化**：这 5 个槽位若补齐，large 占比可从 20% 升到 33%；它们全部卡 A8（`277/390/441/504/590` token < 1000），两条结构性原因（ts 裸 node 首个断言即终止、cargo test 摘要偏短）写在 §4.7。",
+          "**准入率**：本轮 remainder plan 15 槽 → 10 个准入（`eval/task_admissibility.json` 复核，旧驱动的「15/15」是计数 bug 造成的假收敛，已修）。"
+        ],
+        "next_action": "without 臂正在跑（`--tag tf0114 --arms without --seeds 42,43,44`）；跑完后执行全链重刷（`tools/refresh_live_artifacts.py`，含真实 tokenizer 校准）并跑完整门禁（含 cargo 测试）。",
+        "progress": 95.0,
+        "progress_source": "agent",
+        "status": "in_progress"
+      },
+      "id": "TF-0105"
+    }
+  ],
+  "created_at": "2026-09-28T14:10:00.000000Z",
+  "proposal_id": "TFP-round14-live-findings-2026-09-28",
+  "rationale": "第 14 轮 live 的 with 臂已完成并合并（partial，3 行 api_error），C34 首次在新任务集上通过；同时实测出两条必须固化成节点的结构性发现。without 臂仍在跑。",
+  "session_id": "ses_verseshell-live-chain-2026-09-28",
+  "status": "applied"
+}

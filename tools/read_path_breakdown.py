@@ -36,6 +36,8 @@ ROOT = Path(__file__).resolve().parents[1]
 BENCH = ROOT / "bench" / "aci"
 sys.path.insert(0, str(ROOT / "tools"))
 from tf45_envelope_replay import (  # noqa: E402
+    AE,
+    STORED_LIVE,
     frozen_calls,
     prepare_workspace,
     run_op,
@@ -70,6 +72,35 @@ def project(envelope: dict, *, compact: bool) -> str:
     return format_aci_result(envelope, compact=compact)
 
 
+def carries_rendered_content(envelope: dict) -> bool:
+    """Does this envelope carry line content that the projection actually renders?
+
+    The compact projection changes exactly one thing: how a rendered `lines` window
+    is written (verbatim framed `text` instead of an array of {line,text} objects, plus
+    dropping the counts the text makes derivable). When the envelope carries no
+    rendered lines the two projections are byte-identical, so such a call has a
+    saving of exactly zero and averaging it in measures the CALL MIX, not the
+    projection. This predicate is evaluated on the ENVELOPE, never on the
+    legacy/current delta, so the subset is not chosen by whether it improved.
+
+    It must mirror the projector's CURRENT rule, which is "carry the window the tool
+    returned" (claim C30). It previously mirrored the pre-fix ten-line cutoff, and
+    after that cutoff was removed this predicate silently kept classifying
+    content-bearing windows as metadata-only.
+    """
+    data = envelope.get("data") or {}
+    lines = data.get("lines")
+    if isinstance(lines, list) and lines:
+        return True
+    for entry in data.get("files") or []:
+        if not isinstance(entry, dict):
+            continue
+        entry_lines = entry.get("lines")
+        if isinstance(entry_lines, list) and entry_lines:
+            return True
+    return False
+
+
 # Attribution uses two exact techniques rather than one clever-but-fragile one:
 #   * `content` and `lines_wrapper` are computed directly (a JSON array of N
 #     strings costs the text plus exactly 4N: two quotes per string, two
@@ -85,6 +116,7 @@ def variant_no_digest(envelope: dict) -> dict:
     clone = copy.deepcopy(envelope)
     data = clone.get("data")
     if isinstance(data, dict):
+        data.pop("hash", None)
         data.pop("content_hash", None)
         for entry in data.get("files") or []:
             if isinstance(entry, dict):
@@ -151,9 +183,10 @@ def attribute(envelope: dict, *, compact: bool) -> dict:
         "content": content,
         # A JSON array of N strings costs the text plus exactly 4N (two quotes and
         # two separator characters per line, two brackets); the compact rendering
-        # joins them into one string, which costs 2N (two quotes plus two escaped
-        # newlines per gap).
-        "line_wrapper": (2 * lines) if compact else (4 * lines),
+        # uses raw newlines: N-B within B bodies, B-1 between bodies, and one
+        # after the header, giving N total. Escapes within legacy strings remain
+        # in residual; verbatim framing no longer needs them.
+        "line_wrapper": lines if compact else (4 * lines),
         "digest": total - len(project(variant_no_digest(envelope), compact=compact)),
         "path": total - len(project(variant_no_paths(envelope), compact=compact)),
         "counts": total - len(project(variant_no_counts(envelope), compact=compact)),
@@ -167,6 +200,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, default=None)
     args = ap.parse_args(argv)
 
+    binary_before = hashlib.sha256(AE.read_bytes()).hexdigest()
+    source_before = STORED_LIVE.read_bytes()
+    source_data = json.loads(source_before)
     calls = frozen_calls()
     per_call: list[dict] = []
     by_op: dict[str, dict] = defaultdict(lambda: {
@@ -176,6 +212,8 @@ def main(argv: list[str] | None = None) -> int:
     })
     excluded = 0
     matched = {"legacy": 0, "current": 0}
+    # [0] = envelopes carrying rendered content, [1] = metadata-only envelopes.
+    rendered_calls = [0, 0]
 
     for call in calls:
         workspace = prepare_workspace(call["fixture"])
@@ -196,11 +234,14 @@ def main(argv: list[str] | None = None) -> int:
                 excluded += 1
                 continue
             matched[which] += 1
+            renders = carries_rendered_content(envelope)
+            rendered_calls[0 if renders else 1] += 1
             legacy_att = attribute(envelope, compact=False)
             current_att = attribute(envelope, compact=True)
             per_call.append({
                 "task_id": call["task_id"], "op": call["op"], "args": call["args"],
                 "matched_projection": which,
+                "carries_rendered_content": renders,
                 "legacy_chars": legacy_att["total_chars"],
                 "current_chars": current_att["total_chars"],
                 "legacy_tokens": legacy_tokens,
@@ -240,6 +281,16 @@ def main(argv: list[str] | None = None) -> int:
     legacy_parts = aggregate(per_call, "legacy_parts")
     current_parts = aggregate(per_call, "current_parts")
 
+    # The scope the compact projection actually acts on: envelopes that render line
+    # content. Metadata-only envelopes (no rendered window, e.g. a bare
+    # `{"ok": true, "content_hash": ..., "total_lines": N}`) are byte-identical under
+    # both projections, so they have a saving of exactly zero by construction and
+    # including them measures the call mix rather than the projection.
+    rendered = [r for r in per_call if r["carries_rendered_content"]]
+    metadata_only = [r for r in per_call if not r["carries_rendered_content"]]
+    rendered_legacy = sum(r["legacy_tokens"] for r in rendered)
+    rendered_current = sum(r["current_tokens"] for r in rendered)
+
     def op_view(bucket: dict) -> dict:
         return {
             "calls": bucket["calls"],
@@ -259,14 +310,19 @@ def main(argv: list[str] | None = None) -> int:
 
     report = {
         "schema": "verseshell.read-path-breakdown/v1",
+        "ae_binary": str(AE.resolve()), "ae_binary_sha256": binary_before,
+        "source_identity": {"path": str(STORED_LIVE.resolve()), "sha256": hashlib.sha256(source_before).hexdigest(),
+                            "task_set_version": source_data.get("task_set_version"), "git_rev": source_data.get("git_rev")},
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "method": {
+            "match_scope": "token-count equality only, not original byte/content equality; mismatches do not identify their cause",
             "frozen_call_source": "bench/aci/results/latest_live.json (condition D read ops)",
             "ab": "the same envelope is projected twice with the real projector: "
                   "format_aci_result(compact=False) is the pre-change rendering, "
                   "format_aci_result(compact=True) is current",
-            "attribution": "content and line_wrapper are computed exactly (a JSON array of N strings costs "
-                           "the text plus 4N); digest, path and counts are measured by deleting those fields "
+            "attribution": "content is verbatim character count; line_wrapper is 4N for legacy JSON "
+                           "and N for framed text (including header/body separators). Legacy content "
+                           "escapes remain in residual; digest, path and counts are measured by deleting those fields "
                            "and re-projecting, which only removes content so no part can go negative; "
                            "`residual` is the key names, braces, commas and array containers no single value owns",
             "reproducible_call": "a call counts only when one of the two projections reproduces the token "
@@ -274,6 +330,7 @@ def main(argv: list[str] | None = None) -> int:
                                  "re-run fails instead of comparing across projections",
         },
         "evidence": {
+            "input_sha256": {str(STORED_LIVE.resolve()): hashlib.sha256(source_before).hexdigest()},
             "globs": EVIDENCE_GLOBS,
             "fingerprint": evidence_fingerprint(EVIDENCE_GLOBS),
         },
@@ -291,11 +348,28 @@ def main(argv: list[str] | None = None) -> int:
             "legacy_part_shares": shares(legacy_parts, legacy_chars),
             "current_parts": current_parts,
             "current_part_shares": shares(current_parts, current_chars),
+            # Scope split. `token_savings` above is over ALL replayed calls and is
+            # therefore a call-mix-sensitive number; the projection's actual effect is
+            # `rendered_token_savings`, measured only where it can have one.
+            "calls_rendering_content": len(rendered),
+            "calls_metadata_only": len(metadata_only),
+            "rendered_legacy_tokens": rendered_legacy,
+            "rendered_current_tokens": rendered_current,
+            "rendered_token_savings": (
+                round(1.0 - rendered_current / rendered_legacy, 4) if rendered_legacy else None
+            ),
+            "rendered_char_savings": (
+                round(1.0 - sum(r["current_chars"] for r in rendered)
+                      / sum(r["legacy_chars"] for r in rendered), 4)
+                if sum(r["legacy_chars"] for r in rendered) else None
+            ),
         },
         "by_op": {op: op_view(bucket) for op, bucket in by_op.items()},
         "rows": per_call,
     }
 
+    if hashlib.sha256(AE.read_bytes()).hexdigest() != binary_before or STORED_LIVE.read_bytes() != source_before:
+        raise ValueError("binary or frozen source changed during replay")
     text = json.dumps(report, indent=2, ensure_ascii=False) + "\n"
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -307,6 +381,13 @@ def main(argv: list[str] | None = None) -> int:
     t = report["totals"]
     print(f"read bucket: {t['calls']} calls ({t['excluded_calls']} excluded), "
           f"matched={t['matched_projection']}")
+    print(f"  all replayed calls      : {t['legacy_tokens']} -> {t['current_tokens']} tok "
+          f"({(t['token_savings'] or 0) * 100:.1f}%)  [call-mix sensitive]")
+    print(f"  content-rendering calls : {t['calls_rendering_content']} calls "
+          f"{t['rendered_legacy_tokens']} -> {t['rendered_current_tokens']} tok "
+          f"({(t['rendered_token_savings'] or 0) * 100:.1f}%)  [the projection's effect]")
+    print(f"  metadata-only calls     : {t['calls_metadata_only']} calls "
+          f"(no rendered window => saving is exactly 0 by construction)")
     print(f"  compact projection: {t['legacy_chars']} -> {t['current_chars']} chars "
           f"({t['char_savings'] * 100:.1f}%), {t['legacy_tokens']} -> {t['current_tokens']} tok "
           f"({t['token_savings'] * 100:.1f}%)")

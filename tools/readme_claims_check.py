@@ -20,7 +20,9 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -52,8 +54,9 @@ def pick_binary(explicit: str | None) -> Path:
         if not path.exists():
             raise SystemExit(f"--ae path does not exist: {path}")
         return path
-    for candidate in ("target/debug/ae.exe", "target/debug/ae", "target/release/ae.exe", "target/release/ae"):
-        path = ROOT / candidate
+    target = Path(os.environ.get("CARGO_TARGET_DIR", str(ROOT / "target")))
+    for candidate in ("debug/ae.exe", "debug/ae", "release/ae.exe", "release/ae"):
+        path = target / candidate
         if path.exists():
             return path
     raise SystemExit("no ae binary found; run `cargo build` first")
@@ -158,7 +161,7 @@ def check_numbers(readme: str) -> list[dict]:
     return results
 
 
-def check_cross_shell(readme: str) -> list[dict]:
+def check_cross_shell(readme: str, artifact: Path | None = None) -> list[dict]:
     """The README cross-shell table must equal the measured artifact, row by row.
 
     Wall-clock numbers drift on every re-measurement, so the table is pinned to
@@ -166,7 +169,7 @@ def check_cross_shell(readme: str) -> list[dict]:
     bench requires updating the table, and this check makes that coupling
     explicit instead of silent.
     """
-    artifact = ROOT / "eval/cross_shell.json"
+    artifact = artifact or ROOT / "eval/cross_shell.json"
     if not artifact.exists():
         return [{
             "kind": "cross_shell", "name": "eval/cross_shell.json present",
@@ -186,7 +189,7 @@ def check_cross_shell(readme: str) -> list[dict]:
         results.append({
             "kind": "cross_shell",
             "name": row["name"],
-            "source": "README.md vs eval/cross_shell.json",
+            "source": "README.md vs " + str(artifact.resolve()),
             "expected": expected,
             "actual": "present" if expected in readme else "missing or outdated",
             "pass": expected in readme,
@@ -194,20 +197,45 @@ def check_cross_shell(readme: str) -> list[dict]:
     return results
 
 
+def check_compact_encoding(readme: str, artifact: Path) -> list[dict]:
+    # Use the same conservative byte/proxy rule as C9, not the more flattering side.
+    from claim_gate import compact_ratio_claim
+    try:
+        claim = compact_ratio_claim(json.loads(artifact.read_text(encoding='utf-8')))
+        expected = f"measured {100 * claim['value']:.1f}% gated saving"
+        ok = claim['pass'] and expected in readme
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, SystemExit) as error:
+        expected = str(error); ok = False
+    return [{'kind':'compact_encoding','name':'C9 conservative README percentage',
+             'source':str(artifact.resolve()),'expected':expected,
+             'actual':'present' if ok else 'missing, overstated or unsupported','pass':bool(ok)}]
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--ae", default=None, help="path to the ae binary")
     ap.add_argument("--json", type=Path, default=None, help="write a machine-readable report")
+    ap.add_argument("--cross-shell", type=Path, default=ROOT / "eval/cross_shell.json")
+    ap.add_argument("--compact-ratio", type=Path, default=ROOT / "eval/compact_ratio.json")
     args = ap.parse_args(argv)
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    ae = pick_binary(args.ae)
+    ae = pick_binary(args.ae).resolve()
+    ae_label = str(ae.relative_to(ROOT) if ae.is_relative_to(ROOT) else ae)
 
-    checks = check_examples(ae, readme) + check_numbers(readme) + check_cross_shell(readme)
+    binary_before = hashlib.sha256(ae.read_bytes()).hexdigest()
+    inputs = [ROOT / "README.md", args.cross_shell.resolve(), args.compact_ratio.resolve()]
+    input_hashes = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs if p.is_file()}
+    checks = (check_examples(ae, readme) + check_numbers(readme) + check_cross_shell(readme, args.cross_shell)
+              + check_compact_encoding(readme, args.compact_ratio))
+    stable = hashlib.sha256(ae.read_bytes()).hexdigest() == binary_before and all(
+        Path(p).is_file() and hashlib.sha256(Path(p).read_bytes()).hexdigest() == digest for p, digest in input_hashes.items())
+    checks.append({"kind":"source_binding", "name":"binary and selected inputs stable", "source":str(ae),
+                   "expected":"same bytes throughout check", "actual":stable, "pass":stable})
     passed = sum(1 for c in checks if c["pass"])
     all_pass = passed == len(checks)
 
-    print(f"readme_claims_check: {passed}/{len(checks)} checks pass  (ae={ae.relative_to(ROOT)})")
+    print(f"readme_claims_check: {passed}/{len(checks)} checks pass  (ae={ae_label})")
     for check in checks:
         status = "PASS" if check["pass"] else "FAIL"
         if check["kind"] == "example":
@@ -227,7 +255,9 @@ def main(argv: list[str] | None = None) -> int:
         "schema": "verseshell.readme-claims/v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "generator": "tools/readme_claims_check.py",
-        "ae_binary": str(ae.relative_to(ROOT)),
+        "ae_binary": ae_label,
+        "ae_binary_sha256": binary_before,
+        "input_sha256": input_hashes,
         "all_pass": all_pass,
         "checks": checks,
     }

@@ -1,4 +1,4 @@
-﻿# VerseShell ACI Quickstart (Codex / Claude Code / MCP)
+# VerseShell ACI Quickstart (Codex / Claude Code / MCP)
 
 Minimal integration so **Condition D** (VerseShell ACI) can be reproduced for ACI-Bench and agent workflows.
 
@@ -67,8 +67,15 @@ Do not dump full install/build logs; use reduced observations.
 
 ```json
 {"id":"1","agent":"coder","op":"file.view","args":{"path":"src/lib.rs","cursor":1,"window":40}}
-{"id":"2","agent":"coder","op":"file.replace_exact","args":{"path":"src/lib.rs","old":"return a * b;","new":"return a + b;","expected_hash":"<from file.view>"}}
+{"id":"2","agent":"coder","op":"file.replace_exact","args":{"path":"src/lib.rs","old":"return a * b;","new":"return a + b;","expected_hash":"e3b0c44298fc1c14"}}
 ```
+
+**`expected_hash` must be the literal hash returned by the preceding read** — the
+16-hex `hash` field (or the full `content_hash`). The digest above is an *example
+value*, not something to send. Sending a placeholder string, or a hash that does
+not match the file's current content, fails with `E_STALE_HASH` and returns
+`data.actual_hash` / `data.expected_hash` so you can retry with the real value.
+A stale hash is never a reason to fall back to shell redirection.
 
 ### B. Build with semantic diagnostics
 

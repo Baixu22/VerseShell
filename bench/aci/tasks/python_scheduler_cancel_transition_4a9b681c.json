@@ -1,0 +1,50 @@
+{
+  "id": "python_scheduler_cancel_transition_4a9b681c",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "The job scheduler's test suite fails: a job that is cancelled while running ends up marked DONE, a state it should never reach from cancellation. Exactly one entry in the transition table is wrong; fix the state machine so all tests pass without modifying the tests.",
+  "golden": {
+    "scheduler.py": "\"\"\"A tiny job scheduler built on an explicit state machine.\n\nJobs move between states in response to events.  Every legal\n(state, event) pair is listed in TRANSITIONS; firing an event that is\nnot listed for the job's current state raises InvalidTransitionError.\n\"\"\"\n\nPENDING = \"PENDING\"\nRUNNING = \"RUNNING\"\nDONE = \"DONE\"\nFAILED = \"FAILED\"\nCANCELLED = \"CANCELLED\"\n\nTERMINAL_STATES = frozenset({DONE, FAILED, CANCELLED})\n\nTRANSITIONS = {\n    (PENDING, \"start\"): RUNNING,\n    (PENDING, \"cancel\"): CANCELLED,\n    (RUNNING, \"complete\"): DONE,\n    (RUNNING, \"fail\"): FAILED,\n    (RUNNING, \"cancel\"): CANCELLED,\n    (FAILED, \"retry\"): PENDING,\n}\n\n\nclass InvalidTransitionError(Exception):\n    \"\"\"Raised when an event is not legal for the job's current state.\"\"\"\n\n\nclass Job:\n    def __init__(self, name: str):\n        self.name = name\n        self.state = PENDING\n        self.history = [PENDING]\n\n    def fire(self, event: str) -> str:\n        key = (self.state, event)\n        if key not in TRANSITIONS:\n            raise InvalidTransitionError(\n                f\"job {self.name!r}: event {event!r} is not allowed in state {self.state}\"\n            )\n        self.state = TRANSITIONS[key]\n        self.history.append(self.state)\n        return self.state\n\n    @property\n    def is_terminal(self) -> bool:\n        return self.state in TERMINAL_STATES\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "timeout_sec": 120
+      },
+      {
+        "type": "file_contains",
+        "path": "test_scheduler.py",
+        "contains": "def test_cancel_from_running_goes_to_cancelled():"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_and_golden_author",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "generated_at": "2026-09-25T01:50:54.484704+00:00"
+  },
+  "workspace_fixture": "python_scheduler_cancel_transition_4a9b681c",
+  "promoted_from": "bench/aci/candidates/python_scheduler_cancel_transition_4a9b681c",
+  "promoted_at": "2026-09-25T08:29:13.947766+00:00"
+}

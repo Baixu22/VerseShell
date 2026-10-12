@@ -1,0 +1,100 @@
+{
+  "applied_at": "2026-09-28T22:29:08.079510Z",
+  "base_graph_hash": "352956d1caeb7d77842d0b215107c140e3b695ba226b80e87505ce5420439598",
+  "base_summary": {
+    "edge_count": 181,
+    "node_count": 122,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**收口完成**：本轮变更已按 `proposal-save` → `proposal-apply` → `validate` → `export` 落成可审计提案（`TFP-live-chain-tf0104-0119-2026-09-28`、`TFP-tf0105-generation-outcome-2026-09-28`、`TFP-round14-live-findings-2026-09-28`、`TFP-tf0121-attribution-2026-09-28`、`TFP-round14-close-2026-09-28`），森林校验通过。",
+          "**完整门禁（含 cargo 测试）：27/30 PASS**（本轮开始时为 22/30）。仅三项红：**C14 = 0.0422**（门槛 ≥0.15）、**C16 = 0.0768**（门槛 ≥0.10）——两者按 TF-0116 的决策**保持原阈值**，不改度量；**C35 = 0**——with 臂是 partial 合并（3 行端点失败，见 TF-0122），配对组成检查**正确地**判红。",
+          "**本轮转绿的**：C12（重刷后全部产物新鲜）、C34（0.5654，新声明首次在比 2.0.0 更新的任务集上验证通过）、C36（假设族 + Holm，含负对照）、C28 与 C33（修掉两处标签/一致性缺陷后转绿）。",
+          "**新增/修订的文档**：`docs/acceptance-criteria.md`（§0.5.2 预算敏感清单、§0.5.3 第 14 轮任务集、§0.7 假设族与多重比较、§4.5 C34 预注册）、`docs/task-generation-protocol.md`（§4.6 难度与大观察目标、§4.7 实际结果与 5 条生成器缺陷）、`docs/claims-and-evidence.md`（C34 条目 + C13 端点硬上限边界）、`docs/tf0114-round-notes.md`（本轮完整记录）、`CHANGELOG.md`。",
+          "**新增门禁**：C34、C35、C36（均含负对照或有明确判定条件）。",
+          "**README 的跨 shell 表已按新产物更新**（否则 C10 判红——它确实先判红了，更新后 PASS）。"
+        ],
+        "next_action": "无（已关闭）。下一轮的固定动作仍是：跑 live → `tools/refresh_live_artifacts.py` →（若 live 重跑过）`tools/cross_shell_bench.py` 与 `tools/three_arm_report.py` → `python tools/claim_gate.py`。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0106"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**两臂都跑完并合并**：with 臂 `bench/aci/results/latest_live.json`（315 行，partial，`api_error_rows=3`）、without 臂 `bench/aci/results/live_ab_without_read_files.json`（315 行，`api_error_rows=0`），均为 `task_set_version 3.0.0`。逐 seed 原始行在 `bench/aci/results/tf0114/`。",
+          "**留出集已被真实使用**：`eval/task_set_freeze.json` 的 `holdout` 列出本轮新提升的 10 个任务；它们全部进了 live 并出现在逐任务统计里。",
+          "**耗时实测**：with 臂 seed42 13:15→14:51、seed43 14:51→17:59、seed44 17:59→20:58（合计 ~7.7h）；without 臂 22:03→03:47（~5.7h）。单格速率在 0.96–4 分钟之间波动，端点抖动是主因。",
+          "**全链重刷完成**：`tools/refresh_live_artifacts.py` 两遍（第二遍用于修正顺序：mock bench / three_arm / cross_shell 必须先于 tokenizer 校准），exit 0；`eval/token_proxy_calibration.json` 等全部重生成。",
+          "**未达标的部分照实登记**：准入 25/30 生成任务（缺 5，全为 large，全卡 A8），large 占比 20%（目标 ≥1/3）。"
+        ],
+        "next_action": "无（已关闭）。未补齐的 5 个 large 槽位由 TF-0114 承接（它要求的是改观察机制，不是再跑几轮）。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0105"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**C35 在本轮真实发挥了作用**：它现在是**唯一**报出「with 臂与 without 臂在组成上不可等同对待」的机检——with 臂 `api_error_rows=3`、without 为 0，C35 判 FAIL。若没有它，这轮会把两条臂当成同一质量水平一起引用。",
+          "**负对照仍然有效**（本轮之前已跑）：把 without 臂去掉 seed 44 的行 → C35 FAIL 并精确报出 `seed sets differ`／`row counts differ`；指向真实产物 → PASS。",
+          "**新增 `--without-arm` 覆盖参数**使负对照可复现，与 C28/C33 的覆盖写法一致。"
+        ],
+        "next_action": "无（已关闭）。C35 现在会持续监视两臂组成；with 臂的 partial 状态由 TF-0122 承接。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0119"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**本轮已按 partial 处置**：with 臂 3 行 `api_error`（`python_batch_splitter_05613a34 [raw_shell] seed42`、`python_csvlite_parse_80d158b2 [raw_shell] seed42/seed44`）在 **6 次补跑全部失败**后，用 `merge_live_runs.py --allow-api-errors` 合并，产物带 `live_config.api_error_rows = 3`。旧基线备份 `audit-r12-scratch/latest_live_round13_backup.json`。",
+          "**没有绕过任何门槛**：§0.6.3 第 3 条（`api_error` 行数为 0）仍使含该行的对比不可主张，`tools/three_arm_report.py` 已明确列出 `api_error_rows_present` 为阻断原因之一。",
+          "**失败是任务/条件特异的**：`python_csvlite_parse_80d158b2` 在 with 臂 A 条件连续 6 次 502（300 秒上限），但在 without 臂第一次补跑就返回普通 FAIL 行；同批 `python_batch_splitter` 在重试中先后返回 PASS/FAIL。所以不是端点整体不可用。",
+          "**管道缺陷（待修）**：`merge_live_runs.py --allow-api-errors` 只记录计数，不产出逐行分类；而 §0.6 的分类只实现在 `tools/live_uncertainty.py::row_class()`。两者应对齐到同一实现。",
+          "**C35 因此判红**——这是正确信号，不是误报。"
+        ],
+        "next_action": "把「单格端点失败」的处置写进预注册，并让 `merge_live_runs.py --allow-api-errors` 与 §0.6 的 `row_class()` 对齐（当前它只写一个计数、不产出逐行分类），使门禁能机检 partial 产物。",
+        "progress": 40.0,
+        "progress_source": "agent",
+        "status": "in_progress"
+      },
+      "id": "TF-0122"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已实现并接入产物**：`tools/acceptance_power.py` 的 `VERDICT_FAMILIES`（预注册族表）+ `apply_multiplicity()`（Holm-Bonferroni、按族），产物新增 `multiplicity` 块与 `demoted_by_multiplicity`。本轮实测：`live_model` 族 m=9（5 项可评分，Holm 门槛 0.01/0.0125/0.0167/0.025/0.05）、`cross_shell` 族 m=2（0.025/0.05），**降级项 0**。",
+          "**口径诚实性**：判定是区间式的，p 值由各判定自己的 `(point, CI)` 反推并标为 `p_value_kind=\"approx_from_ci95\"`；成功率两项是设计/功效判定，`passes_holm=null` 并照实报告，不假装已校正。",
+          "**门禁 C36 + 负对照**：把 `token_ratio_level1_D_cheaper` 人为改成 `claimable=True, passes_holm=False` → C36 FAIL（21/30）；真实产物 → PASS。",
+          "**实现过程中发现并修掉的两处自身缺陷**：①cross-shell 两项原本没有评分三元组，会使该族显示 `corrected: true` 而实际什么都没校正——已补上「取区间最宽操作」的三元组；②补上后 C28 的「区间 vs 标签一致性」检查开始看这两项，于是必须同时发布 `gap_type`/`impossible_by_sample_size`（否则 C28 判红）。",
+          "**同时修掉 C28 的一处语义错误**：`_impossible_flag_consistent` 原先把 §0.6 的 `gap_type=\"policy_blocked\"` 当成不一致（它期望 `data_gap`）。但 policy block 与区间无关（是「这一行集不合格」，不是「估计值还会动」），所以现在对它跳过区间标签检查。修完 C28 与 C33 均转绿。"
+        ],
+        "next_action": "无（已关闭）。下一轮若新增判定，必须同时更新 §0.7 的族表（`VERDICT_FAMILIES`）与文档，否则 C36 会因「未声明族」判红。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0113"
+    }
+  ],
+  "created_at": "2026-09-28T06:40:00.000000Z",
+  "proposal_id": "TFP-round14-close-2026-09-28",
+  "rationale": "第 14 轮 live 两臂跑完、全链重刷完成、完整门禁 27/30；把最终结果与两处剩余缺口按实登记，并执行本轮收口。",
+  "session_id": "ses_verseshell-live-chain-2026-09-28",
+  "status": "applied"
+}

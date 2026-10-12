@@ -190,6 +190,7 @@ impl ArtifactStore {
 pub fn parse_handle(handle: &str) -> Result<&str> {
     let digest = handle
         .strip_prefix("result://sha256/")
+        .or_else(|| handle.strip_prefix("result://sha256:"))
         .ok_or_else(|| anyhow!("E_RESULT_HANDLE: invalid artifact handle"))?;
     if digest.len() != 64 || !digest.bytes().all(|b| b.is_ascii_hexdigit()) {
         return Err(anyhow!("E_RESULT_HANDLE: invalid artifact digest"));
@@ -241,6 +242,13 @@ mod tests {
     fn rejects_invalid_handles() {
         assert!(parse_handle("file://x").is_err());
         assert!(parse_handle("result://sha256/nope").is_err());
+    }
+
+    #[test]
+    fn accepts_model_seen_colon_handle_alias() {
+        let digest = "a".repeat(64);
+        let handle = format!("result://sha256:{digest}");
+        assert_eq!(parse_handle(&handle).unwrap(), digest);
     }
 
     #[test]

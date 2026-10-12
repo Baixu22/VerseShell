@@ -1,0 +1,204 @@
+{
+  "task_set_version": "3.1.0",
+  "base_task_set_version": "3.0.0",
+  "scope": "Eight reviewed scoring contracts in a new version; original v3.0.0 tasks and fixtures unchanged. windows_path_normalize_edit already uses exact output validation.",
+  "base_sha256": {
+    "manifest.json": "2bc7d6e816adefb971c152e386931dc8b2e6c357a1c669a75e47a897ad09180f",
+    "rust_fix_compile_error.json": "65355d4cb75e18a0cbc67a54594a7428f223b6baa70f1b7ee1d4b8061d0c69f2",
+    "rust_add_unit_test.json": "dd3fc1730138e265e72ef26a8609b35c0e9056e54ee24b34f0389ea08ff7fd7c",
+    "rust_search_and_edit.json": "82323c508f7235d08b562af55cbf40ed2e44498db3b56ad00be51c0793f98e15",
+    "python_fix_pytest_fail.json": "5d99a324106ffe740a34c9bf3268bee191f47a50c0047591323fd48d48fd1aa8",
+    "python_edit_and_retest.json": "6a7d77aeffa61bd1ab58270bc00b2ce7d3e11ab44135c8c7b748f91494b7df3b",
+    "python_noisy_install_summary.json": "d7c7201f46c9ad5d8a91434ce3d336cc094609a73ed29d87adffbb70ceeaee00",
+    "ts_fix_type_error.json": "dcc2f2b149cecf74eebc2b8c82c8b11f266a6b3695535ae90e204414da5e8326",
+    "ts_package_script_fail.json": "6e3ca211a61c54f43c22078c74dac386510b2f9fbfa13329607b05b271f94212",
+    "windows_path_normalize_edit.json": "d8a3c9d9ae7cc7e88641d76c0d35c8b88c750964d388a962e5c895a6a65db88e",
+    "windows_batch_capture_diag.json": "2dd2a6db1823bf020bae1640673cc9002e2aed74e6246c1724df970199e2ce2e",
+    "py_region_top_seller_7f713e22.json": "506cf0514bd60941f1d99cd892e53d891a0282c6613aeb8e6035d05e1e12500e",
+    "python_batch_splitter_05613a34.json": "64683884183f4cf80f89b37da9ef51c78deae7674b604dc8478eb9d426375309",
+    "python_config_reader_686653a1.json": "067f61b6119963181a47112e79963fe142e5c6d17c7d2b55c6319a38f08a5b50",
+    "python_exception_mislabel_0816896a.json": "57ef1e4b195c242f1404dd490f01ecb22232f65f7fe61db869cc1e1ac0f76f18",
+    "python_ledger_window_bug_9bfcc241.json": "96d933d031323dff444636904889fd73751c3aff0491da211b93dcd6cb3963e4",
+    "python_paginate_60b4dafc.json": "0de64660a30a88f6076a7caf4e5ccbc49fdbf239ff65a5d1299cc83071ed087e",
+    "python_parse_orders_708606f4.json": "cbb4549e73bedec789d4b1f243a699b2618d6dbbbedf087986bd55c009dd512a",
+    "python_scheduler_cancel_transition_4a9b681c.json": "659d30efa2de92d85648be95df0f3e17a82ea894220dd7709659016c945b48c2",
+    "python_shift_report_tie_order_4a0c45c8.json": "aa2f4c9f917915b1a3efed5935cd972f725e7dff42ead04ae566b3bff1f4029a",
+    "python_turnstile_6e3358e8.json": "22acf1c57e9ecf297ded76e8cde2e42998cac85f3b5061aac0e6b97e3eb58bde",
+    "rust_borrow_fix_longest_word_a4c895ec.json": "6f0225de161c33ed05cacce8feb935b2be3b5fdefc9baa390ea2b92000562490",
+    "rust_error_source_propagation_3eca2e86.json": "e5074e10abfe8bff4aee452fce33de6d19b52d06bc410117d44db545edfd341d",
+    "rust_window_fold_scanner_3d213f38.json": "6aca0ec9a263c45efbc3f118cefff48dcf18f98268085ef9c3cbce566c2f96b1",
+    "typescript_missing_await_result_order_c58cafb6.json": "ac65f532a8743905f221ab3e54276550282f8a5937b4ce44381a27f1726e0152",
+    "typescript_reduce_shared_accumulator_d80f462d.json": "01b9c1071fa1f3b402cf66c5877d29c6ea894d029189d3ffeb47ea2ec1773e7f",
+    "js_leaderboard_rank_b1603acf.json": "f71b99ec6dbcb3d7e1288b83540412ae6f6363a833a4e57bfdb02be528f51c62",
+    "node_envconfig_validate_dd681123.json": "72668bf2b6a02de501be1ff6d3967e03e51757991f672b9ebfe3ef937e25e143",
+    "node_slugify_771d856c.json": "9f4b862c7062af8bafe84ad63f89cfe4f1a419aa96b1ebcf147da903b8e2891a",
+    "python_csvlite_parse_80d158b2.json": "4d5ed1d5b7a85b6532719e8f76336e6cc0ff00755c0a9340648a1d9dea2961a5",
+    "python_nested_flatten_53db7c0b.json": "702f27160a54fbc0b1e231ef219128703475ff0f53cff13f9488bd816f41b1dc",
+    "rust_config_parse_port_d6111a63.json": "fabeeeea48214990b43b4bc0ead5620629236df6319db8cfeef06a6ec5fbb0bf",
+    "rust_grade_threshold_502d9b26.json": "55e70e67c2774b62ce408409fdf836c25a2a65aa9c0fc65872426b51a8b16089",
+    "rust_username_guard_758c1a78.json": "e19a2b9643c6d5dcfe7081bca2887803d322b04f6e6b4c85e702f31174de26e1",
+    "ts_chunk_batches_233e9e44.json": "c2dbbc79820d45f490a36b2e124312f80330c2fa9d4db6f1fdfdb66fb7c3497c",
+    "ts_narrow_vs_cast_824b51c8.json": "2fe633db2780aa4de5fef6af3b6a00817882c52b5ed954f6a9981d3fe5e18839"
+  },
+  "overrides": {
+    "rust_add_unit_test": {
+      "version": "1.1.0",
+      "success": {
+        "type": "rust_behavior",
+        "function": "add",
+        "require_unit_tests": true,
+        "timeout_sec": 120
+      },
+      "optional_verify": null
+    },
+    "rust_search_and_edit": {
+      "version": "1.1.0",
+      "success": {
+        "type": "rust_behavior",
+        "function": "sum",
+        "require_unit_tests": false,
+        "timeout_sec": 120
+      },
+      "optional_verify": null
+    },
+    "rust_fix_compile_error": {
+      "version": "1.1.0",
+      "success": {
+        "type": "rust_behavior",
+        "function": "add",
+        "require_unit_tests": false,
+        "timeout_sec": 120
+      },
+      "optional_verify": null
+    },
+    "python_fix_pytest_fail": {
+      "version": "1.1.0",
+      "success": {
+        "type": "all",
+        "of": [
+          {
+            "type": "command_exit_0",
+            "argv": [
+              "python",
+              "-B",
+              "-c",
+              "from mathlib import add; assert add(2,3)==5; assert add(-1,1)==0; assert add(0,7)==7"
+            ],
+            "timeout_sec": 120,
+            "timeout_is_unverified": true,
+            "resolve_executable": true
+          },
+          {
+            "type": "command_exit_0",
+            "argv": [
+              "python",
+              "-B",
+              "-m",
+              "pytest",
+              "-q",
+              "-p",
+              "no:cacheprovider"
+            ],
+            "timeout_sec": 120,
+            "timeout_is_unverified": true,
+            "resolve_executable": true,
+            "unverified_output_markers": [
+              "No module named pytest",
+              "No module named 'pytest'"
+            ]
+          }
+        ]
+      },
+      "optional_verify": null
+    },
+    "python_edit_and_retest": {
+      "version": "1.1.0",
+      "success": {
+        "type": "all",
+        "of": [
+          {
+            "type": "command_exit_0",
+            "argv": [
+              "python",
+              "-B",
+              "-c",
+              "from greet import greet; assert greet('Ada')=='Hello, Ada!'; assert greet('')=='Hello, !'; assert greet('Lin')=='Hello, Lin!'"
+            ],
+            "timeout_sec": 120,
+            "timeout_is_unverified": true,
+            "resolve_executable": true
+          },
+          {
+            "type": "command_exit_0",
+            "argv": [
+              "python",
+              "-B",
+              "-m",
+              "pytest",
+              "-q",
+              "-p",
+              "no:cacheprovider"
+            ],
+            "timeout_sec": 120,
+            "timeout_is_unverified": true,
+            "resolve_executable": true,
+            "unverified_output_markers": [
+              "No module named pytest",
+              "No module named 'pytest'"
+            ]
+          }
+        ]
+      },
+      "optional_verify": null
+    },
+    "ts_package_script_fail": {
+      "version": "1.1.0",
+      "success": {
+        "type": "command_exit_0",
+        "argv": [
+          "npm",
+          "test"
+        ],
+        "timeout_sec": 120,
+        "timeout_is_unverified": true,
+        "resolve_executable": true
+      },
+      "optional_verify": null
+    },
+    "windows_batch_capture_diag": {
+      "version": "1.1.0",
+      "success": {
+        "type": "file_matches",
+        "path": "ERR.txt",
+        "pattern": "src[/\\\\]main\\.rs:12"
+      },
+      "optional_verify": null
+    },
+    "python_noisy_install_summary": {
+      "version": "1.1.0",
+      "success": {
+        "type": "all",
+        "of": [
+          {
+            "type": "command_exit_0",
+            "argv": [
+              "python",
+              "-B",
+              "-c",
+              "import six; assert six.__version__ == '1.16.0'"
+            ],
+            "timeout_sec": 120,
+            "timeout_is_unverified": true,
+            "resolve_executable": true
+          },
+          {
+            "type": "file_matches",
+            "path": "SUMMARY.txt",
+            "pattern": "(?i)[^\\r\\n]*\\bsix\\b[^\\r\\n]*"
+          }
+        ]
+      },
+      "optional_verify": null
+    }
+  }
+}

@@ -1,0 +1,636 @@
+{
+  "schema": "verseshell.aci_learning_probe/v1",
+  "generated_at": "2026-09-24T21:17:29.856672+00:00",
+  "model": "sn-glm-5-3-flash",
+  "api_base": "http://127.0.0.1:3065/v1",
+  "caps": "sys.read,file.read,file.write,file.delete,shell.exec,git.read,git.write,proc.list,proc.spawn,proc.kill,crypto.hash",
+  "repeat": 3,
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "doc_under_test": "docs/quickstart/aci-mcp.md",
+  "protocol": "quickstart doc only as system prompt; no tool schemas; one shot; every emitted op executed through the real ae --serve --agent",
+  "summary": {
+    "rows": 15,
+    "api_error_rows": 0,
+    "scored_rows": 15,
+    "rows_with_no_ops_emitted": 1,
+    "first_attempt_op_acceptance": 0.6667,
+    "op_acceptance_given_ops_emitted": 0.7143,
+    "task_success": 0.4,
+    "hash_handoff_rate": 0.3333,
+    "hash_handoff_rows": 3
+  },
+  "evidence": {
+    "globs": [
+      "docs/quickstart/**/*",
+      "tools/aci_learning_probe.py"
+    ],
+    "fingerprint": "0dbcf3a6624bf73a126c8fb042f2b24dfcfe7c82717403c6e9bdcf7aefbb2013"
+  },
+  "rows": [
+    {
+      "task_id": "write_file",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "file.write",
+          "args": {
+            "path": "out/hello.txt",
+            "content": "world"
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "out/hello.txt",
+            "cursor": 1,
+            "window": 40
+          },
+          "ok": true,
+          "error": null
+        }
+      ],
+      "n_ops": 2,
+      "no_ops_emitted": false,
+      "all_ops_accepted": true,
+      "task_success": true,
+      "hash_handoff_ok": null,
+      "observation_tokens": 41,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"file.write\",\"args\":{\"path\":\"out/hello.txt\",\"content\":\"world\"}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"out/hello.txt\",\"cursor\":1,\"window\":40}}",
+      "repeat_index": 0,
+      "seed": 42
+    },
+    {
+      "task_id": "read_window",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs",
+            "cursor": 1,
+            "window": 2
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "python",
+              "-c",
+              "import os,pathlib; p=pathlib.Path('src/lib.rs'); os.makedirs('out',exist_ok=True); pathlib.Path('out/lines.txt').write_text(str(len(p.read_bytes().splitlines()))+chr(10))"
+            ],
+            "profile": "auto"
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "out/lines.txt",
+            "cursor": 1,
+            "window": 1
+          },
+          "ok": true,
+          "error": null
+        }
+      ],
+      "n_ops": 3,
+      "no_ops_emitted": false,
+      "all_ops_accepted": true,
+      "task_success": true,
+      "hash_handoff_ok": null,
+      "observation_tokens": 49,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"src/lib.rs\",\"cursor\":1,\"window\":2}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"python\",\"-c\",\"import os,pathlib; p=pathlib.Path('src/lib.rs'); os.makedirs('out',exist_ok=True); pathlib.Path('out/lines.txt').write_text(str(len(p.read_bytes().splitlines()))+chr(10))\"],\"profile\":\"auto\"}}\n{\"id\":\"3\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"out/lines.txt\",\"cursor\":1,\"window\":1}}",
+      "repeat_index": 0,
+      "seed": 42
+    },
+    {
+      "task_id": "exact_edit",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs",
+            "cursor": 1,
+            "window": 200
+          },
+          "ok": true,
+          "error": null
+        }
+      ],
+      "n_ops": 1,
+      "no_ops_emitted": false,
+      "all_ops_accepted": true,
+      "task_success": false,
+      "hash_handoff_ok": false,
+      "observation_tokens": 29,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"src/lib.rs\",\"cursor\":1,\"window\":200}}",
+      "repeat_index": 0,
+      "seed": 42
+    },
+    {
+      "task_id": "search_then_report",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "repo.search",
+          "args": {
+            "query": "TODO(fix-me)",
+            "path": "."
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "file.write",
+          "args": {
+            "path": "out/found.txt",
+            "content": "src/lib.rs\n"
+          },
+          "ok": true,
+          "error": null
+        }
+      ],
+      "n_ops": 2,
+      "no_ops_emitted": false,
+      "all_ops_accepted": true,
+      "task_success": false,
+      "hash_handoff_ok": null,
+      "observation_tokens": 56,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"repo.search\",\"args\":{\"query\":\"TODO(fix-me)\",\"path\":\".\"}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"file.write\",\"args\":{\"path\":\"out/found.txt\",\"content\":\"src/lib.rs\\n\"}}",
+      "repeat_index": 0,
+      "seed": 42
+    },
+    {
+      "task_id": "exec_and_report",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "sh",
+              "-c",
+              "pwd"
+            ],
+            "profile": "auto"
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "sh",
+              "-c",
+              "mkdir -p out && pwd > out/pwd.txt"
+            ],
+            "profile": "auto"
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "out/pwd.txt",
+            "cursor": 1,
+            "window": 10
+          },
+          "ok": true,
+          "error": null
+        }
+      ],
+      "n_ops": 3,
+      "no_ops_emitted": false,
+      "all_ops_accepted": true,
+      "task_success": true,
+      "hash_handoff_ok": null,
+      "observation_tokens": 44,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"sh\",\"-c\",\"pwd\"],\"profile\":\"auto\"}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"sh\",\"-c\",\"mkdir -p out && pwd > out/pwd.txt\"],\"profile\":\"auto\"}}\n{\"id\":\"3\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"out/pwd.txt\",\"cursor\":1,\"window\":10}}",
+      "repeat_index": 0,
+      "seed": 42
+    },
+    {
+      "task_id": "write_file",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "powershell",
+              "-NoProfile",
+              "-Command",
+              "New-Item -ItemType Directory -Force -Path out | Out-Null; [IO.File]::WriteAllText('out/hello.txt','world')"
+            ],
+            "profile": "auto"
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "out/hello.txt",
+            "cursor": 1,
+            "window": 40
+          },
+          "ok": true,
+          "error": null
+        }
+      ],
+      "n_ops": 2,
+      "no_ops_emitted": false,
+      "all_ops_accepted": true,
+      "task_success": true,
+      "hash_handoff_ok": null,
+      "observation_tokens": 19,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"powershell\",\"-NoProfile\",\"-Command\",\"New-Item -ItemType Directory -Force -Path out | Out-Null; [IO.File]::WriteAllText('out/hello.txt','world')\"],\"profile\":\"auto\"}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"out/hello.txt\",\"cursor\":1,\"window\":40}}",
+      "repeat_index": 1,
+      "seed": 43
+    },
+    {
+      "task_id": "read_window",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs",
+            "cursor": 1,
+            "window": 2
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "sh",
+              "-c",
+              "mkdir -p out && wc -l < src/lib.rs | tr -d ' ' > out/lines.txt"
+            ],
+            "profile": "auto"
+          },
+          "ok": true,
+          "error": null
+        }
+      ],
+      "n_ops": 2,
+      "no_ops_emitted": false,
+      "all_ops_accepted": true,
+      "task_success": true,
+      "hash_handoff_ok": null,
+      "observation_tokens": 34,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"src/lib.rs\",\"cursor\":1,\"window\":2}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"sh\",\"-c\",\"mkdir -p out && wc -l < src/lib.rs | tr -d ' ' > out/lines.txt\"],\"profile\":\"auto\"}}",
+      "repeat_index": 1,
+      "seed": 43
+    },
+    {
+      "task_id": "exact_edit",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs",
+            "cursor": 1,
+            "window": 200
+          },
+          "ok": true,
+          "error": null
+        }
+      ],
+      "n_ops": 1,
+      "no_ops_emitted": false,
+      "all_ops_accepted": true,
+      "task_success": false,
+      "hash_handoff_ok": false,
+      "observation_tokens": 29,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"src/lib.rs\",\"cursor\":1,\"window\":200}}",
+      "repeat_index": 1,
+      "seed": 43
+    },
+    {
+      "task_id": "search_then_report",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [],
+      "n_ops": 0,
+      "no_ops_emitted": true,
+      "all_ops_accepted": false,
+      "task_success": false,
+      "hash_handoff_ok": null,
+      "observation_tokens": 0,
+      "reply_text": "",
+      "repeat_index": 1,
+      "seed": 43
+    },
+    {
+      "task_id": "exec_and_report",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "pwd"
+            ],
+            "profile": "auto"
+          },
+          "ok": false,
+          "error": "E_EXEC_NOT_FOUND"
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "out/pwd.txt",
+            "cursor": 1,
+            "window": 10
+          },
+          "ok": false,
+          "error": "E_NOT_FOUND"
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "out/pwd.txt",
+            "old": "",
+            "new": "<stdout of id 1>",
+            "expected_hash": "<hash from id 2>"
+          },
+          "ok": false,
+          "error": "E_NOT_FOUND"
+        }
+      ],
+      "n_ops": 3,
+      "no_ops_emitted": false,
+      "all_ops_accepted": false,
+      "task_success": false,
+      "hash_handoff_ok": null,
+      "observation_tokens": 140,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"pwd\"],\"profile\":\"auto\"}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"out/pwd.txt\",\"cursor\":1,\"window\":10}}\n{\"id\":\"3\",\"agent\":\"coder\",\"op\":\"file.replace_exact\",\"args\":{\"path\":\"out/pwd.txt\",\"old\":\"\",\"new\":\"<stdout of id 1>\",\"expected_hash\":\"<hash from id 2>\"}}",
+      "repeat_index": 1,
+      "seed": 43
+    },
+    {
+      "task_id": "write_file",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "powershell",
+              "-NoProfile",
+              "-Command",
+              "New-Item -ItemType Directory -Force -Path out | Out-Null; [System.IO.File]::WriteAllText('out/hello.txt','world')"
+            ],
+            "profile": "auto"
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "out/hello.txt",
+            "cursor": 1,
+            "window": 40
+          },
+          "ok": true,
+          "error": null
+        }
+      ],
+      "n_ops": 2,
+      "no_ops_emitted": false,
+      "all_ops_accepted": true,
+      "task_success": true,
+      "hash_handoff_ok": null,
+      "observation_tokens": 19,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"powershell\",\"-NoProfile\",\"-Command\",\"New-Item -ItemType Directory -Force -Path out | Out-Null; [System.IO.File]::WriteAllText('out/hello.txt','world')\"],\"profile\":\"auto\"}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"out/hello.txt\",\"cursor\":1,\"window\":40}}",
+      "repeat_index": 2,
+      "seed": 44
+    },
+    {
+      "task_id": "read_window",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs",
+            "cursor": 1,
+            "window": 2
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "bash",
+              "-lc",
+              "mkdir -p out && awk 'END{print NR}' src/lib.rs > out/lines.txt"
+            ],
+            "profile": "auto"
+          },
+          "ok": false,
+          "error": "E_PROCESS_EXIT"
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "out/lines.txt",
+            "cursor": 1,
+            "window": 2
+          },
+          "ok": false,
+          "error": "E_NOT_FOUND"
+        }
+      ],
+      "n_ops": 3,
+      "no_ops_emitted": false,
+      "all_ops_accepted": false,
+      "task_success": false,
+      "hash_handoff_ok": null,
+      "observation_tokens": 140,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"src/lib.rs\",\"cursor\":1,\"window\":2}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"bash\",\"-lc\",\"mkdir -p out && awk 'END{print NR}' src/lib.rs > out/lines.txt\"],\"profile\":\"auto\"}}\n{\"id\":\"3\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"out/lines.txt\",\"cursor\":1,\"window\":2}}",
+      "repeat_index": 2,
+      "seed": 44
+    },
+    {
+      "task_id": "exact_edit",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "file.view",
+          "args": {
+            "path": "src/lib.rs",
+            "cursor": 1,
+            "window": 40
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "file.replace_exact",
+          "args": {
+            "path": "src/lib.rs",
+            "old": "return a * b;",
+            "new": "return a + b;",
+            "expected_hash": "$1.hash"
+          },
+          "ok": false,
+          "error": "E_STALE_HASH"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "cargo",
+              "check"
+            ],
+            "profile": "auto"
+          },
+          "ok": false,
+          "error": "E_PROCESS_EXIT"
+        }
+      ],
+      "n_ops": 3,
+      "no_ops_emitted": false,
+      "all_ops_accepted": false,
+      "task_success": false,
+      "hash_handoff_ok": true,
+      "observation_tokens": 192,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"src/lib.rs\",\"cursor\":1,\"window\":40}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"file.replace_exact\",\"args\":{\"path\":\"src/lib.rs\",\"old\":\"return a * b;\",\"new\":\"return a + b;\",\"expected_hash\":\"$1.hash\"}}\n{\"id\":\"3\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"cargo\",\"check\"],\"profile\":\"auto\"}}",
+      "repeat_index": 2,
+      "seed": 44
+    },
+    {
+      "task_id": "search_then_report",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "repo.search",
+          "args": {
+            "query": "TODO(fix-me)",
+            "max_results": 20
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "sh",
+              "-lc",
+              "hit=$(grep -rlF -- 'TODO(fix-me)' . --exclude-dir=.git --exclude-dir=target --exclude-dir=out | head -n1); mkdir -p out; printf '%s\\n' \"$hit\" > out/found.txt"
+            ],
+            "cwd": ".",
+            "profile": "auto"
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "file.view",
+          "args": {
+            "path": "out/found.txt",
+            "cursor": 1,
+            "window": 10
+          },
+          "ok": true,
+          "error": null
+        },
+        {
+          "op": "ops.observation_recent",
+          "args": {
+            "limit": 4
+          },
+          "ok": true,
+          "error": null
+        }
+      ],
+      "n_ops": 4,
+      "no_ops_emitted": false,
+      "all_ops_accepted": true,
+      "task_success": false,
+      "hash_handoff_ok": null,
+      "observation_tokens": 99,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"repo.search\",\"args\":{\"query\":\"TODO(fix-me)\",\"max_results\":20}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"sh\",\"-lc\",\"hit=$(grep -rlF -- 'TODO(fix-me)' . --exclude-dir=.git --exclude-dir=target --exclude-dir=out | head -n1); mkdir -p out; printf '%s\\\\n' \\\"$hit\\\" > out/found.txt\"],\"cwd\":\".\",\"profile\":\"auto\"}}\n{\"id\":\"3\",\"agent\":\"coder\",\"op\":\"file.view\",\"args\":{\"path\":\"out/found.txt\",\"cursor\":1,\"window\":10}}\n{\"id\":\"4\",\"agent\":\"coder\",\"op\":\"ops.observation_recent\",\"args\":{\"limit\":4}}",
+      "repeat_index": 2,
+      "seed": 44
+    },
+    {
+      "task_id": "exec_and_report",
+      "api_error": false,
+      "error": null,
+      "ops_emitted": [
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "bash",
+              "-c",
+              "pwd"
+            ],
+            "profile": "auto"
+          },
+          "ok": false,
+          "error": "E_PROCESS_EXIT"
+        },
+        {
+          "op": "exec.run",
+          "args": {
+            "argv": [
+              "bash",
+              "-c",
+              "mkdir -p out && pwd > out/pwd.txt"
+            ],
+            "profile": "auto"
+          },
+          "ok": false,
+          "error": "E_PROCESS_EXIT"
+        }
+      ],
+      "n_ops": 2,
+      "no_ops_emitted": false,
+      "all_ops_accepted": false,
+      "task_success": false,
+      "hash_handoff_ok": null,
+      "observation_tokens": 116,
+      "reply_text": "{\"id\":\"1\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"bash\",\"-c\",\"pwd\"],\"profile\":\"auto\"}}\n{\"id\":\"2\",\"agent\":\"coder\",\"op\":\"exec.run\",\"args\":{\"argv\":[\"bash\",\"-c\",\"mkdir -p out && pwd > out/pwd.txt\"],\"profile\":\"auto\"}}",
+      "repeat_index": 2,
+      "seed": 44
+    }
+  ]
+}

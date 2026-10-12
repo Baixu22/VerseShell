@@ -1,0 +1,58 @@
+{
+  "id": "python_csvlite_parse_80d158b2",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "The test suite for `csvlite.py` fails. Splits every line naively on commas, so quoted commas break rows apart, doubled quotes are not unescaped, and multi-line quoted fields get dropped. Fix the module so the suite passes, without changing test_csvlite.py.",
+  "golden": {
+    "csvlite.py": "\"\"\"csvlite: a tiny, self-contained CSV string parser.\n\nParses RFC-4180-style CSV text, honouring double-quoted fields so that\nembedded commas, doubled quotes (``\"\"``) and quoted newlines stay inside\na single field. Lines may be terminated by ``\\n``, ``\\r\\n`` or ``\\r``.\n\"\"\"\n\n__all__ = [\"parse_csv\"]\n\n# Parser states.\n_START = 0        # at the very beginning of a field\n_IN_FIELD = 1     # inside an unquoted field\n_IN_QUOTED = 2    # inside a double-quoted field\n_AFTER_QUOTE = 3  # just consumed the closing quote of a quoted field\n\n\ndef parse_csv(text):\n    \"\"\"Parse *text* (a CSV document) into a list of rows.\n\n    Each row is a list of strings. A field wrapped in double quotes may\n    contain commas, carriage returns and newlines; a doubled double\n    quote (``\"\"``) inside such a field stands for one literal quote.\n\n    >>> parse_csv('a,b\\\\n1,\"x, y\"\\\\n2,\"he said \"\"hi\"\"\\\\nbye\"')\n    [['a', 'b'], ['1', 'x, y'], ['2', 'he said \"hi\"\\\\nbye']]\n    \"\"\"\n    if not isinstance(text, str):\n        raise TypeError(\n            \"parse_csv() expects a str, got %s\" % type(text).__name__\n        )\n\n    rows = []\n    row = []\n    field = []\n    state = _START\n    i = 0\n    n = len(text)\n\n    def flush_field():\n        row.append(\"\".join(field))\n        del field[:]\n\n    def flush_row():\n        rows.append(row[:])\n        del row[:]\n\n    while i < n:\n        ch = text[i]\n\n        if state == _IN_QUOTED:\n            if ch == '\"':\n                if i + 1 < n and text[i + 1] == '\"':\n                    field.append('\"')   # doubled quote -> literal quote\n                    i += 2\n                    continue\n                state = _AFTER_QUOTE    # closing quote\n                i += 1\n                continue\n            field.append(ch)            # commas/newlines stay literal\n            i += 1\n            continue\n\n        # Row terminator (outside quotes): \\n, \\r\\n or \\r.\n        if ch == \"\\n\" or ch == \"\\r\":\n            if ch == \"\\r\" and i + 1 < n and text[i + 1] == \"\\n\":\n                i += 1                  # swallow the \\n of a CRLF pair\n            if state == _START and not row:\n                flush_row()             # completely blank line\n            else:\n                flush_field()\n                flush_row()\n            state = _START\n            i += 1\n            continue\n\n        # Field separator (outside quotes).\n        if ch == \",\":\n            flush_field()\n            state = _START\n            i += 1\n            continue\n\n        # An opening quote only counts at the start of a field.\n        if ch == '\"' and state == _START:\n            state = _IN_QUOTED\n            i += 1\n            continue\n\n        # Any other character (including stray quotes after a closing\n        # quote or inside an unquoted field) is taken literally.\n        field.append(ch)\n        if state == _START:\n            state = _IN_FIELD\n        i += 1\n\n    # End of input: emit any pending field/row. A trailing newline has\n    # already flushed its row and leaves nothing pending.\n    if state != _START or row or field:\n        flush_field()\n        flush_row()\n\n    return rows\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest"
+        ],
+        "timeout_sec": 300
+      },
+      {
+        "type": "file_contains",
+        "path": "test_csvlite.py",
+        "contains": "def test_plain_single_row_many_fields():"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task author (TDD-ordered, locally self-verified)",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written from the spec and tests, never from the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      }
+    ],
+    "plan_index": 3,
+    "tier": "large",
+    "self_verified": {
+      "tests_pass_on_correct": true,
+      "tests_fail_on_buggy": true,
+      "variants_verified": 2
+    },
+    "generated_at": "2026-09-27T18:51:46.146906+00:00"
+  },
+  "workspace_fixture": "python_csvlite_parse_80d158b2",
+  "promoted_from": "bench/aci/candidates/python_csvlite_parse_80d158b2",
+  "promoted_at": "2026-09-28T04:37:02.587369+00:00"
+}

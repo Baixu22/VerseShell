@@ -1,7 +1,7 @@
 {
   "id": "windows_batch_capture_diag",
   "version": "1.0.0",
-  "lang": "windows",
+  "lang": "shell",
   "platform": [
     "windows",
     "any"

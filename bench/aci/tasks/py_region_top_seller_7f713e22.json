@@ -1,0 +1,52 @@
+{
+  "id": "py_region_top_seller_7f713e22",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "The test suite for `salesagg.py` fails. Breaks ties in the per-region max by alphabetical seller name instead of the first seller seen in input order. Fix the module so the test suite passes, without changing test_salesagg.py.",
+  "golden": {
+    "salesagg.py": "\"\"\"salesagg: aggregate sales records by region.\"\"\"\n\nimport csv\nfrom collections import defaultdict\n\n\ndef load_sales(path):\n    records = []\n    with open(path, newline=\"\") as f:\n        for row in csv.DictReader(f):\n            records.append((row[\"region\"], row[\"seller\"], float(row[\"amount\"])))\n    return records\n\n\ndef max_sale_by_region(records):\n    \"\"\"Top sale per region; ties broken by first seller seen in input order.\"\"\"\n    best = {}\n    for region, seller, amount in records:\n        if region not in best or amount > best[region][1]:\n            best[region] = (seller, amount)\n    return best\n\n\ndef totals_by_region(records):\n    totals = defaultdict(float)\n    for region, _, amount in records:\n        totals[region] += amount\n    return dict(totals)\n\n\ndef report(path):\n    records = load_sales(path)\n    top = max_sale_by_region(records)\n    totals = totals_by_region(records)\n    return \"\\n\".join(\n        f\"{r}: top={top[r][0]} ({top[r][1]:.2f}) total={totals[r]:.2f}\"\n        for r in sorted(top)\n    )\n\n\nif __name__ == \"__main__\":\n    import sys\n    print(report(sys.argv[1]))\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "timeout_sec": 180
+      },
+      {
+        "type": "file_contains",
+        "path": "test_salesagg.py",
+        "contains": "def test_simple_tie_keeps_first_seen_seller(self):"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_fixture_tests_author (decomposed 3-step protocol)",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "plan_index": 12,
+    "tier": "medium",
+    "generated_at": "2026-09-25T05:14:11.464526+00:00"
+  },
+  "workspace_fixture": "py_region_top_seller_7f713e22",
+  "promoted_from": "bench/aci/candidates/py_region_top_seller_7f713e22",
+  "promoted_at": "2026-09-25T08:29:13.923633+00:00"
+}

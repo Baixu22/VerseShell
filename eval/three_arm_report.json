@@ -1,0 +1,1774 @@
+{
+  "schema": "verseshell.three_arm_report/v1",
+  "generated_at": "2026-10-10T05:44:12.376124+00:00",
+  "generator": "tools/three_arm_report.py",
+  "source": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\bench\\aci\\results\\latest_live.json",
+  "source_arm": "latest_live.json",
+  "max_turns": 20,
+  "cap_binding_limit": 0.1,
+  "model": "sn-glm-5-3-flash",
+  "prompt_variant": "baseline",
+  "interpretation": "Row-policy eligibility is not statistical significance or interface-only causality. Historical compact changes D descriptions only. Compare baseline and compact_all in separately frozen, matched collections.",
+  "task_set_version": "3.0.0",
+  "arms": {
+    "raw_shell": {
+      "condition": "raw_shell",
+      "n": 105,
+      "n_scored": 105,
+      "successes": 95,
+      "success_rate": 0.9048,
+      "wilson_ci95": [
+        0.8335,
+        0.9474
+      ],
+      "at_cap": 1,
+      "at_cap_rate": 0.0095,
+      "turn_cap_binding": false,
+      "at_token_cap": 0,
+      "at_token_cap_rate": 0.0,
+      "token_cap_binding": false,
+      "cap_binding": false,
+      "harness_crash": 0,
+      "harness_crash_rate": 0.0,
+      "n_scored_excluding_harness_crash": 105,
+      "successes_excluding_harness_crash": 95,
+      "success_rate_excluding_harness_crash": 0.9048,
+      "wilson_ci95_excluding_harness_crash": [
+        0.8335,
+        0.9474
+      ],
+      "harness_crash_tasks": [],
+      "avg_tool_calls": 4.7333,
+      "avg_observation_tokens": 1266.8095,
+      "median_observation_tokens": 867
+    },
+    "raw_shell_coached": {
+      "condition": "raw_shell_coached",
+      "n": 105,
+      "n_scored": 105,
+      "successes": 94,
+      "success_rate": 0.8952,
+      "wilson_ci95": [
+        0.8221,
+        0.9405
+      ],
+      "at_cap": 1,
+      "at_cap_rate": 0.0095,
+      "turn_cap_binding": false,
+      "at_token_cap": 2,
+      "at_token_cap_rate": 0.019,
+      "token_cap_binding": false,
+      "cap_binding": false,
+      "harness_crash": 0,
+      "harness_crash_rate": 0.0,
+      "n_scored_excluding_harness_crash": 105,
+      "successes_excluding_harness_crash": 94,
+      "success_rate_excluding_harness_crash": 0.8952,
+      "wilson_ci95_excluding_harness_crash": [
+        0.8221,
+        0.9405
+      ],
+      "harness_crash_tasks": [],
+      "avg_tool_calls": 4.6571,
+      "avg_observation_tokens": 1084.4952,
+      "median_observation_tokens": 701
+    },
+    "verseshell_aci": {
+      "condition": "verseshell_aci",
+      "n": 105,
+      "n_scored": 105,
+      "successes": 98,
+      "success_rate": 0.9333,
+      "wilson_ci95": [
+        0.8687,
+        0.9673
+      ],
+      "at_cap": 0,
+      "at_cap_rate": 0.0,
+      "turn_cap_binding": false,
+      "at_token_cap": 0,
+      "at_token_cap_rate": 0.0,
+      "token_cap_binding": false,
+      "cap_binding": false,
+      "harness_crash": 0,
+      "harness_crash_rate": 0.0,
+      "n_scored_excluding_harness_crash": 105,
+      "successes_excluding_harness_crash": 98,
+      "success_rate_excluding_harness_crash": 0.9333,
+      "wilson_ci95_excluding_harness_crash": [
+        0.8687,
+        0.9673
+      ],
+      "harness_crash_tasks": [],
+      "avg_tool_calls": 4.019,
+      "avg_observation_tokens": 769.5524,
+      "median_observation_tokens": 569
+    }
+  },
+  "contrasts": [
+    {
+      "baseline_condition": "raw_shell",
+      "all_rows": {
+        "subset": "all_rows",
+        "n_pairs": 105,
+        "success_rate_baseline": 0.9048,
+        "success_rate_D": 0.9333,
+        "success_delta_D_minus_baseline": 0.0286,
+        "only_baseline_wins": 0,
+        "only_D_wins": 3,
+        "tool_call_ratio_D_over_baseline": {
+          "kind": "tool_call_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.8491,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.1785,
+            "bootstrap_ci95": [
+              1.0225,
+              1.3415
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.6877,
+            1.0576
+          ],
+          "bootstrap_ci95_row": [
+            0.727,
+            0.9951
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.0355,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.6877,
+            1.0576
+          ],
+          "frozen_target": 0.7
+        },
+        "observation_token_ratio_D_over_baseline": {
+          "kind": "observation_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.6075,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 0.8854,
+            "bootstrap_ci95": [
+              0.7526,
+              1.0377
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.5007,
+            0.7589
+          ],
+          "bootstrap_ci95_row": [
+            0.5224,
+            0.7089
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.4488,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.5007,
+            0.7589
+          ],
+          "frozen_target": 0.6
+        },
+        "usage_token_ratio_D_over_baseline": {
+          "kind": "usage_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.9461,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.1394,
+            "bootstrap_ci95": [
+              1.8014,
+              2.488
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.6462,
+            1.5202
+          ],
+          "bootstrap_ci95_row": [
+            0.717,
+            1.2964
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.6462,
+            1.5202
+          ]
+        },
+        "prompt_token_ratio_D_over_baseline": {
+          "kind": "prompt_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 1.0255,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.3018,
+            "bootstrap_ci95": [
+              1.9377,
+              2.6764
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.696,
+            1.6803
+          ],
+          "bootstrap_ci95_row": [
+            0.7723,
+            1.4202
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.696,
+            1.6803
+          ]
+        },
+        "completion_token_ratio_D_over_baseline": {
+          "kind": "completion_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.4259,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.1554,
+            "bootstrap_ci95": [
+              0.9134,
+              1.4224
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.2706,
+            0.6583
+          ],
+          "bootstrap_ci95_row": [
+            0.3077,
+            0.581
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.2706,
+            0.6583
+          ]
+        },
+        "ratio_caliber": {
+          "tool_call_ratio_D_over_baseline": {
+            "caliber": "count_ratio",
+            "note": "ratio of tool-CALL COUNTS: not tokens, not usage, not currency"
+          },
+          "observation_token_ratio_D_over_baseline": {
+            "caliber": "observation_proxy_estimate_tokens",
+            "note": "ratio of `estimate_tokens(text) = max(1, len(text)//4)` accumulated over the delivered observation text. PROXY-caliber: NOT endpoint usage, NOT the evaluated model's own tokenizer and NOT a money cost"
+          },
+          "usage_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_total",
+            "note": "ratio of endpoint-reported `usage` summed over observed requests in usage-eligible pairs (llm_prompt_tokens + llm_completion_tokens). It is NOT the length of one system prompt or one tool-schema payload, and without price/cache rules it is NOT a money cost"
+          },
+          "prompt_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_prompt",
+            "note": "ratio of endpoint-reported `llm_prompt_tokens`, the input usage accumulated over observed requests in usage-eligible pairs: NOT one request's system-prompt/schema size and NOT currency"
+          },
+          "completion_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_completion",
+            "note": "ratio of endpoint-reported `llm_completion_tokens`. The reasoning billing boundary is unconfirmed, so it is NOT the visible answer's character count and NOT currency"
+          }
+        },
+        "usage_note": "Unknown usage is excluded, never zero-imputed; candidate_pairs, n_pairs and excluded_nonfinite_pairs describe the cost denominator, not the score denominator. caliber: see `ratio_caliber`. `usage_*` ratios use the endpoint's `usage` field accumulated over observed requests in usage-eligible pairs (system prompt + tool schemas + re-sent history + reasoning) — i.e. endpoint-usage caliber, NOT the length of one system prompt or one tool-schema payload, and not a money cost or a reconciled bill. It is the broader endpoint-usage reading the pre-registration requires, so when it disagrees in direction with the observation-token proxy it governs (docs/acceptance-criteria.md §4.2), while `observation_token_ratio_D_over_baseline` stays proxy-caliber and must be quoted as such"
+      },
+      "cap_excluded": {
+        "subset": "no_turn_or_completion_cap",
+        "n_pairs": 104,
+        "success_rate_baseline": 0.9038,
+        "success_rate_D": 0.9327,
+        "success_delta_D_minus_baseline": 0.0288,
+        "only_baseline_wins": 0,
+        "only_D_wins": 3,
+        "tool_call_ratio_D_over_baseline": {
+          "kind": "tool_call_ratio",
+          "candidate_pairs": 104,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 104,
+          "point_estimate": 0.8819,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.1881,
+            "bootstrap_ci95": [
+              1.033,
+              1.3486
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 104,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.7207,
+            1.0771
+          ],
+          "bootstrap_ci95_row": [
+            0.7631,
+            1.0199
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.0132,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.7207,
+            1.0771
+          ],
+          "frozen_target": 0.7
+        },
+        "observation_token_ratio_D_over_baseline": {
+          "kind": "observation_token_ratio",
+          "candidate_pairs": 104,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 104,
+          "point_estimate": 0.6212,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 0.8919,
+            "bootstrap_ci95": [
+              0.7611,
+              1.0433
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 104,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.5148,
+            0.7668
+          ],
+          "bootstrap_ci95_row": [
+            0.5363,
+            0.7226
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.362,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.5148,
+            0.7668
+          ],
+          "frozen_target": 0.6
+        },
+        "usage_token_ratio_D_over_baseline": {
+          "kind": "usage_token_ratio",
+          "candidate_pairs": 104,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 104,
+          "point_estimate": 1.0306,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.1589,
+            "bootstrap_ci95": [
+              1.8234,
+              2.503
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 104,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.7088,
+            1.5706
+          ],
+          "bootstrap_ci95_row": [
+            0.7972,
+            1.3651
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.7088,
+            1.5706
+          ]
+        },
+        "prompt_token_ratio_D_over_baseline": {
+          "kind": "prompt_token_ratio",
+          "candidate_pairs": 104,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 104,
+          "point_estimate": 1.1214,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.3228,
+            "bootstrap_ci95": [
+              1.9648,
+              2.689
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 104,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.7681,
+            1.7379
+          ],
+          "bootstrap_ci95_row": [
+            0.8628,
+            1.5031
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.7681,
+            1.7379
+          ]
+        },
+        "completion_token_ratio_D_over_baseline": {
+          "kind": "completion_token_ratio",
+          "candidate_pairs": 104,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 104,
+          "point_estimate": 0.4519,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.1657,
+            "bootstrap_ci95": [
+              0.9234,
+              1.4295
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 104,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.2853,
+            0.6867
+          ],
+          "bootstrap_ci95_row": [
+            0.3285,
+            0.6073
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.2853,
+            0.6867
+          ]
+        },
+        "ratio_caliber": {
+          "tool_call_ratio_D_over_baseline": {
+            "caliber": "count_ratio",
+            "note": "ratio of tool-CALL COUNTS: not tokens, not usage, not currency"
+          },
+          "observation_token_ratio_D_over_baseline": {
+            "caliber": "observation_proxy_estimate_tokens",
+            "note": "ratio of `estimate_tokens(text) = max(1, len(text)//4)` accumulated over the delivered observation text. PROXY-caliber: NOT endpoint usage, NOT the evaluated model's own tokenizer and NOT a money cost"
+          },
+          "usage_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_total",
+            "note": "ratio of endpoint-reported `usage` summed over observed requests in usage-eligible pairs (llm_prompt_tokens + llm_completion_tokens). It is NOT the length of one system prompt or one tool-schema payload, and without price/cache rules it is NOT a money cost"
+          },
+          "prompt_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_prompt",
+            "note": "ratio of endpoint-reported `llm_prompt_tokens`, the input usage accumulated over observed requests in usage-eligible pairs: NOT one request's system-prompt/schema size and NOT currency"
+          },
+          "completion_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_completion",
+            "note": "ratio of endpoint-reported `llm_completion_tokens`. The reasoning billing boundary is unconfirmed, so it is NOT the visible answer's character count and NOT currency"
+          }
+        },
+        "usage_note": "Unknown usage is excluded, never zero-imputed; candidate_pairs, n_pairs and excluded_nonfinite_pairs describe the cost denominator, not the score denominator. caliber: see `ratio_caliber`. `usage_*` ratios use the endpoint's `usage` field accumulated over observed requests in usage-eligible pairs (system prompt + tool schemas + re-sent history + reasoning) — i.e. endpoint-usage caliber, NOT the length of one system prompt or one tool-schema payload, and not a money cost or a reconciled bill. It is the broader endpoint-usage reading the pre-registration requires, so when it disagrees in direction with the observation-token proxy it governs (docs/acceptance-criteria.md §4.2), while `observation_token_ratio_D_over_baseline` stays proxy-caliber and must be quoted as such"
+      },
+      "cap_excluded_dropped": 1,
+      "excluded_count_unit": "paired_cells",
+      "harness_crash_excluded": {
+        "subset": "no_harness_crash",
+        "n_pairs": 105,
+        "success_rate_baseline": 0.9048,
+        "success_rate_D": 0.9333,
+        "success_delta_D_minus_baseline": 0.0286,
+        "only_baseline_wins": 0,
+        "only_D_wins": 3,
+        "tool_call_ratio_D_over_baseline": {
+          "kind": "tool_call_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.8491,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.1785,
+            "bootstrap_ci95": [
+              1.0225,
+              1.3415
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.6877,
+            1.0576
+          ],
+          "bootstrap_ci95_row": [
+            0.727,
+            0.9951
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.0355,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.6877,
+            1.0576
+          ],
+          "frozen_target": 0.7
+        },
+        "observation_token_ratio_D_over_baseline": {
+          "kind": "observation_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.6075,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 0.8854,
+            "bootstrap_ci95": [
+              0.7526,
+              1.0377
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.5007,
+            0.7589
+          ],
+          "bootstrap_ci95_row": [
+            0.5224,
+            0.7089
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.4488,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.5007,
+            0.7589
+          ],
+          "frozen_target": 0.6
+        },
+        "usage_token_ratio_D_over_baseline": {
+          "kind": "usage_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.9461,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.1394,
+            "bootstrap_ci95": [
+              1.8014,
+              2.488
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.6462,
+            1.5202
+          ],
+          "bootstrap_ci95_row": [
+            0.717,
+            1.2964
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.6462,
+            1.5202
+          ]
+        },
+        "prompt_token_ratio_D_over_baseline": {
+          "kind": "prompt_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 1.0255,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.3018,
+            "bootstrap_ci95": [
+              1.9377,
+              2.6764
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.696,
+            1.6803
+          ],
+          "bootstrap_ci95_row": [
+            0.7723,
+            1.4202
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.696,
+            1.6803
+          ]
+        },
+        "completion_token_ratio_D_over_baseline": {
+          "kind": "completion_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.4259,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.1554,
+            "bootstrap_ci95": [
+              0.9134,
+              1.4224
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.2706,
+            0.6583
+          ],
+          "bootstrap_ci95_row": [
+            0.3077,
+            0.581
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.2706,
+            0.6583
+          ]
+        },
+        "ratio_caliber": {
+          "tool_call_ratio_D_over_baseline": {
+            "caliber": "count_ratio",
+            "note": "ratio of tool-CALL COUNTS: not tokens, not usage, not currency"
+          },
+          "observation_token_ratio_D_over_baseline": {
+            "caliber": "observation_proxy_estimate_tokens",
+            "note": "ratio of `estimate_tokens(text) = max(1, len(text)//4)` accumulated over the delivered observation text. PROXY-caliber: NOT endpoint usage, NOT the evaluated model's own tokenizer and NOT a money cost"
+          },
+          "usage_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_total",
+            "note": "ratio of endpoint-reported `usage` summed over observed requests in usage-eligible pairs (llm_prompt_tokens + llm_completion_tokens). It is NOT the length of one system prompt or one tool-schema payload, and without price/cache rules it is NOT a money cost"
+          },
+          "prompt_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_prompt",
+            "note": "ratio of endpoint-reported `llm_prompt_tokens`, the input usage accumulated over observed requests in usage-eligible pairs: NOT one request's system-prompt/schema size and NOT currency"
+          },
+          "completion_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_completion",
+            "note": "ratio of endpoint-reported `llm_completion_tokens`. The reasoning billing boundary is unconfirmed, so it is NOT the visible answer's character count and NOT currency"
+          }
+        },
+        "usage_note": "Unknown usage is excluded, never zero-imputed; candidate_pairs, n_pairs and excluded_nonfinite_pairs describe the cost denominator, not the score denominator. caliber: see `ratio_caliber`. `usage_*` ratios use the endpoint's `usage` field accumulated over observed requests in usage-eligible pairs (system prompt + tool schemas + re-sent history + reasoning) — i.e. endpoint-usage caliber, NOT the length of one system prompt or one tool-schema payload, and not a money cost or a reconciled bill. It is the broader endpoint-usage reading the pre-registration requires, so when it disagrees in direction with the observation-token proxy it governs (docs/acceptance-criteria.md §4.2), while `observation_token_ratio_D_over_baseline` stays proxy-caliber and must be quoted as such"
+      },
+      "harness_crash_excluded_dropped": 0
+    },
+    {
+      "baseline_condition": "raw_shell_coached",
+      "all_rows": {
+        "subset": "all_rows",
+        "n_pairs": 105,
+        "success_rate_baseline": 0.8952,
+        "success_rate_D": 0.9333,
+        "success_delta_D_minus_baseline": 0.0381,
+        "only_baseline_wins": 0,
+        "only_D_wins": 4,
+        "tool_call_ratio_D_over_baseline": {
+          "kind": "tool_call_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.863,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.0967,
+            "bootstrap_ci95": [
+              0.9562,
+              1.245
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 104,
+            "excluded_nonpositive_baseline": 1,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.7381,
+            1.0181
+          ],
+          "bootstrap_ci95_row": [
+            0.7568,
+            0.9836
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.0035,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.7381,
+            1.0181
+          ],
+          "frozen_target": 0.7
+        },
+        "observation_token_ratio_D_over_baseline": {
+          "kind": "observation_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.7096,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 0.9887,
+            "bootstrap_ci95": [
+              0.8368,
+              1.1554
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 104,
+            "excluded_nonpositive_baseline": 1,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.5761,
+            0.8788
+          ],
+          "bootstrap_ci95_row": [
+            0.586,
+            0.8466
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.0572,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.5761,
+            0.8788
+          ],
+          "frozen_target": 0.6
+        },
+        "usage_token_ratio_D_over_baseline": {
+          "kind": "usage_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 1.0817,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.1546,
+            "bootstrap_ci95": [
+              1.8109,
+              2.5218
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.7558,
+            1.5772
+          ],
+          "bootstrap_ci95_row": [
+            0.7799,
+            1.4792
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.7558,
+            1.5772
+          ]
+        },
+        "prompt_token_ratio_D_over_baseline": {
+          "kind": "prompt_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 1.1876,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.3976,
+            "bootstrap_ci95": [
+              2.0048,
+              2.8252
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.7923,
+            1.7834
+          ],
+          "bootstrap_ci95_row": [
+            0.8233,
+            1.6784
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.7923,
+            1.7834
+          ]
+        },
+        "completion_token_ratio_D_over_baseline": {
+          "kind": "completion_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.4492,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.2544,
+            "bootstrap_ci95": [
+              0.9615,
+              1.5924
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.3716,
+            0.6425
+          ],
+          "bootstrap_ci95_row": [
+            0.3598,
+            0.5785
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.3716,
+            0.6425
+          ]
+        },
+        "ratio_caliber": {
+          "tool_call_ratio_D_over_baseline": {
+            "caliber": "count_ratio",
+            "note": "ratio of tool-CALL COUNTS: not tokens, not usage, not currency"
+          },
+          "observation_token_ratio_D_over_baseline": {
+            "caliber": "observation_proxy_estimate_tokens",
+            "note": "ratio of `estimate_tokens(text) = max(1, len(text)//4)` accumulated over the delivered observation text. PROXY-caliber: NOT endpoint usage, NOT the evaluated model's own tokenizer and NOT a money cost"
+          },
+          "usage_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_total",
+            "note": "ratio of endpoint-reported `usage` summed over observed requests in usage-eligible pairs (llm_prompt_tokens + llm_completion_tokens). It is NOT the length of one system prompt or one tool-schema payload, and without price/cache rules it is NOT a money cost"
+          },
+          "prompt_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_prompt",
+            "note": "ratio of endpoint-reported `llm_prompt_tokens`, the input usage accumulated over observed requests in usage-eligible pairs: NOT one request's system-prompt/schema size and NOT currency"
+          },
+          "completion_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_completion",
+            "note": "ratio of endpoint-reported `llm_completion_tokens`. The reasoning billing boundary is unconfirmed, so it is NOT the visible answer's character count and NOT currency"
+          }
+        },
+        "usage_note": "Unknown usage is excluded, never zero-imputed; candidate_pairs, n_pairs and excluded_nonfinite_pairs describe the cost denominator, not the score denominator. caliber: see `ratio_caliber`. `usage_*` ratios use the endpoint's `usage` field accumulated over observed requests in usage-eligible pairs (system prompt + tool schemas + re-sent history + reasoning) — i.e. endpoint-usage caliber, NOT the length of one system prompt or one tool-schema payload, and not a money cost or a reconciled bill. It is the broader endpoint-usage reading the pre-registration requires, so when it disagrees in direction with the observation-token proxy it governs (docs/acceptance-criteria.md §4.2), while `observation_token_ratio_D_over_baseline` stays proxy-caliber and must be quoted as such"
+      },
+      "cap_excluded": {
+        "subset": "no_turn_or_completion_cap",
+        "n_pairs": 102,
+        "success_rate_baseline": 0.9216,
+        "success_rate_D": 0.9412,
+        "success_delta_D_minus_baseline": 0.0196,
+        "only_baseline_wins": 0,
+        "only_D_wins": 2,
+        "tool_call_ratio_D_over_baseline": {
+          "kind": "tool_call_ratio",
+          "candidate_pairs": 102,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 102,
+          "point_estimate": 0.8772,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.0774,
+            "bootstrap_ci95": [
+              0.9429,
+              1.2227
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 101,
+            "excluded_nonpositive_baseline": 1,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.7606,
+            1.0218
+          ],
+          "bootstrap_ci95_row": [
+            0.7808,
+            0.9886
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.0007,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.7606,
+            1.0218
+          ],
+          "frozen_target": 0.7
+        },
+        "observation_token_ratio_D_over_baseline": {
+          "kind": "observation_token_ratio",
+          "candidate_pairs": 102,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 102,
+          "point_estimate": 0.7415,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 0.9837,
+            "bootstrap_ci95": [
+              0.8316,
+              1.1535
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 101,
+            "excluded_nonpositive_baseline": 1,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.6381,
+            0.8731
+          ],
+          "bootstrap_ci95_row": [
+            0.6498,
+            0.8483
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.0019,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.6381,
+            0.8731
+          ],
+          "frozen_target": 0.6
+        },
+        "usage_token_ratio_D_over_baseline": {
+          "kind": "usage_token_ratio",
+          "candidate_pairs": 102,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 102,
+          "point_estimate": 1.2577,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.1835,
+            "bootstrap_ci95": [
+              1.8321,
+              2.5511
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 102,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            1.0297,
+            1.6148
+          ],
+          "bootstrap_ci95_row": [
+            1.0465,
+            1.5406
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            1.0297,
+            1.6148
+          ]
+        },
+        "prompt_token_ratio_D_over_baseline": {
+          "kind": "prompt_token_ratio",
+          "candidate_pairs": 102,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 102,
+          "point_estimate": 1.3872,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.2995,
+            "bootstrap_ci95": [
+              1.9519,
+              2.6637
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 102,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            1.1358,
+            1.7598
+          ],
+          "bootstrap_ci95_row": [
+            1.1518,
+            1.6944
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            1.1358,
+            1.7598
+          ]
+        },
+        "completion_token_ratio_D_over_baseline": {
+          "kind": "completion_token_ratio",
+          "candidate_pairs": 102,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 102,
+          "point_estimate": 0.4778,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.283,
+            "bootstrap_ci95": [
+              0.9833,
+              1.6263
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 102,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.3796,
+            0.6817
+          ],
+          "bootstrap_ci95_row": [
+            0.386,
+            0.6312
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.3796,
+            0.6817
+          ]
+        },
+        "ratio_caliber": {
+          "tool_call_ratio_D_over_baseline": {
+            "caliber": "count_ratio",
+            "note": "ratio of tool-CALL COUNTS: not tokens, not usage, not currency"
+          },
+          "observation_token_ratio_D_over_baseline": {
+            "caliber": "observation_proxy_estimate_tokens",
+            "note": "ratio of `estimate_tokens(text) = max(1, len(text)//4)` accumulated over the delivered observation text. PROXY-caliber: NOT endpoint usage, NOT the evaluated model's own tokenizer and NOT a money cost"
+          },
+          "usage_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_total",
+            "note": "ratio of endpoint-reported `usage` summed over observed requests in usage-eligible pairs (llm_prompt_tokens + llm_completion_tokens). It is NOT the length of one system prompt or one tool-schema payload, and without price/cache rules it is NOT a money cost"
+          },
+          "prompt_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_prompt",
+            "note": "ratio of endpoint-reported `llm_prompt_tokens`, the input usage accumulated over observed requests in usage-eligible pairs: NOT one request's system-prompt/schema size and NOT currency"
+          },
+          "completion_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_completion",
+            "note": "ratio of endpoint-reported `llm_completion_tokens`. The reasoning billing boundary is unconfirmed, so it is NOT the visible answer's character count and NOT currency"
+          }
+        },
+        "usage_note": "Unknown usage is excluded, never zero-imputed; candidate_pairs, n_pairs and excluded_nonfinite_pairs describe the cost denominator, not the score denominator. caliber: see `ratio_caliber`. `usage_*` ratios use the endpoint's `usage` field accumulated over observed requests in usage-eligible pairs (system prompt + tool schemas + re-sent history + reasoning) — i.e. endpoint-usage caliber, NOT the length of one system prompt or one tool-schema payload, and not a money cost or a reconciled bill. It is the broader endpoint-usage reading the pre-registration requires, so when it disagrees in direction with the observation-token proxy it governs (docs/acceptance-criteria.md §4.2), while `observation_token_ratio_D_over_baseline` stays proxy-caliber and must be quoted as such"
+      },
+      "cap_excluded_dropped": 3,
+      "excluded_count_unit": "paired_cells",
+      "harness_crash_excluded": {
+        "subset": "no_harness_crash",
+        "n_pairs": 105,
+        "success_rate_baseline": 0.8952,
+        "success_rate_D": 0.9333,
+        "success_delta_D_minus_baseline": 0.0381,
+        "only_baseline_wins": 0,
+        "only_D_wins": 4,
+        "tool_call_ratio_D_over_baseline": {
+          "kind": "tool_call_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.863,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.0967,
+            "bootstrap_ci95": [
+              0.9562,
+              1.245
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 104,
+            "excluded_nonpositive_baseline": 1,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.7381,
+            1.0181
+          ],
+          "bootstrap_ci95_row": [
+            0.7568,
+            0.9836
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.0035,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.7381,
+            1.0181
+          ],
+          "frozen_target": 0.7
+        },
+        "observation_token_ratio_D_over_baseline": {
+          "kind": "observation_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.7096,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 0.9887,
+            "bootstrap_ci95": [
+              0.8368,
+              1.1554
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 104,
+            "excluded_nonpositive_baseline": 1,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.5761,
+            0.8788
+          ],
+          "bootstrap_ci95_row": [
+            0.586,
+            0.8466
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.0572,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.5761,
+            0.8788
+          ],
+          "frozen_target": 0.6
+        },
+        "usage_token_ratio_D_over_baseline": {
+          "kind": "usage_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 1.0817,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.1546,
+            "bootstrap_ci95": [
+              1.8109,
+              2.5218
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.7558,
+            1.5772
+          ],
+          "bootstrap_ci95_row": [
+            0.7799,
+            1.4792
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.7558,
+            1.5772
+          ]
+        },
+        "prompt_token_ratio_D_over_baseline": {
+          "kind": "prompt_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 1.1876,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.3976,
+            "bootstrap_ci95": [
+              2.0048,
+              2.8252
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.7923,
+            1.7834
+          ],
+          "bootstrap_ci95_row": [
+            0.8233,
+            1.6784
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.7923,
+            1.7834
+          ]
+        },
+        "completion_token_ratio_D_over_baseline": {
+          "kind": "completion_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.4492,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.2544,
+            "bootstrap_ci95": [
+              0.9615,
+              1.5924
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.3716,
+            0.6425
+          ],
+          "bootstrap_ci95_row": [
+            0.3598,
+            0.5785
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.3716,
+            0.6425
+          ]
+        },
+        "ratio_caliber": {
+          "tool_call_ratio_D_over_baseline": {
+            "caliber": "count_ratio",
+            "note": "ratio of tool-CALL COUNTS: not tokens, not usage, not currency"
+          },
+          "observation_token_ratio_D_over_baseline": {
+            "caliber": "observation_proxy_estimate_tokens",
+            "note": "ratio of `estimate_tokens(text) = max(1, len(text)//4)` accumulated over the delivered observation text. PROXY-caliber: NOT endpoint usage, NOT the evaluated model's own tokenizer and NOT a money cost"
+          },
+          "usage_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_total",
+            "note": "ratio of endpoint-reported `usage` summed over observed requests in usage-eligible pairs (llm_prompt_tokens + llm_completion_tokens). It is NOT the length of one system prompt or one tool-schema payload, and without price/cache rules it is NOT a money cost"
+          },
+          "prompt_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_prompt",
+            "note": "ratio of endpoint-reported `llm_prompt_tokens`, the input usage accumulated over observed requests in usage-eligible pairs: NOT one request's system-prompt/schema size and NOT currency"
+          },
+          "completion_token_ratio_D_over_baseline": {
+            "caliber": "endpoint_usage_completion",
+            "note": "ratio of endpoint-reported `llm_completion_tokens`. The reasoning billing boundary is unconfirmed, so it is NOT the visible answer's character count and NOT currency"
+          }
+        },
+        "usage_note": "Unknown usage is excluded, never zero-imputed; candidate_pairs, n_pairs and excluded_nonfinite_pairs describe the cost denominator, not the score denominator. caliber: see `ratio_caliber`. `usage_*` ratios use the endpoint's `usage` field accumulated over observed requests in usage-eligible pairs (system prompt + tool schemas + re-sent history + reasoning) — i.e. endpoint-usage caliber, NOT the length of one system prompt or one tool-schema payload, and not a money cost or a reconciled bill. It is the broader endpoint-usage reading the pre-registration requires, so when it disagrees in direction with the observation-token proxy it governs (docs/acceptance-criteria.md §4.2), while `observation_token_ratio_D_over_baseline` stays proxy-caliber and must be quoted as such"
+      },
+      "harness_crash_excluded_dropped": 0
+    }
+  ],
+  "cap_binding_arms": [],
+  "cap_binding_arms_by_turn": [],
+  "cap_binding_arms_by_completion_tokens": [],
+  "cap_ok": true,
+  "harness_crash_arms": {},
+  "harness_crash_total": 0,
+  "row_policy": {
+    "rule": "docs/acceptance-criteria.md §0.6 (pre-registered)",
+    "exclusion_limit": 0.1,
+    "primary": "analysable",
+    "must_also_report": "intention_to_treat",
+    "per_arm": {
+      "raw_shell": {
+        "n": 105,
+        "endpoint_failure": 0,
+        "cap_truncated": 1,
+        "analysable": 104,
+        "api_error": 0,
+        "endpoint_rate": 0.0,
+        "cap_truncated_rate": 0.0095,
+        "budget_axes": {
+          "completion_cap": 0,
+          "turn_cap": 1,
+          "repeat_call_cap": 0,
+          "overlap": 0,
+          "union": 1,
+          "completion_cap_rate": 0.0,
+          "turn_cap_rate": 0.0095,
+          "repeat_call_cap_rate": 0.0
+        },
+        "analysable_rate": 0.9905,
+        "success_analysable": 0.9038,
+        "success_intention_to_treat": 0.8952,
+        "mean_tool_calls_analysable": 4.5577,
+        "mean_tool_calls_intention_to_treat": 4.7333,
+        "mean_observation_tokens_analysable": 1237.1154,
+        "mean_observation_tokens_intention_to_treat": 1266.8095
+      },
+      "raw_shell_coached": {
+        "n": 105,
+        "endpoint_failure": 0,
+        "cap_truncated": 3,
+        "analysable": 102,
+        "api_error": 0,
+        "endpoint_rate": 0.0,
+        "cap_truncated_rate": 0.0286,
+        "budget_axes": {
+          "completion_cap": 2,
+          "turn_cap": 1,
+          "repeat_call_cap": 0,
+          "overlap": 0,
+          "union": 3,
+          "completion_cap_rate": 0.019,
+          "turn_cap_rate": 0.0095,
+          "repeat_call_cap_rate": 0.0
+        },
+        "analysable_rate": 0.9714,
+        "success_analysable": 0.9216,
+        "success_intention_to_treat": 0.8952,
+        "mean_tool_calls_analysable": 4.549,
+        "mean_tool_calls_intention_to_treat": 4.6571,
+        "mean_observation_tokens_analysable": 995.9804,
+        "mean_observation_tokens_intention_to_treat": 1084.4952
+      },
+      "verseshell_aci": {
+        "n": 105,
+        "endpoint_failure": 0,
+        "cap_truncated": 0,
+        "analysable": 105,
+        "api_error": 0,
+        "endpoint_rate": 0.0,
+        "cap_truncated_rate": 0.0,
+        "budget_axes": {
+          "completion_cap": 0,
+          "turn_cap": 0,
+          "repeat_call_cap": 0,
+          "overlap": 0,
+          "union": 0,
+          "completion_cap_rate": 0.0,
+          "turn_cap_rate": 0.0,
+          "repeat_call_cap_rate": 0.0
+        },
+        "analysable_rate": 1.0,
+        "success_analysable": 0.9333,
+        "success_intention_to_treat": 0.9333,
+        "mean_tool_calls_analysable": 4.019,
+        "mean_tool_calls_intention_to_treat": 4.019,
+        "mean_observation_tokens_analysable": 769.5524,
+        "mean_observation_tokens_intention_to_treat": 769.5524
+      }
+    },
+    "comparisons": {
+      "verseshell_aci_vs_raw_shell": {
+        "baseline": "raw_shell",
+        "treatment": "verseshell_aci",
+        "rates_ok": true,
+        "cap_truncated_axes": {
+          "raw_shell": {
+            "completion_cap": 0,
+            "turn_cap": 1,
+            "repeat_call_cap": 0,
+            "overlap": 0,
+            "union": 1,
+            "completion_cap_rate": 0.0,
+            "turn_cap_rate": 0.0095,
+            "repeat_call_cap_rate": 0.0
+          },
+          "verseshell_aci": {
+            "completion_cap": 0,
+            "turn_cap": 0,
+            "repeat_call_cap": 0,
+            "overlap": 0,
+            "union": 0,
+            "completion_cap_rate": 0.0,
+            "turn_cap_rate": 0.0,
+            "repeat_call_cap_rate": 0.0
+          }
+        },
+        "success_delta_analysable": 0.0295,
+        "success_delta_intention_to_treat": 0.0381,
+        "sign_agreement": true,
+        "claimable": true,
+        "policy_blocked_reasons": []
+      },
+      "verseshell_aci_vs_raw_shell_coached": {
+        "baseline": "raw_shell_coached",
+        "treatment": "verseshell_aci",
+        "rates_ok": true,
+        "cap_truncated_axes": {
+          "raw_shell_coached": {
+            "completion_cap": 2,
+            "turn_cap": 1,
+            "repeat_call_cap": 0,
+            "overlap": 0,
+            "union": 3,
+            "completion_cap_rate": 0.019,
+            "turn_cap_rate": 0.0095,
+            "repeat_call_cap_rate": 0.0
+          },
+          "verseshell_aci": {
+            "completion_cap": 0,
+            "turn_cap": 0,
+            "repeat_call_cap": 0,
+            "overlap": 0,
+            "union": 0,
+            "completion_cap_rate": 0.0,
+            "turn_cap_rate": 0.0,
+            "repeat_call_cap_rate": 0.0
+          }
+        },
+        "success_delta_analysable": 0.0118,
+        "success_delta_intention_to_treat": 0.0381,
+        "sign_agreement": true,
+        "claimable": true,
+        "policy_blocked_reasons": []
+      }
+    }
+  },
+  "claimable": false,
+  "acceptance_scope": "single_collection_diagnostic",
+  "acceptance": {
+    "verseshell_aci_vs_raw_shell": {
+      "row_policy_eligible": true,
+      "data_eligible": true,
+      "policy_blocked_reasons": [
+        "complete_repeated_study_not_evaluated",
+        "frozen_family_inference_not_evaluated"
+      ],
+      "unknown_scoring_rows": 0,
+      "incomplete_usage_rows": 0,
+      "row_policy": {
+        "rule": "docs/acceptance-criteria.md §0.6 (pre-registered)",
+        "exclusion_limit": 0.1,
+        "primary": "analysable",
+        "must_also_report": "intention_to_treat",
+        "per_arm": {
+          "raw_shell": {
+            "n": 105,
+            "endpoint_failure": 0,
+            "cap_truncated": 1,
+            "analysable": 104,
+            "api_error": 0,
+            "endpoint_rate": 0.0,
+            "cap_truncated_rate": 0.0095,
+            "budget_axes": {
+              "completion_cap": 0,
+              "turn_cap": 1,
+              "repeat_call_cap": 0,
+              "overlap": 0,
+              "union": 1,
+              "completion_cap_rate": 0.0,
+              "turn_cap_rate": 0.0095,
+              "repeat_call_cap_rate": 0.0
+            },
+            "analysable_rate": 0.9905,
+            "success_analysable": 0.9038,
+            "success_intention_to_treat": 0.8952,
+            "mean_tool_calls_analysable": 4.5577,
+            "mean_tool_calls_intention_to_treat": 4.7333,
+            "mean_observation_tokens_analysable": 1237.1154,
+            "mean_observation_tokens_intention_to_treat": 1266.8095
+          },
+          "verseshell_aci": {
+            "n": 105,
+            "endpoint_failure": 0,
+            "cap_truncated": 0,
+            "analysable": 105,
+            "api_error": 0,
+            "endpoint_rate": 0.0,
+            "cap_truncated_rate": 0.0,
+            "budget_axes": {
+              "completion_cap": 0,
+              "turn_cap": 0,
+              "repeat_call_cap": 0,
+              "overlap": 0,
+              "union": 0,
+              "completion_cap_rate": 0.0,
+              "turn_cap_rate": 0.0,
+              "repeat_call_cap_rate": 0.0
+            },
+            "analysable_rate": 1.0,
+            "success_analysable": 0.9333,
+            "success_intention_to_treat": 0.9333,
+            "mean_tool_calls_analysable": 4.019,
+            "mean_tool_calls_intention_to_treat": 4.019,
+            "mean_observation_tokens_analysable": 769.5524,
+            "mean_observation_tokens_intention_to_treat": 769.5524
+          }
+        },
+        "comparisons": {
+          "verseshell_aci_vs_raw_shell": {
+            "baseline": "raw_shell",
+            "treatment": "verseshell_aci",
+            "rates_ok": true,
+            "cap_truncated_axes": {
+              "raw_shell": {
+                "completion_cap": 0,
+                "turn_cap": 1,
+                "repeat_call_cap": 0,
+                "overlap": 0,
+                "union": 1,
+                "completion_cap_rate": 0.0,
+                "turn_cap_rate": 0.0095,
+                "repeat_call_cap_rate": 0.0
+              },
+              "verseshell_aci": {
+                "completion_cap": 0,
+                "turn_cap": 0,
+                "repeat_call_cap": 0,
+                "overlap": 0,
+                "union": 0,
+                "completion_cap_rate": 0.0,
+                "turn_cap_rate": 0.0,
+                "repeat_call_cap_rate": 0.0
+              }
+            },
+            "success_delta_analysable": 0.0295,
+            "success_delta_intention_to_treat": 0.0381,
+            "sign_agreement": true,
+            "claimable": true,
+            "policy_blocked_reasons": []
+          }
+        }
+      },
+      "acceptance_scope": "single_collection_diagnostic",
+      "claimable": false,
+      "meets_acceptance": false
+    },
+    "verseshell_aci_vs_raw_shell_coached": {
+      "row_policy_eligible": true,
+      "data_eligible": true,
+      "policy_blocked_reasons": [
+        "complete_repeated_study_not_evaluated",
+        "frozen_family_inference_not_evaluated"
+      ],
+      "unknown_scoring_rows": 0,
+      "incomplete_usage_rows": 0,
+      "row_policy": {
+        "rule": "docs/acceptance-criteria.md §0.6 (pre-registered)",
+        "exclusion_limit": 0.1,
+        "primary": "analysable",
+        "must_also_report": "intention_to_treat",
+        "per_arm": {
+          "raw_shell_coached": {
+            "n": 105,
+            "endpoint_failure": 0,
+            "cap_truncated": 3,
+            "analysable": 102,
+            "api_error": 0,
+            "endpoint_rate": 0.0,
+            "cap_truncated_rate": 0.0286,
+            "budget_axes": {
+              "completion_cap": 2,
+              "turn_cap": 1,
+              "repeat_call_cap": 0,
+              "overlap": 0,
+              "union": 3,
+              "completion_cap_rate": 0.019,
+              "turn_cap_rate": 0.0095,
+              "repeat_call_cap_rate": 0.0
+            },
+            "analysable_rate": 0.9714,
+            "success_analysable": 0.9216,
+            "success_intention_to_treat": 0.8952,
+            "mean_tool_calls_analysable": 4.549,
+            "mean_tool_calls_intention_to_treat": 4.6571,
+            "mean_observation_tokens_analysable": 995.9804,
+            "mean_observation_tokens_intention_to_treat": 1084.4952
+          },
+          "verseshell_aci": {
+            "n": 105,
+            "endpoint_failure": 0,
+            "cap_truncated": 0,
+            "analysable": 105,
+            "api_error": 0,
+            "endpoint_rate": 0.0,
+            "cap_truncated_rate": 0.0,
+            "budget_axes": {
+              "completion_cap": 0,
+              "turn_cap": 0,
+              "repeat_call_cap": 0,
+              "overlap": 0,
+              "union": 0,
+              "completion_cap_rate": 0.0,
+              "turn_cap_rate": 0.0,
+              "repeat_call_cap_rate": 0.0
+            },
+            "analysable_rate": 1.0,
+            "success_analysable": 0.9333,
+            "success_intention_to_treat": 0.9333,
+            "mean_tool_calls_analysable": 4.019,
+            "mean_tool_calls_intention_to_treat": 4.019,
+            "mean_observation_tokens_analysable": 769.5524,
+            "mean_observation_tokens_intention_to_treat": 769.5524
+          }
+        },
+        "comparisons": {
+          "verseshell_aci_vs_raw_shell_coached": {
+            "baseline": "raw_shell_coached",
+            "treatment": "verseshell_aci",
+            "rates_ok": true,
+            "cap_truncated_axes": {
+              "raw_shell_coached": {
+                "completion_cap": 2,
+                "turn_cap": 1,
+                "repeat_call_cap": 0,
+                "overlap": 0,
+                "union": 3,
+                "completion_cap_rate": 0.019,
+                "turn_cap_rate": 0.0095,
+                "repeat_call_cap_rate": 0.0
+              },
+              "verseshell_aci": {
+                "completion_cap": 0,
+                "turn_cap": 0,
+                "repeat_call_cap": 0,
+                "overlap": 0,
+                "union": 0,
+                "completion_cap_rate": 0.0,
+                "turn_cap_rate": 0.0,
+                "repeat_call_cap_rate": 0.0
+              }
+            },
+            "success_delta_analysable": 0.0118,
+            "success_delta_intention_to_treat": 0.0381,
+            "sign_agreement": true,
+            "claimable": true,
+            "policy_blocked_reasons": []
+          }
+        }
+      },
+      "acceptance_scope": "single_collection_diagnostic",
+      "claimable": false,
+      "meets_acceptance": false
+    }
+  },
+  "row_policy_eligible_comparisons": [
+    "verseshell_aci_vs_raw_shell",
+    "verseshell_aci_vs_raw_shell_coached"
+  ],
+  "row_policy_claimable_comparisons": [],
+  "row_policy_blocked_comparisons": [],
+  "verdict": "no arm exceeds the cap-binding limit on either budget (max_turns or max_tokens); the comparison is not confounded by the budget",
+  "harness_note": "no harness faults detected in this artifact",
+  "evidence": {
+    "globs": [
+      "bench/aci/results/latest_live.json",
+      "bench/aci/results/live_ab_without_read_files.json",
+      "bench/aci/runners/live_agent_loop.py",
+      "tools/three_arm_report.py",
+      "tools/live_uncertainty.py",
+      "tools/report_inputs.py"
+    ],
+    "fingerprint": "b1b3fd35436bf47fdf711897dfeff66a2f53dd0988778aaaba0bba56ce6c15a7",
+    "input_sha256": {
+      "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\bench\\aci\\results\\latest_live.json": "e73732e9a702ccfa0d5638e708c958773b81673ad4c49aa2dda137b8f822fa86"
+    }
+  }
+}

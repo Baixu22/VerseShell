@@ -1,0 +1,57 @@
+{
+  "id": "ts_narrow_vs_cast_824b51c8",
+  "kind": "capability",
+  "lang": "typescript",
+  "prompt": "The test suite for `narrow.mjs` fails. Replaces the typeof narrowing with a blind cast, so passing a number makes charat throw instead of returning null. Fix the module so the suite passes, without changing check.mjs.",
+  "golden": {
+    "narrow.mjs": "/**\n * Returns the first character of `value`, but only after a typeof check\n * confirms it is a string. Returns null for any non-string value.\n *\n * @param {unknown} value\n * @returns {string | null}\n */\nexport function firstChar(value) {\n  if (typeof value === \"string\") {\n    return value.length > 0 ? value[0] : null;\n  }\n  return null;\n}\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "node",
+          "check.mjs"
+        ],
+        "timeout_sec": 300
+      },
+      {
+        "type": "file_contains",
+        "path": "check.mjs",
+        "contains": "assert.equal(firstChar('Sphinx of black quartz, judge my vow!'), 'S');"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task author (TDD-ordered, locally self-verified)",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written from the spec and tests, never from the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      }
+    ],
+    "plan_index": 19,
+    "tier": "medium",
+    "self_verified": {
+      "tests_pass_on_correct": true,
+      "tests_fail_on_buggy": true,
+      "variants_verified": 2
+    },
+    "generated_at": "2026-09-27T20:10:20.221072+00:00"
+  },
+  "workspace_fixture": "ts_narrow_vs_cast_824b51c8",
+  "promoted_from": "bench/aci/candidates/ts_narrow_vs_cast_824b51c8",
+  "promoted_at": "2026-09-28T04:37:02.627196+00:00"
+}

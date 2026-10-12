@@ -1,0 +1,1391 @@
+{
+  "schema": "verseshell.acceptance_power/v1",
+  "generated_at": "2026-10-10T05:44:35.986506+00:00",
+  "generator": "tools/acceptance_power.py",
+  "source": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\bench\\aci\\results\\latest_live.json",
+  "model": "sn-glm-5-3-flash",
+  "task_set_version": "3.0.0",
+  "without_arm_available": true,
+  "prompt_variant": "baseline",
+  "interpretation": "Statistical eligibility for the recorded pipeline, not proof of an interface-only effect. Historical compact changes D descriptions only. Report both ratio estimators; endpoint usage governs over observation proxy.",
+  "preregistration_source": "docs/acceptance-criteria.md",
+  "preregistered_parameters": {
+    "success_mde_absolute": 0.15,
+    "token_ratio_level1_upper": 1.0,
+    "token_ratio_level2_point": 0.85,
+    "token_ratio_level2_upper": 0.9,
+    "token_ratio_frozen_point": 0.6,
+    "token_ratio_frozen_upper": 0.7,
+    "tool_ratio_level1_upper": 1.0,
+    "cost_per_success_point": 0.8,
+    "cost_per_success_upper": 1.0,
+    "success_noninferiority_margin": 0.1,
+    "cross_shell_strict_upper": 1.0,
+    "cross_shell_2x_upper": 0.5
+  },
+  "method": {
+    "success": "paired McNemar normal approximation, alpha=0.05 two-sided, power=0.80",
+    "ratios": "percentile bootstrap CI95 resampling whole TASKS (the design unit: the three seeds of one task are correlated, measured ICC 0.28-0.56). The row-level interval is kept as `ci95_row` for continuity with earlier rounds; it is systematically narrower",
+    "real_tokenizer": "endpoint `usage` accumulated over every turn (system prompt + tool schemas + re-sent history + reasoning), published as `usage_token_ratio` / `prompt_token_ratio` / `completion_token_ratio`; governs when it disagrees in direction with the observation-token proxy",
+    "cross_shell": "percentile bootstrap CI95 on median(ae)/median(other), PAIRED BY ITERATION (the bench runs iteration i for every shell back-to-back, so pairing is the honest unit); output equivalence must be proven before the times are compared",
+    "rule": "a claim is only allowed when its interval clears the threshold; a product gap (no amount of data can rescue the claim) is asserted only when the WHOLE CI95 lies on the wrong side of the cap the claim needs. A point estimate past the threshold whose interval still reaches below it is 'no evidence' (`gap_type=data_gap`), because the estimate can move"
+  },
+  "live": {
+    "baseline_condition": "raw_shell",
+    "n_rows": 315,
+    "n_pairs": 105,
+    "success": {
+      "n_pairs": 105,
+      "discordant": 3,
+      "only_A": 0,
+      "only_D": 3,
+      "both_pass": 95,
+      "neither": 7,
+      "discordance_rate_psi": 0.0286,
+      "observed_abs_delta": 0.0286,
+      "prereg_mde": 0.15,
+      "n_required_at_mde": 8,
+      "observed_mde_at_current_n": 0.0462,
+      "powered_for_prereg_mde": true,
+      "observed_positive_headroom": 0.0952,
+      "positive_mde_feasible_at_observed_baseline": false,
+      "headroom_note": "sample-size power for an absolute difference does not establish room for a positive improvement"
+    },
+    "token_ratio": {
+      "point": 0.6075,
+      "estimator": "ratio_of_sums",
+      "mean_of_ratios": {
+        "point_estimate": 0.8854,
+        "bootstrap_ci95": [
+          0.7526,
+          1.0377
+        ],
+        "bootstrap_unit": "task",
+        "n_pairs": 105,
+        "excluded_nonpositive_baseline": 0,
+        "weighting": "equal weight per paired cell; seeds retained in task clusters"
+      },
+      "ci95": [
+        0.5007,
+        0.7589
+      ],
+      "ci95_row": [
+        0.5224,
+        0.7089
+      ],
+      "unit": "task",
+      "n_pairs": 105,
+      "candidate_pairs": 105,
+      "excluded_nonfinite_pairs": 0,
+      "iterations": 20000,
+      "caliber": "observation_proxy_estimate_tokens",
+      "caliber_note": "ratio of the live rows' recorded `observation_tokens`, i.e. the live runner's `estimate_tokens(text) = max(1, len(text)//4)` accumulated over delivered observation text: a PROXY, NOT endpoint usage, NOT the evaluated model's own tokenizer and NOT currency"
+    },
+    "tool_ratio": {
+      "point": 0.8491,
+      "estimator": "ratio_of_sums",
+      "mean_of_ratios": {
+        "point_estimate": 1.1785,
+        "bootstrap_ci95": [
+          1.0225,
+          1.3415
+        ],
+        "bootstrap_unit": "task",
+        "n_pairs": 105,
+        "excluded_nonpositive_baseline": 0,
+        "weighting": "equal weight per paired cell; seeds retained in task clusters"
+      },
+      "ci95": [
+        0.6877,
+        1.0576
+      ],
+      "ci95_row": [
+        0.727,
+        0.9951
+      ],
+      "unit": "task",
+      "n_pairs": 105,
+      "candidate_pairs": 105,
+      "excluded_nonfinite_pairs": 0,
+      "iterations": 20000,
+      "caliber": "count_ratio",
+      "caliber_note": "ratio of tool-CALL COUNTS: not tokens, not usage, not currency"
+    },
+    "usage_token_ratio": {
+      "point": 0.9461,
+      "estimator": "ratio_of_sums",
+      "mean_of_ratios": {
+        "point_estimate": 2.1394,
+        "bootstrap_ci95": [
+          1.8014,
+          2.488
+        ],
+        "bootstrap_unit": "task",
+        "n_pairs": 105,
+        "excluded_nonpositive_baseline": 0,
+        "weighting": "equal weight per paired cell; seeds retained in task clusters"
+      },
+      "ci95": [
+        0.6462,
+        1.5202
+      ],
+      "ci95_row": [
+        0.717,
+        1.2964
+      ],
+      "unit": "task",
+      "n_pairs": 105,
+      "candidate_pairs": 105,
+      "excluded_nonfinite_pairs": 0,
+      "iterations": 20000,
+      "caliber": "endpoint_usage_total",
+      "caliber_note": "ratio of endpoint-reported `usage` summed over observed requests in usage-eligible pairs (llm_prompt_tokens + llm_completion_tokens): system prompt + tool schemas + re-sent history + reasoning per turn. It is NOT the length of one system prompt or one tool-schema payload, and without price/cache rules it is NOT a money cost"
+    },
+    "prompt_token_ratio": {
+      "point": 1.0255,
+      "estimator": "ratio_of_sums",
+      "mean_of_ratios": {
+        "point_estimate": 2.3018,
+        "bootstrap_ci95": [
+          1.9377,
+          2.6764
+        ],
+        "bootstrap_unit": "task",
+        "n_pairs": 105,
+        "excluded_nonpositive_baseline": 0,
+        "weighting": "equal weight per paired cell; seeds retained in task clusters"
+      },
+      "ci95": [
+        0.696,
+        1.6803
+      ],
+      "ci95_row": [
+        0.7723,
+        1.4202
+      ],
+      "unit": "task",
+      "n_pairs": 105,
+      "candidate_pairs": 105,
+      "excluded_nonfinite_pairs": 0,
+      "iterations": 20000,
+      "caliber": "endpoint_usage_prompt",
+      "caliber_note": "ratio of endpoint-reported `llm_prompt_tokens` (input usage accumulated over observed requests in usage-eligible pairs), NOT one request's system-prompt/schema size and NOT currency"
+    },
+    "completion_token_ratio": {
+      "point": 0.4259,
+      "estimator": "ratio_of_sums",
+      "mean_of_ratios": {
+        "point_estimate": 1.1554,
+        "bootstrap_ci95": [
+          0.9134,
+          1.4224
+        ],
+        "bootstrap_unit": "task",
+        "n_pairs": 105,
+        "excluded_nonpositive_baseline": 0,
+        "weighting": "equal weight per paired cell; seeds retained in task clusters"
+      },
+      "ci95": [
+        0.2706,
+        0.6583
+      ],
+      "ci95_row": [
+        0.3077,
+        0.581
+      ],
+      "unit": "task",
+      "n_pairs": 105,
+      "candidate_pairs": 105,
+      "excluded_nonfinite_pairs": 0,
+      "iterations": 20000,
+      "caliber": "endpoint_usage_completion",
+      "caliber_note": "ratio of endpoint-reported `llm_completion_tokens` (output usage). The reasoning billing boundary is unconfirmed, so it is NOT the visible answer's character count and NOT currency"
+    },
+    "usage_note": "Unknown usage is excluded, never zero-imputed; candidate_pairs, n_pairs and excluded_nonfinite_pairs describe the cost denominator, not the score denominator. No provider invoice is reconciled. Caliber: endpoint usage, not system-prompt length. `usage_*` blocks are the endpoint's reported `usage` accumulated over observed requests in usage-eligible pairs (system prompt + tool schemas + re-sent history + reasoning). They are broader than observation_tokens, are NOT the size of one system prompt or one tool-schema payload, and are NOT a money cost. `token_ratio` is observation-proxy caliber (max(1, len(text)//4) over the delivered observation text) and `tool_ratio` is a ratio of CALL COUNTS. Observation tokens being cheaper while usage tokens are dearer is a real, reportable combination, not a contradiction",
+    "cost_per_success": {
+      "paired_task_intervals": {
+        "analysable": {
+          "available": true,
+          "point_estimate": 0.6019831698987662,
+          "ci95": [
+            0.4967220729671333,
+            0.7515915445568591
+          ],
+          "success_delta": 0.028846153846153848,
+          "success_delta_ci95": [
+            0.0,
+            0.058823529411764705
+          ],
+          "undefined_draws": 0,
+          "bootstrap_unit": "task",
+          "tasks": 35,
+          "n_pairs": 104,
+          "excluded_pairs": 1,
+          "view": "analysable",
+          "caliber": "observation_tokens",
+          "claimable": false,
+          "inference_status": "diagnostic interval; requires prospective calibration and multiplicity"
+        },
+        "intention_to_treat": {
+          "available": true,
+          "point_estimate": 0.5826780315554406,
+          "ci95": [
+            0.47335175282938474,
+            0.7379495587628093
+          ],
+          "success_delta": 0.0380952380952381,
+          "success_delta_ci95": [
+            0.009523809523809525,
+            0.0761904761904762
+          ],
+          "undefined_draws": 0,
+          "bootstrap_unit": "task",
+          "tasks": 35,
+          "n_pairs": 105,
+          "excluded_pairs": 0,
+          "view": "intention_to_treat",
+          "caliber": "observation_tokens",
+          "claimable": false,
+          "inference_status": "diagnostic interval; requires prospective calibration and multiplicity"
+        }
+      },
+      "point_D_over_A": 0.5889,
+      "tokens_A": 133015.0,
+      "tokens_D": 80803.0,
+      "successes_A": 95,
+      "successes_D": 98,
+      "cpst_A_tokens_per_success": 1400.158,
+      "cpst_D_tokens_per_success": 824.52,
+      "success_noninferiority_lower_bound": -0.0034,
+      "success_mean_diff_D_minus_A": 0.0286,
+      "caliber": "observation_proxy_tokens_per_success",
+      "caliber_note": "`cost_per_success` / `cpst_*` divide OBSERVATION-PROXY tokens (the live rows' recorded `observation_tokens`, i.e. max(1, len(text)//4) over delivered observation text) by the count of SUCCESSFUL tasks. Despite the word `cost` this is NOT currency and NOT a billed endpoint-usage measurement; `tokens_A` / `tokens_D` are that same proxy"
+    },
+    "without_arm": {
+      "n_pairs": 105,
+      "discordance_rate_psi": 0.0857,
+      "observed_abs_delta": 0.0476
+    },
+    "raw_shell_successes": 287,
+    "cpst_A_absolute": 1141.7770034843206
+  },
+  "live_coached": {
+    "baseline_condition": "raw_shell_coached",
+    "n_rows": 315,
+    "n_pairs": 105,
+    "success": {
+      "n_pairs": 105,
+      "discordant": 4,
+      "only_A": 0,
+      "only_D": 4,
+      "both_pass": 94,
+      "neither": 7,
+      "discordance_rate_psi": 0.0381,
+      "observed_abs_delta": 0.0381,
+      "prereg_mde": 0.15,
+      "n_required_at_mde": 11,
+      "observed_mde_at_current_n": 0.0534,
+      "powered_for_prereg_mde": true,
+      "observed_positive_headroom": 0.1048,
+      "positive_mde_feasible_at_observed_baseline": false,
+      "headroom_note": "sample-size power for an absolute difference does not establish room for a positive improvement"
+    },
+    "token_ratio": {
+      "point": 0.7096,
+      "estimator": "ratio_of_sums",
+      "mean_of_ratios": {
+        "point_estimate": 0.9887,
+        "bootstrap_ci95": [
+          0.8368,
+          1.1554
+        ],
+        "bootstrap_unit": "task",
+        "n_pairs": 104,
+        "excluded_nonpositive_baseline": 1,
+        "weighting": "equal weight per paired cell; seeds retained in task clusters"
+      },
+      "ci95": [
+        0.5761,
+        0.8788
+      ],
+      "ci95_row": [
+        0.586,
+        0.8466
+      ],
+      "unit": "task",
+      "n_pairs": 105,
+      "candidate_pairs": 105,
+      "excluded_nonfinite_pairs": 0,
+      "iterations": 20000,
+      "caliber": "observation_proxy_estimate_tokens",
+      "caliber_note": "ratio of the live rows' recorded `observation_tokens`, i.e. the live runner's `estimate_tokens(text) = max(1, len(text)//4)` accumulated over delivered observation text: a PROXY, NOT endpoint usage, NOT the evaluated model's own tokenizer and NOT currency"
+    },
+    "tool_ratio": {
+      "point": 0.863,
+      "estimator": "ratio_of_sums",
+      "mean_of_ratios": {
+        "point_estimate": 1.0967,
+        "bootstrap_ci95": [
+          0.9562,
+          1.245
+        ],
+        "bootstrap_unit": "task",
+        "n_pairs": 104,
+        "excluded_nonpositive_baseline": 1,
+        "weighting": "equal weight per paired cell; seeds retained in task clusters"
+      },
+      "ci95": [
+        0.7381,
+        1.0181
+      ],
+      "ci95_row": [
+        0.7568,
+        0.9836
+      ],
+      "unit": "task",
+      "n_pairs": 105,
+      "candidate_pairs": 105,
+      "excluded_nonfinite_pairs": 0,
+      "iterations": 20000,
+      "caliber": "count_ratio",
+      "caliber_note": "ratio of tool-CALL COUNTS: not tokens, not usage, not currency"
+    },
+    "usage_token_ratio": {
+      "point": 1.0817,
+      "estimator": "ratio_of_sums",
+      "mean_of_ratios": {
+        "point_estimate": 2.1546,
+        "bootstrap_ci95": [
+          1.8109,
+          2.5218
+        ],
+        "bootstrap_unit": "task",
+        "n_pairs": 105,
+        "excluded_nonpositive_baseline": 0,
+        "weighting": "equal weight per paired cell; seeds retained in task clusters"
+      },
+      "ci95": [
+        0.7558,
+        1.5772
+      ],
+      "ci95_row": [
+        0.7799,
+        1.4792
+      ],
+      "unit": "task",
+      "n_pairs": 105,
+      "candidate_pairs": 105,
+      "excluded_nonfinite_pairs": 0,
+      "iterations": 20000,
+      "caliber": "endpoint_usage_total",
+      "caliber_note": "ratio of endpoint-reported `usage` summed over observed requests in usage-eligible pairs (llm_prompt_tokens + llm_completion_tokens): system prompt + tool schemas + re-sent history + reasoning per turn. It is NOT the length of one system prompt or one tool-schema payload, and without price/cache rules it is NOT a money cost"
+    },
+    "prompt_token_ratio": {
+      "point": 1.1876,
+      "estimator": "ratio_of_sums",
+      "mean_of_ratios": {
+        "point_estimate": 2.3976,
+        "bootstrap_ci95": [
+          2.0048,
+          2.8252
+        ],
+        "bootstrap_unit": "task",
+        "n_pairs": 105,
+        "excluded_nonpositive_baseline": 0,
+        "weighting": "equal weight per paired cell; seeds retained in task clusters"
+      },
+      "ci95": [
+        0.7923,
+        1.7834
+      ],
+      "ci95_row": [
+        0.8233,
+        1.6784
+      ],
+      "unit": "task",
+      "n_pairs": 105,
+      "candidate_pairs": 105,
+      "excluded_nonfinite_pairs": 0,
+      "iterations": 20000,
+      "caliber": "endpoint_usage_prompt",
+      "caliber_note": "ratio of endpoint-reported `llm_prompt_tokens` (input usage accumulated over observed requests in usage-eligible pairs), NOT one request's system-prompt/schema size and NOT currency"
+    },
+    "completion_token_ratio": {
+      "point": 0.4492,
+      "estimator": "ratio_of_sums",
+      "mean_of_ratios": {
+        "point_estimate": 1.2544,
+        "bootstrap_ci95": [
+          0.9615,
+          1.5924
+        ],
+        "bootstrap_unit": "task",
+        "n_pairs": 105,
+        "excluded_nonpositive_baseline": 0,
+        "weighting": "equal weight per paired cell; seeds retained in task clusters"
+      },
+      "ci95": [
+        0.3716,
+        0.6425
+      ],
+      "ci95_row": [
+        0.3598,
+        0.5785
+      ],
+      "unit": "task",
+      "n_pairs": 105,
+      "candidate_pairs": 105,
+      "excluded_nonfinite_pairs": 0,
+      "iterations": 20000,
+      "caliber": "endpoint_usage_completion",
+      "caliber_note": "ratio of endpoint-reported `llm_completion_tokens` (output usage). The reasoning billing boundary is unconfirmed, so it is NOT the visible answer's character count and NOT currency"
+    },
+    "usage_note": "Unknown usage is excluded, never zero-imputed; candidate_pairs, n_pairs and excluded_nonfinite_pairs describe the cost denominator, not the score denominator. No provider invoice is reconciled. Caliber: endpoint usage, not system-prompt length. `usage_*` blocks are the endpoint's reported `usage` accumulated over observed requests in usage-eligible pairs (system prompt + tool schemas + re-sent history + reasoning). They are broader than observation_tokens, are NOT the size of one system prompt or one tool-schema payload, and are NOT a money cost. `token_ratio` is observation-proxy caliber (max(1, len(text)//4) over the delivered observation text) and `tool_ratio` is a ratio of CALL COUNTS. Observation tokens being cheaper while usage tokens are dearer is a real, reportable combination, not a contradiction",
+    "cost_per_success": {
+      "paired_task_intervals": {
+        "analysable": {
+          "available": true,
+          "point_estimate": 0.7260040358302983,
+          "ci95": [
+            0.6261380080489207,
+            0.8545039138222184
+          ],
+          "success_delta": 0.0196078431372549,
+          "success_delta_ci95": [
+            0.0,
+            0.049019607843137254
+          ],
+          "undefined_draws": 0,
+          "bootstrap_unit": "task",
+          "tasks": 35,
+          "n_pairs": 102,
+          "excluded_pairs": 3,
+          "view": "analysable",
+          "caliber": "observation_tokens",
+          "claimable": false,
+          "inference_status": "diagnostic interval; requires prospective calibration and multiplicity"
+        },
+        "intention_to_treat": {
+          "available": true,
+          "point_estimate": 0.6806319232765469,
+          "ci95": [
+            0.5444493345432027,
+            0.8448457689826201
+          ],
+          "success_delta": 0.0380952380952381,
+          "success_delta_ci95": [
+            0.009523809523809525,
+            0.0761904761904762
+          ],
+          "undefined_draws": 0,
+          "bootstrap_unit": "task",
+          "tasks": 35,
+          "n_pairs": 105,
+          "excluded_pairs": 0,
+          "view": "intention_to_treat",
+          "caliber": "observation_tokens",
+          "claimable": false,
+          "inference_status": "diagnostic interval; requires prospective calibration and multiplicity"
+        }
+      },
+      "point_D_over_A": 0.6806,
+      "tokens_A": 113872.0,
+      "tokens_D": 80803.0,
+      "successes_A": 94,
+      "successes_D": 98,
+      "cpst_A_tokens_per_success": 1211.404,
+      "cpst_D_tokens_per_success": 824.52,
+      "success_noninferiority_lower_bound": 0.0013,
+      "success_mean_diff_D_minus_A": 0.0381,
+      "caliber": "observation_proxy_tokens_per_success",
+      "caliber_note": "`cost_per_success` / `cpst_*` divide OBSERVATION-PROXY tokens (the live rows' recorded `observation_tokens`, i.e. max(1, len(text)//4) over delivered observation text) by the count of SUCCESSFUL tasks. Despite the word `cost` this is NOT currency and NOT a billed endpoint-usage measurement; `tokens_A` / `tokens_D` are that same proxy"
+    },
+    "without_arm": {
+      "n_pairs": 105,
+      "discordance_rate_psi": 0.0667,
+      "observed_abs_delta": 0.0286
+    },
+    "raw_shell_successes": 287,
+    "cpst_A_absolute": 1141.7770034843206
+  },
+  "has_prompt_matched_arm": true,
+  "row_policy": {
+    "rule": "docs/acceptance-criteria.md §0.6 (pre-registered)",
+    "exclusion_limit": 0.1,
+    "primary": "analysable",
+    "must_also_report": "intention_to_treat",
+    "per_arm": {
+      "raw_shell": {
+        "n": 105,
+        "endpoint_failure": 0,
+        "cap_truncated": 1,
+        "analysable": 104,
+        "api_error": 0,
+        "endpoint_rate": 0.0,
+        "cap_truncated_rate": 0.0095,
+        "budget_axes": {
+          "completion_cap": 0,
+          "turn_cap": 1,
+          "repeat_call_cap": 0,
+          "overlap": 0,
+          "union": 1,
+          "completion_cap_rate": 0.0,
+          "turn_cap_rate": 0.0095,
+          "repeat_call_cap_rate": 0.0
+        },
+        "analysable_rate": 0.9905,
+        "success_analysable": 0.9038,
+        "success_intention_to_treat": 0.8952,
+        "mean_tool_calls_analysable": 4.5577,
+        "mean_tool_calls_intention_to_treat": 4.7333,
+        "mean_observation_tokens_analysable": 1237.1154,
+        "mean_observation_tokens_intention_to_treat": 1266.8095
+      },
+      "raw_shell_coached": {
+        "n": 105,
+        "endpoint_failure": 0,
+        "cap_truncated": 3,
+        "analysable": 102,
+        "api_error": 0,
+        "endpoint_rate": 0.0,
+        "cap_truncated_rate": 0.0286,
+        "budget_axes": {
+          "completion_cap": 2,
+          "turn_cap": 1,
+          "repeat_call_cap": 0,
+          "overlap": 0,
+          "union": 3,
+          "completion_cap_rate": 0.019,
+          "turn_cap_rate": 0.0095,
+          "repeat_call_cap_rate": 0.0
+        },
+        "analysable_rate": 0.9714,
+        "success_analysable": 0.9216,
+        "success_intention_to_treat": 0.8952,
+        "mean_tool_calls_analysable": 4.549,
+        "mean_tool_calls_intention_to_treat": 4.6571,
+        "mean_observation_tokens_analysable": 995.9804,
+        "mean_observation_tokens_intention_to_treat": 1084.4952
+      },
+      "verseshell_aci": {
+        "n": 105,
+        "endpoint_failure": 0,
+        "cap_truncated": 0,
+        "analysable": 105,
+        "api_error": 0,
+        "endpoint_rate": 0.0,
+        "cap_truncated_rate": 0.0,
+        "budget_axes": {
+          "completion_cap": 0,
+          "turn_cap": 0,
+          "repeat_call_cap": 0,
+          "overlap": 0,
+          "union": 0,
+          "completion_cap_rate": 0.0,
+          "turn_cap_rate": 0.0,
+          "repeat_call_cap_rate": 0.0
+        },
+        "analysable_rate": 1.0,
+        "success_analysable": 0.9333,
+        "success_intention_to_treat": 0.9333,
+        "mean_tool_calls_analysable": 4.019,
+        "mean_tool_calls_intention_to_treat": 4.019,
+        "mean_observation_tokens_analysable": 769.5524,
+        "mean_observation_tokens_intention_to_treat": 769.5524
+      }
+    },
+    "comparisons": {
+      "verseshell_aci_vs_raw_shell": {
+        "baseline": "raw_shell",
+        "treatment": "verseshell_aci",
+        "rates_ok": true,
+        "cap_truncated_axes": {
+          "raw_shell": {
+            "completion_cap": 0,
+            "turn_cap": 1,
+            "repeat_call_cap": 0,
+            "overlap": 0,
+            "union": 1,
+            "completion_cap_rate": 0.0,
+            "turn_cap_rate": 0.0095,
+            "repeat_call_cap_rate": 0.0
+          },
+          "verseshell_aci": {
+            "completion_cap": 0,
+            "turn_cap": 0,
+            "repeat_call_cap": 0,
+            "overlap": 0,
+            "union": 0,
+            "completion_cap_rate": 0.0,
+            "turn_cap_rate": 0.0,
+            "repeat_call_cap_rate": 0.0
+          }
+        },
+        "success_delta_analysable": 0.0295,
+        "success_delta_intention_to_treat": 0.0381,
+        "sign_agreement": true,
+        "claimable": true,
+        "policy_blocked_reasons": []
+      },
+      "verseshell_aci_vs_raw_shell_coached": {
+        "baseline": "raw_shell_coached",
+        "treatment": "verseshell_aci",
+        "rates_ok": true,
+        "cap_truncated_axes": {
+          "raw_shell_coached": {
+            "completion_cap": 2,
+            "turn_cap": 1,
+            "repeat_call_cap": 0,
+            "overlap": 0,
+            "union": 3,
+            "completion_cap_rate": 0.019,
+            "turn_cap_rate": 0.0095,
+            "repeat_call_cap_rate": 0.0
+          },
+          "verseshell_aci": {
+            "completion_cap": 0,
+            "turn_cap": 0,
+            "repeat_call_cap": 0,
+            "overlap": 0,
+            "union": 0,
+            "completion_cap_rate": 0.0,
+            "turn_cap_rate": 0.0,
+            "repeat_call_cap_rate": 0.0
+          }
+        },
+        "success_delta_analysable": 0.0118,
+        "success_delta_intention_to_treat": 0.0381,
+        "sign_agreement": true,
+        "claimable": true,
+        "policy_blocked_reasons": []
+      }
+    }
+  },
+  "multiplicity": {
+    "alpha": 0.05,
+    "method": "Holm-Bonferroni, within family",
+    "families_table": {
+      "success_paired_can_claim_MDE_0.15": "live_model",
+      "token_ratio_level1_D_cheaper": "live_model",
+      "token_ratio_level2_saves_15pct": "live_model",
+      "token_ratio_frozen_0.60": "live_model",
+      "tool_ratio_level1_D_fewer_calls": "live_model",
+      "token_ratio_coached_level1_D_cheaper": "live_model",
+      "cost_per_success_D_cheaper": "live_model",
+      "success_paired_coached_can_claim_MDE_0.15": "live_model",
+      "cost_per_success_coached_D_cheaper": "live_model",
+      "cross_shell_all_ops_strictly_faster": "cross_shell",
+      "cross_shell_all_ops_2x": "cross_shell"
+    },
+    "preregistered_in": "docs/acceptance-criteria.md §0.7",
+    "families": {
+      "live_model": {
+        "m": 9,
+        "m_scored": 5,
+        "hypothesis_count": 7,
+        "corrected": true,
+        "members": [
+          "cost_per_success_D_cheaper",
+          "cost_per_success_coached_D_cheaper",
+          "success_paired_can_claim_MDE_0.15",
+          "success_paired_coached_can_claim_MDE_0.15",
+          "token_ratio_coached_level1_D_cheaper",
+          "token_ratio_frozen_0.60",
+          "token_ratio_level1_D_cheaper",
+          "token_ratio_level2_saves_15pct",
+          "tool_ratio_level1_D_fewer_calls"
+        ],
+        "holm_alpha": {
+          "token_ratio_level1_D_cheaper": 0.007143,
+          "token_ratio_level2_saves_15pct": 0.008333,
+          "token_ratio_coached_level1_D_cheaper": 0.01,
+          "tool_ratio_level1_D_fewer_calls": 0.0125,
+          "token_ratio_frozen_0.60": 0.016667
+        },
+        "uncorrected_members": [
+          "cost_per_success_D_cheaper",
+          "cost_per_success_coached_D_cheaper",
+          "success_paired_can_claim_MDE_0.15",
+          "success_paired_coached_can_claim_MDE_0.15"
+        ]
+      },
+      "cross_shell": {
+        "m": 2,
+        "m_scored": 2,
+        "hypothesis_count": 2,
+        "corrected": true,
+        "members": [
+          "cross_shell_all_ops_2x",
+          "cross_shell_all_ops_strictly_faster"
+        ],
+        "holm_alpha": {
+          "cross_shell_all_ops_strictly_faster": 0.025,
+          "cross_shell_all_ops_2x": 0.05
+        },
+        "uncorrected_members": []
+      }
+    },
+    "demoted_by_multiplicity": [
+      "cost_per_success_D_cheaper",
+      "cost_per_success_coached_D_cheaper"
+    ],
+    "note": "Exploratory verdicts have no pre-registered threshold and are never claimable as confirmatory results. Families are split by data source: the live-model ladder and the local cross-shell benchmark do not share a correction."
+  },
+  "cross_shell": {
+    "operations": [
+      {
+        "operation": "CPU info",
+        "n": 20,
+        "outputs_equivalent": true,
+        "equivalence_keys": 1,
+        "unresolved_shells": [],
+        "cold_vs_warm": {
+          "ae": {
+            "cold_ms": 224.695,
+            "warm_median_ms": 224.625
+          },
+          "pwsh": {
+            "cold_ms": 1211.107,
+            "warm_median_ms": 1224.683
+          },
+          "cmd": {
+            "cold_ms": 66.175,
+            "warm_median_ms": 66.322
+          },
+          "bash": {
+            "cold_ms": 293.536,
+            "warm_median_ms": 292.342
+          }
+        },
+        "vs_pwsh": {
+          "point": 0.1834,
+          "ci95": [
+            0.1817,
+            0.1845
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        },
+        "vs_cmd": {
+          "point": 3.3868,
+          "ci95": [
+            3.351,
+            3.42
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        },
+        "vs_bash": {
+          "point": 0.7661,
+          "ci95": [
+            0.7554,
+            0.7797
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        }
+      },
+      {
+        "operation": "Disk info",
+        "n": 20,
+        "outputs_equivalent": true,
+        "equivalence_keys": 1,
+        "unresolved_shells": [],
+        "cold_vs_warm": {
+          "ae": {
+            "cold_ms": 8.864,
+            "warm_median_ms": 9.068
+          },
+          "pwsh": {
+            "cold_ms": 300.522,
+            "warm_median_ms": 299.323
+          },
+          "cmd": {
+            "cold_ms": 14.683,
+            "warm_median_ms": 14.323
+          },
+          "bash": {
+            "cold_ms": null,
+            "warm_median_ms": null
+          }
+        },
+        "vs_pwsh": {
+          "point": 0.0302,
+          "ci95": [
+            0.0298,
+            0.0307
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        },
+        "vs_cmd": {
+          "point": 0.6306,
+          "ci95": [
+            0.6177,
+            0.6482
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        },
+        "vs_bash": null
+      },
+      {
+        "operation": "List dir",
+        "n": 20,
+        "outputs_equivalent": true,
+        "equivalence_keys": 1,
+        "unresolved_shells": [],
+        "cold_vs_warm": {
+          "ae": {
+            "cold_ms": 9.199,
+            "warm_median_ms": 9.166
+          },
+          "pwsh": {
+            "cold_ms": 217.534,
+            "warm_median_ms": 221.497
+          },
+          "cmd": {
+            "cold_ms": 7.923,
+            "warm_median_ms": 7.633
+          },
+          "bash": {
+            "cold_ms": 265.327,
+            "warm_median_ms": 276.173
+          }
+        },
+        "vs_pwsh": {
+          "point": 0.0413,
+          "ci95": [
+            0.0403,
+            0.0419
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        },
+        "vs_cmd": {
+          "point": 1.2004,
+          "ci95": [
+            1.1652,
+            1.2383
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        },
+        "vs_bash": {
+          "point": 0.0332,
+          "ci95": [
+            0.0323,
+            0.034
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        }
+      },
+      {
+        "operation": "Read file",
+        "n": 20,
+        "outputs_equivalent": true,
+        "equivalence_keys": 1,
+        "unresolved_shells": [],
+        "cold_vs_warm": {
+          "ae": {
+            "cold_ms": 8.852,
+            "warm_median_ms": 8.744
+          },
+          "pwsh": {
+            "cold_ms": 124.314,
+            "warm_median_ms": 123.761
+          },
+          "cmd": {
+            "cold_ms": 9.23,
+            "warm_median_ms": 9.464
+          },
+          "bash": {
+            "cold_ms": 252.605,
+            "warm_median_ms": 266.813
+          }
+        },
+        "vs_pwsh": {
+          "point": 0.0708,
+          "ci95": [
+            0.07,
+            0.0723
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        },
+        "vs_cmd": {
+          "point": 0.9266,
+          "ci95": [
+            0.9093,
+            0.954
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        },
+        "vs_bash": {
+          "point": 0.0328,
+          "ci95": [
+            0.0321,
+            0.0342
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        }
+      },
+      {
+        "operation": "Pipeline 1K",
+        "n": 20,
+        "outputs_equivalent": true,
+        "equivalence_keys": 1,
+        "unresolved_shells": [],
+        "cold_vs_warm": {
+          "ae": {
+            "cold_ms": 9.33,
+            "warm_median_ms": 9.333
+          },
+          "pwsh": {
+            "cold_ms": 150.025,
+            "warm_median_ms": 150.462
+          },
+          "cmd": {
+            "cold_ms": null,
+            "warm_median_ms": null
+          },
+          "bash": {
+            "cold_ms": 290.838,
+            "warm_median_ms": 291.784
+          }
+        },
+        "vs_pwsh": {
+          "point": 0.0622,
+          "ci95": [
+            0.0615,
+            0.0633
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        },
+        "vs_cmd": null,
+        "vs_bash": {
+          "point": 0.032,
+          "ci95": [
+            0.0317,
+            0.0326
+          ],
+          "n": 20,
+          "iterations": 20000,
+          "paired_by_iteration": true
+        }
+      }
+    ],
+    "worst_point_ratio_vs_pwsh": 0.1834,
+    "worst_point_ratio_vs_cmd": 3.3868,
+    "all_outputs_equivalent": true,
+    "interleaved": true,
+    "n_iterations": 20,
+    "comparator_note": "cmd.exe is the shell the raw-shell baseline arm actually runs through (`shell=True` in the live runner); PowerShell is the one the README advertises. Only the PowerShell comparison is pre-registered (C11); the cmd.exe numbers are recorded as context and are NOT a claim",
+    "wall_clock_context": {
+      "available": true,
+      "source": "latest_live.json",
+      "arms": {
+        "raw_shell": {
+          "n": 105,
+          "median_tool_share_of_wall_clock": 0.0108,
+          "mean_tool_share_of_wall_clock": 0.0303,
+          "median_wall_clock_ms": 46902.0,
+          "median_tool_ms": 609.0
+        },
+        "raw_shell_coached": {
+          "n": 105,
+          "median_tool_share_of_wall_clock": 0.0162,
+          "mean_tool_share_of_wall_clock": 0.0288,
+          "median_wall_clock_ms": 35143.0,
+          "median_tool_ms": 567.0
+        },
+        "verseshell_aci": {
+          "n": 105,
+          "median_tool_share_of_wall_clock": 0.045,
+          "mean_tool_share_of_wall_clock": 0.0644,
+          "median_wall_clock_ms": 32366.0,
+          "median_tool_ms": 1580.0
+        }
+      },
+      "note": "tool share = sum(trajectory elapsed_ms) / row elapsed_ms; the rest is model latency (the endpoint), which no shell choice can remove"
+    }
+  },
+  "verdicts": {
+    "success_paired_can_claim_MDE_0.15": {
+      "claim": "D 与 A 的成功率差达到预注册 MDE 0.15 时可判定",
+      "claimable": true,
+      "n_actual": 105,
+      "n_required": 8,
+      "powered": true,
+      "observed_mde_at_current_n": 0.0462,
+      "reason": "need ~8 pairs for MDE 0.15; at n=105 only |delta|>=0.0462 is detectable",
+      "row_policy_comparison": "verseshell_aci_vs_raw_shell",
+      "row_policy_claimable": true,
+      "row_policy_blocked_reasons": [],
+      "success_delta_analysable": 0.0295,
+      "success_delta_intention_to_treat": 0.0381,
+      "family": "live_model",
+      "multiplicity_corrected": false,
+      "claimable_before_multiplicity": true,
+      "passes_holm": null,
+      "claimable_after_multiplicity": true,
+      "multiplicity_note": "sample-size diagnostic, not an effect claim"
+    },
+    "token_ratio_level1_D_cheaper": {
+      "n_pairs": 105,
+      "point": 0.6075,
+      "ci95_lower": 0.5007,
+      "ci95_upper": 0.7589,
+      "threshold": 1.0,
+      "unit": "task",
+      "claimable": true,
+      "gap_type": "none",
+      "impossible_by_sample_size": false,
+      "reason": "interval upper bound clears the threshold",
+      "row_policy_comparison": "verseshell_aci_vs_raw_shell",
+      "row_policy_claimable": true,
+      "row_policy_blocked_reasons": [],
+      "success_delta_analysable": 0.0295,
+      "success_delta_intention_to_treat": 0.0381,
+      "family": "live_model",
+      "multiplicity_corrected": true,
+      "claimable_before_multiplicity": true,
+      "p_value_approx": 0.0,
+      "p_value_kind": "approx_from_ci95",
+      "holm_alpha": 0.007143,
+      "passes_holm": true,
+      "claimable_after_multiplicity": true
+    },
+    "token_ratio_level2_saves_15pct": {
+      "n_pairs": 105,
+      "point": 0.6075,
+      "ci95_lower": 0.5007,
+      "ci95_upper": 0.7589,
+      "threshold": 0.9,
+      "unit": "task",
+      "point_cap": 0.85,
+      "point_cap_met": true,
+      "claimable": true,
+      "gap_type": "none",
+      "impossible_by_sample_size": false,
+      "reason": "interval upper bound clears the threshold",
+      "row_policy_comparison": "verseshell_aci_vs_raw_shell",
+      "row_policy_claimable": true,
+      "row_policy_blocked_reasons": [],
+      "success_delta_analysable": 0.0295,
+      "success_delta_intention_to_treat": 0.0381,
+      "family": "live_model",
+      "multiplicity_corrected": true,
+      "claimable_before_multiplicity": true,
+      "p_value_approx": 9e-06,
+      "p_value_kind": "approx_from_ci95",
+      "holm_alpha": 0.008333,
+      "passes_holm": true,
+      "claimable_after_multiplicity": true
+    },
+    "token_ratio_frozen_0.60": {
+      "n_pairs": 105,
+      "point": 0.6075,
+      "ci95_lower": 0.5007,
+      "ci95_upper": 0.7589,
+      "threshold": 0.7,
+      "unit": "task",
+      "point_cap": 0.6,
+      "point_cap_met": false,
+      "claimable": false,
+      "gap_type": "data_gap",
+      "impossible_by_sample_size": false,
+      "n_required": null,
+      "n_shortfall": null,
+      "reason": "point estimate 0.6075 is above the claim's point cap 0.6, but CI95 still reaches below it (0.5007 < 0.6): the estimate has to move, so this is no evidence yet, not a product gap",
+      "row_policy_comparison": "verseshell_aci_vs_raw_shell",
+      "row_policy_claimable": true,
+      "row_policy_blocked_reasons": [],
+      "success_delta_analysable": 0.0295,
+      "success_delta_intention_to_treat": 0.0381,
+      "family": "live_model",
+      "multiplicity_corrected": true,
+      "claimable_before_multiplicity": false,
+      "p_value_approx": 0.160226,
+      "p_value_kind": "approx_from_ci95",
+      "holm_alpha": 0.016667,
+      "passes_holm": false,
+      "claimable_after_multiplicity": false
+    },
+    "tool_ratio_level1_D_fewer_calls": {
+      "n_pairs": 105,
+      "point": 0.8491,
+      "ci95_lower": 0.6877,
+      "ci95_upper": 1.0576,
+      "threshold": 1.0,
+      "unit": "task",
+      "claimable": false,
+      "gap_type": "data_gap",
+      "impossible_by_sample_size": false,
+      "margin_at_current_n": 0.2085,
+      "margin_needed": 0.1509,
+      "n_required": 201,
+      "n_shortfall": 96,
+      "reason": "need ~201 pairs (have 105); CI95 upper 1.0576 > 1.0",
+      "row_policy_comparison": "verseshell_aci_vs_raw_shell",
+      "row_policy_claimable": true,
+      "row_policy_blocked_reasons": [],
+      "success_delta_analysable": 0.0295,
+      "success_delta_intention_to_treat": 0.0381,
+      "family": "live_model",
+      "multiplicity_corrected": true,
+      "claimable_before_multiplicity": false,
+      "p_value_approx": 0.109792,
+      "p_value_kind": "approx_from_ci95",
+      "holm_alpha": 0.0125,
+      "passes_holm": false,
+      "claimable_after_multiplicity": false
+    },
+    "token_ratio_coached_level1_D_cheaper": {
+      "n_pairs": 105,
+      "point": 0.7096,
+      "ci95_lower": 0.5761,
+      "ci95_upper": 0.8788,
+      "threshold": 1.0,
+      "unit": "task",
+      "claimable": true,
+      "gap_type": "none",
+      "impossible_by_sample_size": false,
+      "reason": "interval upper bound clears the threshold",
+      "row_policy_comparison": "verseshell_aci_vs_raw_shell_coached",
+      "row_policy_claimable": true,
+      "row_policy_blocked_reasons": [],
+      "success_delta_analysable": 0.0118,
+      "success_delta_intention_to_treat": 0.0381,
+      "family": "live_model",
+      "multiplicity_corrected": true,
+      "claimable_before_multiplicity": true,
+      "p_value_approx": 0.000169,
+      "p_value_kind": "approx_from_ci95",
+      "holm_alpha": 0.01,
+      "passes_holm": true,
+      "claimable_after_multiplicity": true
+    },
+    "cost_per_success_D_cheaper": {
+      "claim": "每成功一次任务的花费（观察 token/成功数）D <= 0.80 A，且成功率非劣",
+      "point_D_over_A": 0.5889,
+      "cpst_A_tokens_per_success": 1400.158,
+      "cpst_D_tokens_per_success": 824.52,
+      "success_noninferiority_lower_bound": -0.0034,
+      "noninferiority_margin": 0.1,
+      "success_noninferiority_ok": true,
+      "point_ok": true,
+      "claimable": false,
+      "reason": "cost ratio must clear the cap AND success must be non-inferior; cheaper-by-failing is not a saving",
+      "row_policy_comparison": "verseshell_aci_vs_raw_shell",
+      "row_policy_claimable": true,
+      "row_policy_blocked_reasons": [],
+      "success_delta_analysable": 0.0295,
+      "success_delta_intention_to_treat": 0.0381,
+      "family": "live_model",
+      "multiplicity_corrected": false,
+      "claimable_before_multiplicity": true,
+      "passes_holm": null,
+      "claimable_after_multiplicity": false,
+      "multiplicity_note": "missing effect interval/p-value; confirmatory claim blocked",
+      "demoted_by_multiplicity": true
+    },
+    "success_paired_coached_can_claim_MDE_0.15": {
+      "claim": "D 与 A′（提示词等量对照）的成功率差达到预注册 MDE 0.15 时可判定",
+      "claimable": true,
+      "n_actual": 105,
+      "n_required": 11,
+      "powered": true,
+      "observed_mde_at_current_n": 0.0534,
+      "only_A": 0,
+      "only_D": 4,
+      "observed_abs_delta": 0.0381,
+      "reason": "need ~11 pairs for MDE 0.15; at n=105 only |delta|>=0.0534 is detectable",
+      "row_policy_comparison": "verseshell_aci_vs_raw_shell_coached",
+      "row_policy_claimable": true,
+      "row_policy_blocked_reasons": [],
+      "success_delta_analysable": 0.0118,
+      "success_delta_intention_to_treat": 0.0381,
+      "family": "live_model",
+      "multiplicity_corrected": false,
+      "claimable_before_multiplicity": true,
+      "passes_holm": null,
+      "claimable_after_multiplicity": true,
+      "multiplicity_note": "sample-size diagnostic, not an effect claim"
+    },
+    "cost_per_success_coached_D_cheaper": {
+      "claim": "每成功一次任务的花费（观察 token/成功数）D <= 0.80 A′，且成功率非劣",
+      "point_D_over_A": 0.6806,
+      "cpst_A_tokens_per_success": 1211.404,
+      "cpst_D_tokens_per_success": 824.52,
+      "success_noninferiority_lower_bound": 0.0013,
+      "noninferiority_margin": 0.1,
+      "success_noninferiority_ok": true,
+      "point_ok": true,
+      "claimable": false,
+      "reason": "same rule as the D-vs-A row, applied to the prompt-matched arm: the cost ratio must clear the cap AND success must be non-inferior",
+      "row_policy_comparison": "verseshell_aci_vs_raw_shell_coached",
+      "row_policy_claimable": true,
+      "row_policy_blocked_reasons": [],
+      "success_delta_analysable": 0.0118,
+      "success_delta_intention_to_treat": 0.0381,
+      "family": "live_model",
+      "multiplicity_corrected": false,
+      "claimable_before_multiplicity": true,
+      "passes_holm": null,
+      "claimable_after_multiplicity": false,
+      "multiplicity_note": "missing effect interval/p-value; confirmatory claim blocked",
+      "demoted_by_multiplicity": true
+    },
+    "cross_shell_all_ops_strictly_faster": {
+      "claim": "每一个操作的墙钟中位数比都严格快于 PowerShell（CI95 上界 < 1.00），且该操作的输出等价已先被证明",
+      "operations": [
+        {
+          "operation": "CPU info",
+          "n": 20,
+          "point": 0.1834,
+          "ci95": [
+            0.1817,
+            0.1845
+          ],
+          "paired_by_iteration": true,
+          "outputs_equivalent": true,
+          "strictly_faster": true,
+          "at_least_2x_faster": true,
+          "vs_cmd_point": 3.3868
+        },
+        {
+          "operation": "Disk info",
+          "n": 20,
+          "point": 0.0302,
+          "ci95": [
+            0.0298,
+            0.0307
+          ],
+          "paired_by_iteration": true,
+          "outputs_equivalent": true,
+          "strictly_faster": true,
+          "at_least_2x_faster": true,
+          "vs_cmd_point": 0.6306
+        },
+        {
+          "operation": "List dir",
+          "n": 20,
+          "point": 0.0413,
+          "ci95": [
+            0.0403,
+            0.0419
+          ],
+          "paired_by_iteration": true,
+          "outputs_equivalent": true,
+          "strictly_faster": true,
+          "at_least_2x_faster": true,
+          "vs_cmd_point": 1.2004
+        },
+        {
+          "operation": "Read file",
+          "n": 20,
+          "point": 0.0708,
+          "ci95": [
+            0.07,
+            0.0723
+          ],
+          "paired_by_iteration": true,
+          "outputs_equivalent": true,
+          "strictly_faster": true,
+          "at_least_2x_faster": true,
+          "vs_cmd_point": 0.9266
+        },
+        {
+          "operation": "Pipeline 1K",
+          "n": 20,
+          "point": 0.0622,
+          "ci95": [
+            0.0615,
+            0.0633
+          ],
+          "paired_by_iteration": true,
+          "outputs_equivalent": true,
+          "strictly_faster": true,
+          "at_least_2x_faster": true,
+          "vs_cmd_point": null
+        }
+      ],
+      "worst_point": 0.1834,
+      "worst_point_vs_cmd": 3.3868,
+      "all_outputs_equivalent": true,
+      "interleaved": true,
+      "threshold": 1.0,
+      "scoring_operation": "CPU info",
+      "point": 0.1834,
+      "ci95_lower": 0.1817,
+      "ci95_upper": 0.1845,
+      "claimable": true,
+      "reason": "headline must be the WORST operation, never the best; and §2 requires output equivalence before timing. `worst_point_vs_cmd` is context only: cmd.exe is the shell the baseline arm actually uses, but the pre-registered claim is against PowerShell",
+      "gap_type": "none",
+      "impossible_by_sample_size": false,
+      "family": "cross_shell",
+      "multiplicity_corrected": true,
+      "claimable_before_multiplicity": true,
+      "p_value_approx": 0.0,
+      "p_value_kind": "approx_from_ci95",
+      "holm_alpha": 0.025,
+      "passes_holm": true,
+      "claimable_after_multiplicity": true
+    },
+    "cross_shell_all_ops_2x": {
+      "claim": "每一个操作都快于 PowerShell 2 倍（CI95 上界 < 0.50），且输出等价已先被证明",
+      "threshold": 0.5,
+      "scoring_operation": "CPU info",
+      "point": 0.1834,
+      "ci95_lower": 0.1817,
+      "ci95_upper": 0.1845,
+      "claimable": true,
+      "failing_operations": [],
+      "all_outputs_equivalent": true,
+      "gap_type": "none",
+      "impossible_by_sample_size": false,
+      "family": "cross_shell",
+      "multiplicity_corrected": true,
+      "claimable_before_multiplicity": true,
+      "p_value_approx": 0.0,
+      "p_value_kind": "approx_from_ci95",
+      "holm_alpha": 0.05,
+      "passes_holm": true,
+      "claimable_after_multiplicity": true
+    }
+  },
+  "evidence": {
+    "globs": [
+      "bench/aci/results/latest_live.json",
+      "bench/aci/results/live_ab_without_read_files.json",
+      "eval/cross_shell.json",
+      "eval/live_uncertainty.json",
+      "tools/acceptance_power.py",
+      "tools/live_uncertainty.py",
+      "tools/report_inputs.py"
+    ],
+    "fingerprint": "4e10d6f6573f323e6b978ad02752205a149cf9360f717988a0fcbe7db0995faa",
+    "input_sha256": {
+      "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\bench\\aci\\results\\latest_live.json": "e73732e9a702ccfa0d5638e708c958773b81673ad4c49aa2dda137b8f822fa86",
+      "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\bench\\aci\\results\\live_ab_without_read_files.json": "61bf357114e495b8b80c3e786f95821fb844e614a9206d272390c2ee659f282d",
+      "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\eval\\cross_shell.json": "9c98156a6b528f9b9e1bc38d97ad7080d023bb95f1ddd493e63163043e6c517d"
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "schema": "verseshell.analysis-plan/v1",
+  "method": "crossed_axis_t_union/v1",
+  "alpha": 0.05,
+  "minimum_tasks": 30,
+  "minimum_seeds": 5,
+  "minimum_complete_runs": 3,
+  "status": "prospective_template_not_acquired",
+  "multiplicity": "Bonferroni across declared hypotheses, then alpha/2 per crossed margin",
+  "interpretation": "Endpoint usage is not money; proxy CPST is separately labelled; no success-improvement claim on the old 35-task set.",
+  "hypotheses": [
+    {
+      "id": "compact_raw_shell_usage_token_ratio",
+      "kind": "variant",
+      "variant": "compact_all",
+      "baseline": "raw_shell",
+      "metric": "usage_token_ratio",
+      "rule": "upper_below",
+      "threshold": 1.0
+    },
+    {
+      "id": "compact_raw_shell_usage_mean_of_ratios",
+      "kind": "variant",
+      "variant": "compact_all",
+      "baseline": "raw_shell",
+      "metric": "usage_mean_of_ratios",
+      "rule": "upper_below",
+      "threshold": 1.0
+    },
+    {
+      "id": "compact_raw_shell_coached_usage_token_ratio",
+      "kind": "variant",
+      "variant": "compact_all",
+      "baseline": "raw_shell_coached",
+      "metric": "usage_token_ratio",
+      "rule": "upper_below",
+      "threshold": 1.0
+    },
+    {
+      "id": "compact_raw_shell_coached_usage_mean_of_ratios",
+      "kind": "variant",
+      "variant": "compact_all",
+      "baseline": "raw_shell_coached",
+      "metric": "usage_mean_of_ratios",
+      "rule": "upper_below",
+      "threshold": 1.0
+    },
+    {
+      "id": "interaction_raw_shell_usage_token_ratio",
+      "kind": "interaction",
+      "baseline": "raw_shell",
+      "metric": "usage_token_ratio",
+      "rule": "excludes_zero"
+    },
+    {
+      "id": "interaction_raw_shell_usage_mean_of_ratios",
+      "kind": "interaction",
+      "baseline": "raw_shell",
+      "metric": "usage_mean_of_ratios",
+      "rule": "excludes_zero"
+    },
+    {
+      "id": "interaction_raw_shell_coached_usage_token_ratio",
+      "kind": "interaction",
+      "baseline": "raw_shell_coached",
+      "metric": "usage_token_ratio",
+      "rule": "excludes_zero"
+    },
+    {
+      "id": "interaction_raw_shell_coached_usage_mean_of_ratios",
+      "kind": "interaction",
+      "baseline": "raw_shell_coached",
+      "metric": "usage_mean_of_ratios",
+      "rule": "excludes_zero"
+    },
+    {
+      "id": "compact_coached_success_noninferiority",
+      "kind": "variant",
+      "variant": "compact_all",
+      "baseline": "raw_shell_coached",
+      "metric": "success_delta",
+      "rule": "lower_above",
+      "threshold": -0.1
+    },
+    {
+      "id": "compact_coached_proxy_cpst",
+      "kind": "variant",
+      "variant": "compact_all",
+      "baseline": "raw_shell_coached",
+      "metric": "observation_cost_per_success",
+      "rule": "upper_below",
+      "threshold": 0.8,
+      "requires": [
+        "compact_coached_success_noninferiority"
+      ]
+    }
+  ],
+  "analysis_code_sha256": {
+    "tools/crossed_inference.py": "72d090ff364ca946db2f3ef48b2886f2d8a02c4b5c2dbb18fe3beafc1b7edc4e",
+    "tools/repeated_run_uncertainty.py": "e8551c1c2c45a09d69f9b3fb5074b3bc6bf3b6f7f60ba9cff5d4eb1f6fc69ac3",
+    "tools/study_inference.py": "49db2560b84333872922c4f76549f896beaf749c167cae527d02acd57b1a97e3",
+    "tools/live_uncertainty.py": "8513620341535011dd2fdd8cfa013528089de71d6896f850d6ab5a560a3717c3",
+    "tools/report_inputs.py": "1e28548ebc4c40a9ead6959a63eb68ef830f5b8247af36ebd8f770d898a2a2c9"
+  }
+}

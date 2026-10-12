@@ -1,0 +1,36 @@
+{
+  "applied_at": "2026-09-28T22:37:50.388127Z",
+  "base_graph_hash": "dae160d747d1c2126044c6f39ccbcec26910e8f2c26dfc6afbe9cdab5205f988",
+  "base_summary": {
+    "edge_count": 181,
+    "node_count": 123,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已完成 · 新增 `tools/statistics_crosscheck.py`**：直接从 `bench/aci/results/latest_live.json` 的**原始行**出发，用**独立代码路径**重算并逐项比对——闭式量用教科书写法自己实现（`math.comb` 做精确二项、Wilson 公式展开写），bootstrap 用独立种子（`20260929`，刻意不同于主路径）。",
+          "**覆盖的量**：逐臂成功数/样本量/成功率/Wilson 95%（A 与 D）；McNemar 精确 p 与四个不一致格计数（both_pass/only_A/only_D/neither）；配对成功率的 n/均值差/标准差；观察 token 比与工具调用比的**点估计**（闭式）与**任务聚类 bootstrap CI**（重采样）；CPST（A/D 总 token、成功数、每次成功 token、D/A 比）；真实 tokenizer 口径的总 token 比（`llm_prompt_tokens + llm_completion_tokens`）与其 CI。",
+          "**实测：34/34 项全部吻合**。闭式量**零误差**（成功数 95/88、成功率 0.9048/0.8381、Wilson [0.8335,0.9474]/[0.7559,0.8964]、McNemar only_A=10 only_D=3 p=0.092285、均值差 −0.0667、标准差 0.3471、CPST 1302.421/892.409/0.6852、真实 token 比 1.3583 全部逐位相同）。bootstrap 量在容差内（观察 token 比 CI 最大偏差 0.0021、工具比 0.0014、真实 token 比 CI 0.0050，均 < 0.02 容差）**且与已发布值落在 1.0 的同一侧**。",
+          "**比对规则按量分两类（这是设计要点，不是宽松）**：闭式量**必须精确吻合到发布精度**（5e-4 舍入下限）；重采样量给 Monte-Carlo 容差**并额外要求同侧**——只要求同侧会掩盖量级 bug，只要求相等会把不同种子造成的正常差异误报为缺陷。",
+          "**门禁 C37 + 负对照（已跑）**：把 `eval/live_uncertainty.json` 的两个已发布值人为改错（`raw_shell.successes` 95→90、`only_A` 10→8）后重跑交叉核对 → **32/34（2 项 DIFF）**，门禁指向该产物 → **C37 FAIL（24/31）**；真实产物 → **C37 PASS**。为此给 `claim_gate.py` 加了 `--statistics-crosscheck` 覆盖参数——**这正是 TF-0118 中途抓到过的自引入缺陷（C33 起初硬编码路径，导致负对照误通过）**，所以这次一开始就留了覆盖口。",
+          "**同时接入两处**：①`tools/refresh_live_artifacts.py` 的 CHAIN 末尾（它必须看到最终发布的数字）；②`claim_gate.py` 的 `EVIDENCE_ARTIFACTS`（纳入 C12 新鲜度检查）。",
+          "**本条针对的是什么**：审计的 E7（只量一个预算）、E11（重抽单位错）、E12（运算符优先级把余量夸大 6 倍）**三条都是分析代码的 bug，一条都没被测试抓到**。在一个「结论完全由几十行统计代码决定」的项目里，这条门禁把「算答案的代码与独立实现一致」变成了可机检属性。",
+          "**诚实边界**：第二份实现不等于正确性证明——两份实现可能犯同一个概念错误。它抓的是**编码类**错误（重抽单位、运算符优先级、漏掉一个预算），而那正是审计实际发现的那一类。这条边界写在门禁 notes 里。"
+        ],
+        "next_action": "无（已关闭）。该步骤已加进 `tools/refresh_live_artifacts.py` 的**最后一步**（必须在 `live_uncertainty.json` 与 `acceptance_power.json` 之后跑，否则它比对的不是最终发布的数字）。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0111"
+    }
+  ],
+  "created_at": "2026-09-29T08:00:00.000000Z",
+  "proposal_id": "TFP-tf0111-crosscheck-2026-09-29",
+  "rationale": "TF-0111 完成：统计代码的独立重实现与交叉核对门禁（C37）已落地并做过负对照。它针对的正是审计发现的 E7/E11/E12——三条全是分析代码 bug、全靠人肉发现。",
+  "session_id": "ses_verseshell-live-chain-2026-09-28",
+  "status": "applied"
+}

@@ -1,18 +1,10 @@
 #!/usr/bin/env python3
-"""Recover the file a stored live run left behind, from its trajectory alone.
+"""Infer candidate file text from a stored trajectory, without executing commands.
 
-Success predicates are re-scored after the fact — "would the current predicate
-accept what this run actually produced?" — so the analysis tools need the final
-content of the file each run wrote. Both conditions write it, just differently:
-
-  * condition D uses typed ops (`file.write` / `file.replace_exact`), which replay
-    exactly;
-  * raw shell folds the write into a command, in practice a
-    `python -c "open('f','w').write('...')"` one-liner, which is decoded back into
-    the string literal it wrote.
-
-Nothing here re-runs a workspace; it only reconstructs text, and it reports
-`None` when it cannot, so a caller never silently scores a missing artifact.
+This is a legacy sensitivity aid, NOT a final-workspace reconstruction proof:
+commands can fail, write other files, or mutate state outside the parsed forms.
+Callers must not equate a non-None candidate with independent live re-scoring.
+Use final_workspace_audit.py for hash-verified saved grading inputs.
 """
 from __future__ import annotations
 
@@ -42,7 +34,7 @@ def step_text(step: dict) -> str:
 
 
 def typed_write(pristine: str, trajectory: list[dict], path: str) -> tuple[str | None, str]:
-    """Replay the typed writes a D run left in the workspace."""
+    """Infer text from typed write arguments; outcomes and other edits are unknown."""
     body = pristine
     touched = False
     for step in trajectory:
@@ -57,11 +49,11 @@ def typed_write(pristine: str, trajectory: list[dict], path: str) -> tuple[str |
             if old and old in body:
                 body = body.replace(old, new, 1)
                 touched = True
-    return (body if touched else None), ("typed file ops" if touched else "no write to the file")
+    return (body if touched else None), ("candidate from typed write arguments" if touched else "no supported typed write found")
 
 
 def inline_write(pristine: str, trajectory: list[dict], path: str) -> tuple[str | None, str]:
-    """Recover a raw-shell write from an inline command (python one-liner or echo)."""
+    """Parse a candidate from a Python literal or echo, without proving execution."""
     body = pristine
     touched = False
     for step in trajectory:
@@ -84,12 +76,12 @@ def inline_write(pristine: str, trajectory: list[dict], path: str) -> tuple[str 
                 continue
             body = match.group("body")
             touched = True
-    return (body if touched else None), ("inline shell write" if touched else "no write to the file")
+    return (body if touched else None), ("candidate from inline shell write" if touched else "no supported inline write found")
 
 
 def reconstruct(condition: str, pristine: str, trajectory: list[dict],
                 path: str) -> tuple[str | None, str]:
-    """Pick the reconstruction that matches the condition."""
+    """Pick a candidate parser for the condition, not an exact state replay."""
     if condition == "verseshell_aci":
         return typed_write(pristine, trajectory, path)
     return inline_write(pristine, trajectory, path)

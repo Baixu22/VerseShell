@@ -51,6 +51,51 @@ fn op(id: &str, op: &str, args: Value) -> String {
 }
 
 #[test]
+fn centered_file_windows_expose_exact_bounds_and_continuation() {
+    let workspace = std::env::temp_dir().join(format!("vs-view-{}", uuid::Uuid::new_v4()));
+    std::fs::create_dir_all(&workspace).unwrap();
+    let source: String = (1..=106).map(|n| format!("line {n}\n")).collect();
+    std::fs::write(workspace.join("sample.txt"), source).unwrap();
+    std::fs::write(workspace.join("empty.txt"), "").unwrap();
+    for (cursor, first, last, next) in [
+        (1u64, 1, 10, Some(16)),
+        (100, 95, 104, Some(110)),
+        (110, 105, 106, None),
+        (u64::MAX, 97, 106, None),
+    ] {
+        let r = run_server(&op("view", "file.view",
+            json!({"path": "sample.txt", "cursor": cursor, "window": 10})), &workspace).remove(0);
+        assert_eq!(r["ok"], true, "{r}");
+        assert_eq!(r["data"]["start_line"], first);
+        assert_eq!(r["data"]["end_line"], last);
+        assert_eq!(r["data"]["total_lines"], 106);
+        assert_eq!(r["data"]["next_cursor"], json!(next));
+    }
+    let mut cursor = 1;
+    let mut visited = Vec::new();
+    loop {
+        let r = run_server(&op("page", "file.view",
+            json!({"path": "sample.txt", "cursor": cursor, "window": 10})), &workspace).remove(0);
+        visited.extend(r["data"]["lines"].as_array().unwrap().iter()
+            .map(|line| line["line"].as_u64().unwrap()));
+        match r["data"]["next_cursor"].as_u64() {
+            Some(next) => { assert!(next > cursor); cursor = next; }
+            None => break,
+        }
+    }
+    assert_eq!(visited, (1..=106).collect::<Vec<_>>());
+    let r = run_server(&op("empty", "file.view",
+        json!({"path": "empty.txt", "cursor": u64::MAX, "window": 10})), &workspace).remove(0);
+    assert_eq!(r["ok"], true, "{r}");
+    assert_eq!(r["data"]["start_line"], 0);
+    assert_eq!(r["data"]["end_line"], 0);
+    assert_eq!(r["data"]["total_lines"], 0);
+    assert!(r["data"]["next_cursor"].is_null());
+    assert_eq!(r["data"]["lines"], json!([]));
+    let _ = std::fs::remove_dir_all(workspace);
+}
+
+#[test]
 fn file_view_replace_and_stale_hash() {
     let workspace = std::env::temp_dir().join(format!("vs-1-{}", uuid::Uuid::new_v4()));
     std::fs::create_dir_all(&workspace).unwrap();

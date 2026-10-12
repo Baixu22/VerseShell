@@ -274,6 +274,10 @@ pub(crate) fn decode_output_bytes(bytes: &[u8]) -> (String, String) {
 fn decode_windows_oem(bytes: &[u8]) -> Option<(String, String)> {
     use windows_sys::Win32::Globalization::GetOEMCP;
     let cp = unsafe { GetOEMCP() };
+    decode_windows_code_page(bytes, cp)
+}
+
+fn decode_windows_code_page(bytes: &[u8], cp: u32) -> Option<(String, String)> {
     let label = match cp {
         65001 => "utf-8",
         936 => "gbk",
@@ -292,8 +296,24 @@ fn decode_windows_oem(bytes: &[u8]) -> Option<(String, String)> {
         _ => return None,
     };
     let encoding = encoding_rs::Encoding::for_label(label.as_bytes())?;
-    let (text, _, _) = encoding.decode(bytes);
-    Some((text.into_owned(), format!("windows-oem-{cp}")))
+    let (text, _, lossy) = encoding.decode(bytes);
+    let suffix = if lossy { "-lossy" } else { "" };
+    Some((text.into_owned(), format!("windows-oem-{cp}{suffix}")))
+}
+
+pub(crate) fn decode_recorded_output(bytes: &[u8], declared: &str) -> (String, String) {
+    if let Some(cp) = declared.strip_prefix("windows-oem-")
+        .and_then(|s| s.trim_end_matches("-lossy").parse().ok())
+    {
+        if let Some(decoded) = decode_windows_code_page(bytes, cp) {
+            return decoded;
+        }
+    }
+    let bytes = bytes.strip_prefix(&[0xEF, 0xBB, 0xBF]).unwrap_or(bytes);
+    match std::str::from_utf8(bytes) {
+        Ok(text) => (text.into(), "utf-8".into()),
+        Err(_) => (String::from_utf8_lossy(bytes).into_owned(), "utf-8-lossy".into()),
+    }
 }
 
 pub fn normalize_preview(text: &str) -> String {
@@ -406,6 +426,18 @@ impl Drop for WindowsJob {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn recorded_output_uses_its_code_page_and_marks_loss() {
+        let chinese = [0xd6, 0xd0, 0xce, 0xc4];
+        assert_eq!(decode_recorded_output(&chinese, "windows-oem-936"),
+            ("中文".into(), "windows-oem-936".into()));
+        let (text, encoding) = decode_recorded_output(&[0xff], "windows-oem-936");
+        assert!(text.contains('\u{fffd}'));
+        assert_eq!(encoding, "windows-oem-936-lossy");
+        assert_eq!(decode_output_bytes("中文\u{fffd}".as_bytes()),
+            ("中文\u{fffd}".into(), "utf-8".into()));
+    }
 
     #[test]
     fn normalization_strips_ansi_and_progress_updates() {

@@ -1,0 +1,31 @@
+{
+  "applied_at": "2026-09-28T14:11:16.393289Z",
+  "base_graph_hash": "e57c781bfabef16b3a6f9843b25ecaec7576403ce878090d484d34118ca389fe",
+  "base_summary": {
+    "edge_count": 181,
+    "node_count": 122,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**归因已完成（原假设「large tier 任务导致」被证伪）**：逐臂均值 —— 每行输入提示 token：A **9,015** / A′ **9,924** / **D 11,393**；每行 completion token：A 1,593 / A′ 1,610 / **D 3,017**。即 D 的提示比 A 大约 **26%**、推理输出约 **2 倍**。15 行截断的 `llm_completion_tokens` 全部落在 **16,424–16,453**（撞满 16384 上限）。",
+          "**截断与任务规模无关**：12 个被截断任务的 pristine 观察量跨度是 **141–1559 token**，其中 `typescript_missing_await_result_order`(141)、`python_scheduler_cancel_transition`(192)、`ts_chunk_batches`(221)、`rust_error_source_propagation`(259)、`ts_narrow_vs_cast`(308) 都属于 small/medium 档；反过来说，本轮新增的 large 任务里只有 1 个被截断。**所以这不是「新任务太难」，而是 D 条件本身的提示体积与推理量。**",
+          "对照：A′ 的提示（9,924）与 A（9,015）相当，但 completion 均值也≈1,600——提示词等量并不能解释 D 的 3,017。可推断 D 的 typed-op 提示与工具 schema 促使模型做更多推理。",
+          "**已实测（第 14 轮 with 臂，`bench/aci/results/latest_live.json`，315 行，`api_error_rows=3`）**：按 §0.6.1 分类后逐臂 endpoint/cap/排除率与两个口径成功率：A `3/2/4.8%`、0.9048（全量）vs 0.9400（analysable）；A′ `0/0/0.0%`、0.8762 vs 0.8762；**D `0/15/14.3%`、0.8381 vs 0.9556**。",
+          "**符号翻转**：全量（ITT）口径 D−A = −0.0667（D 更差），剔除截断行后 D−A = +0.0156（D 更好）。§0.6.3 第 1 条（任一侧 cap >10%）使该对比不可主张；第 3 条（`api_error` 行数为 0）另因 A 臂 3 行端点失败而不满足。",
+          "对照：round 13（v2.0.0）D 的 completion 截断率是 3%/7%/4%（合计 ≤10%），本轮 14.3%。归因结果表明差异**不在任务集**，而在 D 条件的提示/推理体积——下一轮若要降低它，应从那两处入手。"
+        ],
+        "next_action": "写进 C13 的两个口径数字已登记；下一步是**预注册**缓解方案（下一轮 live 之前写死）。可行方向：缩小 D 侧提示/工具 schema 体积，或把 turn-1 截断与「模型真的在思考」区分开（例如记录首轮 reasoning 是否为空）。不得靠抬 max_tokens。"
+      },
+      "id": "TF-0121"
+    }
+  ],
+  "created_at": "2026-09-28T14:20:00.000000Z",
+  "proposal_id": "TFP-tf0121-attribution-2026-09-28",
+  "rationale": "把 TF-0121 里标注为「尚未归因」的那条假设测掉：D 臂独有截断的原因是条件本身（提示体积 + 推理量），不是本轮新增的 large tier 任务。",
+  "session_id": "ses_verseshell-live-chain-2026-09-28",
+  "status": "applied"
+}

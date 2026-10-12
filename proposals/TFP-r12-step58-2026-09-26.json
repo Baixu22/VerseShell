@@ -1,0 +1,94 @@
+{
+  "applied_at": "2026-09-26T08:59:15.746733Z",
+  "base_graph_hash": "e5600ce17c1c97da9cc7e9693d699817fef80c88e24ccec6206b344472ad9718",
+  "base_summary": {
+    "edge_count": 166,
+    "node_count": 106,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**要求 1 · 输出等价先于计时**：`tools/cross_shell_bench.py` 新增 `probe_equivalence()`——把每个 shell 的 stdout 归一化成**语义键**（CPU 型号 / 盘符集合 / 目录项集合 / 文件内容 sha256 / 流水线结果），**所有被测 shell 必须给出同一个键**，退出码相同不算数；无法归一化的 shell 记为「未验证」而不是通过。探针阶段捕获 stdout，**计时阶段仍然丢弃 stdout/stderr**（与 §2 一致）。实测 **5/5 操作等价通过**",
+          "**等价检查抓出的三处旧不公平（不是推测，是跑出来的）**：①PowerShell 的 List dir 用了 `Get-ChildItem -File`，**只列文件**，而 `file.ls` / `dir /b` / `ls -la` 都列目录 → 旧对比让 PowerShell 做更少的事；②PowerShell 的 Read file 用 `Get-Content -Raw` 未指定编码，**按 ANSI 代码页解码 UTF-8 文件**，读到的字节与 `type` / `cat` 不同（内容 sha256 直接抓到）；③旧实现在两个 shell 上**独立重抽**区间。前两处已修（去掉 `-File`、加 `-Encoding UTF8`）",
+          "**要求 2 · 交错执行 + cmd 对照 + 百分位 + 冷热**：迭代改为外层循环，第 i 次迭代把每个 shell 连着跑一遍；对照新增 **cmd.exe**（`wmic cpu get Name` / `fsutil fsinfo drives` / `dir /b` / `type`，流水线无等价命令故跳过）；每格新增 `cold_ms`（预热前的一次真实 spawn）、`first_ms`、`warm_median_ms`、`p50_ms`、`p90_ms`、`p99_ms`",
+          "**要求 3 · 按迭代配对**：`tools/acceptance_power.py::bootstrap_median_ratio` 由「两个 shell 独立重抽」改为**按迭代索引配对重抽**（交错执行下第 i 个样本与第 i 个样本是相邻时刻取的，共享机器状态），产物标记 `paired_by_iteration=true`",
+          "**要求 4 · shell 时间 / 端到端墙钟**：`cross_shell_bench.py::wall_clock_context()` 从 `latest_live.json` 的轨迹算 `sum(trajectory elapsed_ms)/row elapsed_ms`，写进 `eval/cross_shell.json` 的 `wall_clock_context`。实测中位数：**A 2.85% / A′ 1.76% / D 7.36%**（A 中位墙钟 16213ms、工具时间 572ms）",
+          "**要求 5 · 门禁与产物**：`tools/claim_gate.py` 的 C11 把 `all_outputs_equivalent` 与 `method.interleaved` 纳入 pass 条件（§2 要求「先证明等价再比时间」，所以等价失败即使比值好看也不能过）；`eval/cross_shell.json` 重生成（schema v2），C10/C11 复跑均 PASS",
+          "**结论性发现（必须写进对外表述）**：vs PowerShell 5/5 严格更快且 ≥2 倍（最差 0.2682 [0.2599, 0.2867]）；**vs cmd.exe 没有优势**——CPU info **3.3859（慢 3.4 倍）**、List dir 1.2688（慢）、Read file 0.9539（持平）、Disk info 0.7114（快）。cmd.exe 才是裸 shell 基线臂实际使用的 shell（`live_agent_loop.py` 的 `shell=True`）",
+          "文档同步：`docs/claims-and-evidence.md` 的 C11 整条重写（含 v2 协议、三处不公平、cmd 语境、端到端占比、六条失效边界）；`docs/acceptance-criteria.md` §6 增加两行（cmd 语境行与工具时间占比行）并在「一句话」里写明「快 ≥2 倍」不得被读成「比裸 shell 快」；`README.md` 的跨 shell 表按新数字更新（否则 C10 判红——它确实先判红了），并新增一段说明对照物与端到端占比",
+          "`python tools/readme_claims_check.py` → **17/17 PASS**；`python tools/claim_gate.py` → **22/25**（C10/C11 均 PASS；C12 红是 TF-0100 改 harness 使 live 基线 stale，C14/C16 是既有产品缺口）"
+        ],
+        "next_action": "无（已关闭）。注意 `eval/cross_shell.json` 的指纹现在覆盖 `bench/aci/results/latest_live.json`（因为 `wall_clock_context` 读它），所以每轮 live 重跑后必须重跑一次 `tools/cross_shell_bench.py`，否则 C12 会判陈旧。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0102"
+    },
+    {
+      "action": "add_node",
+      "alias": "decision-cmd-comparator",
+      "node": {
+        "acceptance_criteria": [
+          "C11 的门槛与 pass 条件仍只针对 PowerShell（`worst_ratio_ae_over_pwsh`）",
+          "cmd.exe 的比值出现在产物（`aggregate.worst_ratio_ae_over_cmd`、每操作 `ratio_ae_over_cmd`）与门禁 detail 中，但不参与任何 claimable 判定",
+          "README 与 `docs/acceptance-criteria.md` 必须同时给出两个对照物，并写明「快 ≥2 倍」不得被读成「比裸 shell 快」"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "bench",
+          "wall_clock",
+          "gate",
+          "claims"
+        ],
+        "difficulty": "low",
+        "display_order": 340,
+        "evidence": [
+          "实测（2026-09-26，`eval/cross_shell.json` schema v2）：vs PowerShell 最差 0.2682；**vs cmd.exe 最差 3.3859**（CPU info 慢 3.4 倍），List dir 1.2688、Read file 0.9539、Disk info 0.7114",
+          "cmd.exe 是基线臂实际使用的 shell：`bench/aci/runners/live_agent_loop.py` 用 `subprocess.run(..., shell=True)` → COMSPEC = cmd.exe",
+          "门禁现状：C11 只读 `worst_ratio_ae_over_pwsh` 与 `all_outputs_equivalent`；`worst_ratio_ae_over_cmd` 仅出现在 detail 里",
+          "文档：`docs/claims-and-evidence.md` C11 失效边界③、`docs/acceptance-criteria.md` §6 的 cmd 语境行、`README.md` 表格下方的「Read the comparator」段落"
+        ],
+        "kind": "decision",
+        "next_action": "无（已关闭）。若将来要把 cmd.exe 变成正式对照，必须先改 `docs/acceptance-criteria.md` 的预注册并重跑，不得直接引用本轮数字。",
+        "non_goals": [
+          "不为 cmd.exe 新增门槛——那等于在看到数据之后新增一条声明",
+          "不因为 cmd.exe 的数字不利就把它从产物里删掉",
+          "不把两个对照物的数字混在同一个倍数里"
+        ],
+        "priority": 2,
+        "progress": 100.0,
+        "progress_source": "agent",
+        "purpose": "跨 shell 的结论现在有两个对照物，而它们的结论相反。必须先定下「哪一个算声明、哪一个算语境」，否则下一轮很容易把对 cmd.exe 不利的数字悄悄丢掉、或反过来把非预注册的数字写进声明。",
+        "status": "done",
+        "summary": "预注册门槛只对 PowerShell 生效（5/5 通过）；cmd.exe 的数字登记为语境，因为它是对照物变更，不是新证据。",
+        "title": "决策：跨 shell 声明保持预注册的 PowerShell 对照，cmd.exe 只作语境、不设门槛"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "该决策属于本轮「R12 复核收口」的边界设定"
+      },
+      "from": "decision-cmd-comparator",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 130
+      },
+      "id": "decision-cmd-comparator"
+    }
+  ],
+  "created_at": "2026-09-26T08:59:15.527900Z",
+  "proposal_id": "TFP-r12-step58-2026-09-26",
+  "rationale": "落地 TF-0102（跨 shell 协议补全）。预注册 B 区的四条要求逐条实现并各有证据，输出等价检查立刻抓出三处旧实现的不公平，同时暴露一个结论性问题：README 的「快 ≥2 倍」只对 PowerShell 成立，而基线臂实际用的是 cmd.exe。就此新增一个 decision 节点，记录「保持预注册对照、cmd 只作语境、不新增门槛」这个边界，避免下一轮有人顺手把 cmd 也写进声明。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

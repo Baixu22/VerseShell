@@ -1,0 +1,100 @@
+{
+  "applied_at": "2026-09-28T22:31:22.732410Z",
+  "base_graph_hash": "dfef4b5760bf49a623789d42707b3226f22188a0925703adf646adcc7261d398",
+  "base_summary": {
+    "edge_count": 181,
+    "node_count": 122,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "large-tier-observation-mechanism",
+      "node": {
+        "acceptance_criteria": [
+          "给出并实测两种观察机制改动：①typescript 的 `check.mjs` 不再由裸 node 首断言即终止（改为收集全部失败再报告，例如逐断言 try/catch 汇总输出）；②rust 让每条失败用例打印长 payload（而不是 `cargo test` 的短摘要）",
+          "用同一批被拒候选复测 A8：证明 ≥7 个候选能越过 1000 token，或在实测后照实降低可达上限并说明",
+          "把新的组合目标**在看数据之前**写进 `docs/task-generation-protocol.md`（数值必须由算式给出，不是拍的）",
+          "改观察机制会改变 live 证据面，因此必须与下一轮 live 一起做；不得只改任务集就跑结论"
+        ],
+        "confidence": 0.8,
+        "context_tags": [
+          "dataset",
+          "bench",
+          "claims"
+        ],
+        "difficulty": "high",
+        "display_order": 530,
+        "evidence": [
+          "**算术（本轮实测）**：冻结集 v3.0.0 = 35 任务，pristine 观察 ≥1000 token 的只有 **7** 个 → **20.0%**。逐个补 1–5 个 large 槽位的结果分别是 22.2% / 24.3% / 26.3% / 28.2% / **30.0%**，**全部低于 1/3**；达到 1/3 需要 **7** 个额外 large 任务（14/42 = 33.3%）。",
+          "**5 个未补齐槽位**（`bench/aci/candidates/REMAINDER_PLAN.json` 的 rust 5/6/7 与 typescript 9/10）全部是 large，全部被 A8 拒绝，实测 pristine 失败转储 **277–590 token**（`rust_primesieve` 277、`rust_chunker` 390、`rust_sliding_sums` 443、`rust_spiral_order` 590、`js_csvlite_parsecsv` 376）。",
+          "**两条结构性原因**：①typescript 的 `check.mjs` 由裸 node 执行，**第一条断言抛出就终止进程**，其余 11–17 条失败测试的 diff 永不打印；pytest 与 `cargo test` 都会跑完全部用例。②`cargo test` 的失败摘要是每用例两三行，没有 pytest 那种整段长字面量 diff。",
+          "**对比证据**：同一批 python large 轻松达标（`python_nested_flatten` 3496、`python_csvlite_parse` 1559），说明 1000 token 不是不可达，而是 rust/ts 的**报告机制**不产生长输出。",
+          "**已试过的缓解无效**：把 large 档的测试数指令从 3–5 个提高到 12–18 个（对齐 `FULL_PLAN.json` 的 `large_tier_requirement`）后，python 立刻达标，**rust/ts 仍不达标**——证实问题在报告机制而非用例数量。"
+        ],
+        "kind": "global_task",
+        "non_goals": [
+          "不为凑数放松 A8（1000 token 是预注册门槛）",
+          "不在看过第 14 轮 token 结果之后按结果增删任务（§5 冻结规则）",
+          "不把 5 个槽位补齐当作已达标——它只到 30.0%"
+        ],
+        "priority": 1,
+        "purpose": "large 占比是 token 声明构造效度的支撑（TF-0114 要求 ≥1/3）。当前 7/35 = 20%；**即使把预注册里剩余 5 个 large 槽位全部补齐，也只有 12/40 = 30.0%，仍不达标**——达到 1/3 需要 7 个额外 large 任务（14/42 = 33.3%）。所以「补到 30 个」这个数字本身不足以服务它的目的，必须先重新推导组合目标。",
+        "status": "ready",
+        "summary": "A8 要求 tier=large 候选的 pristine 裸 shell 观察 ≥1000 token。ts 与 rust 的 large 候选实测只有 277–590，全部被拒。要达标必须改观察机制本身。",
+        "title": "改观察机制让 large 档真正可达标（1/3 需要 ≥7 个额外 large 任务，不是 5 个）"
+      }
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**难度目标未达成且方向相反**：第 14 轮 with 臂 A 臂成功率 **0.9048**（目标 0.40–0.70，上一轮 0.8400），可用余量 0.0952 < 预注册 MDE 0.15 → `MDE/余量 = 1.58`，成功率支**结构上不可能检出**。",
+          "**large 占比 7/35 = 20%**（目标 ≥1/3）。**关键新结论：补齐预注册里剩余 5 个 large 槽位也只到 12/40 = 30.0%，仍不达标**；达到 1/3 需要 **7** 个额外 large 任务（14/42 = 33.3%）。所以本节点真正需要的不是「补到 30 个」，而是**改观察机制 + 重新推导组合目标**（已另立节点承接）。",
+          "**留出集已达标且已被真实使用**：`eval/task_set_freeze.json` 的 `holdout` = 10 个本轮新提升任务，全部进了 live 并出现在逐任务统计中。",
+          "**第 14 轮必须与结论一起说的三条**：①D 臂 completion 截断率 14.3%（A/A′ 为 0），按 §0.6.3 使两条成功率对比不可主张；②全量与 analysable 两个口径**符号相反**（D 更差 6.7pp vs D 更好 1.6pp）；③真实 tokenizer 口径下 D 总 token 比 1.3583 [1.0303, 1.8986]，CPST 0.6852 但**非劣不成立**。"
+        ],
+        "next_action": "不要在现在补那 5 个槽位：§5 规定「看过某个任务集的 D/A token 比之后不得再按该结果增删任务」，而第 14 轮的 token 结果已经看过；且补满也只到 30.0%。正确顺序是：先在**看不到结果的前提下**重新推导组合目标（≥7 个额外 large 任务），改观察机制，再与下一轮 live 一起跑。",
+        "progress": 90.0,
+        "status": "in_progress"
+      },
+      "id": "TF-0114"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**缺口已逐项闭合**：头条 token 声明改为双口径（真实 tokenizer 为准）；全部对外区间按任务聚类（ICC 0.28–0.56，行级口径保留为对照）；A 臂 cp936 崩溃已修并登记为门禁 C31；消融 P7 已按重跑结果撤回。",
+          "**第 14 轮提供了最终验证**：全链重刷（`tools/refresh_live_artifacts.py`）跑通两遍，`eval/live_uncertainty.json` 与 `eval/acceptance_power.json` 都是按任务聚类的区间；真实 tokenizer 口径与代理口径的差异（`token_proxy_calibration`：本轮 `real/proxy` 均值 1.2442、**`len//4` 不是上界**、52/60 违反）已与数字一起发布。",
+          "**完整门禁 27/30**（含 cargo 测试），`eval/evidence.json` 为最新。"
+        ],
+        "next_action": "无（已关闭）。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0093"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**收口结果**：`python tools/claim_gate.py` → **27/30**。三项红及归属：**C14 = 0.0422**（门槛 ≥0.15）与 **C16 = 0.0768**（门槛 ≥0.10）——TF-0116 决策**保持原阈值**，另立 C34 混合不变口径并已通过（0.5654）；**C35 = 0**——with 臂为 partial 合并（3 行端点失败，6 次补跑未成功），已由 **TF-0122** 承接，且 §0.6.3 已使相关对比不可主张。",
+          "**本轮转绿**：C12（重刷后全部产物新鲜）、C34、C36、C28、C33；C6/C7/C8（cargo 测试）也在完整模式下转绿。",
+          "**新增门禁三项**：C34（信封开销 ≥40%，两道独立条件）、C35（配对臂组成一致性，含负对照）、C36（假设族 + Holm，含负对照）。",
+          "**本轮修掉的三处自身缺陷**（都在实现中发现）：①C34 原先只看任务集版本，升版本即可让旧数字「通过」——补上产物自身指纹新鲜条件；②cross-shell 判定缺评分三元组会让 Holm 显示 `corrected: true` 而实际未校正；③C28 的 `_impossible_flag_consistent` 把 §0.6 的 `policy_blocked` 误判为不一致（policy block 与区间无关），已按语义修正。"
+        ],
+        "next_action": "无（已关闭）。**验收口径的一次显式修订**：本节点原写「claim_gate 退出码为 0」，但 TF-0116 已决策 C14/C16 **按原阈值保持红**（不放宽门槛），因此退出码 0 在该决策下**不可达**。真正的完成信号改为：**每一项红都有明确的、预注册的归属**——要么是显式决策（C14/C16），要么是已登记节点（C35 ← TF-0122）。这条修订记录在此，不隐藏。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0094"
+    }
+  ],
+  "created_at": "2026-09-29T07:00:00.000000Z",
+  "proposal_id": "TFP-round14-residuals-2026-09-29",
+  "rationale": "第 14 轮已收口；剩下唯一的未达成子项是「补齐 5 个 large 槽位」。先算清算术：补满也达不到 1/3。把该结论、其预注册约束、以及真正要改的东西（观察机制）登记成节点与决策，并把两个 staged 节点按实际状态关闭。",
+  "session_id": "ses_verseshell-live-chain-2026-09-28",
+  "status": "applied"
+}

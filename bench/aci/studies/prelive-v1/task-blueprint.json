@@ -1,0 +1,430 @@
+{
+  "schema": "verseshell.task-blueprint/v1",
+  "status": "not_generated",
+  "development": [
+    {
+      "index": 101,
+      "lang": "python",
+      "topic": "state transitions and cancellation",
+      "tier": "large",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 102,
+      "lang": "rust",
+      "topic": "state transitions and cancellation",
+      "tier": "large",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 103,
+      "lang": "typescript",
+      "topic": "state transitions and cancellation",
+      "tier": "medium",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 104,
+      "lang": "python",
+      "topic": "ordering and aggregation boundaries",
+      "tier": "medium",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 105,
+      "lang": "rust",
+      "topic": "ordering and aggregation boundaries",
+      "tier": "medium",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 106,
+      "lang": "typescript",
+      "topic": "ordering and aggregation boundaries",
+      "tier": "large",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 107,
+      "lang": "python",
+      "topic": "asynchronous completion and errors",
+      "tier": "large",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 108,
+      "lang": "rust",
+      "topic": "asynchronous completion and errors",
+      "tier": "medium",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 109,
+      "lang": "typescript",
+      "topic": "asynchronous completion and errors",
+      "tier": "medium",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 110,
+      "lang": "python",
+      "topic": "configuration validation",
+      "tier": "medium",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 111,
+      "lang": "rust",
+      "topic": "configuration validation",
+      "tier": "large",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 112,
+      "lang": "typescript",
+      "topic": "configuration validation",
+      "tier": "large",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 113,
+      "lang": "python",
+      "topic": "cross-module build and behavior",
+      "tier": "medium",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 114,
+      "lang": "rust",
+      "topic": "cross-module build and behavior",
+      "tier": "medium",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 115,
+      "lang": "typescript",
+      "topic": "cross-module build and behavior",
+      "tier": "medium",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 116,
+      "lang": "python",
+      "topic": "state transitions and cancellation",
+      "tier": "large",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 117,
+      "lang": "rust",
+      "topic": "state transitions and cancellation",
+      "tier": "large",
+      "split": "development",
+      "kind": "capability"
+    },
+    {
+      "index": 118,
+      "lang": "typescript",
+      "topic": "state transitions and cancellation",
+      "tier": "medium",
+      "split": "development",
+      "kind": "capability"
+    }
+  ],
+  "holdout": [
+    {
+      "index": 1,
+      "lang": "python",
+      "topic": "state transitions and cancellation",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 2,
+      "lang": "rust",
+      "topic": "state transitions and cancellation",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 3,
+      "lang": "typescript",
+      "topic": "state transitions and cancellation",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 4,
+      "lang": "python",
+      "topic": "ordering and aggregation boundaries",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 5,
+      "lang": "rust",
+      "topic": "ordering and aggregation boundaries",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 6,
+      "lang": "typescript",
+      "topic": "ordering and aggregation boundaries",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 7,
+      "lang": "python",
+      "topic": "asynchronous completion and errors",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 8,
+      "lang": "rust",
+      "topic": "asynchronous completion and errors",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 9,
+      "lang": "typescript",
+      "topic": "asynchronous completion and errors",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 10,
+      "lang": "python",
+      "topic": "configuration validation",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 11,
+      "lang": "rust",
+      "topic": "configuration validation",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 12,
+      "lang": "typescript",
+      "topic": "configuration validation",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 13,
+      "lang": "python",
+      "topic": "cross-module build and behavior",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 14,
+      "lang": "rust",
+      "topic": "cross-module build and behavior",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 15,
+      "lang": "typescript",
+      "topic": "cross-module build and behavior",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 16,
+      "lang": "python",
+      "topic": "state transitions and cancellation",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 17,
+      "lang": "rust",
+      "topic": "state transitions and cancellation",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 18,
+      "lang": "typescript",
+      "topic": "state transitions and cancellation",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 19,
+      "lang": "python",
+      "topic": "ordering and aggregation boundaries",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 20,
+      "lang": "rust",
+      "topic": "ordering and aggregation boundaries",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 21,
+      "lang": "typescript",
+      "topic": "ordering and aggregation boundaries",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 22,
+      "lang": "python",
+      "topic": "asynchronous completion and errors",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 23,
+      "lang": "rust",
+      "topic": "asynchronous completion and errors",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 24,
+      "lang": "typescript",
+      "topic": "asynchronous completion and errors",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 25,
+      "lang": "python",
+      "topic": "configuration validation",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 26,
+      "lang": "rust",
+      "topic": "configuration validation",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 27,
+      "lang": "typescript",
+      "topic": "configuration validation",
+      "tier": "large",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 28,
+      "lang": "python",
+      "topic": "cross-module build and behavior",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 29,
+      "lang": "rust",
+      "topic": "cross-module build and behavior",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    },
+    {
+      "index": 30,
+      "lang": "typescript",
+      "topic": "cross-module build and behavior",
+      "tier": "medium",
+      "split": "holdout",
+      "kind": "capability"
+    }
+  ],
+  "source_policy": {
+    "author_sees_golden": false,
+    "variant_authors": 2,
+    "cross_family_required": true,
+    "unknown_family_allowed": false,
+    "family_metadata": "required_before_generation"
+  },
+  "split_policy": {
+    "selection": "slot indices fixed before generation; no holdout selection from live outcomes",
+    "development_baseline_target": [
+      0.4,
+      0.7
+    ]
+  },
+  "admission": {
+    "checks": [
+      "A1",
+      "A2",
+      "A3",
+      "A4a",
+      "A5",
+      "A6",
+      "A7",
+      "A8"
+    ],
+    "minimum_languages": 3,
+    "minimum_categories": 4,
+    "minimum_per_category": 5,
+    "minimum_large_fraction": 0.3333333333333333,
+    "large_pristine_proxy_tokens": 1000
+  },
+  "generator_inputs": [
+    "index",
+    "lang",
+    "topic",
+    "tier"
+  ],
+  "generation_policy": null
+}

@@ -1,0 +1,61 @@
+{
+  "id": "rust_error_source_propagation_3eca2e86",
+  "kind": "capability",
+  "lang": "rust",
+  "prompt": "The config_kit library mishandles errors: parsing a malformed duration string panics instead of returning an error, and when a config file cannot be read the returned LoadError throws away the underlying I/O error, so callers can never see the cause of the failure. Fix the library code in src/lib.rs so that every test in tests/propagate.rs passes; do not modify the test file.",
+  "golden": {
+    "Cargo.toml": "[package]\nname = \"config_kit\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n",
+    "src/lib.rs": "use std::fs;\nuse std::path::Path;\n\n#[derive(Debug)]\npub enum ParseError {\n    NotANumber,\n}\n\n/// Parse a duration string like \"45s\" into a number of seconds.\npub fn parse_duration(raw: &str) -> Result<u64, ParseError> {\n    let digits = raw.trim_end_matches('s');\n    let seconds: u64 = digits.parse().map_err(|_| ParseError::NotANumber)?;\n    Ok(seconds)\n}\n\n#[derive(Debug)]\npub enum LoadError {\n    Io { source: std::io::Error },\n    MissingKey,\n}\n\nimpl std::fmt::Display for LoadError {\n    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {\n        match self {\n            LoadError::Io { .. } => write!(f, \"could not read config file\"),\n            LoadError::MissingKey => write!(f, \"config file is missing a required key\"),\n        }\n    }\n}\n\nimpl std::error::Error for LoadError {\n    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {\n        match self {\n            LoadError::Io { source } => Some(source),\n            LoadError::MissingKey => None,\n        }\n    }\n}\n\n/// Read `key=value` lines from `path` and return the value stored for `key`.\npub fn read_config(path: &str, key: &str) -> Result<String, LoadError> {\n    let text = fs::read_to_string(Path::new(path)).map_err(|source| LoadError::Io { source })?;\n    for line in text.lines() {\n        if let Some((k, v)) = line.split_once('=') {\n            if k.trim() == key {\n                return Ok(v.trim().to_string());\n            }\n        }\n    }\n    Err(LoadError::MissingKey)\n}\n",
+    "tests/propagate.rs": "use config_kit::{parse_duration, read_config, ParseError};\nuse std::error::Error;\nuse std::fs;\nuse std::io::Write;\nuse std::path::PathBuf;\nuse std::sync::atomic::{AtomicUsize, Ordering};\n\nstatic NEXT_ID: AtomicUsize = AtomicUsize::new(0);\n\nfn temp_config(contents: &str) -> PathBuf {\n    let id = NEXT_ID.fetch_add(1, Ordering::SeqCst);\n    let mut path = std::env::temp_dir();\n    path.push(format!(\"config_kit_test_{}_{}.cfg\", std::process::id(), id));\n    let mut file = fs::File::create(&path).unwrap();\n    file.write_all(contents.as_bytes()).unwrap();\n    path\n}\n\n#[test]\nfn parse_duration_happy_path() {\n    assert_eq!(parse_duration(\"45s\").unwrap(), 45);\n}\n\n#[test]\nfn parse_duration_reports_bad_input_instead_of_panicking() {\n    let err = parse_duration(\"12x\").unwrap_err();\n    assert!(matches!(err, ParseError::NotANumber), \"got {:?}\", err);\n}\n\n#[test]\nfn read_config_returns_value() {\n    let path = temp_config(\"retries=3\\nname = grid\\n\");\n    let value = read_config(path.to_str().unwrap(), \"name\").unwrap();\n    assert_eq!(value, \"grid\");\n    let _ = fs::remove_file(&path);\n}\n\n#[test]\nfn missing_key_is_reported() {\n    let path = temp_config(\"retries=3\\n\");\n    let err = read_config(path.to_str().unwrap(), \"timeout\").unwrap_err();\n    assert!(matches!(err, config_kit::LoadError::MissingKey), \"got {:?}\", err);\n    let _ = fs::remove_file(&path);\n}\n\n#[test]\nfn io_error_source_is_preserved() {\n    let err = read_config(\"definitely/missing/config.cfg\", \"name\").unwrap_err();\n    let source = err\n        .source()\n        .expect(\"LoadError must expose the underlying io error as its source\");\n    let io_err = source\n        .downcast_ref::<std::io::Error>()\n        .expect(\"source should be the original std::io::Error\");\n    assert_eq!(io_err.kind(), std::io::ErrorKind::NotFound);\n}\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "cargo",
+          "test",
+          "--quiet"
+        ],
+        "timeout_sec": 300
+      },
+      {
+        "type": "file_contains",
+        "path": "tests/propagate.rs",
+        "contains": "fn parse_duration_reports_bad_input_instead_of_panicking"
+      },
+      {
+        "type": "file_contains",
+        "path": "tests/propagate.rs",
+        "contains": "downcast_ref::<std::io::Error>()"
+      },
+      {
+        "type": "file_contains",
+        "path": "tests/propagate.rs",
+        "contains": "assert_eq!(io_err.kind(), std::io::ErrorKind::NotFound);"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_and_golden_author",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "generated_at": "2026-09-25T02:03:32.178922+00:00"
+  },
+  "workspace_fixture": "rust_error_source_propagation_3eca2e86",
+  "promoted_from": "bench/aci/candidates/rust_error_source_propagation_3eca2e86",
+  "promoted_at": "2026-09-25T08:29:13.966862+00:00"
+}

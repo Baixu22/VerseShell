@@ -1,0 +1,333 @@
+{
+  "applied_at": "2026-09-27T06:12:39.525565Z",
+  "base_graph_hash": "8d4344d767693d4fb38f55383efa973d4d17e66ec5c953113b83b391a9e3e66d",
+  "base_summary": {
+    "edge_count": 170,
+    "node_count": 109,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "add_node",
+      "alias": "audit-headline",
+      "node": {
+        "acceptance_criteria": [
+          "`docs/acceptance-criteria.md` §6 顶部有口径更正块与稳健性更正块",
+          "D/A′ 的观察 token 主张由「可主张」降为「不可主张」，并写明余量 0.0212 与跑间位移 0.2207 的对比",
+          "跨 shell 的「快 ≥2 倍」标注为只应作为 spawn 微基准进附录、不进头条"
+        ],
+        "confidence": 0.9,
+        "context_tags": [
+          "claims",
+          "docs",
+          "statistics"
+        ],
+        "difficulty": "low",
+        "display_order": 400,
+        "evidence": [
+          "**核验结果（用仓库产物复算，脚本 `audit-r12-scratch/verify_external_audit.py` 与 `real_cpst.py`）**：审计的核心论点成立，但有两处需要纠正",
+          "**纠正 1**：审计把「真实 token D/A′ = 1.2654（整段区间 >1.0，可主张的劣势）」当作它推荐的「每解一题」指标的结论。**这是两个不同的量**：每次运行的总额比 1.2654 [1.0372, 1.613]（可主张劣势）；**每解出一题的 CPST 比是 1.2079 [0.9632, 1.5891]，区间跨 1.0（方向一致但不可主张）**。行级区间才是 [1.0109, 1.4704]。所以「可主张的劣势」成立在**每次运行**口径上，不在 CPST 口径上",
+          "**纠正 2（加强审计的论点）**：审计的 61.3% / 38.7% 归因算术正确，但 A′→D 同时改变**提示词与工具集**（A′ 与 D 的系统提示不同），所以 38.7% 是**接口自身份额的上界**，真实更小",
+          "**已核验的其他数字**：观察每轮省 145.5 vs 输入每轮多 3618.2（**25 倍**）、输出省 1054.3、净多 2563.9；真实 CPST D/A = 1.0272 [0.6947, 1.6534]；天花板：A/A′ 0.84 → 余量 0.16，MDE 0.15 占 **94%**；多重比较：11 项判定、α=0.05 → 族错误率 **43.1%**；稳健性：D/A′ 观察 token 第 12 轮 1.0567 → 第 13 轮 0.7990（位移 0.2577，其中约 0.037 可由 E10 崩溃修复解释，**剩余 0.2207 是主张余量 0.0212 的 10.4 倍**）",
+          "**已落地**：`docs/acceptance-criteria.md` §6 新增「⚠️ 口径更正」「⚠️ 稳健性更正」「⚠️ 两个额外的效力限制」三块，并重写一句话总结；D/A′ 行由可主张改为不可主张，并新增两行真实口径判定"
+        ],
+        "kind": "decision",
+        "next_action": "无（已关闭）。后续 `docs/claims-and-evidence.md` 的 C13/C28 需同步这套口径（属 TF-0101 的收尾范围）。",
+        "priority": 1,
+        "progress": 100.0,
+        "progress_source": "agent",
+        "purpose": "外部审计指出：把「观察 token 更省」排在头条、把「真实 tokenizer 口径方向相反」用⚠️放后面，本身就是一次口径选择偏袒——和 E7 批评自己的行为同构。",
+        "status": "done",
+        "summary": "头条改成真实 token 每次运行 1.2654 [1.0372,1.613]（可主张的劣势）+ 成功率 +0.04（未检出）；观察 token 与 len//4 代理降为诊断。",
+        "title": "决策：对外头条改为「真实 token 开销 + 成功率区间」，观察 token 降为诊断量"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "stats-crosscheck",
+      "node": {
+        "acceptance_criteria": [
+          "新增 `tools/statistics_crosscheck.py`：用与 `live_uncertainty.py` / `acceptance_power.py` **不同的代码路径**重算 Wilson、McNemar 精确、任务聚类 bootstrap、CPST、真实口径比值，并逐项与产物比对",
+          "差异阈值与判定写入产物；任一超出即 exit 非零",
+          "登记为门禁项（建议 C32 或 C33），并做**负对照**：把 E12 的优先级 bug 重新注入，交叉核对必须判红",
+          "`python tools/claim_gate.py` 不因本改动转红"
+        ],
+        "confidence": 0.85,
+        "context_tags": [
+          "statistics",
+          "gate",
+          "evidence"
+        ],
+        "difficulty": "medium",
+        "display_order": 410,
+        "evidence": [
+          "审计原话：三条严重分析 bug「全靠人肉发现，没有一条是被测试抓到的」；E12 一个 Python 优先级错误就把非劣下界从 −0.0032 变成 +0.5864",
+          "已有的可复用基础：`audit-r12-scratch/verify_core.py`（Wilson / McNemar 精确 / 独立 bootstrap / CPST / 真实口径）与 `verify_part2.py`（ICC、设计效应、非劣性 bug 复现）——**已与产物在重叠项上一致**（观察 token 聚类区间 round 12 双方均得 [0.5509, 0.9061]；McNemar D vs A 双方均得 0.09314）",
+          "门禁现状：C7（cargo test）与多数项测的是管线与契约，**不覆盖统计正确性**"
+        ],
+        "kind": "task",
+        "next_action": "把 `audit-r12-scratch/verify_core.py` 的算法提升为入库工具，加交叉比对与负对照，再登记门禁。",
+        "non_goals": [
+          "不替换既有实现（交叉核对是加法，不是重写）",
+          "不用同一个作者的第二份实现冒充「独立」——文档必须写明这是同一作者的交叉实现，真正的独立性需要第二个人/另一种语言"
+        ],
+        "priority": 1,
+        "purpose": "外部审计指出：E7（只量一个上限）、E11（重抽单位错）、E12（运算符优先级把余量夸大 6 倍）**三条全是分析代码的 bug，全靠人肉发现，没有一条被测试抓到**。在一个「结论完全由几十行统计代码决定」的项目里，这比模型行为更危险。",
+        "status": "ready",
+        "summary": "用第二套独立实现重算全部头条区间与检验，差异超阈值即判红，登记为门禁项。",
+        "title": "步骤65：统计代码的独立重实现与交叉核对门禁"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "between-run-variance",
+      "node": {
+        "acceptance_criteria": [
+          "至少一个配置有 ≥3 次**完整**重跑（同任务集、同 seed、同预算），逐次保留原始产物",
+          "`live_uncertainty.py` / `acceptance_power.py` 支持分层 bootstrap（先抽运行、再抽任务）或方差成分估计，并输出含跑间方差的区间",
+          "重算 D/A′ 的观察 token 与真实 token 头条，**明确报告余量在纳入跑间方差后是否仍存在**",
+          "`docs/acceptance-criteria.md` §6 的稳健性更正块按结果更新"
+        ],
+        "confidence": 0.85,
+        "context_tags": [
+          "statistics",
+          "bench",
+          "live"
+        ],
+        "difficulty": "high",
+        "display_order": 420,
+        "evidence": [
+          "实测跑间位移：D/A′ 观察 token 1.0567（第 12 轮）→ 0.7990（第 13 轮），位移 0.2577；其中约 0.037 可由 E10 解释，**剩余 0.2207 = 主张余量 0.0212 的 10.4 倍**",
+          "同配置重跑的直接测量（消融里 A/A′ 臂，预算不构成约束）：A 成功 0.88→0.84、观察 token +2.7%；A′ 成功 0.84→0.80、观察 token **+5.4%**",
+          "端点时变的另外两次证据：completion 截断率 0%→12%；tokenizer 校准的 `real/proxy` 均值三轮三个值（1.5613 / 1.2498 / 1.2885）",
+          "审计的可证伪预测：把同配置再跑一次，D/A′ 的观察 token 上界很可能越过 1.0"
+        ],
+        "kind": "task",
+        "next_action": "设计「同配置 3 次重跑」的成本（每轮 with 臂 3 seed 约 3.5 小时）；优先用**已有的**两次 D/A′ 数据做方差成分的初步估计，再决定是否需要第三次。",
+        "non_goals": [
+          "不为保住现有 claimable 而选择不计跑间方差的区间"
+        ],
+        "priority": 1,
+        "purpose": "现有 CI 只捕捉任务抽样方差，不含端点/时间非确定性；而实测的跑间位移（0.2207）是当前唯一正面主张余量（0.0212）的 10.4 倍。",
+        "status": "ready",
+        "summary": "对每个配置做 ≥3 次完整重跑，用方差成分模型或分层 bootstrap 把「跑间」方差并入头条区间。",
+        "title": "步骤66：把运行间方差纳入区间（每配置 ≥3 次完整重跑 + 方差成分）"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "multiplicity",
+      "node": {
+        "acceptance_criteria": [
+          "`docs/acceptance-criteria.md` 明确区分**确认性**（预注册、设门槛）与**探索性**（事后新增、无门槛）两组",
+          "确认性组做 FWER 控制（Bonferroni 或 Holm），并把校正后的判定写进 `eval/acceptance_power.json`",
+          "`tools/claim_gate.py` 能检出「探索性结论被当成确认性结论引用」的文档写法（至少要求声明里标注组别）",
+          "重算第 13 轮：列出在校正后由 claimable 变为不可主张的项"
+        ],
+        "confidence": 0.85,
+        "context_tags": [
+          "statistics",
+          "gate",
+          "claims"
+        ],
+        "difficulty": "medium",
+        "display_order": 430,
+        "evidence": [
+          "`eval/acceptance_power.json` 的 `verdicts` 共 11 项（含 D vs A′ 的成功率与 CPST 两行）",
+          "在 α=0.05、11 项独立下 FWER = 1 − 0.95^11 = **43.1%**",
+          "当前门禁（C25/C28）**不做任何多重校正**",
+          "涉及边界项：D/A′ 观察 token（上界 0.9788，余量 0.0212）、工具比（0.8957 [0.7095, 1.1231]）"
+        ],
+        "kind": "task",
+        "next_action": "先定组别划分（哪 11 项属确认性），再选 Bonferroni/Holm 并重算。",
+        "non_goals": [
+          "不放松任何门槛",
+          "不用校正把已经站不住的结论强行保留"
+        ],
+        "priority": 2,
+        "purpose": "`acceptance_power.json` 同时判定 11 项，α=0.05 下族错误率约 43.1%；贴边界的 claimable（如 0.9788）在多重校正下不成立。",
+        "status": "ready",
+        "summary": "对预注册的确认性结论集做 FWER 控制，并把探索性结论单列。",
+        "title": "步骤67：多重比较校正与「确认性/探索性」分组"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "difficulty-ceiling",
+      "node": {
+        "acceptance_criteria": [
+          "新任务集里基线成功率有明确下降（目标区间需先预注册，例如落在 0.4–0.7），使 MDE 0.15 不再贴着天花板",
+          "large tier（pristine 观察 ≥1000 token）占比达到预注册的 1/3",
+          "难度调整**必须与留出集构造一起做**，且不得在看到 live 结果后调难度",
+          "重算成功率 MDE 的可达性：报告 MDE 占可用余量的比例"
+        ],
+        "confidence": 0.8,
+        "context_tags": [
+          "dataset",
+          "bench",
+          "claims"
+        ],
+        "difficulty": "high",
+        "display_order": 440,
+        "evidence": [
+          "第 13 轮 A/A′ 成功率均为 **0.8400**，可用余量 0.16；预注册 MDE 0.15 = **94%** 的余量",
+          "当前 MDE 检出限 0.1121（n=75），观测 Δ=+0.04 → 未检出",
+          "构造效度：25 个任务里只有 **4 个** pristine 观察 ≥1000 token，占 **16%**（预注册要求 1/3）",
+          "与 TF-0105 的扩充计划耦合：`bench/aci/candidates/FULL_PLAN.json` 的 tier 目标本就是 10/10/10"
+        ],
+        "kind": "task",
+        "next_action": "与 TF-0104 / TF-0105 合并执行：先改标签与 freeze，再按 FULL_PLAN 补题时**同时调整难度分布**，然后一次性跑 live。",
+        "non_goals": [
+          "不靠增加样本量来解决天花板",
+          "不再一次放松准入规则"
+        ],
+        "priority": 2,
+        "purpose": "A/A′ 成功率 0.84，到 1.00 只剩 0.16 余量，而预注册 MDE 是 0.15——MDE 占掉全部可用余量的 94%。成功率这一支在当前难度下几乎不可能被检出。",
+        "status": "ready",
+        "summary": "任务集需要**更难**（不是更多），同时把 large tier 的观察占比提到预注册的 1/3。",
+        "title": "步骤68：难度与大观察占比——加样本救不了天花板"
+      }
+    },
+    {
+      "action": "add_node",
+      "alias": "circularity-risk",
+      "node": {
+        "acceptance_criteria": [
+          "量化并登记该风险的实际暴露面（多少任务由同一端点家族生成、变体模型与被测模型的关系）",
+          "给出一条可执行的缓解措施（例如：留出集的一部分用**非该端点家族**的模型生成，或引入公开数据集任务）",
+          "在 `docs/claims-and-evidence.md` 的 C13/C29 失效边界里写明这条风险"
+        ],
+        "confidence": 0.6,
+        "context_tags": [
+          "dataset",
+          "claims",
+          "risk"
+        ],
+        "difficulty": "medium",
+        "display_order": 450,
+        "evidence": [
+          "`docs/audit-brief-r13.md` §2.2 与 §6 第 6 条：15/25 为 LLM 生成，生成器与变体模型来自同一端点家族",
+          "`eval/task_admissibility.json` 的 A7_provenance 检查只验证 provenance 字段存在与自洽，**不验证生成器与被测模型的独立性**",
+          "该风险同时影响成功率与 token 两类结论，故审计建议的优先级高于我们原先的 §6 第 6 条"
+        ],
+        "kind": "risk",
+        "next_action": "在 TF-0105 的扩充批次里做一次对照：一部分新任务用非该端点家族的模型生成，比较两类任务上的 D/A 差异。",
+        "non_goals": [
+          "不声称已经排除该风险"
+        ],
+        "priority": 2,
+        "purpose": "15/25 任务由同一端点家族（`sn-glm-5-3-flash` 生成、`sn-kimi-k3` / `deepseek-v4.1-flash` 出变体）产出，而 `provenance.independent_of` 只靠生成时的提示隔离。存在「被测模型在其家族分布内的任务上占便宜」的不可证伪风险。",
+        "status": "ready",
+        "summary": "可能同时污染成功率**与** token 两类结论，且当前无法事后证伪。",
+        "title": "风险：任务生成器与被测模型同源（潜在循环）"
+      }
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "口径更正属于本轮收口的结论层"
+      },
+      "from": "audit-headline",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "审计提出的分析代码正确性缺口"
+      },
+      "from": "stats-crosscheck",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "审计提出的 CI 效度缺口"
+      },
+      "from": "between-run-variance",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "审计提出的多重比较缺口"
+      },
+      "from": "multiplicity",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.9,
+        "reason": "审计提出的天花板效应与构造效度缺口"
+      },
+      "from": "difficulty-ceiling",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.85,
+        "reason": "审计上调的循环风险"
+      },
+      "from": "circularity-risk",
+      "to": "TF-0094",
+      "type": "child_of"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 160
+      },
+      "id": "audit-headline"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 170
+      },
+      "id": "stats-crosscheck"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 180
+      },
+      "id": "between-run-variance"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 190
+      },
+      "id": "multiplicity"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 200
+      },
+      "id": "difficulty-ceiling"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "display_order": 210
+      },
+      "id": "circularity-risk"
+    }
+  ],
+  "created_at": "2026-09-27T06:12:39.351349Z",
+  "proposal_id": "TFP-r12-external-audit-r13-2026-09-27",
+  "rationale": "外部 agent 对 docs/audit-brief-r13.md 的审计意见已到。我们用仓库产物核验了它每一条可检验的断言：核心论点成立，其中两条需要纠正/加强（见 TF-0115 的 evidence）。本条提案把审计提出的、属于开发工作的缺口落成节点，并把已完成的头条口径更正登记为 decision。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

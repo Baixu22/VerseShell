@@ -1,5 +1,25 @@
 # VerseShell v1.0 — Agent-Computer Interface Runtime
 
+> **Scope & acceptance (2026-10-12):** VerseShell is a **sub-module** of a larger system.
+> The default bar for a feature claim is **one reproducible positive benefit**, not a
+> publication-grade repeated study. See [AGENTS.md](AGENTS.md) for the working rules and
+> [feature-claims status](docs/feature-claims-status-2026-10-12.md) for the current
+> per-claim positive-benefit map. The strict machinery in
+> [docs/acceptance-criteria.md](docs/acceptance-criteria.md) is reserved for explicit
+> publication/release requests.
+
+> **Evidence status (2026-10-06):** canonical `eval/` live numbers are historical
+> baselines, not acceptance of the current code. The c20/c21 collections also
+> predate scoring and process-cleanup repairs. See the [repair report and remaining
+> gaps](docs/c20-c21-repair-2026-10-06.md) before quoting benchmark claims.
+> **Acceptance labels (2026-10-08):** a single live collection is diagnostic only;
+> its old descriptive `PASS` is not a product claim. Formal conclusions require the
+> frozen repeated-study evaluator, not a successful report command or mock gate.
+> See [strict acceptance boundaries](docs/strict-acceptance-repairs-2026-10-08.md).
+> Current claim status must be read from the gate's selected-input/version map;
+> a historical PASS or a local control does not certify a complete independent study.
+> See [claim routing and scope](docs/claim-routing-2026-10-09.md).
+
 A local-systems runtime designed around the information an AI agent actually
 needs: typed actions, bounded structured observations, explicit failures,
 recoverable raw-output artifacts, and safe process-tree execution.
@@ -619,7 +639,7 @@ The response uses `verseshell.observation/v1` (Observation Budget, 0.6.1):
 - Full raw output is always recoverable via `stdout.artifact` / `stderr.artifact` with
   `result.query` (`meta`, `head`, `tail`, `slice`, `grep`, or bounded `raw`).
 
-Token efficiency is therefore **two layers**: (1) `--format compact` encoding, and (2) Observation Budget reducing *what* is shown. The encoding layer is measured in [docs/claims-and-evidence.md](docs/claims-and-evidence.md) (C9): it saves **≥40% on a small response envelope** (measured 42.4%) but does **not** shrink observation payloads or large nested values — those are handled by the Observation Budget, not by the encoding.
+Token efficiency is therefore **two layers**: (1) `--format compact` encoding, and (2) Observation Budget reducing *what* is shown. The encoding layer is measured in [docs/claims-and-evidence.md](docs/claims-and-evidence.md) (C9): it saves **≥40% on a small response envelope** (measured 42.0% gated saving) but does **not** shrink observation payloads or large nested values — those are handled by the Observation Budget, not by the encoding.
 
 **Process contract (two paths):** `exec.run` stays one-shot — stdin is null, stdout/stderr are pipes with `CREATE_NO_WINDOW`, and Windows **Job Objects** (Unix: process groups) kill the full tree on timeout. Long-lived processes use the typed `process.*` ops, which add a monotonic output cursor, explicit lifecycle state, and a Windows **ConPTY** path (`pty: true`) next to the pipe path; both paths still attach the process tree to a Job Object. Paths are resolved through the workspace jail / safety layer. See [docs/1.0-aci.md](docs/1.0-aci.md#process-lifecycle).
 
@@ -929,7 +949,7 @@ src/
 │   └── explain.rs    # Bash → MCP tool call translator (21 patterns)
 │
 ├── benches/          # 5 Criterion benchmark suites
-└── tests/            # 52 integration tests + concurrency stress tests
+└── tests/            # 53 integration tests + concurrency stress tests
 ```
 
 ### Key Design Decisions
@@ -957,7 +977,7 @@ Built-in optimizations for both throughput and latency:
 | Snapshot cache | `sys.*` cached with configurable TTL (default 5s) |
 | `par_map` | Multi-threaded array processing (Rayon, auto thread count) |
 | Work-stealing scheduler | Priority queues, per-agent CPU/memory budgets |
-| Compact protocol | ≥40% smaller than JSON on a small response envelope (measured 42.4%, claim C9); it does not shrink observation or large nested payloads |
+| Compact protocol | ≥40% smaller than JSON on a small response envelope (measured 42.0% gated saving, claim C9); it does not shrink observation or large nested payloads |
 | Observation Budget (0.6.1) | Content reducers: success silence, failure windows, ANSI strip, git profile, `truncated`/omitted markers, recoverable artifacts (complements compact encoding) |
 | Arc-shared modules | O(1) session creation, no deep clone overhead |
 | Panic recovery | `catch_unwind` per request — crash isolation |
@@ -967,24 +987,40 @@ cargo bench                       # 4 benchmark suites
 cargo bench -- --quick            # Quick mode (fewer samples)
 ```
 
-### Cross-Shell Comparison (measured on this machine — claim C11)
+### Cross-Shell Comparison (historical measurement on this machine — claim C11)
+
+These preserved timings are a historical baseline, **not a current-build or live-model
+performance claim**. A matching README table proves transcription only, not fresh timing.
 
 | Operation | VerseShell | PowerShell | Bash | AE vs PWsh |
 |-----------|-----------|------------|------|------------|
-| CPU info | **330.5ms** | 1303.9ms | 429.3ms | **3.9x faster** |
-| Disk info | **12.5ms** | 403.9ms | N/A | **32.3x faster** |
-| List dir | **13.5ms** | 295.0ms | 420.1ms | **21.8x faster** |
-| Read file | **12.7ms** | 180.3ms | 465.4ms | **14.2x faster** |
-| Pipeline 1K | **14.9ms** | 234.1ms | 444.2ms | **15.7x faster** |
+| CPU info | **224.4ms** | 1224.0ms | 292.9ms | **5.5x faster** |
+| Disk info | **9.0ms** | 299.5ms | N/A | **33.1x faster** |
+| List dir | **9.1ms** | 221.3ms | 275.5ms | **24.2x faster** |
+| Read file | **8.8ms** | 123.8ms | 267.1ms | **14.1x faster** |
+| Pipeline 1K | **9.3ms** | 150.3ms | 291.9ms | **16.1x faster** |
 
-Median of 20 runs after 3 warm-up runs on an AMD Ryzen 7 7745HX; each number is a
-real process spawn with stdout/stderr discarded, so process startup is included.
-VerseShell = `target/release/ae.exe`, PowerShell = Windows PowerShell 5.1
-(`-NoProfile`), Bash = Git Bash. Reproduce with `python tools/cross_shell_bench.py`
-(raw per-iteration samples: `eval/cross_shell.json`); the numbers are wall-clock
-measurements on one machine, not a portable guarantee. This table is checked
-against that artifact by `python tools/readme_claims_check.py` (claim C10), so a
-re-measurement must update both together.
+Median of 20 **interleaved** iterations after 3 warm-up runs on an AMD Ryzen 7 7745HX;
+each number is a real process spawn with stdout/stderr discarded during timing, so
+process startup is included. VerseShell = `target/release/ae.exe`, PowerShell =
+Windows PowerShell 5.1 (`-NoProfile`), Bash = Git Bash. Reproduce with
+`python tools/cross_shell_bench.py --iterations 20 --warmup 3` (raw per-iteration
+samples: `eval/cross_shell.json`); the numbers are wall-clock measurements on one
+machine, not a portable guarantee. This table is checked against that artifact by
+`python tools/readme_claims_check.py` (claim C10), so a re-measurement must update
+both together.
+
+**Read the comparator, not just the multiplier.** PowerShell is what the table above
+is measured against, but it is *not* the shell the raw-shell baseline arm runs
+through: `run_command` goes through `cmd.exe` (`shell=True`). Against `cmd.exe` the
+same measurement gives **no speedup** — CPU info 3.3x **slower**, List dir 1.39x
+slower, Read file 0.99x (parity), Disk info 0.67x (faster); the pipeline operation has
+no cmd equivalent. Before timing, `cross_shell_bench.py` proves each shell's output is
+semantically equal to the others (same CPU, same drives, same directory entries,
+same file bytes, same pipeline result); that check is what exposed two unfair
+comparisons in earlier rounds (PowerShell listing files only, and reading UTF-8 as
+ANSI). In that historical collection, tool time was only **1.5%** of a median raw-shell run's wall clock
+(1.8% coached, 4.7% ACI) — the rest is model latency.
 
 ---
 

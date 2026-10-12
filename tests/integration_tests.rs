@@ -373,6 +373,28 @@ fn test_json_compound() {
     assert!(v["os"].is_string());
 }
 
+#[cfg(target_os = "windows")]
+#[test]
+fn test_sys_hostname_without_computername() {
+    for computername in [None, Some("")] {
+        let mut command = Command::new(ae_path());
+        command.args(["--json", "-c", "sys.hostname()"]);
+        if let Some(name) = computername {
+            command.env("COMPUTERNAME", name);
+        } else {
+            command.env_remove("COMPUTERNAME");
+        }
+        let output = command.output().expect("failed to execute ae");
+        assert!(output.status.success(), "{:?}", output);
+        let value: serde_json::Value =
+            serde_json::from_slice(&output.stdout).expect("not valid JSON");
+        assert!(
+            value.as_str().is_some_and(|name| !name.is_empty()),
+            "COMPUTERNAME={computername:?}: expected a hostname, got {value}"
+        );
+    }
+}
+
 // ==================== Error Handling ====================
 
 #[test]

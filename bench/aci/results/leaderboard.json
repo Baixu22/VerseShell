@@ -3,21 +3,21 @@
     {
       "model": "mock",
       "condition": "raw_shell",
-      "tasks": 10,
+      "tasks": 35,
       "success_rate": 0.0,
       "avg_tool_calls": 10.0,
       "avg_observation_tokens": 3820.0,
-      "avg_elapsed_ms": 293.4
+      "avg_elapsed_ms": 302.9
     },
     {
       "model": "mock",
       "condition": "verseshell_aci",
-      "tasks": 10,
+      "tasks": 35,
       "success_rate": 1.0,
-      "avg_tool_calls": 5.5,
-      "avg_observation_tokens": 405.0,
-      "avg_elapsed_ms": 298.6
+      "avg_tool_calls": 5.63,
+      "avg_observation_tokens": 414.86,
+      "avg_elapsed_ms": 306.0
     }
   ],
-  "n_rows": 20
+  "n_rows": 70
 }

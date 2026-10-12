@@ -1,0 +1,372 @@
+{
+  "generator": "examples/eval_metrics.rs",
+  "manifest": "eval/manifest.json",
+  "recovery_probes": {
+    "ambiguous": {
+      "error_code": "E_AMBIGUOUS",
+      "match_count": 3,
+      "matches_structured_line_offset_snippet": true,
+      "source": "src/ops/file.rs replace_exact E_AMBIGUOUS",
+      "widen_old_retry_ok": true
+    },
+    "stale_hash": {
+      "data_actual_hash_present": true,
+      "data_expected_hash_present": true,
+      "error_code": "E_STALE_HASH",
+      "one_step_retry_from_suggested_next_ok": true,
+      "source": "src/ops/file.rs replace_exact E_STALE_HASH"
+    }
+  },
+  "reducer_diagnostic_completeness": {
+    "complete": 6,
+    "diff_class": {
+      "complete": 4,
+      "rate": 1.0,
+      "scope": "entries tagged expect.diff_class=true in eval/manifest.json (pytest assert `==`, cargo E0308 mismatch) — the failure classes whose output contains an expected/found pair",
+      "total": 4
+    },
+    "per_entry": [
+      {
+        "diff_class": false,
+        "errors": 0,
+        "expected_found_complete": 0,
+        "id": "fixture_cargo_ok",
+        "kind": "success_fixture",
+        "profile": "cargo",
+        "source": "tests/fixtures/reducers/cargo_ok.txt"
+      },
+      {
+        "diff_class": true,
+        "errors": 1,
+        "expected_found_complete": 1,
+        "id": "fixture_cargo_e0308",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": true,
+          "suggested_next_count": 3,
+          "suggested_next_has_rerun": true,
+          "suggested_next_legal": true,
+          "suggested_next_ops": [
+            "file.view",
+            "file.replace_exact",
+            "exec.run"
+          ]
+        },
+        "profile": "cargo",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/cargo_e0308.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 0,
+        "expected_found_complete": 0,
+        "id": "fixture_pytest_ok",
+        "kind": "success_fixture",
+        "profile": "pytest",
+        "source": "tests/fixtures/reducers/pytest_ok.txt"
+      },
+      {
+        "diff_class": true,
+        "errors": 1,
+        "expected_found_complete": 1,
+        "id": "fixture_pytest_fail",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": true,
+          "suggested_next_count": 3,
+          "suggested_next_has_rerun": true,
+          "suggested_next_legal": true,
+          "suggested_next_ops": [
+            "file.view",
+            "file.replace_exact",
+            "test.run_target"
+          ]
+        },
+        "profile": "pytest",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/pytest_fail.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 0,
+        "expected_found_complete": 0,
+        "id": "fixture_git_status",
+        "kind": "success_fixture",
+        "profile": "git",
+        "source": "tests/fixtures/reducers/git_status.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 0,
+        "expected_found_complete": 0,
+        "id": "fixture_git_diffstat",
+        "kind": "success_fixture",
+        "profile": "git",
+        "source": "tests/fixtures/reducers/git_diffstat.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 0,
+        "expected_found_complete": 0,
+        "id": "fixture_npm_ok",
+        "kind": "success_fixture",
+        "profile": "npm_install",
+        "source": "tests/fixtures/reducers/npm_ok.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 6,
+        "expected_found_complete": 0,
+        "id": "fixture_npm_fail",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": false,
+          "suggested_next_count": 0,
+          "suggested_next_has_rerun": false,
+          "suggested_next_legal": true,
+          "suggested_next_ops": []
+        },
+        "profile": "npm_install",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/npm_fail.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 2,
+        "expected_found_complete": 1,
+        "id": "adv_cargo_fail_multi_error",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": true,
+          "suggested_next_count": 5,
+          "suggested_next_has_rerun": true,
+          "suggested_next_legal": true,
+          "suggested_next_ops": [
+            "file.view",
+            "file.replace_exact",
+            "exec.run",
+            "file.view",
+            "file.replace_exact"
+          ]
+        },
+        "profile": "cargo",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/adversarial/cargo_fail_multi_error.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 1,
+        "expected_found_complete": 0,
+        "id": "adv_cargo_fail_noisy",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": true,
+          "suggested_next_count": 2,
+          "suggested_next_has_rerun": true,
+          "suggested_next_legal": true,
+          "suggested_next_ops": [
+            "file.view",
+            "exec.run"
+          ]
+        },
+        "profile": "cargo",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/adversarial/cargo_fail_noisy.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 1,
+        "expected_found_complete": 0,
+        "id": "adv_cargo_fail_panic",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": true,
+          "suggested_next_count": 2,
+          "suggested_next_has_rerun": true,
+          "suggested_next_legal": true,
+          "suggested_next_ops": [
+            "file.view",
+            "exec.run"
+          ]
+        },
+        "profile": "cargo",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/adversarial/cargo_fail_panic.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 1,
+        "expected_found_complete": 1,
+        "id": "adv_cargo_fail_malformed",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": true,
+          "suggested_next_count": 3,
+          "suggested_next_has_rerun": true,
+          "suggested_next_legal": true,
+          "suggested_next_ops": [
+            "file.view",
+            "file.replace_exact",
+            "exec.run"
+          ]
+        },
+        "profile": "cargo",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/adversarial/cargo_fail_malformed.txt"
+      },
+      {
+        "diff_class": true,
+        "errors": 2,
+        "expected_found_complete": 2,
+        "id": "adv_pytest_fail_multi",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": true,
+          "suggested_next_count": 6,
+          "suggested_next_has_rerun": true,
+          "suggested_next_legal": true,
+          "suggested_next_ops": [
+            "file.view",
+            "file.replace_exact",
+            "test.run_target",
+            "file.view",
+            "file.replace_exact",
+            "test.run_target"
+          ]
+        },
+        "profile": "pytest",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/adversarial/pytest_fail_multi.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 0,
+        "expected_found_complete": 0,
+        "id": "adv_pytest_ok_noisy",
+        "kind": "success_fixture",
+        "profile": "pytest",
+        "source": "tests/fixtures/reducers/adversarial/pytest_ok_noisy.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 3,
+        "expected_found_complete": 0,
+        "id": "adv_pytest_fail_no_header",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": true,
+          "suggested_next_count": 6,
+          "suggested_next_has_rerun": true,
+          "suggested_next_legal": true,
+          "suggested_next_ops": [
+            "file.view",
+            "test.run_target",
+            "file.view",
+            "test.run_target",
+            "file.view",
+            "test.run_target"
+          ]
+        },
+        "profile": "pytest",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/adversarial/pytest_fail_no_header.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 0,
+        "expected_found_complete": 0,
+        "id": "adv_git_status_mixed",
+        "kind": "success_fixture",
+        "profile": "git",
+        "source": "tests/fixtures/reducers/adversarial/git_status_mixed.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 1,
+        "expected_found_complete": 0,
+        "id": "adv_git_fail_not_repo",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": false,
+          "suggested_next_count": 0,
+          "suggested_next_has_rerun": false,
+          "suggested_next_legal": true,
+          "suggested_next_ops": []
+        },
+        "profile": "git",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/adversarial/git_fail_not_repo.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 2,
+        "expected_found_complete": 0,
+        "id": "adv_git_fail_conflict",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": true,
+          "suggested_next_count": 5,
+          "suggested_next_has_rerun": true,
+          "suggested_next_legal": true,
+          "suggested_next_ops": [
+            "file.view",
+            "file.replace_exact",
+            "exec.run",
+            "file.view",
+            "file.replace_exact"
+          ]
+        },
+        "profile": "git",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/adversarial/git_fail_conflict.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 0,
+        "expected_found_complete": 0,
+        "id": "adv_npm_ok_noisy",
+        "kind": "success_fixture",
+        "profile": "npm_install",
+        "source": "tests/fixtures/reducers/adversarial/npm_ok_noisy.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 7,
+        "expected_found_complete": 0,
+        "id": "adv_npm_fail_enoent",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": false,
+          "suggested_next_count": 0,
+          "suggested_next_has_rerun": false,
+          "suggested_next_legal": true,
+          "suggested_next_ops": []
+        },
+        "profile": "npm_install",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/adversarial/npm_fail_enoent.txt"
+      },
+      {
+        "diff_class": false,
+        "errors": 5,
+        "expected_found_complete": 0,
+        "id": "adv_npm_fail_network",
+        "kind": "failure_fixture",
+        "playbook": {
+          "suggested_next_arg_keys_ok": false,
+          "suggested_next_count": 0,
+          "suggested_next_has_rerun": false,
+          "suggested_next_legal": true,
+          "suggested_next_ops": []
+        },
+        "profile": "npm_install",
+        "reduced": true,
+        "source": "tests/fixtures/reducers/adversarial/npm_fail_network.txt"
+      }
+    ],
+    "rate": 0.18181818181818182,
+    "scope": "error diagnostics produced by failure entries in eval/manifest.json (reducer_fixture + adversarial_fixture); complete = expected AND found both present",
+    "total": 33
+  },
+  "schema": "verseshell.eval-metrics/v1"
+}

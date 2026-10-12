@@ -1,0 +1,55 @@
+{
+  "id": "python_shift_report_tie_order_4a0c45c8",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "In shifts.py, shift_report computes correct per-shift totals but violates its documented ordering contract: shifts with equal totals must appear in the order they first occur in the input, and the tie cases in test_shifts.py fail. Repair the implementation without modifying the tests.",
+  "golden": {
+    "shifts.py": "\"\"\"Shift report aggregation.\n\n``shift_report(events)`` takes a list of event records; each record is a dict\nwith a \"shift\" name and a non-negative \"units\" count. It returns a list of\n(shift, total_units) tuples, one per distinct shift, ordered by total units\ndescending. Shifts with equal totals must appear in the order in which they\nfirst occur in the event list.\n\"\"\"\n\n\ndef shift_report(events):\n    totals = {}\n    for event in events:\n        shift = event[\"shift\"]\n        totals[shift] = totals.get(shift, 0) + event[\"units\"]\n    return sorted(totals.items(), key=lambda item: -item[1])\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "timeout_sec": 120
+      },
+      {
+        "type": "file_contains",
+        "path": "test_shifts.py",
+        "contains": "from shifts import shift_report"
+      },
+      {
+        "type": "file_contains",
+        "path": "test_shifts.py",
+        "contains": "assert shift_report(events) == [(\"day\", 13), (\"swing\", 7), (\"graveyard\", 7)]"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_and_golden_author",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "generated_at": "2026-09-25T01:48:02.006667+00:00"
+  },
+  "workspace_fixture": "python_shift_report_tie_order_4a0c45c8",
+  "promoted_from": "bench/aci/candidates/python_shift_report_tie_order_4a0c45c8",
+  "promoted_at": "2026-09-25T08:29:13.950894+00:00"
+}

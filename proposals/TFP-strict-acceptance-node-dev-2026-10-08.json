@@ -1,0 +1,276 @@
+{
+  "proposal_id": "TFP-strict-acceptance-node-dev-2026-10-08",
+  "session_id": "strict-acceptance-node-dev-2026-10-08",
+  "status": "proposed",
+  "rationale": "用户继续推进节点开发。本批实现 TF-0137，16 项新增控制、276 项 Python（273 通过/3 跳过）与 Rust 289 项通过，1050 行旧轮四个比较保持不可主张；产品门禁 24/31，其中新检出的 C35 标签冲突和其余六项仍由 TF-0140 承接。核对前序 TF-0136 原始回执后同步其已实现进度，不重跑或追认历史评分。按仓库根策略保存、应用、校验、导出，不关闭节点、不改阈值或旧产物；2026-10-08 开始，10-09 收尾。",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0124",
+      "fields": {
+        "status": "in_progress",
+        "summary": "推进 TF-0137：统一描述性与正式验收入口，1050 行旧轮四个比较均拒绝主张；Python 273 通过/3 跳过、Rust 289 通过，门禁 24/31。同步前序 TF-0136 进展；新冻结研究、声明一致性和默认分支落地仍开放。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0126",
+      "fields": {
+        "status": "in_progress",
+        "summary": "前序 TF-0133～0136 工程工作继续保留；本批核对 TF-0136 既有回执并同步 85% 状态（不冒充再次复评分）。历史最终快照 0/1050、账单与恢复边界仍未补齐。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0127",
+      "fields": {
+        "status": "in_progress",
+        "summary": "TF-0137 接通共享资格规则、描述性标签与正式研究边界；四个实测比较均拒绝主张，产品门禁 24/31。下一工程节点为 TF-0138；TF-0140/0141 保留旧声明与源码落地缺口。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0136",
+      "fields": {
+        "status": "in_progress",
+        "progress": 85,
+        "summary": "核对并同步前序工程回执：最终评分输入冻结与显式独立复核已实现；前序18项专项及8/8可复评分一致，另2 unknown；历史快照0/1050。本批未重新执行独立复评分。当前产品门禁24/31，继续开放。",
+        "next_action": "确认提案后登记工程进展；评估保守凭据检测的覆盖限制，在新冻结版本采集中验证快照，再推进 TF-0137 的全入口严格判定。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-baseline/task_set_audit.json",
+          "tools/trajectory_replay.py",
+          "tools/task_set_audit.py:198",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json",
+          "docs/final-workspace-repairs-2026-10-08.md",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/node-change-manifest.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/node-change-manifest.diff",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/change-manifest.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/logs/python-tests-final.log",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/offline-independent-rescore.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/historical-final-workspaces.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/historical-candidate-coverage.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/final-summary.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0137",
+      "fields": {
+        "status": "in_progress",
+        "progress": 85,
+        "summary": "工程入口统一完成：旧 OR 仅描述性，单 collection 的正式字段 fail-closed；研究评估器复用逐行/评分/usage/配对检查并保留正向路径。新增16测试，全量276项中273通过/3跳过；Rust289通过。1050行旧轮四比较不可主张，原始哈希不变；产品24/31不自动done。",
+        "next_action": "后续以新冻结版本进行开发验证和正式研究。TF-0140 承接旧 canonical 肯定标签与其余六项产品红项，TF-0141 承接源码落地；不重写旧报告追求绿色。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:1800",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-baseline/three_arm_report.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-compact_all/three_arm_report.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0140",
+      "fields": {
+        "summary": "本批统一严格标签后门禁24/31，C12/C14/C16/C24/C34/C35/C36失败。C35新增发现：两份历史 canonical collection 各含两个肯定验收标签；保留旧产物，README及claims明确其历史范围，不假装当前工程回归完成正式验收。",
+        "next_action": "建立并核验历史声明/输入/版本映射，明确退役或限制旧肯定标签的消费方式；使用新证据而非覆盖旧报告满足正式入口。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/prelive-ready-2026-10-06.md",
+          "docs/claims-and-evidence.md",
+          "tools/claim_gate.py",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/readme-claims-final.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/claim-gate-final.log",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0141",
+      "fields": {
+        "status": "in_progress",
+        "progress": 20,
+        "summary": "本批精确编辑基线和diff保存于D盘；没有提交、合并或暂存。git fetch origin因127.0.0.1:7890代理不可达exit128；check-landing仅按缓存origin/master得44项历史发现、exit1，不视为已刷新远端，也不把全部历史问题归责本轮。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/task-forest-20261008/landing-before.json",
+          "docs/task-forest-policy.md",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/check-landing.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/git-fetch-direct.exit",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "docs/strict-acceptance-repairs-2026-10-08.md",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/historical-replay.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/product-claim-gate-final.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/python-tests-final.log",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/change-manifest.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/evidence/check-landing.json",
+          "D:/VerseShellLive/strict-acceptance-20261008-01a11c1d/logs/git-fetch.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "strict-acceptance-node-dev-2026-10-08"
+        ]
+      }
+    }
+  ]
+}

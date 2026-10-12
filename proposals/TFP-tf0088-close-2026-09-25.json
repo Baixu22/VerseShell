@@ -1,0 +1,101 @@
+{
+  "applied_at": "2026-09-24T21:23:50.861155Z",
+  "base_graph_hash": "77f598421a7f070a8b2b36b2e89189bdd594e183471280f28c4e40ddd086880d",
+  "base_summary": "TF-0088…TF-0092 在 claim_gate 转绿后收口为 done",
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "投影契约门禁（已从草稿提升为入库工具）：`python tools/projection_contract.py` → **6/6 PASS**，产物 `eval/projection_contract.json`",
+          "登记为声明 **C26**（门槛 == 1.00，PASS）：1.0",
+          "修复本体：`bench/aci/runners/live_agent_loop.py::format_aci_result` 增加 `repo.search` 的 `matches/match_count/truncated` 投影、`repo.summary` 的 `top_level`（且不取 `workspace`）、失败路径的 `E_AMBIGUOUS` 候选点 `matches[{line,offset,snippet}]`",
+          "改动前的影响量化（已存 live 产物）：with 臂 `repo.search` **0 次**调用、raw_shell 侧 `grep`/`Select-String`/`findstr` 类命令 **11 次**——搜索需求整批转移到裸 shell",
+          "修复后的定版 live：D 侧 `repo.search` 恢复调用、`repo.summary` 的 avg 观察 token 从 14.0 升到 42.2（`top_level` 真的到达模型了）；with 臂 D/A token 比 **0.7794**",
+          "`python tools/claim_gate.py` → **21/21 gated claims pass，exit 0**；`cargo test` 16 suites / 286 passed / 0 failed / 1 ignored"
+        ],
+        "next_action": "无（已关闭）。后续若新增工具，需在 tools/projection_contract.py 的检查集里补一条。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0088"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "新工具 `tools/aci_learning_probe.py`：只把 `docs/quickstart/aci-mcp.md` 当 system prompt（不给 tool schema），每一行 op 都经真实 `ae --serve --agent` 执行",
+          "定版真实调用（`--repeat 3`，15 格，0 api_error）：门槛值 `op_acceptance_given_ops_emitted = 0.7143`、`first_attempt_op_acceptance = 0.6667`、`task_success = 0.4`、`hash_handoff_rate = 0.3333`；产物 `eval/aci_learning_probe.json`",
+          "登记为声明 **C5**（门槛 >= 0.70，PASS，此前状态是「未证实／无指标」）：0.7143",
+          "修复前的缺陷态证据：单轮探针 2/5 = 0.40（不达标），原因是模型逐字照抄 quickstart 里的字面占位符 `\"expected_hash\":\"<from file.view>\"` → `E_STALE_HASH`",
+          "文档修复：`docs/quickstart/aci-mcp.md` 的占位符换成真实 16-hex 示例 + 明确警告",
+          "`python tools/claim_gate.py` → **21/21 gated claims pass，exit 0**；`cargo test` 16 suites / 286 passed / 0 failed / 1 ignored"
+        ],
+        "next_action": "无（已关闭）。门槛 0.7143 只高出 0.014，是边际通过；扩样本需重跑探针。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0089"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "新工具 `tools/live_uncertainty.py`（无 API 调用）：Wilson 区间、合并比例 z 检验、配对 McNemar、逐指标配对 t 区间、headline 比值的 bootstrap CI 与 `n_for_80pct_power`，并用 `rows[]` 重算产物聚合（不一致即判失败）",
+          "定版数字（with 臂）：A 成功率 0.6 vs D 0.5333；合并 z=-0.5211（p=0.602332）；配对 McNemar p=0.625 → **不显著**",
+          "冻结门槛（`docs/v1.1-freeze.md` 第 32 行）：工具比 bootstrap 0.95，`P(< 0.70) = 0.0144`；token 比 0.7794，`P(< 0.60) = 0.0244` → **两条数值门槛都未以可信度达成**",
+          "登记为声明 **C25**（门槛 == 1.00，PASS）；产物 `eval/live_uncertainty.json`",
+          "`python tools/claim_gate.py` → **21/21 gated claims pass，exit 0**；`cargo test` 16 suites / 286 passed / 0 failed / 1 ignored"
+        ],
+        "next_action": "无（已关闭）。它门禁的是「不确定性存在」，不是「差异显著」。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0090"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "定版 live 第 10 轮：3 seeds × 10 任务 × 2 条件 × 2 臂 = **120 行，`api_error` 0**；逐 seed 原始行在 `bench/aci/results/tf90/`，已合并为 `latest_live.json` 与 `live_ab_without_read_files.json`",
+          "with 臂：A 成功率 0.6 / D 0.5333；工具比 **0.95**、token 比 **0.7794**",
+          "without 臂（配对对照）：A 0.6 / D 0.5667；工具比 0.8485、token 比 0.6197",
+          "中途 5 格因端点超时被判 `api_error`，已用 `bench/aci/runners/splice_live_cells.py` 只重跑这 5 格（`merge_live_runs.py` 拒绝合并 `api_error` 行，这是设计）",
+          "本轮同时修掉两个测量缺陷：投影层（TF-0088）与 **4096 completion 上限的系统性反 D 截断**（30 行 D 里 7 行被截断、A 0/30；上限提到 16384 并逐行记录 `completion_truncated_turns`，HTTP 超时随之 180s→900s）",
+          "`python tools/claim_gate.py` → **21/21 gated claims pass，exit 0**；`cargo test` 16 suites / 286 passed / 0 failed / 1 ignored"
+        ],
+        "next_action": "无（已关闭）。仍残留 3 行（全在 D 侧）`completion_truncated_turns>0`。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0091"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "`python tools/claim_gate.py` → **21/21 gated claims pass，exit 0**；`cargo test` 16 suites / 286 passed / 0 failed / 1 ignored",
+          "新增并登记三条声明：**C25**（live 数字必须带不确定性，1.0）、**C26**（投影契约，1.0）、**C27**（`len(text)//4` 代理校准，1.0）",
+          "**C27** 的实测结论：代理在观察信封上**低估约 33%**（mean real/proxy 1.4905），`real > proxy` 占 60/60，因此 `len//4` **不是上界**；误差形状依赖（英文散文被高估、CJK 被低估约 4 倍），不存在单一修正系数",
+          "新工具入库：`tools/projection_contract.py`、`tools/live_uncertainty.py`、`tools/aci_learning_probe.py`、`tools/token_proxy_calibration.py`、`tools/refresh_live_artifacts.py`（按依赖顺序重刷全部 live 派生产物）",
+          "下划线草稿脚本（`tools/_dbg_*.py` 等）已删除，回归检查已提升为 C26 的入库工具",
+          "文档：`docs/claims-and-evidence.md` 新增/刷新 C5/C13/C14/C16/C17/C19/C20/C21/C25/C26/C27；`docs/dataset-research.md`（公开数据集调研）；`docs/tf0088-round-notes.md`（本轮记录）；`CHANGELOG.md` 增补本轮 Added/Fixed"
+        ],
+        "next_action": "无（已关闭）。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0092"
+    }
+  ],
+  "created_at": "2026-09-24T21:23:50.700078+00:00",
+  "proposal_id": "TFP-tf0088-close-2026-09-25",
+  "rationale": "按 docs/task-forest-policy.md §3 的四条硬门槛逐条满足后关闭：(1) 每个 acceptance_criteria 都有可复现命令 + 产物路径；(2) 涉及对外数字的已登记在 docs/claims-and-evidence.md 且 claim_gate exit 0；(3) 门禁与测试全绿（21/21 gated claims、cargo test 286 passed）；(4) 证据写入节点 evidence 字段。",
+  "session_id": "dsh-agent-tf0088-close",
+  "status": "applied"
+}

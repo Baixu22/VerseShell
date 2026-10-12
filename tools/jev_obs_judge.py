@@ -48,11 +48,19 @@ ROOT = Path(__file__).resolve().parents[1]
 
 # The measured surface. Recorded into the artifact so claim_gate (C12) can tell
 # whether the stored numbers still describe the current code.
+#
+# The report also *summarises* `eval/metrics.json` (loaded at runtime) and names
+# `bench/aci/results/latest.json` as its bench input, so both must be inside the
+# fingerprint: without them C12 reported this artifact fresh even after the metrics
+# or the mock bench changed, which is exactly the "fresh-but-stale-inputs" gap the
+# fingerprint exists to close (found by the r15 verification, finding F3).
 EVIDENCE_GLOBS = [
     "src/**/*.rs",
     "tests/fixtures/reducers/**/*",
     "eval/manifest.json",
+    "eval/metrics.json",
     "examples/eval_metrics.rs",
+    "bench/aci/results/latest.json",
     "tools/jev_obs_judge.py",
 ]
 

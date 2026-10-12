@@ -1,0 +1,185 @@
+{
+  "proposal_id": "TFP-usage-accounting-node-dev-2026-10-08",
+  "session_id": "usage-accounting-node-dev-2026-10-08",
+  "rationale": "用户要求继续节点开发。本批限 TF-0135，完成 per-attempt 用量证据、共同成本有效性规则、明确配对分母与只读旧轮审计；修复两项测试对旧生产摘要的依赖，仅使用临时测试计划，生产冻结文件未改。全量242 tests exit0，claim_gate25/31 exit1，账单unknown与新冻结/正式验收边界保留，按仓库策略保存后应用，不关闭总目标。",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0124",
+      "fields": {
+        "summary": "2026-10-08：在工具契约、采集收尾/存储批次基础上继续 TF-0135。新增 attempt 用量台账与统一成本拒绝规则；1050 行旧轮只读核对到 5 行/6 回合/7 次未知用量，完整 Python 回归 242 项通过，产品门禁仍 25/31。正式研究、全入口验收与源码落地继续开放。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0126",
+      "fields": {
+        "summary": "2026-10-08：TF-0133/0134 的控制与恢复实现保留；本批推进 TF-0135，逐 attempt 记录已收到/未知 usage，成本配对分母明确，旧轮 5 项缺口复核一致。TF-0136 与历史恢复/账单核对剩余范围未被关闭。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0135",
+      "fields": {
+        "status": "in_progress",
+        "progress": 85,
+        "summary": "2026-10-08：新增只读 usage_audit；采集端补每次 attempt 的 usage/请求身份，未知不补零；单轮与重复实验成本入口复用严格有效性规则，旧完整标记不能覆盖重试证据。1050 行/18582 attempts 中 5 行不完整，6 回合/7 次未知；收到 134271140 tokens，但无提供方账单证据，billing unknown。四组成本有效对数 174/175/174/172，各对照匹配 175；评分保留。新增 11 项离线测试，全量 242 项 exit 0。",
+        "next_action": "以新冻结源码/分析计划进入后续开发验证；若获得提供方账单则按请求身份追加核对，否则保留未知及完整成本主张限制。TF-0140 产品门禁与 TF-0141 落地尚未闭合，不自动 done。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "bench/aci/runners/live_agent_loop.py:1488",
+          "tools/live_uncertainty.py:249",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0140",
+      "fields": {
+        "summary": "2026-10-08：用量与成本分母批次后 claim_gate 仍 25/31，C12/C14/C16/C24/C34/C36 保持失败。旧生产分析计划摘要未改，仍拒绝当前源码；242 项工程回归不能追认旧轮统计、完整计费或正式产品声明。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/prelive-ready-2026-10-06.md",
+          "docs/claims-and-evidence.md",
+          "tools/claim_gate.py",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/readme-claims-final.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/claim-gate-final.log",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0141",
+      "fields": {
+        "summary": "2026-10-08：本批新增 8 文件的会话基线精确 diff/摘要；未提交、合并、覆盖旧 D 盘冻结源码或改动暂存区。历史默认分支/完成状态发现本批未重新核验，继续保留开放，不用局部工程通过代替落地。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/task-forest-20261008/landing-before.json",
+          "docs/task-forest-policy.md",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/check-landing.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/git-fetch-direct.exit",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08"
+        ]
+      }
+    }
+  ]
+}

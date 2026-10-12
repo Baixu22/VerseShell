@@ -1,0 +1,45 @@
+{
+  "applied_at": "2026-09-26T09:17:43.555296Z",
+  "base_graph_hash": "7aac32a954cb1a05fb2eedbf27d6b18774d128f1856f571f462afe3fe644248b",
+  "base_summary": {
+    "edge_count": 167,
+    "node_count": 107,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**已完成 · 交叉引用（7 处 + 1 处悬空）**：`docs/audit-brief.md` 的 `§5 列出 5 个` → **7 个**；`§3.3 给出三臂设计` → **§2.1**（§3.3 是预算纪律），并补上「方向性偏袒记在 §5 的 D3」；`见 §7 问题 P6` → **§6**；`见 §6 缺陷 D6` → **§5**；`（§0.5，本轮新增）` 悬空 → 改成**对应 `docs/acceptance-criteria.md` 的 §0.5**；`理由见 §7 问题 P1` → **§6**；`未修，见 §7 P1` → **§6**。改完复核全部 17 处内部引用，逐条对应正确（`§4` 结果表、`§4.1/4.2`、`§4.3`、`§4.5`、`§6 P1/P6/P7`、`§3.2`、`§3.3`）",
+          "**已完成 · 缺陷计数对齐**：§0 原文「§5 列出 5 个，其中 3 个各自单独足以翻转」与 §10「被三个独立的测量缺陷轮流改写」都对不上 §5 实列的 7 个缺陷。按 §5 正文改成：**§5 列出 7 个缺陷 D1–D7；其中 D2 与 D4 各自曾单独翻转结论（D2 排除撞上限行后 D/A 由 1.1398 翻成 0.8617；D4 修完 D 由「更贵」翻成「更省」）；另有 D1–D3 造成方向性偏袒**",
+          "**已完成 · 标签语义（顺带修掉一处自相矛盾）**：§2.2 把 `windows 2` 列在「语言分布」下，而 §6 P6 又说 `windows` 不是语言。改成「**`lang` 字段取值分布**（注意：这不是语言分布——`windows` 是任务类别，`ts` 与 `typescript` 是同一门语言的两种写法）」。同时给「分层：existing 20」补上出处说明：`existing` 是 **tier 桶的默认值**（`tools/freeze_task_set.py` 的 `tier = prov.get(\"tier\") or \"existing\"`），20 = 10 手写 + 10 个未带 `tier` 的生成任务，与「10 手写 + 15 生成」是两个不同的轴，**不矛盾**",
+          "**已完成 · 协议分母（但前提与验收标准不同，见下）**：`docs/task-generation-protocol.md` 第 7 条与 `tools/task_generate_v2.py` 的 docstring 都补上「这两个分母属于第 11 轮那批 32 个候选」的**批次标注**，并给出当前口径 **A2 17/33、A3 15/33**（用 `eval/task_admissibility.json` 重算：35 候选，33 个被 A2/A3 评估，2 个缺 `task.json` 被自动拒）。顺带修掉两份文档**互相矛盾**的一处：协议文档与声明文档都说 A2=16/31、A3=15/31，而工具 docstring 写反成 A2=15/31、A3=16/31——已按两份多数来源改正工具 docstring",
+          "**复核发现（验收标准第 4 条的前提有误）**：TF-0104 原写「`docs/task-generation-protocol.md` 的 A2/A3 分母同步为 33」。实读该文档后确认，那段是 **v2 第一版顺序缺陷的历史叙述**（「v2 的第一版顺序是 `buggy → fix → tests(buggy)`…改成：…」），31 是**当时那批候选**的分母，不是一条过期的现值声明。**把历史数字直接改成 33 会抹掉「当时失败了多少」这个证据**，所以采用「保留历史 + 标注批次 + 并列现值」的写法。这是本节点唯一一处偏离原验收标准的地方，理由记在此处",
+          "**未完成 · 任务集标签与 freeze 记录（已推迟，有硬理由）**：`bench/aci/tasks/*.json` 的 `lang` 统一（`ts`→`typescript`、`windows` 移出语言字段）与 `eval/task_set_freeze.json` 的 `promoted`/`kept_existing` 修复**必须等 live 重跑结束**。代码依据：`bench/aci/runners/live_agent_loop.py:1442` 在**循环内**逐个读取 `bench/aci/tasks/{tid}.json`，而 `:1487` 在**循环结束后**才计算产物指纹；中途改任务文件会同时造成①同一轮里旧定义与新定义混用、②`latest_live.json` 的「行来自旧文件、指纹来自新文件」这种**假新鲜**。当前 live 重跑（TF-0105）正在进行，故推迟",
+          "**门禁未受影响**：`python tools/claim_gate.py` → **22/25**（C14/C16 仍红、C12 因 live 基线待刷新而红，与本次文档改动无关）；`python tools/readme_claims_check.py` → **17/17**；21 个产物中除 `latest_live.json` 外全部 fresh（文档与生成器 docstring 都不在指纹覆盖面内，已逐条确认）"
+        ],
+        "next_action": "等 TF-0105 的 live 重跑合并完成后，做剩下两条：①`bench/aci/tasks/*.json` 的 `lang` 统一（`ts`→`typescript` 合并；`windows` 改放 `platform`，`lang` 取该 fixture 的真实语言）；②修 `eval/task_set_freeze.json` 的 `promoted: []` 与 `kept_existing`（当前列了全部 25 个，使冻结记录无法区分 10 手写与 15 生成）。两处都会改变任务集指纹，改完必须重跑 live 或至少重刷全部派生产物。",
+        "progress": 50.0,
+        "progress_source": "agent",
+        "status": "in_progress"
+      },
+      "id": "TF-0104"
+    },
+    {
+      "action": "add_edge",
+      "edge": {
+        "confidence": 0.95,
+        "reason": "改 bench/aci/tasks/*.json 会与正在进行的 live 重跑冲突：runner 在循环内逐个读任务文件（:1442），却在循环后才算指纹（:1487），中途改动会产生「行旧指纹新」的假新鲜产物，并让同一轮混用两版任务定义"
+      },
+      "from": "TF-0104",
+      "to": "TF-0105",
+      "type": "depends_on"
+    }
+  ],
+  "created_at": "2026-09-26T09:17:43.408129Z",
+  "proposal_id": "TFP-r12-step60-partial-2026-09-26",
+  "rationale": "TF-0104 拆成两半落地。纯文档的两条（交叉引用/缺陷计数、协议分母）现在完成；改 bench/aci/tasks/*.json 与 eval/task_set_freeze.json 的那两条必须推迟到 live 重跑结束——依据是代码事实：live_agent_loop.py 在循环内逐个读任务文件（:1442），而在循环结束后才算产物指纹（:1487），所以中途改任务文件会同时造成「同一轮里旧定义与新定义混用」和「行是旧的、指纹是新的」这种假新鲜产物。新增 TF-0104 depends_on TF-0105 表达这个顺序约束。另外记录一处复核发现：TF-0104 验收标准第 4 条的前提有误——协议文档里的 16/31、15/31 是历史记录，不是过期的现值。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

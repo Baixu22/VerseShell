@@ -1,0 +1,781 @@
+{
+  "schema": "verseshell.aci_live_uncertainty/v1",
+  "generated_at": "2026-10-10T05:43:26.929420+00:00",
+  "method": {
+    "independent_complete_run_variance_included": false,
+    "success_interval": "Wilson score interval (95%); no independent-run component",
+    "unpaired_test": "two-proportion pooled z-test, two-sided",
+    "paired_test": "McNemar exact binomial on discordant success pairs; paired t interval for continuous metrics",
+    "paired_unit": "(task_id, seed, run_index)",
+    "ratio_bootstrap_unit": "task — whole tasks are resampled, because the three seeds of one task are correlated (ICC 0.28-0.56) and a row-level resample is systematically narrower. The row interval is still reported as `bootstrap_ci95_row`",
+    "real_tokenizer": "endpoint `usage` accumulated over every turn, published as usage_token_ratio / prompt_token_ratio / completion_token_ratio",
+    "power_target": "0.80 at alpha=0.05 two-sided"
+  },
+  "evidence": {
+    "globs": [
+      "bench/aci/results/latest_live.json",
+      "bench/aci/results/live_ab_without_read_files.json",
+      "bench/aci/runners/live_agent_loop.py",
+      "tools/live_uncertainty.py"
+    ],
+    "fingerprint": "7c1e084056c4f58914a93ad2e6640abd74118d84addbbe1503de137cd11d135b"
+  },
+  "arms": [
+    {
+      "artifact": "with_read_files",
+      "mode": "live",
+      "task_set_version": "3.0.0",
+      "generated_at": "2026-09-29T21:10:37.484634+00:00",
+      "source_rows_fingerprint": "8a2f9d48fd898c6a692d4372c0a0c61edf51327b267a6a1ea87aac70e9521db5",
+      "source_provenance": {
+        "generated_at": "2026-09-29T21:10:37.484634+00:00",
+        "git_rev": "a8d4c56c45093d0a7d650d96afe3dd561d80e5b0",
+        "task_set_version": "3.0.0",
+        "evidence_fingerprint": "17ae50f8e1a3118359766fdc6e5a46607b7adc62386c9a98ed5e106576afaead",
+        "merged_from": [
+          "with_seed42.json",
+          "with_seed43.json",
+          "with_seed44.json"
+        ]
+      },
+      "model": "sn-glm-5-3-flash",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "repeat": 3,
+      "n_rows": 315,
+      "recomputed_aggregate": {
+        "raw_shell": {
+          "n_rows": 105,
+          "n_scored": 105,
+          "n_unverified": 0,
+          "successes": 95,
+          "mean_tool_calls": 4.7333,
+          "mean_observation_tokens": 1266.8095,
+          "harness_crash": 0,
+          "successes_excluding_harness_crash": 95,
+          "n_scored_excluding_harness_crash": 105
+        },
+        "raw_shell_coached": {
+          "n_rows": 105,
+          "n_scored": 105,
+          "n_unverified": 0,
+          "successes": 94,
+          "mean_tool_calls": 4.6571,
+          "mean_observation_tokens": 1084.4952,
+          "harness_crash": 0,
+          "successes_excluding_harness_crash": 94,
+          "n_scored_excluding_harness_crash": 105
+        },
+        "verseshell_aci": {
+          "n_rows": 105,
+          "n_scored": 105,
+          "n_unverified": 0,
+          "successes": 98,
+          "mean_tool_calls": 4.019,
+          "mean_observation_tokens": 769.5524,
+          "harness_crash": 0,
+          "successes_excluding_harness_crash": 98,
+          "n_scored_excluding_harness_crash": 105
+        }
+      },
+      "stored_aggregate_mismatches": [],
+      "success_rate": {
+        "raw_shell": {
+          "successes": 95,
+          "n_scored": 105,
+          "n_unverified": 0,
+          "success_rate": 0.9048,
+          "wilson_ci95": [
+            0.8335,
+            0.9474
+          ]
+        },
+        "verseshell_aci": {
+          "successes": 98,
+          "n_scored": 105,
+          "n_unverified": 0,
+          "success_rate": 0.9333,
+          "wilson_ci95": [
+            0.8687,
+            0.9673
+          ]
+        }
+      },
+      "unpaired_z_test_success": {
+        "z": 0.759,
+        "p_value": 0.447867,
+        "phi": 0.1051
+      },
+      "paired_success_mcnemar": {
+        "both_pass": 95,
+        "only_A": 0,
+        "only_D": 3,
+        "neither": 7,
+        "p_value_exact": 0.25
+      },
+      "paired": {
+        "success_rate": {
+          "metric": "success_rate",
+          "n_pairs": 105,
+          "mean_delta_D_minus_A": 0.0286,
+          "sd_of_deltas": 0.1674,
+          "paired_ci95": [
+            -0.0034,
+            0.0606
+          ],
+          "n_for_80pct_power": 270,
+          "paired_t": 1.7489,
+          "paired_p_value": 0.0803
+        },
+        "tool_calls": {
+          "metric": "tool_calls",
+          "n_pairs": 105,
+          "mean_delta_D_minus_A": -0.7143,
+          "sd_of_deltas": 3.8648,
+          "paired_ci95": [
+            -1.4535,
+            0.025
+          ],
+          "n_for_80pct_power": 230,
+          "paired_t": -1.8938,
+          "paired_p_value": 0.05825
+        },
+        "observation_tokens": {
+          "metric": "observation_tokens",
+          "n_pairs": 105,
+          "mean_delta_D_minus_A": -497.2571,
+          "sd_of_deltas": 1008.5315,
+          "paired_ci95": [
+            -690.1654,
+            -304.3489
+          ],
+          "n_for_80pct_power": 33,
+          "paired_t": -5.0523,
+          "paired_p_value": 0.0
+        }
+      },
+      "ratio_bootstrap": {
+        "tool_call_ratio": {
+          "kind": "tool_call_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.8491,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.1785,
+            "bootstrap_ci95": [
+              1.0225,
+              1.3415
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.6877,
+            1.0576
+          ],
+          "bootstrap_ci95_row": [
+            0.727,
+            0.9951
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.0355,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.6877,
+            1.0576
+          ],
+          "frozen_target": 0.7
+        },
+        "observation_token_ratio": {
+          "kind": "observation_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.6075,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 0.8854,
+            "bootstrap_ci95": [
+              0.7526,
+              1.0377
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.5007,
+            0.7589
+          ],
+          "bootstrap_ci95_row": [
+            0.5224,
+            0.7089
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.4488,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.5007,
+            0.7589
+          ],
+          "frozen_target": 0.6
+        },
+        "usage_token_ratio": {
+          "kind": "usage_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.9461,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.1394,
+            "bootstrap_ci95": [
+              1.8014,
+              2.488
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.6462,
+            1.5202
+          ],
+          "bootstrap_ci95_row": [
+            0.717,
+            1.2964
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.6462,
+            1.5202
+          ]
+        },
+        "prompt_token_ratio": {
+          "kind": "prompt_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 1.0255,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.3018,
+            "bootstrap_ci95": [
+              1.9377,
+              2.6764
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.696,
+            1.6803
+          ],
+          "bootstrap_ci95_row": [
+            0.7723,
+            1.4202
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.696,
+            1.6803
+          ]
+        },
+        "completion_token_ratio": {
+          "kind": "completion_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.4259,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.1554,
+            "bootstrap_ci95": [
+              0.9134,
+              1.4224
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.2706,
+            0.6583
+          ],
+          "bootstrap_ci95_row": [
+            0.3077,
+            0.581
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.2706,
+            0.6583
+          ]
+        }
+      },
+      "ratio_caliber": {
+        "tool_call_ratio": {
+          "caliber": "count_ratio",
+          "note": "ratio of tool-CALL COUNTS (raw_shell vs verseshell_aci): not tokens, not usage, not currency"
+        },
+        "observation_token_ratio": {
+          "caliber": "observation_proxy_estimate_tokens",
+          "note": "ratio of `estimate_tokens(text) = max(1, len(text)//4)` accumulated over the delivered observation text. This is a PROXY: NOT endpoint usage, NOT the evaluated model's own tokenizer and NOT a money cost"
+        },
+        "usage_token_ratio": {
+          "caliber": "endpoint_usage_total",
+          "note": "ratio of endpoint-reported `usage` summed over observed requests in usage-eligible pairs (llm_prompt_tokens + llm_completion_tokens): system prompt + tool schemas + re-sent history + reasoning per turn. It is NOT the size of one system prompt or one tool-schema payload, and without price/cache rules it is NOT a money cost"
+        },
+        "prompt_token_ratio": {
+          "caliber": "endpoint_usage_prompt",
+          "note": "ratio of endpoint-reported `llm_prompt_tokens` (input usage accumulated over observed requests in usage-eligible pairs): NOT the system-prompt/schema size of one request and NOT currency"
+        },
+        "completion_token_ratio": {
+          "caliber": "endpoint_usage_completion",
+          "note": "ratio of endpoint-reported `llm_completion_tokens` (output usage). The reasoning billing boundary is unconfirmed, so it is NOT the visible answer's character count and NOT currency"
+        }
+      },
+      "real_tokenizer_note": "Unknown usage is excluded, never zero-imputed; candidate_pairs, n_pairs and excluded_nonfinite_pairs describe the cost denominator, not the score denominator. No provider invoice is reconciled. Caliber: see `ratio_caliber`. `observation_token_ratio` is PROXY-caliber — max(1, len(text)//4) over the delivered observation text. `usage_token_ratio` / `prompt_token_ratio` / `completion_token_ratio` are ENDPOINT-USAGE caliber: the endpoint's reported `usage` accumulated over observed requests in usage-eligible pairs (system prompt + tool schemas + re-sent history + reasoning). They are therefore broader than observation_tokens, are NOT the size of one system prompt or one tool-schema payload, and are NOT a money cost; the usage reading governs when the two disagree in direction (docs/acceptance-criteria.md §4.2)",
+      "tool_calls": {
+        "raw_shell": {
+          "n": 105,
+          "mean": 4.7333,
+          "sd": 3.8935,
+          "se": 0.38
+        },
+        "verseshell_aci": {
+          "n": 105,
+          "mean": 4.019,
+          "sd": 1.441,
+          "se": 0.1406
+        }
+      },
+      "observation_tokens": {
+        "raw_shell": {
+          "n": 105,
+          "mean": 1266.8095,
+          "sd": 1330.1711,
+          "se": 129.8114
+        },
+        "verseshell_aci": {
+          "n": 105,
+          "mean": 769.5524,
+          "sd": 678.2064,
+          "se": 66.1862
+        }
+      },
+      "significance_notes": [
+        "unpaired success-rate difference is NOT significant at alpha=0.05 (z=0.759, p=0.447867)",
+        "paired (McNemar) success difference is NOT significant (discordant 0 A-only vs 3 D-only, p=0.25)"
+      ],
+      "uncertainty_scope": {
+        "independent_complete_run_variance_included": false,
+        "ratio_interval": "task-clustered only",
+        "other_intervals": "Wilson/paired-row t assumptions; not independent collection replicates",
+        "all_row_success_is_not_policy_itt": true,
+        "repeated_run_analysis": "tools/repeated_run_uncertainty.py requires a separately collected complete-run manifest"
+      }
+    },
+    {
+      "artifact": "without_read_files",
+      "mode": "live",
+      "task_set_version": "3.0.0",
+      "generated_at": "2026-09-30T00:51:46.993212+00:00",
+      "source_rows_fingerprint": "b5ec98e12d2763c024eb3c78fe88645d263355bbfd23b800a96734d94354c450",
+      "source_provenance": {
+        "generated_at": "2026-09-30T00:51:46.993212+00:00",
+        "git_rev": "a8d4c56c45093d0a7d650d96afe3dd561d80e5b0",
+        "task_set_version": "3.0.0",
+        "evidence_fingerprint": "17ae50f8e1a3118359766fdc6e5a46607b7adc62386c9a98ed5e106576afaead",
+        "merged_from": [
+          "without_seed42.json",
+          "without_seed43.json",
+          "without_seed44.json"
+        ]
+      },
+      "model": "sn-glm-5-3-flash",
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "repeat": 3,
+      "n_rows": 315,
+      "recomputed_aggregate": {
+        "raw_shell": {
+          "n_rows": 105,
+          "n_scored": 105,
+          "n_unverified": 0,
+          "successes": 92,
+          "mean_tool_calls": 4.5048,
+          "mean_observation_tokens": 1320.5143,
+          "harness_crash": 0,
+          "successes_excluding_harness_crash": 92,
+          "n_scored_excluding_harness_crash": 105
+        },
+        "raw_shell_coached": {
+          "n_rows": 105,
+          "n_scored": 105,
+          "n_unverified": 0,
+          "successes": 94,
+          "mean_tool_calls": 4.6,
+          "mean_observation_tokens": 1072.0857,
+          "harness_crash": 0,
+          "successes_excluding_harness_crash": 94,
+          "n_scored_excluding_harness_crash": 105
+        },
+        "verseshell_aci": {
+          "n_rows": 105,
+          "n_scored": 105,
+          "n_unverified": 0,
+          "successes": 97,
+          "mean_tool_calls": 4.8762,
+          "mean_observation_tokens": 730.2857,
+          "harness_crash": 0,
+          "successes_excluding_harness_crash": 97,
+          "n_scored_excluding_harness_crash": 105
+        }
+      },
+      "stored_aggregate_mismatches": [],
+      "success_rate": {
+        "raw_shell": {
+          "successes": 92,
+          "n_scored": 105,
+          "n_unverified": 0,
+          "success_rate": 0.8762,
+          "wilson_ci95": [
+            0.7996,
+            0.9262
+          ]
+        },
+        "verseshell_aci": {
+          "successes": 97,
+          "n_scored": 105,
+          "n_unverified": 0,
+          "success_rate": 0.9238,
+          "wilson_ci95": [
+            0.8568,
+            0.9609
+          ]
+        }
+      },
+      "unpaired_z_test_success": {
+        "z": 1.1501,
+        "p_value": 0.250099,
+        "phi": 0.1598
+      },
+      "paired_success_mcnemar": {
+        "both_pass": 90,
+        "only_A": 2,
+        "only_D": 7,
+        "neither": 6,
+        "p_value_exact": 0.179688
+      },
+      "paired": {
+        "success_rate": {
+          "metric": "success_rate",
+          "n_pairs": 105,
+          "mean_delta_D_minus_A": 0.0476,
+          "sd_of_deltas": 0.2903,
+          "paired_ci95": [
+            -0.0079,
+            0.1031
+          ],
+          "n_for_80pct_power": 292,
+          "paired_t": 1.6811,
+          "paired_p_value": 0.092744
+        },
+        "tool_calls": {
+          "metric": "tool_calls",
+          "n_pairs": 105,
+          "mean_delta_D_minus_A": 0.3714,
+          "sd_of_deltas": 3.9474,
+          "paired_ci95": [
+            -0.3836,
+            1.1265
+          ],
+          "n_for_80pct_power": 887,
+          "paired_t": 0.9642,
+          "paired_p_value": 0.334953
+        },
+        "observation_tokens": {
+          "metric": "observation_tokens",
+          "n_pairs": 105,
+          "mean_delta_D_minus_A": -590.2286,
+          "sd_of_deltas": 1451.0113,
+          "paired_ci95": [
+            -867.7728,
+            -312.6843
+          ],
+          "n_for_80pct_power": 48,
+          "paired_t": -4.1682,
+          "paired_p_value": 3.1e-05
+        }
+      },
+      "ratio_bootstrap": {
+        "tool_call_ratio": {
+          "kind": "tool_call_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 1.0825,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.5072,
+            "bootstrap_ci95": [
+              1.2363,
+              1.8852
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 103,
+            "excluded_nonpositive_baseline": 2,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.9125,
+            1.2948
+          ],
+          "bootstrap_ci95_row": [
+            0.922,
+            1.2785
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.0,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.9125,
+            1.2948
+          ],
+          "frozen_target": 0.7
+        },
+        "observation_token_ratio": {
+          "kind": "observation_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.553,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 0.8133,
+            "bootstrap_ci95": [
+              0.6962,
+              0.9418
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 103,
+            "excluded_nonpositive_baseline": 2,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.4314,
+            0.7266
+          ],
+          "bootstrap_ci95_row": [
+            0.449,
+            0.6835
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": 0.7186,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.4314,
+            0.7266
+          ],
+          "frozen_target": 0.6
+        },
+        "usage_token_ratio": {
+          "kind": "usage_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.8984,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 1.8812,
+            "bootstrap_ci95": [
+              1.5848,
+              2.1791
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.6691,
+            1.2288
+          ],
+          "bootstrap_ci95_row": [
+            0.6725,
+            1.2245
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.6691,
+            1.2288
+          ]
+        },
+        "prompt_token_ratio": {
+          "kind": "prompt_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 1.0114,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 2.363,
+            "bootstrap_ci95": [
+              1.7787,
+              3.1866
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.7275,
+            1.4681
+          ],
+          "bootstrap_ci95_row": [
+            0.7414,
+            1.4169
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.7275,
+            1.4681
+          ]
+        },
+        "completion_token_ratio": {
+          "kind": "completion_token_ratio",
+          "candidate_pairs": 105,
+          "excluded_nonfinite_pairs": 0,
+          "n_pairs": 105,
+          "point_estimate": 0.3729,
+          "estimator": "ratio_of_sums",
+          "mean_of_ratios": {
+            "point_estimate": 0.9162,
+            "bootstrap_ci95": [
+              0.767,
+              1.071
+            ],
+            "bootstrap_unit": "task",
+            "n_pairs": 105,
+            "excluded_nonpositive_baseline": 0,
+            "weighting": "equal weight per paired cell; seeds retained in task clusters"
+          },
+          "bootstrap_unit": "task",
+          "bootstrap_ci95": [
+            0.2309,
+            0.5096
+          ],
+          "bootstrap_ci95_row": [
+            0.2501,
+            0.5676
+          ],
+          "bootstrap_iterations": 20000,
+          "prob_ratio_below_frozen_target": null,
+          "n_tasks": 35,
+          "bootstrap_ci95_task": [
+            0.2309,
+            0.5096
+          ]
+        }
+      },
+      "ratio_caliber": {
+        "tool_call_ratio": {
+          "caliber": "count_ratio",
+          "note": "ratio of tool-CALL COUNTS (raw_shell vs verseshell_aci): not tokens, not usage, not currency"
+        },
+        "observation_token_ratio": {
+          "caliber": "observation_proxy_estimate_tokens",
+          "note": "ratio of `estimate_tokens(text) = max(1, len(text)//4)` accumulated over the delivered observation text. This is a PROXY: NOT endpoint usage, NOT the evaluated model's own tokenizer and NOT a money cost"
+        },
+        "usage_token_ratio": {
+          "caliber": "endpoint_usage_total",
+          "note": "ratio of endpoint-reported `usage` summed over observed requests in usage-eligible pairs (llm_prompt_tokens + llm_completion_tokens): system prompt + tool schemas + re-sent history + reasoning per turn. It is NOT the size of one system prompt or one tool-schema payload, and without price/cache rules it is NOT a money cost"
+        },
+        "prompt_token_ratio": {
+          "caliber": "endpoint_usage_prompt",
+          "note": "ratio of endpoint-reported `llm_prompt_tokens` (input usage accumulated over observed requests in usage-eligible pairs): NOT the system-prompt/schema size of one request and NOT currency"
+        },
+        "completion_token_ratio": {
+          "caliber": "endpoint_usage_completion",
+          "note": "ratio of endpoint-reported `llm_completion_tokens` (output usage). The reasoning billing boundary is unconfirmed, so it is NOT the visible answer's character count and NOT currency"
+        }
+      },
+      "real_tokenizer_note": "Unknown usage is excluded, never zero-imputed; candidate_pairs, n_pairs and excluded_nonfinite_pairs describe the cost denominator, not the score denominator. No provider invoice is reconciled. Caliber: see `ratio_caliber`. `observation_token_ratio` is PROXY-caliber — max(1, len(text)//4) over the delivered observation text. `usage_token_ratio` / `prompt_token_ratio` / `completion_token_ratio` are ENDPOINT-USAGE caliber: the endpoint's reported `usage` accumulated over observed requests in usage-eligible pairs (system prompt + tool schemas + re-sent history + reasoning). They are therefore broader than observation_tokens, are NOT the size of one system prompt or one tool-schema payload, and are NOT a money cost; the usage reading governs when the two disagree in direction (docs/acceptance-criteria.md §4.2)",
+      "tool_calls": {
+        "raw_shell": {
+          "n": 105,
+          "mean": 4.5048,
+          "sd": 3.4282,
+          "se": 0.3346
+        },
+        "verseshell_aci": {
+          "n": 105,
+          "mean": 4.8762,
+          "sd": 2.3481,
+          "se": 0.2291
+        }
+      },
+      "observation_tokens": {
+        "raw_shell": {
+          "n": 105,
+          "mean": 1320.5143,
+          "sd": 1693.2407,
+          "se": 165.2434
+        },
+        "verseshell_aci": {
+          "n": 105,
+          "mean": 730.2857,
+          "sd": 670.1982,
+          "se": 65.4046
+        }
+      },
+      "significance_notes": [
+        "unpaired success-rate difference is NOT significant at alpha=0.05 (z=1.1501, p=0.250099)",
+        "paired (McNemar) success difference is NOT significant (discordant 2 A-only vs 7 D-only, p=0.179688)"
+      ],
+      "uncertainty_scope": {
+        "independent_complete_run_variance_included": false,
+        "ratio_interval": "task-clustered only",
+        "other_intervals": "Wilson/paired-row t assumptions; not independent collection replicates",
+        "all_row_success_is_not_policy_itt": true,
+        "repeated_run_analysis": "tools/repeated_run_uncertainty.py requires a separately collected complete-run manifest"
+      }
+    }
+  ]
+}

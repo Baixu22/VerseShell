@@ -1,0 +1,177 @@
+{
+  "proposal_id": "TFP-collection-control-node-dev-2026-10-08",
+  "session_id": "collection-control-node-dev-2026-10-08",
+  "rationale": "用户要求开始已登记节点开发。保留已有工具契约批次，推进无付费调用的 TF-0133/0134，补源码、真实离线子进程、故障注入与完整回归。231 tests exit 0，但 claim_gate 25/31 exit 1，未来新冻结接入和剩余路径/中断验证未闭合，节点保持 in_progress。按 docs/task-forest-policy.md 保存提案后应用；复用 TF-0140/0141，不伪造 done 或扩展发布。",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0124",
+      "fields": {
+        "summary": "2026-10-08：在既有 TF-0128～0131 工程实现基础上继续开发 TF-0133/0134；本批完整 Python 回归 231/231，产品门禁仍 25/31。采集控制、离线报告重试与存储故障注入已有源码/证据，新冻结接入和正式研究/产品验收继续开放。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0126",
+      "fields": {
+        "status": "in_progress",
+        "summary": "2026-10-08：启动收尾与恢复分支。TF-0133/0134 已有可复用控制入口、generation 绑定、两个变体报告终态、磁盘/STOP/写入故障回归；TF-0135/0136 与关联历史范围尚未完成。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "collection-control-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0133",
+      "fields": {
+        "status": "in_progress",
+        "progress": 75,
+        "summary": "2026-10-08：新增 live_control.py，Popen 保留句柄获取退出码，核对唯一 control generation 和真实 Python PID；旧/未知/冲突终态拒绝成功。两个冻结变体报告各有终态、退出码、源/报告摘要，失败重试新目录且不重跑采集。真实离线进程及原 round 入口回归通过；旧 PowerShell 脚本和原轮保持不动，未伪造迁移回执。",
+        "next_action": "把新入口连同 runner/存储策略纳入新冻结 checkout 和 readiness；验证实际接入，保留 TF-0140 产品门禁、TF-0141 源码落地缺口后再判定关闭。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/control/run-live.ps1:42",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/storage-watch-final.json",
+          "D:/VerseShellLive/analysis-20261008/report-generation.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/historical-inputs.json",
+          "tools/live_control.py",
+          "tools/refresh_live_artifacts.py"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "collection-control-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0134",
+      "fields": {
+        "status": "in_progress",
+        "progress": 65,
+        "summary": "2026-10-08：新增冻结存储策略并在启动/恢复/下一未完成格/报告变体前检查。离线注入覆盖 D15GiB/C2GiB 边界、未知读数、STOP 传播、checkpoint 写入失败；已提交行保留，同身份显式恢复无重复格。当前测试 TEMP/缓存/构建位于 D；未来新冻结评分副本路径与强制中断过程树回收未全部验证。",
+        "next_action": "在新冻结独立开发工作区核验实际 TEMP、依赖缓存、构建与评分副本路径，并补控制器强制中断/持续写盘失败的边界验证；不复用或补写旧轮结果。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/control/run-live.ps1",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/storage-policy.json",
+          "bench/aci/results/step5p-r1-20261006/",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/runtime-paths.json",
+          "bench/aci/runners/live_storage.py",
+          "tests/test_live_recovery.py"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "collection-control-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0140",
+      "fields": {
+        "summary": "2026-10-08：本批控制与存储修复后产品门禁仍为 25/31，C12/C14/C16/C24/C34/C36 红项保留；完整 Python 回归 231 项不替代历史评分合同、证据新鲜度或正式统计验收。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/prelive-ready-2026-10-06.md",
+          "docs/claims-and-evidence.md",
+          "tools/claim_gate.py",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/readme-claims-final.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/claim-gate-final.log",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0141",
+      "fields": {
+        "summary": "2026-10-08：此前 44 条历史落地发现未在本批解决。新增控制/存储批次 9 个文件的会话基线精确 diff 和摘要；暂存区未变，抽验的原轮合并结果/collection/终态摘要不变；尚未提交、合并或覆盖 D 盘旧冻结源码。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/task-forest-20261008/landing-before.json",
+          "docs/task-forest-policy.md",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/check-landing.json",
+          "D:/VerseShellLive/node-dev-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/node-dev-20261008/logs/git-fetch-direct.exit",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08"
+        ]
+      }
+    }
+  ]
+}

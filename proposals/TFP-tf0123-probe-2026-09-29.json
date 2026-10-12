@@ -1,0 +1,39 @@
+{
+  "applied_at": "2026-09-28T22:32:44.553781Z",
+  "base_graph_hash": "7fdd0c14dac4c4d44a21569351cdc0757f1ee057faaaaafc2680ca28ebb97b3c",
+  "base_summary": {
+    "edge_count": 181,
+    "node_count": 123,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "acceptance_criteria": [
+          "ts：给出同时满足「失败不终止 + 长载荷断言」的机制并实测 pristine 转储 ≥1000 token（探针基线：收集全部失败 = 665 token，需再乘约 1.5 倍）",
+          "rust：让每条失败用例打印长 payload，并实测在同一批被拒候选上能越过 1000 token",
+          "用同一批被拒候选复测 A8：报告有几个能越过 1000 token（不预设是 5 个）",
+          "把新的组合目标**在看数据之前**写进 `docs/task-generation-protocol.md`，数值由算式给出",
+          "改观察机制会改变 live 证据面，必须与下一轮 live 一起做；不得只改任务集就跑结论"
+        ],
+        "evidence": [
+          "**可行性探针（已跑，在被拒候选上测量，未触碰冻结集与 live 证据）**：取被 A8 拒绝的 ts large 候选 `js_csvlite_parsecsv_98f2c63f`（pristine 观察 376 token），把 `check.mjs` 的 `import assert from 'node:assert/strict'` 换成收集式包装（逐断言 try/catch、失败不抛出、末尾汇总），在同一份 pristine fixture 上重跑：",
+          "  ① 现状（裸 node，首断言抛出即终止）：**1 个失败**、1,529 字符 = **382 proxy token**；",
+          "  ② 收集全部失败：**7 个失败**、2,663 字符 = **665 proxy token**。",
+          "**结论：只改报告机制不够。** 665 < 1000，仍不达标。原因是该候选的 18 个断言里有 7 个失败，但它们比较的是 3×4 这类短数组，`deepStrictEqual` 的 diff 本身很短——**字节数取决于断言的载荷，不取决于失败个数**。",
+          "**因此验收标准必须扩张**：ts 侧要**同时**满足 (a) 失败不终止进程、全部打印，(b) 断言的期望值/实际值是长载荷（`FULL_PLAN.json` 的 `large_tier_requirement` 本就写了「assertions print long values」，但生成器此前只把它当成对测试条数的要求）。rust 侧同理：`cargo test` 的短摘要要靠每条失败用例自己打印长 payload 来补。",
+          "**这条探针也解释了为什么 python large 能达标**：pytest 会把整段长字面量 diff 打出来，且 `python_nested_flatten`(3496)、`python_csvlite_parse`(1559) 的断言载荷本来就长。",
+          "**方法学说明**：这是在**已被拒绝的候选**上做的机制探针，不改变 `bench/aci/tasks/*.json`、不影响第 14 轮证据链（C12 仍为 PASS），也不构成「看到 token 结果后增删任务」。"
+        ],
+        "next_action": "先做两件事再决定组合目标：①ts 侧同时做到「收集全部失败」与「断言比较长载荷」；②rust 侧让每条失败用例打印长 payload。做完后用同一批被拒候选复测 A8，再按**算式**（而不是拍数）把新的组合目标写进 §4.6。"
+      },
+      "id": "TF-0123"
+    }
+  ],
+  "created_at": "2026-09-29T07:20:00.000000Z",
+  "proposal_id": "TFP-tf0123-probe-2026-09-29",
+  "rationale": "TF-0123 的可行性探针已跑：收集全部失败只把 ts 的 pristine 转储从 382 提到 665 token，仍不足 1000。这条改写了该节点的验收标准（需要同时改报告机制与断言载荷长度）。",
+  "session_id": "ses_verseshell-live-chain-2026-09-28",
+  "status": "applied"
+}

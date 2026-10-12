@@ -1,0 +1,76 @@
+{
+  "task_set_version": "3.0.0",
+  "composition": {
+    "total_tasks": 35,
+    "measured_tasks": 25,
+    "confirmed_large_tasks": [
+      "js_leaderboard_rank_b1603acf",
+      "python_config_reader_686653a1",
+      "python_csvlite_parse_80d158b2",
+      "python_ledger_window_bug_9bfcc241",
+      "python_nested_flatten_53db7c0b",
+      "python_paginate_60b4dafc",
+      "python_parse_orders_708606f4"
+    ],
+    "unmeasured_tasks": [
+      "python_edit_and_retest",
+      "python_fix_pytest_fail",
+      "python_noisy_install_summary",
+      "rust_add_unit_test",
+      "rust_fix_compile_error",
+      "rust_search_and_edit",
+      "ts_fix_type_error",
+      "ts_package_script_fail",
+      "windows_batch_capture_diag",
+      "windows_path_normalize_edit"
+    ],
+    "labelled_large_count": 4,
+    "confirmed_large_fraction": 0.2,
+    "coverage_range_not_confidence_interval": [
+      0.2,
+      0.4857142857142857
+    ],
+    "quota_guaranteed_by_existing_evidence": false,
+    "all_large_additions_to_guarantee_quota_without_reclassifying_existing": 7,
+    "additional_range_if_unknown_tasks_are_measured": [
+      0,
+      7
+    ]
+  },
+  "difficulty": {
+    "scope": "observed all-row baseline, not a population estimate or task-selection score",
+    "successes": 95,
+    "rows": 105,
+    "observed_success_rate": 0.9047619047619048,
+    "preregistered_target": [
+      0.4,
+      0.7
+    ],
+    "inside_target": false,
+    "preregistered_mde": 0.15,
+    "observed_positive_headroom": 0.09523809523809523,
+    "headroom_supports_positive_mde": false,
+    "does_not_rule_out": "smaller positive effects, negative effects or another baseline in future runs"
+  },
+  "boundaries": [
+    "Large means measured pristine output >=1000 proxy tokens, not a tier label.",
+    "Missing observations are unknown, never silently counted as measured-small.",
+    "The quota formula assumes each added task actually passes A8; planned labels are not evidence.",
+    "Do not feed task-level live results into new difficulty design; a blind author and new frozen evaluation remain required."
+  ],
+  "schema": "verseshell.task-design-audit/v1",
+  "generator": "tools/task_design_audit.py",
+  "generated_at": "2026-09-30T08:05:45.956349+00:00",
+  "evidence": {
+    "globs": [
+      "eval/task_set_freeze.json",
+      "eval/task_admissibility.json",
+      "bench/aci/results/latest_live.json",
+      "eval/acceptance_power.json",
+      "tools/task_design_audit.py",
+      "tools/task_admissibility.py",
+      "docs/task-generation-protocol.md"
+    ],
+    "fingerprint": "2d9144e353292d4d33172c2d69df0f74d305c51dc1576a4712eb2b7765e0efaf"
+  }
+}

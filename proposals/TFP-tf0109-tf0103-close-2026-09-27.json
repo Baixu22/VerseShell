@@ -1,0 +1,79 @@
+{
+  "applied_at": "2026-09-27T08:31:33.865480Z",
+  "base_graph_hash": "e3caa927d7b0144e12c622c5642e760949de227cbfab9de4cea31df7eea90779",
+  "base_summary": {
+    "edge_count": 180,
+    "node_count": 119,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "record_deviation",
+      "deviation": {
+        "created_at": "2026-09-27T08:31:33.656708Z",
+        "description": "在探测 TF-0109 所修的超时机制时，我把攻击性命令 `python -c \"open('src/lib.rs','w').write(open('CON','r').read())\"` 的 cwd 设成了**仓库根目录**，于是 `open('src/lib.rs','w')` 在 `open('CON','r')` 阻塞之前就把仓库的 `src/lib.rs` 截断为 0 字节（`open(...,'w')` 在打开时即截断）。发现方式：门禁重跑时 cargo 报 `unresolved import verseshell::operation / reducers / capability`，而本轮未改动任何 Rust 代码，`git diff --numstat` 显示 `src/lib.rs` 被删 86 行。已用 `git checkout -- src/lib.rs` 恢复（2170 字节，40 个模块声明全部回来，`git status` 对 src/ 干净）。逐项核查影响范围：src/ 其他文件、bench/aci/fixtures/**（runner 用 prepare_workspace() 复制到临时目录）、其他被跟踪文件均未受损；3 个零字节文件在 HEAD 中本来就是 0 字节。",
+        "evidence": [
+          "损坏证据：`git diff --numstat -- src/lib.rs` = `0  86  src/lib.rs`；修复前文件 0 字节、HEAD 版本 2170 字节",
+          "触发时间：`src/lib.rs` mtime 2026-09-27 14:36:01，与探测中残留的 CON 读取进程 PID 32140 的 CreationDate 完全一致",
+          "发现路径：`claim_gate.py` → `cargo run --example eval_metrics` 报 4 个 E0432/E0433",
+          "恢复：`git checkout -- src/lib.rs` → 2170 字节，`pub mod operation/reducers/capability` 等 40 个声明回归",
+          "根因防护①：`audit-r12-scratch/probe_shell_timeout.py` 的 cwd 改为 `tempfile.mkdtemp()` 一次性沙箱 + 结束时删除，并在 docstring 写明「绝不要把本探测的 cwd 设为仓库」与「`open(...,'w')` 会先截断」这个机制",
+          "根因防护②：`tools/harness_exec_contract.py::_runner_env_probe` 同样改用一次性沙箱 + `finally` 清理",
+          "附带发现并修复：C32 的负对照本身会**泄漏孤儿进程**（旧机制杀不掉持管道的孙进程），已加唯一 marker 与 `_reap_marked_orphans()` 清扫，实测「泄漏 0」"
+        ],
+        "id": "TFD-8207f19972",
+        "impact": "仓库源码在约 1 小时窗口内处于不可编译状态（期间门禁的 cargo 相关项不可用）；未造成数据或证据损坏，已完整恢复。根因不是「碰巧」，而是探测设计缺陷：把一个会写文件的命令放在了仓库目录里执行。",
+        "related_task_ids": [
+          "TF-0109"
+        ],
+        "severity": "high"
+      }
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**先量后写（没有靠猜）**：`audit-r12-scratch/probe_shell_timeout.py` 对同一道攻击性命令测了 5 种机制 —— `subprocess.run(timeout=6)` ❌挂死、`+stdin=DEVNULL` ❌挂死、`+CREATE_NO_WINDOW` ❌挂死、**Popen + Job Object(KILL_ON_JOB_CLOSE) ✅ 6.01s 返回**、Popen + `taskkill /T /F` ✅ 6.21s 返回。前三种还会留下持有管道的孤儿进程",
+          "**修复**：新增 `run_bounded()`（Popen + Job Object + `TerminateJobObject`，`taskkill /T /F` 作第二道保险，`stdin=DEVNULL`），并替换**全部三处**子进程调用：`execute_shell_cmd`（A 臂）、`execute_aci_op`（D 臂）、`check_success` 的 `command_exit_0`",
+          "**刻意不做的取舍**：不用设备名黑名单（CON/PRN/AUX/…）——树杀同时治住死循环与持有管道的孙进程，黑名单不能；且 `> NUL` 是合法重定向。理由写进代码注释与 C32 产物",
+          "**断点续跑（E16）**：每完成一行立即追加到 `<out>.rows.jsonl` 并 flush；重跑同一 `--out` 跳过已记录格；配置不同则把旧 checkpoint 改名为 `.stale` 而非静默混用；新增 `--fresh`。**实测**：seed 44 开跑 4 分钟时 sidecar 已有配置头 + 4 行，即单点挂死现在最多丢 1 行",
+          "**门禁 C32 已接入**：`tools/harness_exec_contract.py`，**7/7 通过**，含 `negative_control_pre_fix_shape_still_hangs`（证明旧实现确实仍会挂死，检查不是「测了个寂寞」）与 `orphans_reaped_after_negative_control`",
+          "**真实运行验证**：消融 seed 44 重跑 **exit 0**、75 行全部完成；**第 61–63 行正是 01:25 挂死 11.5 小时的那道题 `rust_borrow_fix_longest_word_a4c895ec`，这次三臂全部 PASS，D 臂 26.8s 完成**",
+          "**诚实限定**：该次重跑里模型**没有再发出** `open('CON','r')` 命令（它改用 heredoc 正常写 `src\\lib.rs`），所以「超时真的在实盘触发过」这一点的证据来自 **C32 的负对照**，而不是这次 live；live 证明的是**整轮不再卡死在那道题上**",
+          "**自引入缺陷与修复**：①`args.out` 是 `str` 不是 `Path`，首跑即 `AttributeError`，已修；②C32 负对照会泄漏孤儿进程（实测 3 个），已加唯一 marker + 清扫，复测泄漏 0",
+          "**门禁**：C32 PASS。C12 因本节点改了 runner 而转红 —— 这是 fail-closed 的**设计行为**，唯一刷新途径是用新 runner 重跑 live（已启动 with 臂重跑，使两臂共享同一 harness）"
+        ],
+        "next_action": "无（已关闭）。后续任何新增的、会把模型或测试给出的字符串交给子进程执行的通路，都必须走 `run_bounded()`。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0109"
+    },
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**3 seed 消融已完成并合并**：`bench/aci/results/live_ab_without_read_files.json` = **225 行 / seeds [42,43,44] / `api_error` 0**；with 臂 `latest_live.json` 同为 225 行同 seeds",
+          "**§3.3 两个预算都不构成约束**（6 个臂×条件格）：步数上限 ≤1%，**completion 上限最差 7%**、`harness_crash` 全 0 → 这一轮消融可用于结论",
+          "**P7 正式撤回（75 配对格）**：D with 批量读 vs D without：成功率 **0.8800 vs 0.8800**，仅 with 赢 3 / 仅 without 赢 3，**McNemar 精确 p = 1.0000**；工具/轮 **3.89 → 4.55（×1.1678，CI95 [1.0440, 1.2901]，整段 >1.0）**；观察 token/轮 578.31 → 555.88（×0.9612，CI95 [0.8567, 1.0657]，跨 1.0）",
+          "**逐 seed 方向不一致**：seed 42 `+0.08`、seed 43 `−0.08`、seed 44 `±0.00` —— 净效应为零",
+          "**结论**：去掉 `read_files`（=`file.read_many` 批量读；`read_file`=`file.view` 仍可用）的**唯一可主张效应是多约 17% 的工具调用**；成功率无可检出的下降；观察 token 无证据。第 12 轮的 0.32 是 completion 截断假象（13/25 行 `completion_truncated_turns=1` 且 0 次工具调用，剔除后 D=0.667）",
+          "**顺带测到运行间漂移**（A/A′ 两臂配置完全相同）：A 成功 0.8400→0.8267（−0.0133）、观察 token **+3.2%**；A′ 成功 0.8400→0.8400（±0.0000）、观察 token **+16.5%** —— 这是预算不构成约束条件下对同配置重跑的直接量化，支撑「跑间方差必须纳入 CI」（TF-0112）",
+          "**验收标准对照**：①消融 D 臂撞上限降到 ≤10% ✅（最差 7%）；②给出重跑后的成功率/工具数/观察 token 与区间 ✅；③消融描述改正 ✅（`audit-brief.md` P7 修订注、`acceptance-criteria.md` 消融行、`claims-and-evidence.md` C13 第 ⑬ 条）；④无需走「撤回 P7」的兜底路径，因为重跑在预算内完成了 ✅",
+          "**遗留（不属本节点）**：`live_ab_without_read_files.json` 目前仍不在 C12 检查面内 → 已由 requirement 节点 `c12-cover-inputs`（TF-0119）承接"
+        ],
+        "next_action": "无（已关闭）。P7 的替换文本已写入 `docs/audit-brief.md`；下一轮 live（TF-0105）会用到修正后的任务集与留出集。",
+        "progress": 100.0,
+        "progress_source": "agent",
+        "status": "done"
+      },
+      "id": "TF-0103"
+    }
+  ],
+  "created_at": "2026-09-27T08:31:33.645089Z",
+  "proposal_id": "TFP-tf0109-tf0103-close-2026-09-27",
+  "rationale": "TF-0109（阻塞命令的真超时 + 断点续跑）已完成并在真实运行中验证：消融 seed 44 从「挂死 11.5 小时」变成正常跑完 75 行、exit 0。TF-0103 的消融重跑补齐 3 seed / 75 配对格且 §3.3 两个预算都不构成约束，P7 正式撤回并替换为实测效应。另记一条我方造成的 incident：探测脚本以仓库为 cwd 运行了会截断文件的攻击性命令，损坏了 src/lib.rs（已从 git 恢复），并已对根因做防护。",
+  "session_id": "ses_verseshell-r12-audit-2026-09-26",
+  "status": "applied"
+}

@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.read-usage-audit/v1",
-  "generated_at": "2026-09-24T17:13:51.218655+00:00",
+  "generated_at": "2026-09-30T01:07:49.908492+00:00",
   "method": {
     "inputs": [
       "bench\\aci\\results\\latest_live.json",
@@ -23,76 +23,172 @@
       "bench/aci/results/live_ab_without_read_files.json",
       "tools/read_usage_audit.py"
     ],
-    "fingerprint": "d7cb5bcf5bfd7fd8f82b9871c1cf0faf9a0466bded96915609306a351e093746"
+    "fingerprint": "7c8424e0cbe029c55713c95475ab02190149b690970f81322cd6de9b7f66f277"
   },
   "with_read_files": {
     "d_reads": {
-      "calls": 33,
-      "paths": 55,
-      "tokens": 2126.0,
+      "calls": 144,
+      "paths": 246,
+      "tokens": 71656.0,
       "per_class_calls": {
-        "mixed:referenced_in_run+unreferenced": 14,
-        "referenced_in_run": 12,
-        "task_subject": 4,
-        "mixed:task_file+task_subject": 1,
-        "mixed:referenced_in_run+task_file": 1,
-        "mixed:referenced_in_run+task_file+unreferenced": 1
+        "mixed:referenced_in_run+unreferenced": 12,
+        "unreferenced": 3,
+        "referenced_in_run": 88,
+        "mixed:referenced_in_run+task_file+unreferenced": 3,
+        "task_subject": 9,
+        "mixed:referenced_in_run+task_subject": 11,
+        "mixed:referenced_in_run+task_subject+unreferenced": 16,
+        "mixed:referenced_in_run+task_file": 2
       },
       "per_class_paths": {
-        "referenced_in_run": 29,
-        "unreferenced": 18,
-        "task_subject": 5,
-        "task_file": 3
+        "referenced_in_run": 167,
+        "unreferenced": 37,
+        "task_file": 5,
+        "task_subject": 37
       },
       "per_class_tokens": {
-        "referenced_in_run": 1067.83,
-        "unreferenced": 721.17,
-        "task_subject": 202.5,
-        "task_file": 134.5
+        "referenced_in_run": 58011.5,
+        "unreferenced": 4322.0,
+        "task_file": 227.17,
+        "task_subject": 9095.33
       },
       "per_class_token_share": {
-        "referenced_in_run": 0.5023,
-        "unreferenced": 0.3392,
-        "task_subject": 0.0952,
-        "task_file": 0.0633
+        "referenced_in_run": 0.8096,
+        "task_subject": 0.1269,
+        "unreferenced": 0.0603,
+        "task_file": 0.0032
       },
       "per_task_class_counts": {
+        "js_leaderboard_rank_b1603acf": {
+          "referenced_in_run": 7
+        },
+        "node_envconfig_validate_dd681123": {
+          "referenced_in_run": 11
+        },
+        "node_slugify_771d856c": {
+          "referenced_in_run": 6
+        },
+        "py_region_top_seller_7f713e22": {
+          "referenced_in_run": 6
+        },
+        "python_batch_splitter_05613a34": {
+          "referenced_in_run": 3,
+          "task_subject": 3
+        },
+        "python_config_reader_686653a1": {
+          "referenced_in_run": 12
+        },
+        "python_csvlite_parse_80d158b2": {
+          "task_subject": 3,
+          "referenced_in_run": 8
+        },
         "python_edit_and_retest": {
+          "referenced_in_run": 3,
+          "unreferenced": 3
+        },
+        "python_exception_mislabel_0816896a": {
           "referenced_in_run": 5,
-          "unreferenced": 2
+          "task_subject": 1
         },
         "python_fix_pytest_fail": {
           "referenced_in_run": 3,
           "unreferenced": 3
         },
+        "python_ledger_window_bug_9bfcc241": {
+          "referenced_in_run": 6
+        },
+        "python_nested_flatten_53db7c0b": {
+          "referenced_in_run": 11
+        },
         "python_noisy_install_summary": {
           "referenced_in_run": 3,
           "task_file": 1
+        },
+        "python_paginate_60b4dafc": {
+          "referenced_in_run": 6
+        },
+        "python_parse_orders_708606f4": {
+          "referenced_in_run": 3,
+          "task_subject": 3
+        },
+        "python_scheduler_cancel_transition_4a9b681c": {
+          "referenced_in_run": 4,
+          "task_subject": 2
+        },
+        "python_shift_report_tie_order_4a0c45c8": {
+          "referenced_in_run": 5,
+          "task_subject": 1
+        },
+        "python_turnstile_6e3358e8": {
+          "referenced_in_run": 5,
+          "task_subject": 1
         },
         "rust_add_unit_test": {
           "unreferenced": 3,
           "referenced_in_run": 4
         },
+        "rust_borrow_fix_longest_word_a4c895ec": {
+          "unreferenced": 3,
+          "referenced_in_run": 3,
+          "task_subject": 3
+        },
+        "rust_config_parse_port_d6111a63": {
+          "unreferenced": 3,
+          "referenced_in_run": 3,
+          "task_subject": 3
+        },
+        "rust_error_source_propagation_3eca2e86": {
+          "unreferenced": 3,
+          "referenced_in_run": 3,
+          "task_subject": 3
+        },
         "rust_fix_compile_error": {
           "referenced_in_run": 3,
           "unreferenced": 3
         },
+        "rust_grade_threshold_502d9b26": {
+          "referenced_in_run": 3,
+          "task_subject": 3,
+          "unreferenced": 3
+        },
         "rust_search_and_edit": {
+          "unreferenced": 3,
           "referenced_in_run": 4,
-          "unreferenced": 1
+          "task_file": 1
+        },
+        "rust_username_guard_758c1a78": {
+          "referenced_in_run": 3,
+          "task_subject": 3,
+          "unreferenced": 2
+        },
+        "rust_window_fold_scanner_3d213f38": {
+          "unreferenced": 2,
+          "referenced_in_run": 3,
+          "task_subject": 3
+        },
+        "ts_chunk_batches_233e9e44": {
+          "referenced_in_run": 7
         },
         "ts_fix_type_error": {
           "referenced_in_run": 3,
           "unreferenced": 6,
-          "task_file": 1
+          "task_file": 2
+        },
+        "ts_narrow_vs_cast_824b51c8": {
+          "referenced_in_run": 6
         },
         "ts_package_script_fail": {
-          "referenced_in_run": 3
+          "referenced_in_run": 3,
+          "task_file": 1
+        },
+        "typescript_missing_await_result_order_c58cafb6": {
+          "referenced_in_run": 6
+        },
+        "typescript_reduce_shared_accumulator_d80f462d": {
+          "referenced_in_run": 6
         },
         "windows_batch_capture_diag": {
-          "task_subject": 3,
-          "task_file": 1,
-          "referenced_in_run": 1
+          "task_subject": 3
         },
         "windows_path_normalize_edit": {
           "task_subject": 2
@@ -101,14 +197,38 @@
       "top_paths": [
         [
           "referenced_in_run:src/lib.rs",
-          11
+          29
         ],
         [
           "unreferenced:Cargo.toml",
-          7
+          25
         ],
         [
-          "referenced_in_run:greet.py",
+          "referenced_in_run:check.mjs",
+          22
+        ],
+        [
+          "referenced_in_run:test_configreader.py",
+          9
+        ],
+        [
+          "referenced_in_run:envConfig.mjs",
+          8
+        ],
+        [
+          "referenced_in_run:test_nested_flatten.py",
+          8
+        ],
+        [
+          "task_file:TASK.md",
+          5
+        ],
+        [
+          "referenced_in_run:test_csvlite.py",
+          5
+        ],
+        [
+          "referenced_in_run:chunk.mjs",
           4
         ],
         [
@@ -120,44 +240,20 @@
           3
         ],
         [
+          "referenced_in_run:greet.py",
+          3
+        ],
+        [
+          "unreferenced:tests/test_greet.py",
+          3
+        ],
+        [
           "referenced_in_run:requirements.txt",
           3
         ],
         [
           "referenced_in_run:src/index.ts",
           3
-        ],
-        [
-          "unreferenced:tsconfig.json",
-          3
-        ],
-        [
-          "unreferenced:package.json",
-          3
-        ],
-        [
-          "referenced_in_run:package.json",
-          3
-        ],
-        [
-          "task_subject:broken_build.log",
-          3
-        ],
-        [
-          "task_file:TASK.md",
-          3
-        ],
-        [
-          "unreferenced:tests/test_greet.py",
-          2
-        ],
-        [
-          "task_subject:out/result.txt",
-          2
-        ],
-        [
-          "referenced_in_run:ERR.txt",
-          1
         ]
       ],
       "rows": [
@@ -190,168 +286,22 @@
           "share_per_path": 37.5
         },
         {
-          "task_id": "rust_add_unit_test",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 27,
-          "share_per_path": 27.0
-        },
-        {
           "task_id": "rust_search_and_edit",
           "op": "file.view",
           "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 31,
-          "share_per_path": 31.0
-        },
-        {
-          "task_id": "python_fix_pytest_fail",
-          "op": "file.read_many",
-          "paths": [
-            "mathlib.py",
-            "tests/test_math.py"
-          ],
-          "classes": [
-            "referenced_in_run",
-            "unreferenced"
-          ],
-          "tokens": 72,
-          "share_per_path": 36.0
-        },
-        {
-          "task_id": "python_edit_and_retest",
-          "op": "file.read_many",
-          "paths": [
-            "greet.py",
-            "tests/test_greet.py"
-          ],
-          "classes": [
-            "referenced_in_run",
-            "unreferenced"
-          ],
-          "tokens": 80,
-          "share_per_path": 40.0
-        },
-        {
-          "task_id": "python_noisy_install_summary",
-          "op": "file.view",
-          "paths": [
-            "requirements.txt"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 17,
-          "share_per_path": 17.0
-        },
-        {
-          "task_id": "ts_fix_type_error",
-          "op": "file.read_many",
-          "paths": [
-            "src/index.ts",
-            "tsconfig.json",
-            "package.json"
-          ],
-          "classes": [
-            "referenced_in_run",
-            "unreferenced",
-            "unreferenced"
-          ],
-          "tokens": 137,
-          "share_per_path": 45.67
-        },
-        {
-          "task_id": "ts_package_script_fail",
-          "op": "file.view",
-          "paths": [
-            "package.json"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 55,
-          "share_per_path": 55.0
-        },
-        {
-          "task_id": "windows_path_normalize_edit",
-          "op": "file.view",
-          "paths": [
-            "out/result.txt"
-          ],
-          "classes": [
-            "task_subject"
-          ],
-          "tokens": 15,
-          "share_per_path": 15.0
-        },
-        {
-          "task_id": "windows_batch_capture_diag",
-          "op": "file.read_many",
-          "paths": [
-            "broken_build.log",
-            "TASK.md"
-          ],
-          "classes": [
-            "task_subject",
-            "task_file"
-          ],
-          "tokens": 113,
-          "share_per_path": 56.5
-        },
-        {
-          "task_id": "windows_batch_capture_diag",
-          "op": "file.view",
-          "paths": [
-            "ERR.txt"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 18,
-          "share_per_path": 18.0
-        },
-        {
-          "task_id": "rust_fix_compile_error",
-          "op": "file.read_many",
-          "paths": [
-            "src/lib.rs",
             "Cargo.toml"
           ],
           "classes": [
-            "referenced_in_run",
             "unreferenced"
           ],
-          "tokens": 76,
-          "share_per_path": 38.0
-        },
-        {
-          "task_id": "rust_add_unit_test",
-          "op": "file.read_many",
-          "paths": [
-            "Cargo.toml",
-            "src/lib.rs"
-          ],
-          "classes": [
-            "unreferenced",
-            "referenced_in_run"
-          ],
-          "tokens": 75,
-          "share_per_path": 37.5
+          "tokens": 33,
+          "share_per_path": 33.0
         },
         {
           "task_id": "rust_search_and_edit",
           "op": "file.view",
           "paths": [
-            "src/lib.rs"
+            "src\\lib.rs"
           ],
           "classes": [
             "referenced_in_run"
@@ -405,27 +355,29 @@
           "paths": [
             "src/index.ts",
             "tsconfig.json",
-            "package.json"
+            "package.json",
+            "TASK.md"
           ],
           "classes": [
             "referenced_in_run",
             "unreferenced",
-            "unreferenced"
+            "unreferenced",
+            "task_file"
           ],
-          "tokens": 137,
-          "share_per_path": 45.67
+          "tokens": 214,
+          "share_per_path": 53.5
         },
         {
           "task_id": "ts_package_script_fail",
-          "op": "file.view",
+          "op": "file.read_many",
           "paths": [
             "package.json"
           ],
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 55,
-          "share_per_path": 55.0
+          "tokens": 67,
+          "share_per_path": 67.0
         },
         {
           "task_id": "windows_batch_capture_diag",
@@ -440,49 +392,463 @@
           "share_per_path": 58.0
         },
         {
-          "task_id": "rust_fix_compile_error",
+          "task_id": "py_region_top_seller_7f713e22",
+          "op": "file.read_many",
+          "paths": [
+            "salesagg.py",
+            "test_salesagg.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1154,
+          "share_per_path": 577.0
+        },
+        {
+          "task_id": "python_batch_splitter_05613a34",
+          "op": "file.read_many",
+          "paths": [
+            "batches.py",
+            "test_batches.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 393,
+          "share_per_path": 196.5
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.read_many",
+          "paths": [
+            "configreader.py",
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1224,
+          "share_per_path": 612.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 470,
+          "share_per_path": 470.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 201,
+          "share_per_path": 201.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 143,
+          "share_per_path": 143.0
+        },
+        {
+          "task_id": "python_exception_mislabel_0816896a",
+          "op": "file.read_many",
+          "paths": [
+            "intake.py",
+            "test_intake.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 643,
+          "share_per_path": 321.5
+        },
+        {
+          "task_id": "python_ledger_window_bug_9bfcc241",
+          "op": "file.read_many",
+          "paths": [
+            "ledger.py",
+            "test_ledger.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 612,
+          "share_per_path": 306.0
+        },
+        {
+          "task_id": "python_paginate_60b4dafc",
+          "op": "file.read_many",
+          "paths": [
+            "paginate.py",
+            "test_paginate.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1137,
+          "share_per_path": 568.5
+        },
+        {
+          "task_id": "python_parse_orders_708606f4",
+          "op": "file.read_many",
+          "paths": [
+            "orders.py",
+            "test_orders.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 427,
+          "share_per_path": 213.5
+        },
+        {
+          "task_id": "python_scheduler_cancel_transition_4a9b681c",
+          "op": "file.read_many",
+          "paths": [
+            "scheduler.py",
+            "test_scheduler.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 777,
+          "share_per_path": 388.5
+        },
+        {
+          "task_id": "python_shift_report_tie_order_4a0c45c8",
+          "op": "file.read_many",
+          "paths": [
+            "shifts.py",
+            "test_shifts.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 500,
+          "share_per_path": 250.0
+        },
+        {
+          "task_id": "python_turnstile_6e3358e8",
+          "op": "file.read_many",
+          "paths": [
+            "turnstile.py",
+            "test_turnstile.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 915,
+          "share_per_path": 457.5
+        },
+        {
+          "task_id": "rust_borrow_fix_longest_word_a4c895ec",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs",
+            "tests/longest.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 372,
+          "share_per_path": 124.0
+        },
+        {
+          "task_id": "rust_error_source_propagation_3eca2e86",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs",
+            "tests/propagate.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 914,
+          "share_per_path": 304.67
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs",
+            "tests/scanner.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 805,
+          "share_per_path": 268.33
+        },
+        {
+          "task_id": "typescript_missing_await_result_order_c58cafb6",
+          "op": "file.read_many",
+          "paths": [
+            "pipeline.mjs",
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 419,
+          "share_per_path": 209.5
+        },
+        {
+          "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+          "op": "file.read_many",
+          "paths": [
+            "stats.mjs",
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 682,
+          "share_per_path": 341.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.read_many",
+          "paths": [
+            "leaderboard.mjs",
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1904,
+          "share_per_path": 952.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 1848,
+          "share_per_path": 1848.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 804,
+          "share_per_path": 804.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 494,
+          "share_per_path": 494.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 612,
+          "share_per_path": 612.0
+        },
+        {
+          "task_id": "node_slugify_771d856c",
+          "op": "file.read_many",
+          "paths": [
+            "slugify.mjs",
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 432,
+          "share_per_path": 216.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.read_many",
+          "paths": [
+            "csvlite.py",
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "task_subject",
+            "task_subject"
+          ],
+          "tokens": 1013,
+          "share_per_path": 506.5
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 619,
+          "share_per_path": 619.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.read_many",
+          "paths": [
+            "nested_flatten.py",
+            "test_nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 983,
+          "share_per_path": 491.5
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs",
+            "tests/config_test.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 700,
+          "share_per_path": 233.33
+        },
+        {
+          "task_id": "rust_grade_threshold_502d9b26",
           "op": "file.read_many",
           "paths": [
             "src/lib.rs",
+            "tests/grade_test.rs",
             "Cargo.toml"
           ],
           "classes": [
             "referenced_in_run",
+            "task_subject",
             "unreferenced"
           ],
-          "tokens": 76,
-          "share_per_path": 38.0
+          "tokens": 371,
+          "share_per_path": 123.67
         },
         {
-          "task_id": "rust_add_unit_test",
+          "task_id": "rust_username_guard_758c1a78",
           "op": "file.read_many",
           "paths": [
-            "Cargo.toml",
-            "src/lib.rs"
+            "src/lib.rs",
+            "tests/username_test.rs",
+            "Cargo.toml"
           ],
           "classes": [
-            "unreferenced",
-            "referenced_in_run"
+            "referenced_in_run",
+            "task_subject",
+            "unreferenced"
           ],
-          "tokens": 75,
-          "share_per_path": 37.5
+          "tokens": 806,
+          "share_per_path": 268.67
         },
         {
-          "task_id": "rust_search_and_edit",
+          "task_id": "ts_chunk_batches_233e9e44",
           "op": "file.read_many",
           "paths": [
-            "Cargo.toml",
-            "src/lib.rs"
+            "chunk.mjs",
+            "check.mjs"
           ],
           "classes": [
-            "unreferenced",
+            "referenced_in_run",
             "referenced_in_run"
           ],
-          "tokens": 80,
-          "share_per_path": 40.0
+          "tokens": 533,
+          "share_per_path": 266.5
         },
         {
-          "task_id": "rust_search_and_edit",
+          "task_id": "ts_chunk_batches_233e9e44",
+          "op": "file.view",
+          "paths": [
+            "chunk.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 190,
+          "share_per_path": 190.0
+        },
+        {
+          "task_id": "ts_narrow_vs_cast_824b51c8",
+          "op": "file.read_many",
+          "paths": [
+            "narrow.mjs",
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 698,
+          "share_per_path": 349.0
+        },
+        {
+          "task_id": "rust_fix_compile_error",
           "op": "file.view",
           "paths": [
             "src/lib.rs"
@@ -490,8 +856,72 @@
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 31,
-          "share_per_path": 31.0
+          "tokens": 28,
+          "share_per_path": 28.0
+        },
+        {
+          "task_id": "rust_fix_compile_error",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 33,
+          "share_per_path": 33.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 27,
+          "share_per_path": 27.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 33,
+          "share_per_path": 33.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 27,
+          "share_per_path": 27.0
+        },
+        {
+          "task_id": "rust_search_and_edit",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs",
+            "TASK.md"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_file"
+          ],
+          "tokens": 110,
+          "share_per_path": 36.67
         },
         {
           "task_id": "python_fix_pytest_fail",
@@ -516,22 +946,408 @@
           ],
           "classes": [
             "referenced_in_run",
-            "referenced_in_run"
+            "unreferenced"
           ],
           "tokens": 80,
           "share_per_path": 40.0
         },
         {
-          "task_id": "python_edit_and_retest",
+          "task_id": "python_paginate_60b4dafc",
+          "op": "file.read_many",
+          "paths": [
+            "paginate.py",
+            "test_paginate.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1137,
+          "share_per_path": 568.5
+        },
+        {
+          "task_id": "python_parse_orders_708606f4",
           "op": "file.view",
           "paths": [
-            "greet.py"
+            "orders.py"
           ],
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 27,
-          "share_per_path": 27.0
+          "tokens": 196,
+          "share_per_path": 196.0
+        },
+        {
+          "task_id": "python_parse_orders_708606f4",
+          "op": "file.view",
+          "paths": [
+            "test_orders.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 215,
+          "share_per_path": 215.0
+        },
+        {
+          "task_id": "python_scheduler_cancel_transition_4a9b681c",
+          "op": "file.view",
+          "paths": [
+            "scheduler.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 370,
+          "share_per_path": 370.0
+        },
+        {
+          "task_id": "python_scheduler_cancel_transition_4a9b681c",
+          "op": "file.view",
+          "paths": [
+            "test_scheduler.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 389,
+          "share_per_path": 389.0
+        },
+        {
+          "task_id": "python_shift_report_tie_order_4a0c45c8",
+          "op": "file.read_many",
+          "paths": [
+            "shifts.py",
+            "test_shifts.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 500,
+          "share_per_path": 250.0
+        },
+        {
+          "task_id": "python_turnstile_6e3358e8",
+          "op": "file.read_many",
+          "paths": [
+            "turnstile.py",
+            "test_turnstile.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 915,
+          "share_per_path": 457.5
+        },
+        {
+          "task_id": "rust_borrow_fix_longest_word_a4c895ec",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src\\lib.rs",
+            "tests\\longest.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 373,
+          "share_per_path": 124.33
+        },
+        {
+          "task_id": "rust_error_source_propagation_3eca2e86",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs",
+            "tests/propagate.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 914,
+          "share_per_path": 304.67
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 344,
+          "share_per_path": 344.0
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.view",
+          "paths": [
+            "tests/scanner.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 409,
+          "share_per_path": 409.0
+        },
+        {
+          "task_id": "typescript_missing_await_result_order_c58cafb6",
+          "op": "file.read_many",
+          "paths": [
+            "pipeline.mjs",
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 419,
+          "share_per_path": 209.5
+        },
+        {
+          "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 500,
+          "share_per_path": 500.0
+        },
+        {
+          "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+          "op": "file.view",
+          "paths": [
+            "stats.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 167,
+          "share_per_path": 167.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "leaderboard.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 159,
+          "share_per_path": 159.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 1024,
+          "share_per_path": 1024.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.read_many",
+          "paths": [
+            "check.mjs",
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1324,
+          "share_per_path": 662.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 397,
+          "share_per_path": 397.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 122,
+          "share_per_path": 122.0
+        },
+        {
+          "task_id": "node_slugify_771d856c",
+          "op": "file.read_many",
+          "paths": [
+            "slugify.mjs",
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 432,
+          "share_per_path": 216.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.read_many",
+          "paths": [
+            "csvlite.py",
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1013,
+          "share_per_path": 506.5
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 705,
+          "share_per_path": 705.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 298,
+          "share_per_path": 298.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.read_many",
+          "paths": [
+            "nested_flatten.py",
+            "test_nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 983,
+          "share_per_path": 491.5
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.view",
+          "paths": [
+            "test_nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 896,
+          "share_per_path": 896.0
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs",
+            "tests/config_test.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 700,
+          "share_per_path": 233.33
+        },
+        {
+          "task_id": "rust_grade_threshold_502d9b26",
+          "op": "file.read_many",
+          "paths": [
+            "src/lib.rs",
+            "tests/grade_test.rs",
+            "Cargo.toml"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject",
+            "unreferenced"
+          ],
+          "tokens": 371,
+          "share_per_path": 123.67
+        },
+        {
+          "task_id": "rust_username_guard_758c1a78",
+          "op": "file.read_many",
+          "paths": [
+            "src/lib.rs",
+            "tests/username_test.rs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 763,
+          "share_per_path": 381.5
+        },
+        {
+          "task_id": "ts_chunk_batches_233e9e44",
+          "op": "file.read_many",
+          "paths": [
+            "chunk.mjs",
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 533,
+          "share_per_path": 266.5
+        },
+        {
+          "task_id": "ts_narrow_vs_cast_824b51c8",
+          "op": "file.read_many",
+          "paths": [
+            "check.mjs",
+            "narrow.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 698,
+          "share_per_path": 349.0
         },
         {
           "task_id": "python_noisy_install_summary",
@@ -553,6 +1369,268 @@
           "paths": [
             "src/index.ts",
             "tsconfig.json",
+            "package.json"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "unreferenced",
+            "unreferenced"
+          ],
+          "tokens": 183,
+          "share_per_path": 61.0
+        },
+        {
+          "task_id": "ts_package_script_fail",
+          "op": "file.read_many",
+          "paths": [
+            "package.json",
+            "TASK.md"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_file"
+          ],
+          "tokens": 95,
+          "share_per_path": 47.5
+        },
+        {
+          "task_id": "windows_path_normalize_edit",
+          "op": "file.view",
+          "paths": [
+            "out/result.txt"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 15,
+          "share_per_path": 15.0
+        },
+        {
+          "task_id": "windows_batch_capture_diag",
+          "op": "file.view",
+          "paths": [
+            "broken_build.log"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 58,
+          "share_per_path": 58.0
+        },
+        {
+          "task_id": "py_region_top_seller_7f713e22",
+          "op": "file.read_many",
+          "paths": [
+            "salesagg.py",
+            "test_salesagg.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1154,
+          "share_per_path": 577.0
+        },
+        {
+          "task_id": "python_batch_splitter_05613a34",
+          "op": "file.read_many",
+          "paths": [
+            "batches.py",
+            "test_batches.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 393,
+          "share_per_path": 196.5
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.read_many",
+          "paths": [
+            "configreader.py",
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1224,
+          "share_per_path": 612.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 579,
+          "share_per_path": 579.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 692,
+          "share_per_path": 692.0
+        },
+        {
+          "task_id": "python_exception_mislabel_0816896a",
+          "op": "file.view",
+          "paths": [
+            "intake.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 345,
+          "share_per_path": 345.0
+        },
+        {
+          "task_id": "python_exception_mislabel_0816896a",
+          "op": "file.view",
+          "paths": [
+            "test_intake.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 282,
+          "share_per_path": 282.0
+        },
+        {
+          "task_id": "python_ledger_window_bug_9bfcc241",
+          "op": "file.view",
+          "paths": [
+            "ledger.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 308,
+          "share_per_path": 308.0
+        },
+        {
+          "task_id": "python_ledger_window_bug_9bfcc241",
+          "op": "file.view",
+          "paths": [
+            "test_ledger.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 289,
+          "share_per_path": 289.0
+        },
+        {
+          "task_id": "rust_fix_compile_error",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run"
+          ],
+          "tokens": 76,
+          "share_per_path": 38.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run"
+          ],
+          "tokens": 75,
+          "share_per_path": 37.5
+        },
+        {
+          "task_id": "rust_search_and_edit",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run"
+          ],
+          "tokens": 80,
+          "share_per_path": 40.0
+        },
+        {
+          "task_id": "rust_search_and_edit",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 31,
+          "share_per_path": 31.0
+        },
+        {
+          "task_id": "python_fix_pytest_fail",
+          "op": "file.read_many",
+          "paths": [
+            "mathlib.py",
+            "tests/test_math.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "unreferenced"
+          ],
+          "tokens": 72,
+          "share_per_path": 36.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.read_many",
+          "paths": [
+            "greet.py",
+            "tests/test_greet.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "unreferenced"
+          ],
+          "tokens": 80,
+          "share_per_path": 40.0
+        },
+        {
+          "task_id": "python_noisy_install_summary",
+          "op": "file.view",
+          "paths": [
+            "requirements.txt"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 17,
+          "share_per_path": 17.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.read_many",
+          "paths": [
+            "src/index.ts",
+            "tsconfig.json",
             "package.json",
             "TASK.md"
           ],
@@ -562,8 +1640,8 @@
             "unreferenced",
             "task_file"
           ],
-          "tokens": 168,
-          "share_per_path": 42.0
+          "tokens": 214,
+          "share_per_path": 53.5
         },
         {
           "task_id": "ts_package_script_fail",
@@ -600,145 +1678,772 @@
           ],
           "tokens": 58,
           "share_per_path": 58.0
+        },
+        {
+          "task_id": "py_region_top_seller_7f713e22",
+          "op": "file.read_many",
+          "paths": [
+            "salesagg.py",
+            "test_salesagg.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1154,
+          "share_per_path": 577.0
+        },
+        {
+          "task_id": "python_batch_splitter_05613a34",
+          "op": "file.read_many",
+          "paths": [
+            "batches.py",
+            "test_batches.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 393,
+          "share_per_path": 196.5
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.read_many",
+          "paths": [
+            "configreader.py",
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1224,
+          "share_per_path": 612.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 470,
+          "share_per_path": 470.0
+        },
+        {
+          "task_id": "python_exception_mislabel_0816896a",
+          "op": "file.read_many",
+          "paths": [
+            "intake.py",
+            "test_intake.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 643,
+          "share_per_path": 321.5
+        },
+        {
+          "task_id": "python_ledger_window_bug_9bfcc241",
+          "op": "file.read_many",
+          "paths": [
+            "ledger.py",
+            "test_ledger.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 612,
+          "share_per_path": 306.0
+        },
+        {
+          "task_id": "python_paginate_60b4dafc",
+          "op": "file.read_many",
+          "paths": [
+            "paginate.py",
+            "test_paginate.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1137,
+          "share_per_path": 568.5
+        },
+        {
+          "task_id": "python_parse_orders_708606f4",
+          "op": "file.read_many",
+          "paths": [
+            "orders.py",
+            "test_orders.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 427,
+          "share_per_path": 213.5
+        },
+        {
+          "task_id": "python_scheduler_cancel_transition_4a9b681c",
+          "op": "file.read_many",
+          "paths": [
+            "scheduler.py",
+            "test_scheduler.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 777,
+          "share_per_path": 388.5
+        },
+        {
+          "task_id": "python_shift_report_tie_order_4a0c45c8",
+          "op": "file.read_many",
+          "paths": [
+            "shifts.py",
+            "test_shifts.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 500,
+          "share_per_path": 250.0
+        },
+        {
+          "task_id": "python_turnstile_6e3358e8",
+          "op": "file.read_many",
+          "paths": [
+            "turnstile.py",
+            "test_turnstile.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 915,
+          "share_per_path": 457.5
+        },
+        {
+          "task_id": "rust_borrow_fix_longest_word_a4c895ec",
+          "op": "file.read_many",
+          "paths": [
+            "src/lib.rs",
+            "tests/longest.rs",
+            "Cargo.toml"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject",
+            "unreferenced"
+          ],
+          "tokens": 372,
+          "share_per_path": 124.0
+        },
+        {
+          "task_id": "rust_error_source_propagation_3eca2e86",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs",
+            "tests/propagate.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 914,
+          "share_per_path": 304.67
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.read_many",
+          "paths": [
+            "src/lib.rs",
+            "tests/scanner.rs",
+            "Cargo.toml"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject",
+            "unreferenced"
+          ],
+          "tokens": 805,
+          "share_per_path": 268.33
+        },
+        {
+          "task_id": "typescript_missing_await_result_order_c58cafb6",
+          "op": "file.view",
+          "paths": [
+            "pipeline.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 247,
+          "share_per_path": 247.0
+        },
+        {
+          "task_id": "typescript_missing_await_result_order_c58cafb6",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 156,
+          "share_per_path": 156.0
+        },
+        {
+          "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+          "op": "file.view",
+          "paths": [
+            "stats.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 167,
+          "share_per_path": 167.0
+        },
+        {
+          "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 500,
+          "share_per_path": 500.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "leaderboard.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 159,
+          "share_per_path": 159.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 685,
+          "share_per_path": 685.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 804,
+          "share_per_path": 804.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 494,
+          "share_per_path": 494.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 432,
+          "share_per_path": 432.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 163,
+          "share_per_path": 163.0
+        },
+        {
+          "task_id": "node_slugify_771d856c",
+          "op": "file.read_many",
+          "paths": [
+            "slugify.mjs",
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 432,
+          "share_per_path": 216.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.read_many",
+          "paths": [
+            "csvlite.py",
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 1013,
+          "share_per_path": 506.5
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 619,
+          "share_per_path": 619.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 686,
+          "share_per_path": 686.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.read_many",
+          "paths": [
+            "nested_flatten.py",
+            "test_nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 983,
+          "share_per_path": 491.5
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.view",
+          "paths": [
+            "test_nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 543,
+          "share_per_path": 543.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.view",
+          "paths": [
+            "test_nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 563,
+          "share_per_path": 563.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.view",
+          "paths": [
+            "test_nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 558,
+          "share_per_path": 558.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.view",
+          "paths": [
+            "test_nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 345,
+          "share_per_path": 345.0
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs",
+            "tests/config_test.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 700,
+          "share_per_path": 233.33
+        },
+        {
+          "task_id": "rust_grade_threshold_502d9b26",
+          "op": "file.read_many",
+          "paths": [
+            "Cargo.toml",
+            "src/lib.rs",
+            "tests/grade_test.rs"
+          ],
+          "classes": [
+            "unreferenced",
+            "referenced_in_run",
+            "task_subject"
+          ],
+          "tokens": 371,
+          "share_per_path": 123.67
+        },
+        {
+          "task_id": "rust_username_guard_758c1a78",
+          "op": "file.read_many",
+          "paths": [
+            "src/lib.rs",
+            "tests/username_test.rs",
+            "Cargo.toml"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "task_subject",
+            "unreferenced"
+          ],
+          "tokens": 806,
+          "share_per_path": 268.67
+        },
+        {
+          "task_id": "ts_chunk_batches_233e9e44",
+          "op": "file.read_many",
+          "paths": [
+            "chunk.mjs",
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 533,
+          "share_per_path": 266.5
+        },
+        {
+          "task_id": "ts_narrow_vs_cast_824b51c8",
+          "op": "file.read_many",
+          "paths": [
+            "check.mjs",
+            "narrow.mjs"
+          ],
+          "classes": [
+            "referenced_in_run",
+            "referenced_in_run"
+          ],
+          "tokens": 698,
+          "share_per_path": 349.0
         }
       ]
     },
     "a_reads": {
-      "file_refs": 68,
-      "tokens": 2185.0,
+      "file_refs": 322,
+      "tokens": 89356.0,
       "per_class_file_refs": {
-        "referenced_in_run": 31,
-        "unreferenced": 12,
-        "task_file": 7,
-        "task_subject": 18
+        "referenced_in_run": 171,
+        "task_subject": 124,
+        "unreferenced": 22,
+        "task_file": 5
       },
       "per_class_tokens": {
-        "referenced_in_run": 1111.0,
-        "unreferenced": 261.5,
-        "task_file": 234.0,
-        "task_subject": 578.5
+        "referenced_in_run": 56995.5,
+        "task_subject": 29988.0,
+        "unreferenced": 2078.0,
+        "task_file": 294.5
       },
       "per_class_token_share": {
-        "referenced_in_run": 0.5085,
-        "task_subject": 0.2648,
-        "unreferenced": 0.1197,
-        "task_file": 0.1071
+        "referenced_in_run": 0.6378,
+        "task_subject": 0.3356,
+        "unreferenced": 0.0233,
+        "task_file": 0.0033
       },
       "top_paths": [
         [
-          "TASK.md",
-          9
-        ],
-        [
           "src/lib.rs",
-          8
-        ],
-        [
-          "package.json",
-          8
+          51
         ],
         [
           "Cargo.toml",
-          7
+          22
         ],
         [
-          "broken_build.log",
-          4
+          "check.mjs",
+          20
         ],
         [
-          "greet.py",
-          3
+          "configreader.py",
+          11
         ],
         [
-          "tests/test_greet.py",
-          3
+          "TASK.md",
+          10
         ],
         [
-          "requirements.txt",
-          3
+          "pipeline.mjs",
+          10
         ],
         [
-          "SUMMARY.txt",
-          3
+          "narrow.mjs",
+          10
         ],
         [
-          "tsconfig.json",
-          3
+          "batches.py",
+          9
+        ],
+        [
+          "intake.py",
+          9
+        ],
+        [
+          "stats.mjs",
+          9
         ]
       ]
     }
   },
   "without_read_files": {
     "d_reads": {
-      "calls": 35,
-      "paths": 35,
-      "tokens": 1102.0,
+      "calls": 226,
+      "paths": 226,
+      "tokens": 64751.0,
       "per_class_calls": {
-        "referenced_in_run": 19,
-        "unreferenced": 13,
-        "task_subject": 1,
-        "task_file": 2
+        "referenced_in_run": 164,
+        "unreferenced": 25,
+        "task_subject": 37
       },
       "per_class_paths": {
-        "referenced_in_run": 19,
-        "unreferenced": 13,
-        "task_subject": 1,
-        "task_file": 2
+        "referenced_in_run": 164,
+        "unreferenced": 25,
+        "task_subject": 37
       },
       "per_class_tokens": {
-        "referenced_in_run": 575.0,
-        "unreferenced": 446.0,
-        "task_subject": 31.0,
-        "task_file": 50.0
+        "referenced_in_run": 53366.0,
+        "unreferenced": 1003.0,
+        "task_subject": 10382.0
       },
       "per_class_token_share": {
-        "referenced_in_run": 0.5218,
-        "unreferenced": 0.4047,
-        "task_file": 0.0454,
-        "task_subject": 0.0281
+        "referenced_in_run": 0.8242,
+        "task_subject": 0.1603,
+        "unreferenced": 0.0155
       },
       "per_task_class_counts": {
-        "python_edit_and_retest": {
+        "js_leaderboard_rank_b1603acf": {
+          "referenced_in_run": 8
+        },
+        "node_envconfig_validate_dd681123": {
+          "referenced_in_run": 11
+        },
+        "node_slugify_771d856c": {
+          "referenced_in_run": 6
+        },
+        "py_region_top_seller_7f713e22": {
+          "referenced_in_run": 6
+        },
+        "python_batch_splitter_05613a34": {
           "referenced_in_run": 3,
-          "unreferenced": 3
+          "task_subject": 3
+        },
+        "python_config_reader_686653a1": {
+          "referenced_in_run": 8,
+          "task_subject": 2
+        },
+        "python_csvlite_parse_80d158b2": {
+          "referenced_in_run": 13
+        },
+        "python_edit_and_retest": {
+          "referenced_in_run": 4,
+          "unreferenced": 2
+        },
+        "python_exception_mislabel_0816896a": {
+          "referenced_in_run": 4,
+          "task_subject": 2
         },
         "python_fix_pytest_fail": {
-          "referenced_in_run": 3,
-          "unreferenced": 3,
-          "task_file": 2
+          "referenced_in_run": 4,
+          "unreferenced": 3
+        },
+        "python_ledger_window_bug_9bfcc241": {
+          "referenced_in_run": 4,
+          "task_subject": 2
+        },
+        "python_nested_flatten_53db7c0b": {
+          "referenced_in_run": 6
         },
         "python_noisy_install_summary": {
           "referenced_in_run": 3
+        },
+        "python_paginate_60b4dafc": {
+          "referenced_in_run": 5,
+          "task_subject": 1
+        },
+        "python_parse_orders_708606f4": {
+          "referenced_in_run": 6
+        },
+        "python_scheduler_cancel_transition_4a9b681c": {
+          "referenced_in_run": 5,
+          "task_subject": 1
+        },
+        "python_shift_report_tie_order_4a0c45c8": {
+          "referenced_in_run": 4,
+          "task_subject": 2
+        },
+        "python_turnstile_6e3358e8": {
+          "referenced_in_run": 6
+        },
+        "rust_add_unit_test": {
+          "unreferenced": 3,
+          "referenced_in_run": 3
+        },
+        "rust_borrow_fix_longest_word_a4c895ec": {
+          "referenced_in_run": 2,
+          "task_subject": 2,
+          "unreferenced": 1
+        },
+        "rust_config_parse_port_d6111a63": {
+          "referenced_in_run": 3,
+          "task_subject": 3,
+          "unreferenced": 3
+        },
+        "rust_error_source_propagation_3eca2e86": {
+          "referenced_in_run": 2,
+          "task_subject": 4,
+          "unreferenced": 1
         },
         "rust_fix_compile_error": {
           "referenced_in_run": 3,
           "unreferenced": 3
         },
-        "rust_search_and_edit": {
-          "unreferenced": 2,
+        "rust_grade_threshold_502d9b26": {
           "referenced_in_run": 3,
-          "task_subject": 1
+          "task_subject": 3,
+          "unreferenced": 1
+        },
+        "rust_search_and_edit": {
+          "referenced_in_run": 4,
+          "unreferenced": 2
+        },
+        "rust_username_guard_758c1a78": {
+          "referenced_in_run": 3,
+          "task_subject": 3
+        },
+        "rust_window_fold_scanner_3d213f38": {
+          "referenced_in_run": 5,
+          "task_subject": 3,
+          "unreferenced": 1
+        },
+        "ts_chunk_batches_233e9e44": {
+          "referenced_in_run": 6
         },
         "ts_fix_type_error": {
-          "referenced_in_run": 1,
-          "unreferenced": 2
+          "referenced_in_run": 3,
+          "unreferenced": 5
+        },
+        "ts_narrow_vs_cast_824b51c8": {
+          "referenced_in_run": 6
         },
         "ts_package_script_fail": {
           "referenced_in_run": 3
+        },
+        "typescript_missing_await_result_order_c58cafb6": {
+          "referenced_in_run": 6
+        },
+        "typescript_reduce_shared_accumulator_d80f462d": {
+          "referenced_in_run": 6
+        },
+        "windows_batch_capture_diag": {
+          "task_subject": 3
+        },
+        "windows_path_normalize_edit": {
+          "task_subject": 3
         }
       },
       "top_paths": [
         [
           "referenced_in_run:src/lib.rs",
-          6
+          27
+        ],
+        [
+          "referenced_in_run:check.mjs",
+          23
         ],
         [
           "unreferenced:Cargo.toml",
+          15
+        ],
+        [
+          "referenced_in_run:test_csvlite.py",
+          9
+        ],
+        [
+          "referenced_in_run:envConfig.mjs",
+          8
+        ],
+        [
+          "referenced_in_run:test_configreader.py",
           5
         ],
         [
           "referenced_in_run:mathlib.py",
-          3
+          4
+        ],
+        [
+          "referenced_in_run:csvlite.py",
+          4
         ],
         [
           "unreferenced:tests/test_math.py",
@@ -749,11 +2454,15 @@
           3
         ],
         [
-          "unreferenced:tests/test_greet.py",
+          "referenced_in_run:requirements.txt",
           3
         ],
         [
-          "referenced_in_run:requirements.txt",
+          "referenced_in_run:src/index.ts",
+          3
+        ],
+        [
+          "unreferenced:tsconfig.json",
           3
         ],
         [
@@ -761,24 +2470,8 @@
           3
         ],
         [
-          "task_file:TASK.md",
-          2
-        ],
-        [
-          "referenced_in_run:src/index.ts",
-          1
-        ],
-        [
-          "unreferenced:tsconfig.json",
-          1
-        ],
-        [
-          "unreferenced:package.json",
-          1
-        ],
-        [
-          "task_subject:src/lib.rs",
-          1
+          "task_subject:out/result.txt",
+          3
         ]
       ],
       "rows": [
@@ -805,6 +2498,1854 @@
           ],
           "tokens": 33,
           "share_per_path": 33.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 33,
+          "share_per_path": 33.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 27,
+          "share_per_path": 27.0
+        },
+        {
+          "task_id": "rust_search_and_edit",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 31,
+          "share_per_path": 31.0
+        },
+        {
+          "task_id": "rust_search_and_edit",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 33,
+          "share_per_path": 33.0
+        },
+        {
+          "task_id": "python_fix_pytest_fail",
+          "op": "file.view",
+          "paths": [
+            "mathlib.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 23,
+          "share_per_path": 23.0
+        },
+        {
+          "task_id": "python_fix_pytest_fail",
+          "op": "file.view",
+          "paths": [
+            "tests/test_math.py"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 32,
+          "share_per_path": 32.0
+        },
+        {
+          "task_id": "python_fix_pytest_fail",
+          "op": "file.view",
+          "paths": [
+            "mathlib.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 23,
+          "share_per_path": 23.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
+            "greet.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 25,
+          "share_per_path": 25.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
+            "tests/test_greet.py"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 37,
+          "share_per_path": 37.0
+        },
+        {
+          "task_id": "python_noisy_install_summary",
+          "op": "file.view",
+          "paths": [
+            "requirements.txt"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 17,
+          "share_per_path": 17.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
+            "src/index.ts"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 38,
+          "share_per_path": 38.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
+            "tsconfig.json"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 58,
+          "share_per_path": 58.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
+            "package.json"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 67,
+          "share_per_path": 67.0
+        },
+        {
+          "task_id": "ts_package_script_fail",
+          "op": "file.view",
+          "paths": [
+            "package.json"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 55,
+          "share_per_path": 55.0
+        },
+        {
+          "task_id": "windows_path_normalize_edit",
+          "op": "file.view",
+          "paths": [
+            "out/result.txt"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 15,
+          "share_per_path": 15.0
+        },
+        {
+          "task_id": "windows_batch_capture_diag",
+          "op": "file.view",
+          "paths": [
+            "broken_build.log"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 58,
+          "share_per_path": 58.0
+        },
+        {
+          "task_id": "py_region_top_seller_7f713e22",
+          "op": "file.view",
+          "paths": [
+            "salesagg.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 334,
+          "share_per_path": 334.0
+        },
+        {
+          "task_id": "py_region_top_seller_7f713e22",
+          "op": "file.view",
+          "paths": [
+            "test_salesagg.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 793,
+          "share_per_path": 793.0
+        },
+        {
+          "task_id": "python_batch_splitter_05613a34",
+          "op": "file.view",
+          "paths": [
+            "batches.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 163,
+          "share_per_path": 163.0
+        },
+        {
+          "task_id": "python_batch_splitter_05613a34",
+          "op": "file.view",
+          "paths": [
+            "test_batches.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 213,
+          "share_per_path": 213.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 419,
+          "share_per_path": 419.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 776,
+          "share_per_path": 776.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 869,
+          "share_per_path": 869.0
+        },
+        {
+          "task_id": "python_exception_mislabel_0816896a",
+          "op": "file.view",
+          "paths": [
+            "intake.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 345,
+          "share_per_path": 345.0
+        },
+        {
+          "task_id": "python_exception_mislabel_0816896a",
+          "op": "file.view",
+          "paths": [
+            "test_intake.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 282,
+          "share_per_path": 282.0
+        },
+        {
+          "task_id": "python_ledger_window_bug_9bfcc241",
+          "op": "file.view",
+          "paths": [
+            "ledger.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 308,
+          "share_per_path": 308.0
+        },
+        {
+          "task_id": "python_ledger_window_bug_9bfcc241",
+          "op": "file.view",
+          "paths": [
+            "test_ledger.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 289,
+          "share_per_path": 289.0
+        },
+        {
+          "task_id": "python_paginate_60b4dafc",
+          "op": "file.view",
+          "paths": [
+            "paginate.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 330,
+          "share_per_path": 330.0
+        },
+        {
+          "task_id": "python_paginate_60b4dafc",
+          "op": "file.view",
+          "paths": [
+            "test_paginate.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 779,
+          "share_per_path": 779.0
+        },
+        {
+          "task_id": "python_parse_orders_708606f4",
+          "op": "file.view",
+          "paths": [
+            "orders.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 196,
+          "share_per_path": 196.0
+        },
+        {
+          "task_id": "python_parse_orders_708606f4",
+          "op": "file.view",
+          "paths": [
+            "test_orders.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 215,
+          "share_per_path": 215.0
+        },
+        {
+          "task_id": "python_scheduler_cancel_transition_4a9b681c",
+          "op": "file.view",
+          "paths": [
+            "scheduler.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 370,
+          "share_per_path": 370.0
+        },
+        {
+          "task_id": "python_scheduler_cancel_transition_4a9b681c",
+          "op": "file.view",
+          "paths": [
+            "test_scheduler.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 389,
+          "share_per_path": 389.0
+        },
+        {
+          "task_id": "python_shift_report_tie_order_4a0c45c8",
+          "op": "file.view",
+          "paths": [
+            "shifts.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 173,
+          "share_per_path": 173.0
+        },
+        {
+          "task_id": "python_shift_report_tie_order_4a0c45c8",
+          "op": "file.view",
+          "paths": [
+            "test_shifts.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 311,
+          "share_per_path": 311.0
+        },
+        {
+          "task_id": "python_turnstile_6e3358e8",
+          "op": "file.view",
+          "paths": [
+            "turnstile.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 252,
+          "share_per_path": 252.0
+        },
+        {
+          "task_id": "python_turnstile_6e3358e8",
+          "op": "file.view",
+          "paths": [
+            "test_turnstile.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 635,
+          "share_per_path": 635.0
+        },
+        {
+          "task_id": "rust_error_source_propagation_3eca2e86",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 368,
+          "share_per_path": 368.0
+        },
+        {
+          "task_id": "rust_error_source_propagation_3eca2e86",
+          "op": "file.view",
+          "paths": [
+            "tests/propagate.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 488,
+          "share_per_path": 488.0
+        },
+        {
+          "task_id": "rust_error_source_propagation_3eca2e86",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 37,
+          "share_per_path": 37.0
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 344,
+          "share_per_path": 344.0
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.view",
+          "paths": [
+            "tests/scanner.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 409,
+          "share_per_path": 409.0
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 32,
+          "share_per_path": 32.0
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.view",
+          "paths": [
+            "test_output.txt"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 309,
+          "share_per_path": 309.0
+        },
+        {
+          "task_id": "typescript_missing_await_result_order_c58cafb6",
+          "op": "file.view",
+          "paths": [
+            "pipeline.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 247,
+          "share_per_path": 247.0
+        },
+        {
+          "task_id": "typescript_missing_await_result_order_c58cafb6",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 156,
+          "share_per_path": 156.0
+        },
+        {
+          "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+          "op": "file.view",
+          "paths": [
+            "stats.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 167,
+          "share_per_path": 167.0
+        },
+        {
+          "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 500,
+          "share_per_path": 500.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "leaderboard.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 159,
+          "share_per_path": 159.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 685,
+          "share_per_path": 685.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 804,
+          "share_per_path": 804.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 494,
+          "share_per_path": 494.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 388,
+          "share_per_path": 388.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 90,
+          "share_per_path": 90.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 48,
+          "share_per_path": 48.0
+        },
+        {
+          "task_id": "node_slugify_771d856c",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 296,
+          "share_per_path": 296.0
+        },
+        {
+          "task_id": "node_slugify_771d856c",
+          "op": "file.view",
+          "paths": [
+            "slugify.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 121,
+          "share_per_path": 121.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 274,
+          "share_per_path": 274.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 712,
+          "share_per_path": 712.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 635,
+          "share_per_path": 635.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 355,
+          "share_per_path": 355.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.view",
+          "paths": [
+            "nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 376,
+          "share_per_path": 376.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.view",
+          "paths": [
+            "test_nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 576,
+          "share_per_path": 576.0
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 378,
+          "share_per_path": 378.0
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
+          "op": "file.view",
+          "paths": [
+            "tests/config_test.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 261,
+          "share_per_path": 261.0
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 40,
+          "share_per_path": 40.0
+        },
+        {
+          "task_id": "rust_grade_threshold_502d9b26",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 185,
+          "share_per_path": 185.0
+        },
+        {
+          "task_id": "rust_grade_threshold_502d9b26",
+          "op": "file.view",
+          "paths": [
+            "tests/grade_test.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 125,
+          "share_per_path": 125.0
+        },
+        {
+          "task_id": "rust_username_guard_758c1a78",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 500,
+          "share_per_path": 500.0
+        },
+        {
+          "task_id": "rust_username_guard_758c1a78",
+          "op": "file.view",
+          "paths": [
+            "tests/username_test.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 245,
+          "share_per_path": 245.0
+        },
+        {
+          "task_id": "ts_chunk_batches_233e9e44",
+          "op": "file.view",
+          "paths": [
+            "chunk.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 190,
+          "share_per_path": 190.0
+        },
+        {
+          "task_id": "ts_chunk_batches_233e9e44",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 328,
+          "share_per_path": 328.0
+        },
+        {
+          "task_id": "ts_narrow_vs_cast_824b51c8",
+          "op": "file.view",
+          "paths": [
+            "narrow.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 97,
+          "share_per_path": 97.0
+        },
+        {
+          "task_id": "ts_narrow_vs_cast_824b51c8",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 586,
+          "share_per_path": 586.0
+        },
+        {
+          "task_id": "rust_fix_compile_error",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 28,
+          "share_per_path": 28.0
+        },
+        {
+          "task_id": "rust_fix_compile_error",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 33,
+          "share_per_path": 33.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 33,
+          "share_per_path": 33.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 27,
+          "share_per_path": 27.0
+        },
+        {
+          "task_id": "rust_search_and_edit",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 31,
+          "share_per_path": 31.0
+        },
+        {
+          "task_id": "python_fix_pytest_fail",
+          "op": "file.view",
+          "paths": [
+            "mathlib.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 23,
+          "share_per_path": 23.0
+        },
+        {
+          "task_id": "python_fix_pytest_fail",
+          "op": "file.view",
+          "paths": [
+            "tests/test_math.py"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 32,
+          "share_per_path": 32.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
+            "greet.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 25,
+          "share_per_path": 25.0
+        },
+        {
+          "task_id": "python_edit_and_retest",
+          "op": "file.view",
+          "paths": [
+            "tests/test_greet.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 37,
+          "share_per_path": 37.0
+        },
+        {
+          "task_id": "python_noisy_install_summary",
+          "op": "file.view",
+          "paths": [
+            "requirements.txt"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 17,
+          "share_per_path": 17.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
+            "src/index.ts"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 38,
+          "share_per_path": 38.0
+        },
+        {
+          "task_id": "ts_fix_type_error",
+          "op": "file.view",
+          "paths": [
+            "tsconfig.json"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 58,
+          "share_per_path": 58.0
+        },
+        {
+          "task_id": "ts_package_script_fail",
+          "op": "file.view",
+          "paths": [
+            "package.json"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 55,
+          "share_per_path": 55.0
+        },
+        {
+          "task_id": "windows_path_normalize_edit",
+          "op": "file.view",
+          "paths": [
+            "out/result.txt"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 15,
+          "share_per_path": 15.0
+        },
+        {
+          "task_id": "windows_batch_capture_diag",
+          "op": "file.view",
+          "paths": [
+            "broken_build.log"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 58,
+          "share_per_path": 58.0
+        },
+        {
+          "task_id": "py_region_top_seller_7f713e22",
+          "op": "file.view",
+          "paths": [
+            "salesagg.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 334,
+          "share_per_path": 334.0
+        },
+        {
+          "task_id": "py_region_top_seller_7f713e22",
+          "op": "file.view",
+          "paths": [
+            "test_salesagg.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 793,
+          "share_per_path": 793.0
+        },
+        {
+          "task_id": "python_batch_splitter_05613a34",
+          "op": "file.view",
+          "paths": [
+            "batches.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 163,
+          "share_per_path": 163.0
+        },
+        {
+          "task_id": "python_batch_splitter_05613a34",
+          "op": "file.view",
+          "paths": [
+            "test_batches.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 213,
+          "share_per_path": 213.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 419,
+          "share_per_path": 419.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 776,
+          "share_per_path": 776.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 313,
+          "share_per_path": 313.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 688,
+          "share_per_path": 688.0
+        },
+        {
+          "task_id": "python_exception_mislabel_0816896a",
+          "op": "file.view",
+          "paths": [
+            "intake.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 345,
+          "share_per_path": 345.0
+        },
+        {
+          "task_id": "python_exception_mislabel_0816896a",
+          "op": "file.view",
+          "paths": [
+            "test_intake.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 282,
+          "share_per_path": 282.0
+        },
+        {
+          "task_id": "python_ledger_window_bug_9bfcc241",
+          "op": "file.view",
+          "paths": [
+            "ledger.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 308,
+          "share_per_path": 308.0
+        },
+        {
+          "task_id": "python_ledger_window_bug_9bfcc241",
+          "op": "file.view",
+          "paths": [
+            "test_ledger.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 289,
+          "share_per_path": 289.0
+        },
+        {
+          "task_id": "python_paginate_60b4dafc",
+          "op": "file.view",
+          "paths": [
+            "paginate.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 330,
+          "share_per_path": 330.0
+        },
+        {
+          "task_id": "python_paginate_60b4dafc",
+          "op": "file.view",
+          "paths": [
+            "test_paginate.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 779,
+          "share_per_path": 779.0
+        },
+        {
+          "task_id": "python_parse_orders_708606f4",
+          "op": "file.view",
+          "paths": [
+            "orders.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 196,
+          "share_per_path": 196.0
+        },
+        {
+          "task_id": "python_parse_orders_708606f4",
+          "op": "file.view",
+          "paths": [
+            "test_orders.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 215,
+          "share_per_path": 215.0
+        },
+        {
+          "task_id": "python_scheduler_cancel_transition_4a9b681c",
+          "op": "file.view",
+          "paths": [
+            "scheduler.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 370,
+          "share_per_path": 370.0
+        },
+        {
+          "task_id": "python_scheduler_cancel_transition_4a9b681c",
+          "op": "file.view",
+          "paths": [
+            "test_scheduler.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 389,
+          "share_per_path": 389.0
+        },
+        {
+          "task_id": "python_shift_report_tie_order_4a0c45c8",
+          "op": "file.view",
+          "paths": [
+            "shifts.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 173,
+          "share_per_path": 173.0
+        },
+        {
+          "task_id": "python_shift_report_tie_order_4a0c45c8",
+          "op": "file.view",
+          "paths": [
+            "test_shifts.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 311,
+          "share_per_path": 311.0
+        },
+        {
+          "task_id": "python_turnstile_6e3358e8",
+          "op": "file.view",
+          "paths": [
+            "turnstile.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 252,
+          "share_per_path": 252.0
+        },
+        {
+          "task_id": "python_turnstile_6e3358e8",
+          "op": "file.view",
+          "paths": [
+            "test_turnstile.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 635,
+          "share_per_path": 635.0
+        },
+        {
+          "task_id": "rust_borrow_fix_longest_word_a4c895ec",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 107,
+          "share_per_path": 107.0
+        },
+        {
+          "task_id": "rust_borrow_fix_longest_word_a4c895ec",
+          "op": "file.view",
+          "paths": [
+            "tests/longest.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 213,
+          "share_per_path": 213.0
+        },
+        {
+          "task_id": "rust_borrow_fix_longest_word_a4c895ec",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 32,
+          "share_per_path": 32.0
+        },
+        {
+          "task_id": "rust_error_source_propagation_3eca2e86",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 368,
+          "share_per_path": 368.0
+        },
+        {
+          "task_id": "rust_error_source_propagation_3eca2e86",
+          "op": "file.view",
+          "paths": [
+            "tests/propagate.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 488,
+          "share_per_path": 488.0
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 344,
+          "share_per_path": 344.0
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.view",
+          "paths": [
+            "tests/scanner.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 409,
+          "share_per_path": 409.0
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 335,
+          "share_per_path": 335.0
+        },
+        {
+          "task_id": "typescript_missing_await_result_order_c58cafb6",
+          "op": "file.view",
+          "paths": [
+            "pipeline.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 247,
+          "share_per_path": 247.0
+        },
+        {
+          "task_id": "typescript_missing_await_result_order_c58cafb6",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 156,
+          "share_per_path": 156.0
+        },
+        {
+          "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+          "op": "file.view",
+          "paths": [
+            "stats.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 167,
+          "share_per_path": 167.0
+        },
+        {
+          "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 500,
+          "share_per_path": 500.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "leaderboard.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 159,
+          "share_per_path": 159.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 531,
+          "share_per_path": 531.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 691,
+          "share_per_path": 691.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 351,
+          "share_per_path": 351.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 804,
+          "share_per_path": 804.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 494,
+          "share_per_path": 494.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 499,
+          "share_per_path": 499.0
+        },
+        {
+          "task_id": "node_slugify_771d856c",
+          "op": "file.view",
+          "paths": [
+            "slugify.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 121,
+          "share_per_path": 121.0
+        },
+        {
+          "task_id": "node_slugify_771d856c",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 296,
+          "share_per_path": 296.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 274,
+          "share_per_path": 274.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 712,
+          "share_per_path": 712.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 703,
+          "share_per_path": 703.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 187,
+          "share_per_path": 187.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.view",
+          "paths": [
+            "nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 376,
+          "share_per_path": 376.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.view",
+          "paths": [
+            "test_nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 576,
+          "share_per_path": 576.0
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 378,
+          "share_per_path": 378.0
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
+          "op": "file.view",
+          "paths": [
+            "tests/config_test.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 261,
+          "share_per_path": 261.0
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 40,
+          "share_per_path": 40.0
+        },
+        {
+          "task_id": "rust_grade_threshold_502d9b26",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 185,
+          "share_per_path": 185.0
+        },
+        {
+          "task_id": "rust_grade_threshold_502d9b26",
+          "op": "file.view",
+          "paths": [
+            "tests/grade_test.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 125,
+          "share_per_path": 125.0
+        },
+        {
+          "task_id": "rust_username_guard_758c1a78",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 500,
+          "share_per_path": 500.0
+        },
+        {
+          "task_id": "rust_username_guard_758c1a78",
+          "op": "file.view",
+          "paths": [
+            "tests/username_test.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 245,
+          "share_per_path": 245.0
+        },
+        {
+          "task_id": "ts_chunk_batches_233e9e44",
+          "op": "file.view",
+          "paths": [
+            "chunk.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 190,
+          "share_per_path": 190.0
+        },
+        {
+          "task_id": "ts_chunk_batches_233e9e44",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 328,
+          "share_per_path": 328.0
+        },
+        {
+          "task_id": "ts_narrow_vs_cast_824b51c8",
+          "op": "file.view",
+          "paths": [
+            "narrow.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 97,
+          "share_per_path": 97.0
+        },
+        {
+          "task_id": "ts_narrow_vs_cast_824b51c8",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 586,
+          "share_per_path": 586.0
+        },
+        {
+          "task_id": "rust_fix_compile_error",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 28,
+          "share_per_path": 28.0
+        },
+        {
+          "task_id": "rust_fix_compile_error",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 33,
+          "share_per_path": 33.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "Cargo.toml"
+          ],
+          "classes": [
+            "unreferenced"
+          ],
+          "tokens": 33,
+          "share_per_path": 33.0
+        },
+        {
+          "task_id": "rust_add_unit_test",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 27,
+          "share_per_path": 27.0
+        },
+        {
+          "task_id": "rust_search_and_edit",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 31,
+          "share_per_path": 31.0
         },
         {
           "task_id": "rust_search_and_edit",
@@ -923,8 +4464,8 @@
           "classes": [
             "unreferenced"
           ],
-          "tokens": 16,
-          "share_per_path": 16.0
+          "tokens": 67,
+          "share_per_path": 67.0
         },
         {
           "task_id": "ts_package_script_fail",
@@ -939,127 +4480,283 @@
           "share_per_path": 55.0
         },
         {
-          "task_id": "rust_fix_compile_error",
+          "task_id": "windows_path_normalize_edit",
           "op": "file.view",
           "paths": [
-            "src/lib.rs"
-          ],
-          "classes": [
-            "referenced_in_run"
-          ],
-          "tokens": 28,
-          "share_per_path": 28.0
-        },
-        {
-          "task_id": "rust_fix_compile_error",
-          "op": "file.view",
-          "paths": [
-            "Cargo.toml"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 33,
-          "share_per_path": 33.0
-        },
-        {
-          "task_id": "rust_search_and_edit",
-          "op": "file.view",
-          "paths": [
-            "src/lib.rs"
+            "out/result.txt"
           ],
           "classes": [
             "task_subject"
           ],
-          "tokens": 31,
-          "share_per_path": 31.0
+          "tokens": 15,
+          "share_per_path": 15.0
         },
         {
-          "task_id": "python_fix_pytest_fail",
+          "task_id": "windows_batch_capture_diag",
           "op": "file.view",
           "paths": [
-            "mathlib.py"
+            "broken_build.log"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 58,
+          "share_per_path": 58.0
+        },
+        {
+          "task_id": "py_region_top_seller_7f713e22",
+          "op": "file.view",
+          "paths": [
+            "salesagg.py"
           ],
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 23,
-          "share_per_path": 23.0
+          "tokens": 334,
+          "share_per_path": 334.0
         },
         {
-          "task_id": "python_fix_pytest_fail",
+          "task_id": "py_region_top_seller_7f713e22",
           "op": "file.view",
           "paths": [
-            "TASK.md"
-          ],
-          "classes": [
-            "task_file"
-          ],
-          "tokens": 25,
-          "share_per_path": 25.0
-        },
-        {
-          "task_id": "python_fix_pytest_fail",
-          "op": "file.view",
-          "paths": [
-            "tests/test_math.py"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 32,
-          "share_per_path": 32.0
-        },
-        {
-          "task_id": "python_edit_and_retest",
-          "op": "file.view",
-          "paths": [
-            "greet.py"
+            "test_salesagg.py"
           ],
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 25,
-          "share_per_path": 25.0
+          "tokens": 793,
+          "share_per_path": 793.0
         },
         {
-          "task_id": "python_edit_and_retest",
+          "task_id": "python_batch_splitter_05613a34",
           "op": "file.view",
           "paths": [
-            "tests/test_greet.py"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 37,
-          "share_per_path": 37.0
-        },
-        {
-          "task_id": "python_noisy_install_summary",
-          "op": "file.view",
-          "paths": [
-            "requirements.txt"
+            "batches.py"
           ],
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 17,
-          "share_per_path": 17.0
+          "tokens": 163,
+          "share_per_path": 163.0
         },
         {
-          "task_id": "ts_package_script_fail",
+          "task_id": "python_batch_splitter_05613a34",
           "op": "file.view",
           "paths": [
-            "package.json"
+            "test_batches.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 213,
+          "share_per_path": 213.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "configreader.py"
           ],
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 55,
-          "share_per_path": 55.0
+          "tokens": 419,
+          "share_per_path": 419.0
         },
         {
-          "task_id": "rust_fix_compile_error",
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 776,
+          "share_per_path": 776.0
+        },
+        {
+          "task_id": "python_config_reader_686653a1",
+          "op": "file.view",
+          "paths": [
+            "test_configreader.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 438,
+          "share_per_path": 438.0
+        },
+        {
+          "task_id": "python_exception_mislabel_0816896a",
+          "op": "file.view",
+          "paths": [
+            "intake.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 345,
+          "share_per_path": 345.0
+        },
+        {
+          "task_id": "python_exception_mislabel_0816896a",
+          "op": "file.view",
+          "paths": [
+            "test_intake.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 282,
+          "share_per_path": 282.0
+        },
+        {
+          "task_id": "python_ledger_window_bug_9bfcc241",
+          "op": "file.view",
+          "paths": [
+            "ledger.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 308,
+          "share_per_path": 308.0
+        },
+        {
+          "task_id": "python_ledger_window_bug_9bfcc241",
+          "op": "file.view",
+          "paths": [
+            "test_ledger.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 289,
+          "share_per_path": 289.0
+        },
+        {
+          "task_id": "python_paginate_60b4dafc",
+          "op": "file.view",
+          "paths": [
+            "paginate.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 330,
+          "share_per_path": 330.0
+        },
+        {
+          "task_id": "python_paginate_60b4dafc",
+          "op": "file.view",
+          "paths": [
+            "test_paginate.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 779,
+          "share_per_path": 779.0
+        },
+        {
+          "task_id": "python_parse_orders_708606f4",
+          "op": "file.view",
+          "paths": [
+            "orders.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 196,
+          "share_per_path": 196.0
+        },
+        {
+          "task_id": "python_parse_orders_708606f4",
+          "op": "file.view",
+          "paths": [
+            "test_orders.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 215,
+          "share_per_path": 215.0
+        },
+        {
+          "task_id": "python_scheduler_cancel_transition_4a9b681c",
+          "op": "file.view",
+          "paths": [
+            "scheduler.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 370,
+          "share_per_path": 370.0
+        },
+        {
+          "task_id": "python_scheduler_cancel_transition_4a9b681c",
+          "op": "file.view",
+          "paths": [
+            "test_scheduler.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 389,
+          "share_per_path": 389.0
+        },
+        {
+          "task_id": "python_shift_report_tie_order_4a0c45c8",
+          "op": "file.view",
+          "paths": [
+            "shifts.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 173,
+          "share_per_path": 173.0
+        },
+        {
+          "task_id": "python_shift_report_tie_order_4a0c45c8",
+          "op": "file.view",
+          "paths": [
+            "test_shifts.py"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 311,
+          "share_per_path": 311.0
+        },
+        {
+          "task_id": "python_turnstile_6e3358e8",
+          "op": "file.view",
+          "paths": [
+            "turnstile.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 252,
+          "share_per_path": 252.0
+        },
+        {
+          "task_id": "python_turnstile_6e3358e8",
+          "op": "file.view",
+          "paths": [
+            "test_turnstile.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 635,
+          "share_per_path": 635.0
+        },
+        {
+          "task_id": "rust_borrow_fix_longest_word_a4c895ec",
           "op": "file.view",
           "paths": [
             "src/lib.rs"
@@ -1067,11 +4764,311 @@
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 28,
-          "share_per_path": 28.0
+          "tokens": 107,
+          "share_per_path": 107.0
         },
         {
-          "task_id": "rust_fix_compile_error",
+          "task_id": "rust_borrow_fix_longest_word_a4c895ec",
+          "op": "file.view",
+          "paths": [
+            "tests/longest.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 213,
+          "share_per_path": 213.0
+        },
+        {
+          "task_id": "rust_error_source_propagation_3eca2e86",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 368,
+          "share_per_path": 368.0
+        },
+        {
+          "task_id": "rust_error_source_propagation_3eca2e86",
+          "op": "file.view",
+          "paths": [
+            "tests/propagate.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 488,
+          "share_per_path": 488.0
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 344,
+          "share_per_path": 344.0
+        },
+        {
+          "task_id": "rust_window_fold_scanner_3d213f38",
+          "op": "file.view",
+          "paths": [
+            "tests/scanner.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 409,
+          "share_per_path": 409.0
+        },
+        {
+          "task_id": "typescript_missing_await_result_order_c58cafb6",
+          "op": "file.view",
+          "paths": [
+            "pipeline.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 247,
+          "share_per_path": 247.0
+        },
+        {
+          "task_id": "typescript_missing_await_result_order_c58cafb6",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 156,
+          "share_per_path": 156.0
+        },
+        {
+          "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+          "op": "file.view",
+          "paths": [
+            "stats.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 167,
+          "share_per_path": 167.0
+        },
+        {
+          "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 500,
+          "share_per_path": 500.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "leaderboard.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 159,
+          "share_per_path": 159.0
+        },
+        {
+          "task_id": "js_leaderboard_rank_b1603acf",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 685,
+          "share_per_path": 685.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 804,
+          "share_per_path": 804.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 494,
+          "share_per_path": 494.0
+        },
+        {
+          "task_id": "node_envconfig_validate_dd681123",
+          "op": "file.view",
+          "paths": [
+            "envConfig.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 460,
+          "share_per_path": 460.0
+        },
+        {
+          "task_id": "node_slugify_771d856c",
+          "op": "file.view",
+          "paths": [
+            "slugify.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 121,
+          "share_per_path": 121.0
+        },
+        {
+          "task_id": "node_slugify_771d856c",
+          "op": "file.view",
+          "paths": [
+            "check.mjs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 296,
+          "share_per_path": 296.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 274,
+          "share_per_path": 274.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 712,
+          "share_per_path": 712.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 705,
+          "share_per_path": 705.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "test_csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 563,
+          "share_per_path": 563.0
+        },
+        {
+          "task_id": "python_csvlite_parse_80d158b2",
+          "op": "file.view",
+          "paths": [
+            "csvlite.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 664,
+          "share_per_path": 664.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.view",
+          "paths": [
+            "nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 376,
+          "share_per_path": 376.0
+        },
+        {
+          "task_id": "python_nested_flatten_53db7c0b",
+          "op": "file.view",
+          "paths": [
+            "test_nested_flatten.py"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 576,
+          "share_per_path": 576.0
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
+          "op": "file.view",
+          "paths": [
+            "src/lib.rs"
+          ],
+          "classes": [
+            "referenced_in_run"
+          ],
+          "tokens": 378,
+          "share_per_path": 378.0
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
+          "op": "file.view",
+          "paths": [
+            "tests/config_test.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 261,
+          "share_per_path": 261.0
+        },
+        {
+          "task_id": "rust_config_parse_port_d6111a63",
           "op": "file.view",
           "paths": [
             "Cargo.toml"
@@ -1079,11 +5076,11 @@
           "classes": [
             "unreferenced"
           ],
-          "tokens": 33,
-          "share_per_path": 33.0
+          "tokens": 40,
+          "share_per_path": 40.0
         },
         {
-          "task_id": "rust_search_and_edit",
+          "task_id": "rust_grade_threshold_502d9b26",
           "op": "file.view",
           "paths": [
             "src/lib.rs"
@@ -1091,11 +5088,23 @@
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 31,
-          "share_per_path": 31.0
+          "tokens": 185,
+          "share_per_path": 185.0
         },
         {
-          "task_id": "rust_search_and_edit",
+          "task_id": "rust_grade_threshold_502d9b26",
+          "op": "file.view",
+          "paths": [
+            "tests/grade_test.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 125,
+          "share_per_path": 125.0
+        },
+        {
+          "task_id": "rust_grade_threshold_502d9b26",
           "op": "file.view",
           "paths": [
             "Cargo.toml"
@@ -1103,11 +5112,11 @@
           "classes": [
             "unreferenced"
           ],
-          "tokens": 33,
-          "share_per_path": 33.0
+          "tokens": 40,
+          "share_per_path": 40.0
         },
         {
-          "task_id": "rust_search_and_edit",
+          "task_id": "rust_username_guard_758c1a78",
           "op": "file.view",
           "paths": [
             "src/lib.rs"
@@ -1115,156 +5124,132 @@
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 31,
-          "share_per_path": 31.0
+          "tokens": 500,
+          "share_per_path": 500.0
         },
         {
-          "task_id": "python_fix_pytest_fail",
+          "task_id": "rust_username_guard_758c1a78",
           "op": "file.view",
           "paths": [
-            "mathlib.py"
+            "tests/username_test.rs"
+          ],
+          "classes": [
+            "task_subject"
+          ],
+          "tokens": 245,
+          "share_per_path": 245.0
+        },
+        {
+          "task_id": "ts_chunk_batches_233e9e44",
+          "op": "file.view",
+          "paths": [
+            "chunk.mjs"
           ],
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 23,
-          "share_per_path": 23.0
+          "tokens": 190,
+          "share_per_path": 190.0
         },
         {
-          "task_id": "python_fix_pytest_fail",
+          "task_id": "ts_chunk_batches_233e9e44",
           "op": "file.view",
           "paths": [
-            "tests/test_math.py"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 32,
-          "share_per_path": 32.0
-        },
-        {
-          "task_id": "python_fix_pytest_fail",
-          "op": "file.view",
-          "paths": [
-            "TASK.md"
-          ],
-          "classes": [
-            "task_file"
-          ],
-          "tokens": 25,
-          "share_per_path": 25.0
-        },
-        {
-          "task_id": "python_edit_and_retest",
-          "op": "file.view",
-          "paths": [
-            "greet.py"
+            "check.mjs"
           ],
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 25,
-          "share_per_path": 25.0
+          "tokens": 328,
+          "share_per_path": 328.0
         },
         {
-          "task_id": "python_edit_and_retest",
+          "task_id": "ts_narrow_vs_cast_824b51c8",
           "op": "file.view",
           "paths": [
-            "tests/test_greet.py"
-          ],
-          "classes": [
-            "unreferenced"
-          ],
-          "tokens": 37,
-          "share_per_path": 37.0
-        },
-        {
-          "task_id": "python_noisy_install_summary",
-          "op": "file.view",
-          "paths": [
-            "requirements.txt"
+            "narrow.mjs"
           ],
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 17,
-          "share_per_path": 17.0
+          "tokens": 97,
+          "share_per_path": 97.0
         },
         {
-          "task_id": "ts_package_script_fail",
+          "task_id": "ts_narrow_vs_cast_824b51c8",
           "op": "file.view",
           "paths": [
-            "package.json"
+            "check.mjs"
           ],
           "classes": [
             "referenced_in_run"
           ],
-          "tokens": 55,
-          "share_per_path": 55.0
+          "tokens": 586,
+          "share_per_path": 586.0
         }
       ]
     },
     "a_reads": {
-      "file_refs": 57,
-      "tokens": 1767.0,
+      "file_refs": 335,
+      "tokens": 101718.0,
       "per_class_file_refs": {
-        "referenced_in_run": 26,
-        "task_subject": 19,
-        "unreferenced": 8,
-        "task_file": 4
+        "referenced_in_run": 197,
+        "task_subject": 111,
+        "unreferenced": 24,
+        "task_file": 3
       },
       "per_class_tokens": {
-        "referenced_in_run": 839.5,
-        "task_subject": 469.0,
-        "unreferenced": 265.5,
-        "task_file": 193.0
+        "referenced_in_run": 69836.67,
+        "task_subject": 30277.0,
+        "unreferenced": 1406.33,
+        "task_file": 198.0
       },
       "per_class_token_share": {
-        "referenced_in_run": 0.4751,
-        "task_subject": 0.2654,
-        "unreferenced": 0.1503,
-        "task_file": 0.1092
+        "referenced_in_run": 0.6866,
+        "task_subject": 0.2977,
+        "unreferenced": 0.0138,
+        "task_file": 0.0019
       },
       "top_paths": [
         [
           "src/lib.rs",
-          10
+          53
         ],
         [
           "Cargo.toml",
-          7
+          23
         ],
         [
-          "package.json",
-          7
+          "check.mjs",
+          20
         ],
         [
-          "TASK.md",
-          6
+          "configreader.py",
+          11
         ],
         [
-          "greet.py",
-          4
+          "chunk.mjs",
+          11
         ],
         [
-          "tests/test_greet.py",
-          4
+          "batches.py",
+          10
         ],
         [
-          "requirements.txt",
-          3
+          "salesagg.py",
+          9
         ],
         [
-          "SUMMARY.txt",
-          3
+          "shifts.py",
+          9
         ],
         [
-          "broken_build.log",
-          3
+          "narrow.mjs",
+          9
         ],
         [
-          "ERR.txt",
-          3
+          "intake.py",
+          8
         ]
       ]
     }

@@ -1,6 +1,6 @@
 {
   "schema": "verseshell.tf45-envelope-replay/v1",
-  "generated_at": "2026-09-24T17:15:48.415558+00:00",
+  "generated_at": "2026-09-30T01:06:12.034907+00:00",
   "method": {
     "frozen_call_source": "bench/aci/results/latest_live.json (condition D read ops)",
     "legacy_projection": "format_aci_result on the envelope with the compact `hash` removed (== the pre-TF-0045 client projection)",
@@ -18,15 +18,15 @@
       "bench/aci/results/latest_live.json",
       "tools/tf45_envelope_replay.py"
     ],
-    "fingerprint": "f7104410d91c2cdaafa3c0018227335d702785009a094b1c13653514a9154585"
+    "fingerprint": "0b1d8dda71a485ef6f15284868785118f27dfedbbdd58cd541c4a43590ccc4cc"
   },
   "totals": {
-    "calls": 33,
-    "calls_replayed": 29,
-    "calls_excluded": 4,
-    "coverage": 0.8788,
+    "calls": 144,
+    "calls_replayed": 141,
+    "calls_excluded": 3,
+    "coverage": 0.9792,
     "stored_projection_matched": {
-      "current": 29
+      "current": 141
     },
     "excluded": [
       {
@@ -40,26 +40,6 @@
         "reason": "file did not exist in the pristine fixture (created by the live run)"
       },
       {
-        "task_id": "windows_batch_capture_diag",
-        "op": "file.view",
-        "args": {
-          "path": "ERR.txt"
-        },
-        "stored_tokens": 18,
-        "legacy_tokens": 54,
-        "reason": "file did not exist in the pristine fixture (created by the live run)"
-      },
-      {
-        "task_id": "python_edit_and_retest",
-        "op": "file.view",
-        "args": {
-          "path": "greet.py"
-        },
-        "stored_tokens": 27,
-        "legacy_tokens": 39,
-        "reason": "content depends on live-run history: current projection 25 tok / legacy projection 39 tok vs 27 tok recorded live"
-      },
-      {
         "task_id": "windows_path_normalize_edit",
         "op": "file.view",
         "args": {
@@ -68,32 +48,48 @@
         "stored_tokens": 15,
         "legacy_tokens": 56,
         "reason": "file did not exist in the pristine fixture (created by the live run)"
+      },
+      {
+        "task_id": "python_csvlite_parse_80d158b2",
+        "op": "file.view",
+        "args": {
+          "path": "csvlite.py",
+          "window": 80
+        },
+        "stored_tokens": 686,
+        "legacy_tokens": 287,
+        "reason": "content depends on live-run history: current projection 274 tok / legacy projection 287 tok vs 686 tok recorded live"
       }
     ],
-    "legacy_tokens": 2748,
-    "current_tokens": 2051,
-    "token_savings": 0.2536,
-    "legacy_chars": 11042,
-    "current_chars": 8237,
-    "legacy_comparison_exact": true
+    "legacy_tokens": 74280,
+    "current_tokens": 70940,
+    "token_savings": 0.045,
+    "legacy_chars": 297337,
+    "current_chars": 283972,
+    "legacy_comparison_exact": true,
+    "truncated_usable_calls": 20,
+    "untruncated_calls": 121,
+    "untruncated_legacy_tokens": 51226,
+    "untruncated_current_tokens": 48434,
+    "untruncated_token_savings": 0.0545
   },
   "by_op": {
     "file.read_many": {
-      "calls": 18,
-      "legacy_tokens": 2159,
-      "current_tokens": 1616,
-      "savings": 0.2515
+      "calls": 81,
+      "legacy_tokens": 51976,
+      "current_tokens": 49462,
+      "savings": 0.0484
     },
     "file.view": {
-      "calls": 11,
-      "legacy_tokens": 589,
-      "current_tokens": 435,
-      "savings": 0.2615
+      "calls": 60,
+      "legacy_tokens": 22304,
+      "current_tokens": 21478,
+      "savings": 0.037
     }
   },
   "stored_calls_by_op": {
-    "file.read_many": 18,
-    "file.view": 15
+    "file.read_many": 81,
+    "file.view": 63
   },
   "budget": {
     "files": 8,
@@ -166,27 +162,27 @@
       "truncated_entries": 0
     },
     {
-      "task_id": "rust_add_unit_test",
+      "task_id": "rust_search_and_edit",
       "op": "file.view",
       "args": {
-        "path": "src/lib.rs"
+        "path": "Cargo.toml"
       },
       "ok": true,
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 27,
-      "legacy_chars": 164,
-      "current_chars": 109,
-      "legacy_tokens": 41,
-      "current_tokens": 27,
+      "stored_tokens": 33,
+      "legacy_chars": 190,
+      "current_chars": 135,
+      "legacy_tokens": 47,
+      "current_tokens": 33,
       "truncated_entries": 0
     },
     {
       "task_id": "rust_search_and_edit",
       "op": "file.view",
       "args": {
-        "path": "src/lib.rs"
+        "path": "src\\lib.rs"
       },
       "ok": true,
       "reproducible": true,
@@ -263,6 +259,26 @@
         "paths": [
           "src/index.ts",
           "tsconfig.json",
+          "package.json",
+          "TASK.md"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 214,
+      "legacy_chars": 1078,
+      "current_chars": 858,
+      "legacy_tokens": 269,
+      "current_tokens": 214,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_package_script_fail",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
           "package.json"
         ]
       },
@@ -270,28 +286,1460 @@
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 137,
-      "legacy_chars": 715,
-      "current_chars": 550,
-      "legacy_tokens": 178,
-      "current_tokens": 137,
+      "stored_tokens": 67,
+      "legacy_chars": 326,
+      "current_chars": 271,
+      "legacy_tokens": 81,
+      "current_tokens": 67,
       "truncated_entries": 0
     },
     {
-      "task_id": "ts_package_script_fail",
+      "task_id": "windows_batch_capture_diag",
       "op": "file.view",
       "args": {
-        "path": "package.json"
+        "path": "broken_build.log"
       },
       "ok": true,
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 55,
-      "legacy_chars": 276,
-      "current_chars": 221,
-      "legacy_tokens": 69,
-      "current_tokens": 55,
+      "stored_tokens": 58,
+      "legacy_chars": 288,
+      "current_chars": 233,
+      "legacy_tokens": 72,
+      "current_tokens": 58,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "py_region_top_seller_7f713e22",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "salesagg.py",
+          "test_salesagg.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1154,
+      "legacy_chars": 4729,
+      "current_chars": 4619,
+      "legacy_tokens": 1182,
+      "current_tokens": 1154,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_batch_splitter_05613a34",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "batches.py",
+          "test_batches.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 393,
+      "legacy_chars": 1684,
+      "current_chars": 1574,
+      "legacy_tokens": 421,
+      "current_tokens": 393,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_config_reader_686653a1",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "configreader.py",
+          "test_configreader.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1224,
+      "legacy_chars": 5008,
+      "current_chars": 4898,
+      "legacy_tokens": 1252,
+      "current_tokens": 1224,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_config_reader_686653a1",
+      "op": "file.view",
+      "args": {
+        "cursor": 81,
+        "path": "test_configreader.py",
+        "window": 40
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 470,
+      "legacy_chars": 1937,
+      "current_chars": 1882,
+      "legacy_tokens": 484,
+      "current_tokens": 470,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_config_reader_686653a1",
+      "op": "file.view",
+      "args": {
+        "cursor": 101,
+        "path": "test_configreader.py",
+        "window": 20
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 201,
+      "legacy_chars": 860,
+      "current_chars": 805,
+      "legacy_tokens": 215,
+      "current_tokens": 201,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_config_reader_686653a1",
+      "op": "file.view",
+      "args": {
+        "cursor": 108,
+        "path": "test_configreader.py",
+        "window": 12
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 143,
+      "legacy_chars": 627,
+      "current_chars": 572,
+      "legacy_tokens": 156,
+      "current_tokens": 143,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_exception_mislabel_0816896a",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "intake.py",
+          "test_intake.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 643,
+      "legacy_chars": 2684,
+      "current_chars": 2574,
+      "legacy_tokens": 671,
+      "current_tokens": 643,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_ledger_window_bug_9bfcc241",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "ledger.py",
+          "test_ledger.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 612,
+      "legacy_chars": 2561,
+      "current_chars": 2451,
+      "legacy_tokens": 640,
+      "current_tokens": 612,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_paginate_60b4dafc",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "paginate.py",
+          "test_paginate.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1137,
+      "legacy_chars": 4658,
+      "current_chars": 4548,
+      "legacy_tokens": 1164,
+      "current_tokens": 1137,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_parse_orders_708606f4",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "orders.py",
+          "test_orders.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 427,
+      "legacy_chars": 1819,
+      "current_chars": 1709,
+      "legacy_tokens": 454,
+      "current_tokens": 427,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_scheduler_cancel_transition_4a9b681c",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "scheduler.py",
+          "test_scheduler.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 777,
+      "legacy_chars": 3220,
+      "current_chars": 3110,
+      "legacy_tokens": 805,
+      "current_tokens": 777,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_shift_report_tie_order_4a0c45c8",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "shifts.py",
+          "test_shifts.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 500,
+      "legacy_chars": 2110,
+      "current_chars": 2000,
+      "legacy_tokens": 527,
+      "current_tokens": 500,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_turnstile_6e3358e8",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "turnstile.py",
+          "test_turnstile.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 915,
+      "legacy_chars": 3770,
+      "current_chars": 3660,
+      "legacy_tokens": 942,
+      "current_tokens": 915,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "rust_borrow_fix_longest_word_a4c895ec",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs",
+          "tests/longest.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 372,
+      "legacy_chars": 1656,
+      "current_chars": 1491,
+      "legacy_tokens": 414,
+      "current_tokens": 372,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_error_source_propagation_3eca2e86",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs",
+          "tests/propagate.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 914,
+      "legacy_chars": 3824,
+      "current_chars": 3659,
+      "legacy_tokens": 956,
+      "current_tokens": 914,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_window_fold_scanner_3d213f38",
+      "op": "file.read_many",
+      "args": {
+        "max_total_lines": 200,
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs",
+          "tests/scanner.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 805,
+      "legacy_chars": 3386,
+      "current_chars": 3221,
+      "legacy_tokens": 846,
+      "current_tokens": 805,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "typescript_missing_await_result_order_c58cafb6",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "pipeline.mjs",
+          "check.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 419,
+      "legacy_chars": 1786,
+      "current_chars": 1676,
+      "legacy_tokens": 446,
+      "current_tokens": 419,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "stats.mjs",
+          "check.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 682,
+      "legacy_chars": 2841,
+      "current_chars": 2731,
+      "legacy_tokens": 710,
+      "current_tokens": 682,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "js_leaderboard_rank_b1603acf",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "leaderboard.mjs",
+          "check.mjs"
+        ],
+        "window": 200
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1904,
+      "legacy_chars": 7729,
+      "current_chars": 7619,
+      "legacy_tokens": 1932,
+      "current_tokens": 1904,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "js_leaderboard_rank_b1603acf",
+      "op": "file.view",
+      "args": {
+        "cursor": 201,
+        "path": "check.mjs",
+        "window": 210
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1848,
+      "legacy_chars": 7448,
+      "current_chars": 7393,
+      "legacy_tokens": 1862,
+      "current_tokens": 1848,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_envconfig_validate_dd681123",
+      "op": "file.view",
+      "args": {
+        "path": "envConfig.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 804,
+      "legacy_chars": 3272,
+      "current_chars": 3217,
+      "legacy_tokens": 818,
+      "current_tokens": 804,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_envconfig_validate_dd681123",
+      "op": "file.view",
+      "args": {
+        "path": "check.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 494,
+      "legacy_chars": 2033,
+      "current_chars": 1978,
+      "legacy_tokens": 508,
+      "current_tokens": 494,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_envconfig_validate_dd681123",
+      "op": "file.view",
+      "args": {
+        "cursor": 80,
+        "path": "envConfig.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 612,
+      "legacy_chars": 2506,
+      "current_chars": 2451,
+      "legacy_tokens": 626,
+      "current_tokens": 612,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_slugify_771d856c",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "slugify.mjs",
+          "check.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 432,
+      "legacy_chars": 1841,
+      "current_chars": 1731,
+      "legacy_tokens": 460,
+      "current_tokens": 432,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_csvlite_parse_80d158b2",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "csvlite.py",
+          "test_csvlite.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1013,
+      "legacy_chars": 4163,
+      "current_chars": 4053,
+      "legacy_tokens": 1040,
+      "current_tokens": 1013,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_csvlite_parse_80d158b2",
+      "op": "file.view",
+      "args": {
+        "cursor": 81,
+        "path": "test_csvlite.py",
+        "window": 70
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 619,
+      "legacy_chars": 2533,
+      "current_chars": 2478,
+      "legacy_tokens": 633,
+      "current_tokens": 619,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_nested_flatten_53db7c0b",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "nested_flatten.py",
+          "test_nested_flatten.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 983,
+      "legacy_chars": 4042,
+      "current_chars": 3932,
+      "legacy_tokens": 1010,
+      "current_tokens": 983,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "rust_config_parse_port_d6111a63",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs",
+          "tests/config_test.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 700,
+      "legacy_chars": 2966,
+      "current_chars": 2801,
+      "legacy_tokens": 741,
+      "current_tokens": 700,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_grade_threshold_502d9b26",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "src/lib.rs",
+          "tests/grade_test.rs",
+          "Cargo.toml"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 371,
+      "legacy_chars": 1650,
+      "current_chars": 1485,
+      "legacy_tokens": 412,
+      "current_tokens": 371,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_username_guard_758c1a78",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "src/lib.rs",
+          "tests/username_test.rs",
+          "Cargo.toml"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 806,
+      "legacy_chars": 3392,
+      "current_chars": 3227,
+      "legacy_tokens": 848,
+      "current_tokens": 806,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_chunk_batches_233e9e44",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "chunk.mjs",
+          "check.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 533,
+      "legacy_chars": 2245,
+      "current_chars": 2135,
+      "legacy_tokens": 561,
+      "current_tokens": 533,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_chunk_batches_233e9e44",
+      "op": "file.view",
+      "args": {
+        "path": "chunk.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 190,
+      "legacy_chars": 818,
+      "current_chars": 763,
+      "legacy_tokens": 204,
+      "current_tokens": 190,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_narrow_vs_cast_824b51c8",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "narrow.mjs",
+          "check.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 698,
+      "legacy_chars": 2903,
+      "current_chars": 2793,
+      "legacy_tokens": 725,
+      "current_tokens": 698,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_fix_compile_error",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 28,
+      "legacy_chars": 167,
+      "current_chars": 112,
+      "legacy_tokens": 41,
+      "current_tokens": 28,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_fix_compile_error",
+      "op": "file.view",
+      "args": {
+        "path": "Cargo.toml"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 33,
+      "legacy_chars": 187,
+      "current_chars": 132,
+      "legacy_tokens": 46,
+      "current_tokens": 33,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 27,
+      "legacy_chars": 164,
+      "current_chars": 109,
+      "legacy_tokens": 41,
+      "current_tokens": 27,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "op": "file.view",
+      "args": {
+        "path": "Cargo.toml"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 33,
+      "legacy_chars": 187,
+      "current_chars": 132,
+      "legacy_tokens": 46,
+      "current_tokens": 33,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_add_unit_test",
+      "op": "file.view",
+      "args": {
+        "cursor": 1,
+        "path": "src/lib.rs",
+        "window": 10
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 27,
+      "legacy_chars": 164,
+      "current_chars": 109,
+      "legacy_tokens": 41,
+      "current_tokens": 27,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_search_and_edit",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs",
+          "TASK.md"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 110,
+      "legacy_chars": 605,
+      "current_chars": 440,
+      "legacy_tokens": 151,
+      "current_tokens": 110,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_fix_pytest_fail",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "mathlib.py",
+          "tests/test_math.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 72,
+      "legacy_chars": 399,
+      "current_chars": 289,
+      "legacy_tokens": 99,
+      "current_tokens": 72,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_edit_and_retest",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "greet.py",
+          "tests/test_greet.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 80,
+      "legacy_chars": 430,
+      "current_chars": 320,
+      "legacy_tokens": 107,
+      "current_tokens": 80,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_paginate_60b4dafc",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "paginate.py",
+          "test_paginate.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1137,
+      "legacy_chars": 4658,
+      "current_chars": 4548,
+      "legacy_tokens": 1164,
+      "current_tokens": 1137,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_parse_orders_708606f4",
+      "op": "file.view",
+      "args": {
+        "path": "orders.py"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 196,
+      "legacy_chars": 841,
+      "current_chars": 786,
+      "legacy_tokens": 210,
+      "current_tokens": 196,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_parse_orders_708606f4",
+      "op": "file.view",
+      "args": {
+        "path": "test_orders.py"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 215,
+      "legacy_chars": 915,
+      "current_chars": 860,
+      "legacy_tokens": 228,
+      "current_tokens": 215,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_scheduler_cancel_transition_4a9b681c",
+      "op": "file.view",
+      "args": {
+        "path": "scheduler.py"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 370,
+      "legacy_chars": 1537,
+      "current_chars": 1482,
+      "legacy_tokens": 384,
+      "current_tokens": 370,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_scheduler_cancel_transition_4a9b681c",
+      "op": "file.view",
+      "args": {
+        "path": "test_scheduler.py"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 389,
+      "legacy_chars": 1614,
+      "current_chars": 1559,
+      "legacy_tokens": 403,
+      "current_tokens": 389,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_shift_report_tie_order_4a0c45c8",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "shifts.py",
+          "test_shifts.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 500,
+      "legacy_chars": 2110,
+      "current_chars": 2000,
+      "legacy_tokens": 527,
+      "current_tokens": 500,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_turnstile_6e3358e8",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "turnstile.py",
+          "test_turnstile.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 915,
+      "legacy_chars": 3770,
+      "current_chars": 3660,
+      "legacy_tokens": 942,
+      "current_tokens": 915,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "rust_borrow_fix_longest_word_a4c895ec",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src\\lib.rs",
+          "tests\\longest.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 373,
+      "legacy_chars": 1658,
+      "current_chars": 1493,
+      "legacy_tokens": 414,
+      "current_tokens": 373,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_error_source_propagation_3eca2e86",
+      "op": "file.read_many",
+      "args": {
+        "max_total_lines": 200,
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs",
+          "tests/propagate.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 914,
+      "legacy_chars": 3824,
+      "current_chars": 3659,
+      "legacy_tokens": 956,
+      "current_tokens": 914,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_window_fold_scanner_3d213f38",
+      "op": "file.view",
+      "args": {
+        "path": "src/lib.rs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 344,
+      "legacy_chars": 1431,
+      "current_chars": 1376,
+      "legacy_tokens": 357,
+      "current_tokens": 344,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_window_fold_scanner_3d213f38",
+      "op": "file.view",
+      "args": {
+        "path": "tests/scanner.rs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 409,
+      "legacy_chars": 1692,
+      "current_chars": 1637,
+      "legacy_tokens": 423,
+      "current_tokens": 409,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "typescript_missing_await_result_order_c58cafb6",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "pipeline.mjs",
+          "check.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 419,
+      "legacy_chars": 1786,
+      "current_chars": 1676,
+      "legacy_tokens": 446,
+      "current_tokens": 419,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+      "op": "file.view",
+      "args": {
+        "path": "check.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 500,
+      "legacy_chars": 2058,
+      "current_chars": 2003,
+      "legacy_tokens": 514,
+      "current_tokens": 500,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+      "op": "file.view",
+      "args": {
+        "path": "stats.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 167,
+      "legacy_chars": 725,
+      "current_chars": 670,
+      "legacy_tokens": 181,
+      "current_tokens": 167,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "js_leaderboard_rank_b1603acf",
+      "op": "file.view",
+      "args": {
+        "path": "leaderboard.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 159,
+      "legacy_chars": 693,
+      "current_chars": 638,
+      "legacy_tokens": 173,
+      "current_tokens": 159,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "js_leaderboard_rank_b1603acf",
+      "op": "file.view",
+      "args": {
+        "window": 120,
+        "path": "check.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1024,
+      "legacy_chars": 4151,
+      "current_chars": 4096,
+      "legacy_tokens": 1037,
+      "current_tokens": 1024,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_envconfig_validate_dd681123",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "check.mjs",
+          "envConfig.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1324,
+      "legacy_chars": 5409,
+      "current_chars": 5299,
+      "legacy_tokens": 1352,
+      "current_tokens": 1324,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "node_envconfig_validate_dd681123",
+      "op": "file.view",
+      "args": {
+        "cursor": 81,
+        "path": "envConfig.mjs",
+        "window": 40
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 397,
+      "legacy_chars": 1645,
+      "current_chars": 1590,
+      "legacy_tokens": 411,
+      "current_tokens": 397,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_envconfig_validate_dd681123",
+      "op": "file.view",
+      "args": {
+        "cursor": 101,
+        "path": "envConfig.mjs",
+        "window": 20
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 122,
+      "legacy_chars": 545,
+      "current_chars": 490,
+      "legacy_tokens": 136,
+      "current_tokens": 122,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_slugify_771d856c",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "slugify.mjs",
+          "check.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 432,
+      "legacy_chars": 1841,
+      "current_chars": 1731,
+      "legacy_tokens": 460,
+      "current_tokens": 432,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_csvlite_parse_80d158b2",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "csvlite.py",
+          "test_csvlite.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1013,
+      "legacy_chars": 4163,
+      "current_chars": 4053,
+      "legacy_tokens": 1040,
+      "current_tokens": 1013,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_csvlite_parse_80d158b2",
+      "op": "file.view",
+      "args": {
+        "path": "test_csvlite.py",
+        "cursor": 81
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 705,
+      "legacy_chars": 2876,
+      "current_chars": 2821,
+      "legacy_tokens": 719,
+      "current_tokens": 705,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_csvlite_parse_80d158b2",
+      "op": "file.view",
+      "args": {
+        "path": "test_csvlite.py",
+        "window": 30,
+        "cursor": 112
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 298,
+      "legacy_chars": 1250,
+      "current_chars": 1195,
+      "legacy_tokens": 312,
+      "current_tokens": 298,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_nested_flatten_53db7c0b",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "nested_flatten.py",
+          "test_nested_flatten.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 983,
+      "legacy_chars": 4042,
+      "current_chars": 3932,
+      "legacy_tokens": 1010,
+      "current_tokens": 983,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_nested_flatten_53db7c0b",
+      "op": "file.view",
+      "args": {
+        "cursor": 81,
+        "path": "test_nested_flatten.py",
+        "window": 130
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 896,
+      "legacy_chars": 3639,
+      "current_chars": 3584,
+      "legacy_tokens": 909,
+      "current_tokens": 896,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_config_parse_port_d6111a63",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs",
+          "tests/config_test.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 700,
+      "legacy_chars": 2966,
+      "current_chars": 2801,
+      "legacy_tokens": 741,
+      "current_tokens": 700,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_grade_threshold_502d9b26",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "src/lib.rs",
+          "tests/grade_test.rs",
+          "Cargo.toml"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 371,
+      "legacy_chars": 1650,
+      "current_chars": 1485,
+      "legacy_tokens": 412,
+      "current_tokens": 371,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_username_guard_758c1a78",
+      "op": "file.read_many",
+      "args": {
+        "max_total_lines": 120,
+        "paths": [
+          "src/lib.rs",
+          "tests/username_test.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 763,
+      "legacy_chars": 3162,
+      "current_chars": 3052,
+      "legacy_tokens": 790,
+      "current_tokens": 763,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_chunk_batches_233e9e44",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "chunk.mjs",
+          "check.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 533,
+      "legacy_chars": 2245,
+      "current_chars": 2135,
+      "legacy_tokens": 561,
+      "current_tokens": 533,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_narrow_vs_cast_824b51c8",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "check.mjs",
+          "narrow.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 698,
+      "legacy_chars": 2903,
+      "current_chars": 2793,
+      "legacy_tokens": 725,
+      "current_tokens": 698,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_noisy_install_summary",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "requirements.txt",
+          "TASK.md"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 72,
+      "legacy_chars": 400,
+      "current_chars": 290,
+      "legacy_tokens": 100,
+      "current_tokens": 72,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_fix_type_error",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "src/index.ts",
+          "tsconfig.json",
+          "package.json"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 183,
+      "legacy_chars": 899,
+      "current_chars": 734,
+      "legacy_tokens": 224,
+      "current_tokens": 183,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_package_script_fail",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "package.json",
+          "TASK.md"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 95,
+      "legacy_chars": 490,
+      "current_chars": 380,
+      "legacy_tokens": 122,
+      "current_tokens": 95,
       "truncated_entries": 0
     },
     {
@@ -313,196 +1761,6 @@
     },
     {
       "task_id": "windows_batch_capture_diag",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "broken_build.log",
-          "TASK.md"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 113,
-      "legacy_chars": 562,
-      "current_chars": 452,
-      "legacy_tokens": 140,
-      "current_tokens": 113,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "windows_batch_capture_diag",
-      "op": "file.view",
-      "args": {
-        "path": "ERR.txt"
-      },
-      "ok": false,
-      "reproducible": false,
-      "unreproducible_reason": "file did not exist in the pristine fixture (created by the live run)",
-      "matched_projection": null,
-      "stored_tokens": 18,
-      "legacy_chars": 217,
-      "current_chars": 217,
-      "legacy_tokens": 54,
-      "current_tokens": 54,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_fix_compile_error",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "src/lib.rs",
-          "Cargo.toml"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 76,
-      "legacy_chars": 414,
-      "current_chars": 304,
-      "legacy_tokens": 103,
-      "current_tokens": 76,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_add_unit_test",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "Cargo.toml",
-          "src/lib.rs"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 75,
-      "legacy_chars": 411,
-      "current_chars": 301,
-      "legacy_tokens": 102,
-      "current_tokens": 75,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "rust_search_and_edit",
-      "op": "file.view",
-      "args": {
-        "path": "src/lib.rs"
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 31,
-      "legacy_chars": 181,
-      "current_chars": 126,
-      "legacy_tokens": 45,
-      "current_tokens": 31,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "python_fix_pytest_fail",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "mathlib.py",
-          "tests/test_math.py"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 72,
-      "legacy_chars": 399,
-      "current_chars": 289,
-      "legacy_tokens": 99,
-      "current_tokens": 72,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "python_edit_and_retest",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "greet.py",
-          "tests/test_greet.py"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 80,
-      "legacy_chars": 430,
-      "current_chars": 320,
-      "legacy_tokens": 107,
-      "current_tokens": 80,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "python_noisy_install_summary",
-      "op": "file.view",
-      "args": {
-        "path": "requirements.txt"
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 17,
-      "legacy_chars": 126,
-      "current_chars": 71,
-      "legacy_tokens": 31,
-      "current_tokens": 17,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "ts_fix_type_error",
-      "op": "file.read_many",
-      "args": {
-        "max_total_lines": 120,
-        "paths": [
-          "src/index.ts",
-          "tsconfig.json",
-          "package.json"
-        ]
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 137,
-      "legacy_chars": 715,
-      "current_chars": 550,
-      "legacy_tokens": 178,
-      "current_tokens": 137,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "ts_package_script_fail",
-      "op": "file.view",
-      "args": {
-        "path": "package.json"
-      },
-      "ok": true,
-      "reproducible": true,
-      "unreproducible_reason": null,
-      "matched_projection": "current",
-      "stored_tokens": 55,
-      "legacy_chars": 276,
-      "current_chars": 221,
-      "legacy_tokens": 69,
-      "current_tokens": 55,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "windows_batch_capture_diag",
       "op": "file.view",
       "args": {
         "path": "broken_build.log"
@@ -519,12 +1777,179 @@
       "truncated_entries": 0
     },
     {
+      "task_id": "py_region_top_seller_7f713e22",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "salesagg.py",
+          "test_salesagg.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1154,
+      "legacy_chars": 4729,
+      "current_chars": 4619,
+      "legacy_tokens": 1182,
+      "current_tokens": 1154,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_batch_splitter_05613a34",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "batches.py",
+          "test_batches.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 393,
+      "legacy_chars": 1684,
+      "current_chars": 1574,
+      "legacy_tokens": 421,
+      "current_tokens": 393,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_config_reader_686653a1",
+      "op": "file.read_many",
+      "args": {
+        "max_total_lines": 300,
+        "paths": [
+          "configreader.py",
+          "test_configreader.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1224,
+      "legacy_chars": 5008,
+      "current_chars": 4898,
+      "legacy_tokens": 1252,
+      "current_tokens": 1224,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_config_reader_686653a1",
+      "op": "file.view",
+      "args": {
+        "cursor": 81,
+        "path": "test_configreader.py",
+        "window": 50
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 579,
+      "legacy_chars": 2374,
+      "current_chars": 2319,
+      "legacy_tokens": 593,
+      "current_tokens": 579,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_config_reader_686653a1",
+      "op": "file.view",
+      "args": {
+        "cursor": 81,
+        "path": "test_configreader.py",
+        "window": 60
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 692,
+      "legacy_chars": 2823,
+      "current_chars": 2768,
+      "legacy_tokens": 705,
+      "current_tokens": 692,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_exception_mislabel_0816896a",
+      "op": "file.view",
+      "args": {
+        "path": "intake.py"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 345,
+      "legacy_chars": 1436,
+      "current_chars": 1381,
+      "legacy_tokens": 359,
+      "current_tokens": 345,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_exception_mislabel_0816896a",
+      "op": "file.view",
+      "args": {
+        "path": "test_intake.py"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 282,
+      "legacy_chars": 1185,
+      "current_chars": 1130,
+      "legacy_tokens": 296,
+      "current_tokens": 282,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_ledger_window_bug_9bfcc241",
+      "op": "file.view",
+      "args": {
+        "path": "ledger.py"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 308,
+      "legacy_chars": 1287,
+      "current_chars": 1232,
+      "legacy_tokens": 321,
+      "current_tokens": 308,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_ledger_window_bug_9bfcc241",
+      "op": "file.view",
+      "args": {
+        "path": "test_ledger.py"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 289,
+      "legacy_chars": 1211,
+      "current_chars": 1156,
+      "legacy_tokens": 302,
+      "current_tokens": 289,
+      "truncated_entries": 0
+    },
+    {
       "task_id": "rust_fix_compile_error",
       "op": "file.read_many",
       "args": {
         "paths": [
-          "src/lib.rs",
-          "Cargo.toml"
+          "Cargo.toml",
+          "src/lib.rs"
         ]
       },
       "ok": true,
@@ -562,6 +1987,7 @@
       "task_id": "rust_search_and_edit",
       "op": "file.read_many",
       "args": {
+        "max_total_lines": 100,
         "paths": [
           "Cargo.toml",
           "src/lib.rs"
@@ -636,40 +2062,20 @@
       "truncated_entries": 0
     },
     {
-      "task_id": "python_edit_and_retest",
+      "task_id": "python_noisy_install_summary",
       "op": "file.view",
       "args": {
-        "path": "greet.py"
-      },
-      "ok": true,
-      "reproducible": false,
-      "unreproducible_reason": "content depends on live-run history: current projection 25 tok / legacy projection 39 tok vs 27 tok recorded live",
-      "matched_projection": null,
-      "stored_tokens": 27,
-      "legacy_chars": 158,
-      "current_chars": 103,
-      "legacy_tokens": 39,
-      "current_tokens": 25,
-      "truncated_entries": 0
-    },
-    {
-      "task_id": "python_noisy_install_summary",
-      "op": "file.read_many",
-      "args": {
-        "paths": [
-          "requirements.txt",
-          "TASK.md"
-        ]
+        "path": "requirements.txt"
       },
       "ok": true,
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 72,
-      "legacy_chars": 400,
-      "current_chars": 290,
-      "legacy_tokens": 100,
-      "current_tokens": 72,
+      "stored_tokens": 17,
+      "legacy_chars": 126,
+      "current_chars": 71,
+      "legacy_tokens": 31,
+      "current_tokens": 17,
       "truncated_entries": 0
     },
     {
@@ -687,11 +2093,11 @@
       "reproducible": true,
       "unreproducible_reason": null,
       "matched_projection": "current",
-      "stored_tokens": 168,
-      "legacy_chars": 894,
-      "current_chars": 674,
-      "legacy_tokens": 223,
-      "current_tokens": 168,
+      "stored_tokens": 214,
+      "legacy_chars": 1078,
+      "current_chars": 858,
+      "legacy_tokens": 269,
+      "current_tokens": 214,
       "truncated_entries": 0
     },
     {
@@ -743,6 +2149,735 @@
       "current_chars": 233,
       "legacy_tokens": 72,
       "current_tokens": 58,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "py_region_top_seller_7f713e22",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "salesagg.py",
+          "test_salesagg.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1154,
+      "legacy_chars": 4729,
+      "current_chars": 4619,
+      "legacy_tokens": 1182,
+      "current_tokens": 1154,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_batch_splitter_05613a34",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "batches.py",
+          "test_batches.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 393,
+      "legacy_chars": 1684,
+      "current_chars": 1574,
+      "legacy_tokens": 421,
+      "current_tokens": 393,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_config_reader_686653a1",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "configreader.py",
+          "test_configreader.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1224,
+      "legacy_chars": 5008,
+      "current_chars": 4898,
+      "legacy_tokens": 1252,
+      "current_tokens": 1224,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_config_reader_686653a1",
+      "op": "file.view",
+      "args": {
+        "cursor": 81,
+        "path": "test_configreader.py",
+        "window": 40
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 470,
+      "legacy_chars": 1937,
+      "current_chars": 1882,
+      "legacy_tokens": 484,
+      "current_tokens": 470,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_exception_mislabel_0816896a",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "intake.py",
+          "test_intake.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 643,
+      "legacy_chars": 2684,
+      "current_chars": 2574,
+      "legacy_tokens": 671,
+      "current_tokens": 643,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_ledger_window_bug_9bfcc241",
+      "op": "file.read_many",
+      "args": {
+        "max_total_lines": 200,
+        "paths": [
+          "ledger.py",
+          "test_ledger.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 612,
+      "legacy_chars": 2561,
+      "current_chars": 2451,
+      "legacy_tokens": 640,
+      "current_tokens": 612,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_paginate_60b4dafc",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "paginate.py",
+          "test_paginate.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1137,
+      "legacy_chars": 4658,
+      "current_chars": 4548,
+      "legacy_tokens": 1164,
+      "current_tokens": 1137,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_parse_orders_708606f4",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "orders.py",
+          "test_orders.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 427,
+      "legacy_chars": 1819,
+      "current_chars": 1709,
+      "legacy_tokens": 454,
+      "current_tokens": 427,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_scheduler_cancel_transition_4a9b681c",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "scheduler.py",
+          "test_scheduler.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 777,
+      "legacy_chars": 3220,
+      "current_chars": 3110,
+      "legacy_tokens": 805,
+      "current_tokens": 777,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_shift_report_tie_order_4a0c45c8",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "shifts.py",
+          "test_shifts.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 500,
+      "legacy_chars": 2110,
+      "current_chars": 2000,
+      "legacy_tokens": 527,
+      "current_tokens": 500,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_turnstile_6e3358e8",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "turnstile.py",
+          "test_turnstile.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 915,
+      "legacy_chars": 3770,
+      "current_chars": 3660,
+      "legacy_tokens": 942,
+      "current_tokens": 915,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "rust_borrow_fix_longest_word_a4c895ec",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "src/lib.rs",
+          "tests/longest.rs",
+          "Cargo.toml"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 372,
+      "legacy_chars": 1656,
+      "current_chars": 1491,
+      "legacy_tokens": 414,
+      "current_tokens": 372,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_error_source_propagation_3eca2e86",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs",
+          "tests/propagate.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 914,
+      "legacy_chars": 3824,
+      "current_chars": 3659,
+      "legacy_tokens": 956,
+      "current_tokens": 914,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_window_fold_scanner_3d213f38",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "src/lib.rs",
+          "tests/scanner.rs",
+          "Cargo.toml"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 805,
+      "legacy_chars": 3386,
+      "current_chars": 3221,
+      "legacy_tokens": 846,
+      "current_tokens": 805,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "typescript_missing_await_result_order_c58cafb6",
+      "op": "file.view",
+      "args": {
+        "path": "pipeline.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 247,
+      "legacy_chars": 1046,
+      "current_chars": 991,
+      "legacy_tokens": 261,
+      "current_tokens": 247,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "typescript_missing_await_result_order_c58cafb6",
+      "op": "file.view",
+      "args": {
+        "path": "check.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 156,
+      "legacy_chars": 679,
+      "current_chars": 624,
+      "legacy_tokens": 169,
+      "current_tokens": 156,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+      "op": "file.view",
+      "args": {
+        "path": "stats.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 167,
+      "legacy_chars": 725,
+      "current_chars": 670,
+      "legacy_tokens": 181,
+      "current_tokens": 167,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "typescript_reduce_shared_accumulator_d80f462d",
+      "op": "file.view",
+      "args": {
+        "path": "check.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 500,
+      "legacy_chars": 2058,
+      "current_chars": 2003,
+      "legacy_tokens": 514,
+      "current_tokens": 500,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "js_leaderboard_rank_b1603acf",
+      "op": "file.view",
+      "args": {
+        "path": "leaderboard.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 159,
+      "legacy_chars": 693,
+      "current_chars": 638,
+      "legacy_tokens": 173,
+      "current_tokens": 159,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "js_leaderboard_rank_b1603acf",
+      "op": "file.view",
+      "args": {
+        "path": "check.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 685,
+      "legacy_chars": 2798,
+      "current_chars": 2743,
+      "legacy_tokens": 699,
+      "current_tokens": 685,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_envconfig_validate_dd681123",
+      "op": "file.view",
+      "args": {
+        "path": "envConfig.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 804,
+      "legacy_chars": 3272,
+      "current_chars": 3217,
+      "legacy_tokens": 818,
+      "current_tokens": 804,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_envconfig_validate_dd681123",
+      "op": "file.view",
+      "args": {
+        "path": "check.mjs"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 494,
+      "legacy_chars": 2033,
+      "current_chars": 1978,
+      "legacy_tokens": 508,
+      "current_tokens": 494,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_envconfig_validate_dd681123",
+      "op": "file.view",
+      "args": {
+        "cursor": 75,
+        "path": "envConfig.mjs",
+        "window": 40
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 432,
+      "legacy_chars": 1786,
+      "current_chars": 1731,
+      "legacy_tokens": 446,
+      "current_tokens": 432,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_envconfig_validate_dd681123",
+      "op": "file.view",
+      "args": {
+        "cursor": 94,
+        "path": "envConfig.mjs",
+        "window": 20
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 163,
+      "legacy_chars": 707,
+      "current_chars": 652,
+      "legacy_tokens": 176,
+      "current_tokens": 163,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "node_slugify_771d856c",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "slugify.mjs",
+          "check.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 432,
+      "legacy_chars": 1841,
+      "current_chars": 1731,
+      "legacy_tokens": 460,
+      "current_tokens": 432,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_csvlite_parse_80d158b2",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "csvlite.py",
+          "test_csvlite.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 1013,
+      "legacy_chars": 4163,
+      "current_chars": 4053,
+      "legacy_tokens": 1040,
+      "current_tokens": 1013,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_csvlite_parse_80d158b2",
+      "op": "file.view",
+      "args": {
+        "path": "test_csvlite.py",
+        "cursor": 81,
+        "window": 70
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 619,
+      "legacy_chars": 2533,
+      "current_chars": 2478,
+      "legacy_tokens": 633,
+      "current_tokens": 619,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_csvlite_parse_80d158b2",
+      "op": "file.view",
+      "args": {
+        "path": "csvlite.py",
+        "window": 80
+      },
+      "ok": true,
+      "reproducible": false,
+      "unreproducible_reason": "content depends on live-run history: current projection 274 tok / legacy projection 287 tok vs 686 tok recorded live",
+      "matched_projection": null,
+      "stored_tokens": 686,
+      "legacy_chars": 1151,
+      "current_chars": 1096,
+      "legacy_tokens": 287,
+      "current_tokens": 274,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_nested_flatten_53db7c0b",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "nested_flatten.py",
+          "test_nested_flatten.py"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 983,
+      "legacy_chars": 4042,
+      "current_chars": 3932,
+      "legacy_tokens": 1010,
+      "current_tokens": 983,
+      "truncated_entries": 1
+    },
+    {
+      "task_id": "python_nested_flatten_53db7c0b",
+      "op": "file.view",
+      "args": {
+        "path": "test_nested_flatten.py",
+        "cursor": 81
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 543,
+      "legacy_chars": 2230,
+      "current_chars": 2175,
+      "legacy_tokens": 557,
+      "current_tokens": 543,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_nested_flatten_53db7c0b",
+      "op": "file.view",
+      "args": {
+        "cursor": 121,
+        "path": "test_nested_flatten.py"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 563,
+      "legacy_chars": 2310,
+      "current_chars": 2255,
+      "legacy_tokens": 577,
+      "current_tokens": 563,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_nested_flatten_53db7c0b",
+      "op": "file.view",
+      "args": {
+        "cursor": 161,
+        "path": "test_nested_flatten.py"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 558,
+      "legacy_chars": 2287,
+      "current_chars": 2232,
+      "legacy_tokens": 571,
+      "current_tokens": 558,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "python_nested_flatten_53db7c0b",
+      "op": "file.view",
+      "args": {
+        "cursor": 201,
+        "path": "test_nested_flatten.py"
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 345,
+      "legacy_chars": 1438,
+      "current_chars": 1383,
+      "legacy_tokens": 359,
+      "current_tokens": 345,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_config_parse_port_d6111a63",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs",
+          "tests/config_test.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 700,
+      "legacy_chars": 2966,
+      "current_chars": 2801,
+      "legacy_tokens": 741,
+      "current_tokens": 700,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_grade_threshold_502d9b26",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "Cargo.toml",
+          "src/lib.rs",
+          "tests/grade_test.rs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 371,
+      "legacy_chars": 1650,
+      "current_chars": 1485,
+      "legacy_tokens": 412,
+      "current_tokens": 371,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "rust_username_guard_758c1a78",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "src/lib.rs",
+          "tests/username_test.rs",
+          "Cargo.toml"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 806,
+      "legacy_chars": 3392,
+      "current_chars": 3227,
+      "legacy_tokens": 848,
+      "current_tokens": 806,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_chunk_batches_233e9e44",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "chunk.mjs",
+          "check.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 533,
+      "legacy_chars": 2245,
+      "current_chars": 2135,
+      "legacy_tokens": 561,
+      "current_tokens": 533,
+      "truncated_entries": 0
+    },
+    {
+      "task_id": "ts_narrow_vs_cast_824b51c8",
+      "op": "file.read_many",
+      "args": {
+        "paths": [
+          "check.mjs",
+          "narrow.mjs"
+        ]
+      },
+      "ok": true,
+      "reproducible": true,
+      "unreproducible_reason": null,
+      "matched_projection": "current",
+      "stored_tokens": 698,
+      "legacy_chars": 2903,
+      "current_chars": 2793,
+      "legacy_tokens": 725,
+      "current_tokens": 698,
       "truncated_entries": 0
     }
   ]

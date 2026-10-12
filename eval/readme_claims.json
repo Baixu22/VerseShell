@@ -1,8 +1,14 @@
 {
   "schema": "verseshell.readme-claims/v1",
-  "generated_at": "2026-09-24T17:22:31.352677+00:00",
+  "generated_at": "2026-10-12T00:27:50.024287+00:00",
   "generator": "tools/readme_claims_check.py",
   "ae_binary": "target\\debug\\ae.exe",
+  "ae_binary_sha256": "d2de460585a5a231f3376ffd166be511e345a73d8f1e610612ed36e7c858f95b",
+  "input_sha256": {
+    "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\README.md": "5e09fe74d1712c62214733b867b1159cbe4316b6a13edcea982a986cd237e241",
+    "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\eval\\cross_shell.json": "9c98156a6b528f9b9e1bc38d97ad7080d023bb95f1ddd493e63163043e6c517d",
+    "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\eval\\evidence.compact-ratio.json": "f486dd3979e57efdbed9458ac3ae3be34325862bf50618c1af40cb64a0dbd017"
+  },
   "all_pass": true,
   "checks": [
     {
@@ -117,9 +123,9 @@
       "kind": "number",
       "name": "integration tests",
       "source": "tests/integration_tests.rs (#[test] functions)",
-      "expected": 52,
+      "expected": 53,
       "actual": [
-        52
+        53
       ],
       "note": "README states the size of the integration suite",
       "pass": true
@@ -127,41 +133,57 @@
     {
       "kind": "cross_shell",
       "name": "CPU info",
-      "source": "README.md vs eval/cross_shell.json",
-      "expected": "| CPU info | **330.5ms** | 1303.9ms | 429.3ms | **3.9x faster** |",
+      "source": "README.md vs C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\eval\\cross_shell.json",
+      "expected": "| CPU info | **224.4ms** | 1224.0ms | 292.9ms | **5.5x faster** |",
       "actual": "present",
       "pass": true
     },
     {
       "kind": "cross_shell",
       "name": "Disk info",
-      "source": "README.md vs eval/cross_shell.json",
-      "expected": "| Disk info | **12.5ms** | 403.9ms | N/A | **32.3x faster** |",
+      "source": "README.md vs C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\eval\\cross_shell.json",
+      "expected": "| Disk info | **9.0ms** | 299.5ms | N/A | **33.1x faster** |",
       "actual": "present",
       "pass": true
     },
     {
       "kind": "cross_shell",
       "name": "List dir",
-      "source": "README.md vs eval/cross_shell.json",
-      "expected": "| List dir | **13.5ms** | 295.0ms | 420.1ms | **21.8x faster** |",
+      "source": "README.md vs C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\eval\\cross_shell.json",
+      "expected": "| List dir | **9.1ms** | 221.3ms | 275.5ms | **24.2x faster** |",
       "actual": "present",
       "pass": true
     },
     {
       "kind": "cross_shell",
       "name": "Read file",
-      "source": "README.md vs eval/cross_shell.json",
-      "expected": "| Read file | **12.7ms** | 180.3ms | 465.4ms | **14.2x faster** |",
+      "source": "README.md vs C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\eval\\cross_shell.json",
+      "expected": "| Read file | **8.8ms** | 123.8ms | 267.1ms | **14.1x faster** |",
       "actual": "present",
       "pass": true
     },
     {
       "kind": "cross_shell",
       "name": "Pipeline 1K",
-      "source": "README.md vs eval/cross_shell.json",
-      "expected": "| Pipeline 1K | **14.9ms** | 234.1ms | 444.2ms | **15.7x faster** |",
+      "source": "README.md vs C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\eval\\cross_shell.json",
+      "expected": "| Pipeline 1K | **9.3ms** | 150.3ms | 291.9ms | **16.1x faster** |",
       "actual": "present",
+      "pass": true
+    },
+    {
+      "kind": "compact_encoding",
+      "name": "C9 conservative README percentage",
+      "source": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\eval\\evidence.compact-ratio.json",
+      "expected": "measured 42.0% gated saving",
+      "actual": "present",
+      "pass": true
+    },
+    {
+      "kind": "source_binding",
+      "name": "binary and selected inputs stable",
+      "source": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell\\target\\debug\\ae.exe",
+      "expected": "same bytes throughout check",
+      "actual": true,
       "pass": true
     }
   ]

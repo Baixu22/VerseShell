@@ -1,0 +1,52 @@
+{
+  "id": "python_batch_splitter_05613a34",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "The test suite for the batch splitter in batches.py fails: when items don't divide evenly, some items go missing and batch sizes come out unbalanced. Fix the module so the full pytest run passes, without changing test_batches.py.",
+  "golden": {
+    "batches.py": "\"\"\"Split a list of items into ordered batches.\"\"\"\n\n\ndef split_into_batches(items, batch_count):\n    \"\"\"Divide ``items`` (in order) into exactly ``batch_count`` batches.\n\n    Every item must appear in exactly one batch, batches keep the original\n    order, and batch sizes may differ by at most one.\n\n    Raises:\n        ValueError: if ``batch_count`` is less than 1.\n    \"\"\"\n    if batch_count < 1:\n        raise ValueError(\"batch_count must be at least 1\")\n    base, extra = divmod(len(items), batch_count)\n    batches = []\n    start = 0\n    for index in range(batch_count):\n        end = start + base + (1 if index < extra else 0)\n        batches.append(list(items[start:end]))\n        start = end\n    return batches\n",
+    "test_batches.py": "import pytest\n\nfrom batches import split_into_batches\n\n\ndef test_preserves_every_item():\n    batches = split_into_batches(list(range(10)), 3)\n    assert [x for batch in batches for x in batch] == list(range(10))\n\n\ndef test_balanced_sizes():\n    batches = split_into_batches(list(range(10)), 3)\n    assert [len(b) for b in batches] == [4, 3, 3]\n\n\ndef test_more_batches_than_items():\n    assert split_into_batches([\"a\"], 4) == [[\"a\"], [], [], []]\n\n\ndef test_exact_division():\n    assert split_into_batches([1, 2, 3, 4], 2) == [[1, 2], [3, 4]]\n\n\ndef test_single_batch_keeps_everything():\n    assert split_into_batches([1, 2, 3], 1) == [[1, 2, 3]]\n\n\ndef test_rejects_non_positive_batch_count():\n    with pytest.raises(ValueError):\n        split_into_batches([1], 0)\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "timeout_sec": 120
+      },
+      {
+        "type": "file_contains",
+        "path": "test_batches.py",
+        "contains": "assert [len(b) for b in batches] == [4, 3, 3]"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_and_golden_author",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "generated_at": "2026-09-25T01:34:16.969171+00:00",
+    "verifier_guard": "guard clause added on a verbatim line of test_batches.py ('assert [len(b) for b in batches] == [4, 3, 3]') so the task cannot be passed by tampering with its own verifier"
+  },
+  "workspace_fixture": "python_batch_splitter_05613a34",
+  "promoted_from": "bench/aci/candidates/python_batch_splitter_05613a34",
+  "promoted_at": "2026-09-25T08:29:13.926512+00:00"
+}

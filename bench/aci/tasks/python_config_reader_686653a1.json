@@ -1,0 +1,52 @@
+{
+  "id": "python_config_reader_686653a1",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "The test suite for `configreader.py` fails. Catches both keyerror and filenotfounderror in one handler and re-raises everything as filenotfounderror, mislabeling a missing setting key as a missing file. Fix the module so the test suite passes, without changing test_configreader.py.",
+  "golden": {
+    "configreader.py": "\"\"\"configreader: minimal reader for simple ``key = value`` config files.\"\"\"\n\nimport os\n\n__all__ = [\"read_setting\", \"read_settings\"]\n\n_ENCODING = \"utf-8\"\n\n\ndef _parse(lines, path):\n    \"\"\"Parse config lines into a dict, skipping blanks and # comments.\"\"\"\n    settings = {}\n    for number, raw in enumerate(lines, start=1):\n        line = raw.strip()\n        if not line or line.startswith(\"#\"):\n            continue\n        if \"=\" not in line:\n            raise ValueError(f\"{path}:{number}: malformed line {raw!r}\")\n        key, _, value = line.partition(\"=\")\n        settings[key.strip()] = value.strip()\n    return settings\n\n\ndef read_setting(path, key):\n    \"\"\"Return the value stored under *key* in the config file at *path*.\"\"\"\n    if not os.path.isfile(path):\n        raise FileNotFoundError(f\"config file not found: {path}\")\n    with open(path, \"r\", encoding=_ENCODING) as handle:\n        settings = _parse(handle, path)\n    try:\n        return settings[key]\n    except KeyError:\n        # The file exists but does not define this key; that is a distinct\n        # failure from a missing file, so let KeyError propagate.\n        raise KeyError(f\"no setting {key!r} in {path}\") from None\n\n\ndef read_settings(path):\n    \"\"\"Return every setting in the config file at *path* as a dict.\"\"\"\n    if not os.path.isfile(path):\n        raise FileNotFoundError(f\"config file not found: {path}\")\n    with open(path, \"r\", encoding=_ENCODING) as handle:\n        return _parse(handle, path)\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "timeout_sec": 180
+      },
+      {
+        "type": "file_contains",
+        "path": "test_configreader.py",
+        "contains": "def test_missing_key_raises_key_error(self):"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_fixture_tests_author (decomposed 3-step protocol)",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "plan_index": 14,
+    "tier": "medium",
+    "generated_at": "2026-09-25T05:19:47.567329+00:00"
+  },
+  "workspace_fixture": "python_config_reader_686653a1",
+  "promoted_from": "bench/aci/candidates/python_config_reader_686653a1",
+  "promoted_at": "2026-09-25T08:29:13.930040+00:00"
+}

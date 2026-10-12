@@ -1,0 +1,127 @@
+{
+  "proposal_id": "TFP-final-workspace-node-dev-2026-10-08",
+  "session_id": "final-workspace-node-dev-2026-10-08",
+  "rationale": "用户要求续接中断节点开发。本批仅收尾 TF-0136 的实现、负向回归、真实工具链离线对照和只读历史覆盖清单；保留历史评分、敏感字段检测、新冻结采集和正式门禁边界。仅保存提案供确认，不自动应用或关闭节点。",
+  "changes": [
+    {
+      "action": "update_node",
+      "id": "TF-0124",
+      "fields": {
+        "summary": "2026-10-08：在工具契约、采集收尾/存储批次基础上继续 TF-0135。新增 attempt 用量台账与统一成本拒绝规则；1050 行旧轮只读核对到 5 行/6 回合/7 次未知用量，完整 Python 回归 242 项通过，产品门禁仍 25/31。正式研究、全入口验收与源码落地继续开放。 本轮续接 TF-0136：最终评分输入已冻结并支持显式独立复核，18 项专项通过；Python 260 项中 257 通过、3 跳过，产品门禁仍 25/31。历史最终快照 0/1050；10 个离线对照中 8 个可复评分且全部相符，2 个因保守凭据保护保持 unknown，不宣称全量覆盖。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/tool-contract-repairs-2026-10-08.md",
+          "D:/VerseShellLive/node-dev-20261008/change-manifest.json",
+          "D:/VerseShellLive/node-dev-20261008/implementation.diff",
+          "D:/VerseShellLive/node-dev-20261008/evidence/claim-gate-final.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "docs/final-workspace-repairs-2026-10-08.md",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/node-change-manifest.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/node-change-manifest.diff",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/change-manifest.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/logs/python-tests-final.log",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/offline-independent-rescore.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/historical-final-workspaces.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/historical-candidate-coverage.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/final-summary.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "tool-contract-node-dev-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "final-workspace-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0126",
+      "fields": {
+        "summary": "2026-10-08：TF-0133/0134 的控制与恢复实现保留；本批推进 TF-0135，逐 attempt 记录已收到/未知 usage，成本配对分母明确，旧轮 5 项缺口复核一致。TF-0136 与历史恢复/账单核对剩余范围未被关闭。 本轮续接 TF-0136：最终评分输入已冻结并支持显式独立复核，18 项专项通过；Python 260 项中 257 通过、3 跳过，产品门禁仍 25/31。历史最终快照 0/1050；10 个离线对照中 8 个可复评分且全部相符，2 个因保守凭据保护保持 unknown，不宣称全量覆盖。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "docs/collection-control-repairs-2026-10-08.md",
+          "D:/VerseShellLive/control-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/control-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/control-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/control-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/control-repair-20261008/evidence/change-boundary.json",
+          "docs/usage-accounting-repairs-2026-10-08.md",
+          "D:/VerseShellLive/usage-repair-20261008/change-manifest.json",
+          "D:/VerseShellLive/usage-repair-20261008/implementation.diff",
+          "D:/VerseShellLive/usage-repair-20261008/logs/python-tests-final.log",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/historical-usage-audit-final.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/usage-gaps-summary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/claim-gate.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/change-boundary.json",
+          "D:/VerseShellLive/usage-repair-20261008/evidence/old-plan-rejection.json",
+          "docs/final-workspace-repairs-2026-10-08.md",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/node-change-manifest.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/node-change-manifest.diff",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/change-manifest.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/logs/python-tests-final.log",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/offline-independent-rescore.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/historical-final-workspaces.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/historical-candidate-coverage.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/final-summary.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "collection-control-node-dev-2026-10-08",
+          "usage-accounting-node-dev-2026-10-08",
+          "final-workspace-node-dev-2026-10-08"
+        ]
+      }
+    },
+    {
+      "action": "update_node",
+      "id": "TF-0136",
+      "fields": {
+        "status": "in_progress",
+        "progress": 85,
+        "next_action": "确认提案后登记工程进展；评估保守凭据检测的覆盖限制，在新冻结版本采集中验证快照，再推进 TF-0137 的全入口严格判定。",
+        "summary": "本轮续接 TF-0136：最终评分输入已冻结并支持显式独立复核，18 项专项通过；Python 260 项中 257 通过、3 跳过，产品门禁仍 25/31。历史最终快照 0/1050；10 个离线对照中 8 个可复评分且全部相符，2 个因保守凭据保护保持 unknown，不宣称全量覆盖。",
+        "evidence": [
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/workspace/bench/aci/results/step5p-d-r1-20261007/reports-baseline/task_set_audit.json",
+          "tools/trajectory_replay.py",
+          "tools/task_set_audit.py:198",
+          "docs/final-workspace-repairs-2026-10-08.md",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/node-change-manifest.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/node-change-manifest.diff",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/change-manifest.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/logs/python-tests-final.log",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/offline-independent-rescore.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/historical-final-workspaces.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/historical-candidate-coverage.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/product-claim-gate.json",
+          "D:/VerseShellLive/final-state-resume-20261008-01a11b5b/evidence/final-summary.json"
+        ],
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "final-workspace-node-dev-2026-10-08"
+        ]
+      }
+    }
+  ]
+}

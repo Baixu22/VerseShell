@@ -1,0 +1,63 @@
+{
+  "base_graph_hash": "bcbbcdfeb5d8e823a666e3cfd874443c2b2b421873f6bb7b3a5a5244d2467a4c",
+  "base_summary": {
+    "edge_count": 233,
+    "node_count": 141,
+    "workspace_path": "C:\\Users\\27933\\Desktop\\verseshell\\verseshell"
+  },
+  "changes": [
+    {
+      "action": "update_node",
+      "fields": {
+        "evidence": [
+          "**阻塞已消除**：那最后一格 `python_csvlite_parse_80d158b2 [raw_shell] seed=44` 再次补跑时**一次成功**（返回普通 FAIL 行：2 tools / 1348 obs_tok），三份 with 臂 seed 文件现在 **0 行 api_error**。",
+          "**因此 with 臂以干净状态重新合并**：`merge_live_runs.py`（**不需要** `--allow-api-errors`）→ 315 行、`api_error_rows = 0`。旧的部分合并产物备份在 `audit-r12-scratch/latest_live_round14_partial_backup.json`。",
+          "**C35 由 FAIL 转 PASS**，即两臂现在在 seed 集合、任务集合、行数、`git_rev`、`task_set_version` 上完全一致。",
+          "**这同时修正了本节点原先的记录**：早先「6 次补跑全部失败」是**端点状态相关**的（同一格在 without 臂与后续重试中都能成功），不是该任务结构性不可用。**不能把它当成结构性结论**——这一点比结论本身重要。",
+          "**仍然有效的部分**：一个格的端点失败会让**整轮** live 无法合并、全部派生产物永久陈旧，这个管道缺陷依然存在（`--allow-api-errors` 只记计数、不产出行分类），仍待与 §0.6 对齐。",
+          "D:/VerseShellLive/analysis-20261008/analysis.md",
+          "D:/VerseShellLive/analysis-20261008/analysis.json",
+          "D:/VerseShellLive/readiness-ready/readiness.json",
+          "C:/Users/27933/Desktop/verseshell/verseshell/docs/collection-recovery-coverage-2026-10-10.md",
+          "C:/Users/27933/Desktop/verseshell/verseshell/docs/acceptance-criteria.md#0.6.7",
+          "C:/Users/27933/Desktop/verseshell/verseshell/docs/acceptance-criteria.md#0.5.2",
+          "C:/Users/27933/Desktop/verseshell/verseshell/tests/test_live_control.py",
+          "D:/VerseShellLive/freeze-live-20261010/recovery-coverage-tests-afterfix.log",
+          "D:/VerseShellLive/freeze-live-20261010/recovery-coverage-tests-rerun.log",
+          "D:/VerseShellLive/freeze-live-20261010/live-control-fail.log",
+          "D:/VerseShellLive/node-freeze-20261010-01a120ce/workspace/bench/aci/results/step5p-dev-20261010-r2/latest_live.json"
+        ],
+        "next_action": "partial 仍只作诊断；剩余故障场景由 TF-0134（D 盘阈值/强 kill 写盘/POSIX）与 TF-0112 继续。不要把 partial 产物或本节点完成解读为可主张的完整研究。",
+        "progress": 100.0,
+        "source_sessions": [
+          "step5p-findings-2026-10-08",
+          "freeze-live-2026-10-10"
+        ],
+        "status": "done",
+        "summary": "2026-10-10：单格端点失败处置已在 acceptance-criteria §0.6.7 预注册；merge 逐行 row_class、端点行 success=null/raw_success 保留、C35 从原始字段重分类并列出受影响行与对比。真实 live 链路验证：venv Job 误杀后 6 行 checkpoint 原样保留，--resume-paused 跳过已提交格并完成，success=null 保持 unknown、独立复评分结论单列。恢复覆盖对照记录已覆盖 9 项、剩余 5 项（真实 D 盘写满/强 kill 写盘/POSIX 归 TF-0134；完整重复归 TF-0112；产品与落地归 TF-0140/0141）。另修复组合运行时 PID 复用导致的测试隔离假阳性，103 passed。"
+      },
+      "id": "TF-0122"
+    },
+    {
+      "action": "record_deviation",
+      "deviation": {
+        "correction": "仅改测试：为该用例加 @patch.object(control, 'pid_alive', return_value=False)；owner 存活契约仍由 test_new_generation_and_live_owner_cannot_finalize 覆盖。修复后 11 文件组合 103 passed，生产代码未改。",
+        "created_at": "2026-10-10T05:09:33.187891Z",
+        "id": "TFD-b67c114770",
+        "kind": "test_isolation_pid_reuse",
+        "reason": "该用例把 launch() 子进程的 PID 已退出当作环境事实。Windows 复用 PID，同会话其它用例新建进程可能拿到同一 PID，live_control.finalize() 的 fail-closed 存活检查随即误判。生产语义正确，缺陷在测试对环境 PID 的隐式依赖。",
+        "related_task_ids": [
+          "TF-0122",
+          "TF-0133",
+          "TF-0134"
+        ],
+        "summary": "tests/test_live_control.py::test_finalize_rejects_incomplete_tampered_and_extra_manifests 在 11 文件组合运行时稳定失败(ValueError: collection owner is still alive)，单跑通过。"
+      }
+    }
+  ],
+  "created_at": "2026-10-10T05:09:25Z",
+  "proposal_id": "TFP-tf0122-done-recovery-coverage-2026-10-10",
+  "rationale": "TF-0122 六条验收逐条有据：AC1 单格端点失败处置已预注册于 acceptance-criteria §0.6.7；AC2/AC3 merge 逐行 row_class + claim_gate C35 机检，7 项测试；AC4 预算敏感清单见 §0.5.2（对应 TF-0120），tools/budget_sensitivity.py + 5 项测试；AC5 覆盖对照见 docs/collection-recovery-coverage-2026-10-10.md，已覆盖项均指向真实执行，剩余项点名 TF-0134/TF-0112/TF-0140；AC6 本轮真实中断恢复保留 6 行 checkpoint、格身份不变、success=null 不补零。同时修复并复现了组合运行时 PID 复用造成的测试隔离假阳性（102→103 passed），生产 fail-closed 契约未改。",
+  "session_id": "freeze-live-2026-10-10",
+  "status": "proposed"
+}

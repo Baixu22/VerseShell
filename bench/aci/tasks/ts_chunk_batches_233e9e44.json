@@ -1,0 +1,57 @@
+{
+  "id": "ts_chunk_batches_233e9e44",
+  "kind": "capability",
+  "lang": "typescript",
+  "prompt": "The test suite for `chunk.mjs` fails. Uses <= in the loop condition so a spurious empty trailing batch is emitted whenever the array length is an exact multiple of the batch size. Fix the module so the suite passes, without changing check.mjs.",
+  "golden": {
+    "chunk.mjs": "/**\n * Splits an array into consecutive batches of at most `size` elements.\n * The last batch may be smaller, but is never empty.\n *\n * @template T\n * @param {readonly T[]} array - The array to split.\n * @param {number} size - The maximum size of each batch (positive integer).\n * @returns {T[][]} An array of batches, in order.\n * @throws {RangeError} If `size` is not a positive integer.\n */\nexport function chunk(array, size) {\n  if (!Number.isInteger(size) || size < 1) {\n    throw new RangeError(\"size must be a positive integer\");\n  }\n\n  const batches = [];\n  for (let i = 0; i < array.length; i += size) {\n    batches.push(array.slice(i, i + size));\n  }\n  return batches;\n}\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "node",
+          "check.mjs"
+        ],
+        "timeout_sec": 300
+      },
+      {
+        "type": "file_contains",
+        "path": "check.mjs",
+        "contains": "assert.deepStrictEqual(chunk([1, 2, 3, 4, 5], 2), [[1, 2], [3, 4], [5]]);"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task author (TDD-ordered, locally self-verified)",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written from the spec and tests, never from the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false,
+        "verified_passes_tests": true
+      }
+    ],
+    "plan_index": 29,
+    "tier": "small",
+    "self_verified": {
+      "tests_pass_on_correct": true,
+      "tests_fail_on_buggy": true,
+      "variants_verified": 2
+    },
+    "generated_at": "2026-09-27T23:45:26.106389+00:00"
+  },
+  "workspace_fixture": "ts_chunk_batches_233e9e44",
+  "promoted_from": "bench/aci/candidates/ts_chunk_batches_233e9e44",
+  "promoted_at": "2026-09-28T04:37:02.623358+00:00"
+}

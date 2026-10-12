@@ -1,0 +1,52 @@
+{
+  "id": "python_turnstile_6e3358e8",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "The test suite for `turnstile.py` fails. In the transition table, a coin event in the locked state stays locked instead of moving to unlocked. Fix the module so the test suite passes, without changing test_turnstile.py.",
+  "golden": {
+    "turnstile.py": "\"\"\"Turnstile finite state machine.\n\nStates: LOCKED, UNLOCKED\nEvents: COIN, PUSH\n\"\"\"\n\nLOCKED = \"LOCKED\"\nUNLOCKED = \"UNLOCKED\"\n\nCOIN = \"COIN\"\nPUSH = \"PUSH\"\n\n# Transition table: (state, event) -> next state\nTRANSITIONS = {\n    (LOCKED, COIN): UNLOCKED,\n    (LOCKED, PUSH): LOCKED,\n    (UNLOCKED, COIN): UNLOCKED,\n    (UNLOCKED, PUSH): LOCKED,\n}\n\n\nclass Turnstile:\n    def __init__(self):\n        self.state = LOCKED\n\n    def handle(self, event):\n        key = (self.state, event)\n        if key not in TRANSITIONS:\n            raise ValueError(f\"Invalid event {event!r} in state {self.state!r}\")\n        self.state = TRANSITIONS[key]\n        return self.state\n\n\nif __name__ == \"__main__\":\n    t = Turnstile()\n    print(\"initial:\", t.state)\n    print(\"COIN ->\", t.handle(COIN))\n    print(\"PUSH ->\", t.handle(PUSH))\n    print(\"COIN ->\", t.handle(COIN))\n    print(\"PUSH ->\", t.handle(PUSH))\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "timeout_sec": 180
+      },
+      {
+        "type": "file_contains",
+        "path": "test_turnstile.py",
+        "contains": "def test_locked_coin_goes_to_unlocked(self):"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_fixture_tests_author (decomposed 3-step protocol)",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "plan_index": 13,
+    "tier": "medium",
+    "generated_at": "2026-09-25T05:16:00.356334+00:00"
+  },
+  "workspace_fixture": "python_turnstile_6e3358e8",
+  "promoted_from": "bench/aci/candidates/python_turnstile_6e3358e8",
+  "promoted_at": "2026-09-25T08:29:13.954798+00:00"
+}

@@ -1,6 +1,6 @@
 # 观察质检报告（jev_obs_judge）
 
-- 生成时间：2026-09-24T12:27:38.717092+00:00
+- 生成时间：2026-09-30T02:21:30.603261+00:00
 - 判定模式：`heuristic`（judge=deterministic-heuristic）
 - 样本来源：`eval\manifest.json`、`eval\metrics.json`、`bench/aci/results/latest.json`
 - 样本数：13；诊断足够：10；剧本可执行：9

@@ -1,0 +1,60 @@
+{
+  "id": "python_parse_orders_708606f4",
+  "kind": "capability",
+  "lang": "python",
+  "prompt": "orders.py raises a ValueError whenever the order text contains a blank line or a row whose quantity column is missing, so total_quantity is unusable on real-world input. Fix the module so that every test in test_orders.py passes, without editing the tests.",
+  "golden": {
+    "orders.py": "\"\"\"Utilities for parsing simple comma-separated order lines.\n\nEach data line has the form ``name,qty`` where ``qty`` is an integer.\n\"\"\"\n\n\ndef parse_orders(text: str) -> list[tuple[str, int]]:\n    \"\"\"Parse ``text`` and return one (name, qty) tuple per data line.\n\n    Blank lines are not data lines. A row without a quantity field\n    counts as an order with quantity 0.\n    \"\"\"\n    orders = []\n    for line in text.splitlines():\n        if not line.strip():\n            continue\n        parts = line.split(\",\")\n        name = parts[0]\n        qty = 0\n        if len(parts) > 1 and parts[1].strip():\n            qty = int(parts[1])\n        orders.append((name, qty))\n    return orders\n\n\ndef total_quantity(text: str) -> int:\n    \"\"\"Return the sum of the quantities of all orders in ``text``.\"\"\"\n    return sum(qty for _, qty in parse_orders(text))\n"
+  },
+  "success": {
+    "type": "all",
+    "of": [
+      {
+        "type": "command_exit_0",
+        "argv": [
+          "python",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "timeout_sec": 120
+      },
+      {
+        "type": "file_contains",
+        "path": "test_orders.py",
+        "contains": "def test_blank_lines_are_skipped():"
+      },
+      {
+        "type": "file_contains",
+        "path": "test_orders.py",
+        "contains": "def test_missing_quantity_column_is_zero():"
+      },
+      {
+        "type": "file_contains",
+        "path": "test_orders.py",
+        "contains": "assert total_quantity(text) == 5"
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "sn-glm-5-3-flash",
+    "generator_role": "task_and_golden_author",
+    "independent_of": "no VerseShell/ACI/benchmark context was provided to any generator; variants were written without the golden patch",
+    "variants": [
+      {
+        "model": "sn-kimi-k3",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      },
+      {
+        "model": "deepseek-v4.1-flash",
+        "role": "independent_correct_variant",
+        "saw_golden": false
+      }
+    ],
+    "generated_at": "2026-09-25T01:45:55.380196+00:00"
+  },
+  "workspace_fixture": "python_parse_orders_708606f4",
+  "promoted_from": "bench/aci/candidates/python_parse_orders_708606f4",
+  "promoted_at": "2026-09-25T08:29:13.944576+00:00"
+}
