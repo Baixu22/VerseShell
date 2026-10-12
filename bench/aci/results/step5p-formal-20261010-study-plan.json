@@ -1,0 +1,40 @@
+{
+  "schema": "verseshell.repeated-study-plan/v1",
+  "status": "planned_not_collected",
+  "task_manifest": "step5p-formal-20261010-r1/collection.json",
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "conditions": [
+    "raw_shell",
+    "raw_shell_coached",
+    "verseshell_aci"
+  ],
+  "run_indices": [
+    0
+  ],
+  "prompt_variants": [
+    "baseline",
+    "compact_all"
+  ],
+  "runs": [
+    {
+      "run_id": "r1",
+      "artifact": "step5p-formal-20261010-r1/latest_live.json"
+    },
+    {
+      "run_id": "r2",
+      "artifact": "step5p-formal-20261010-r2/latest_live.json"
+    },
+    {
+      "run_id": "r3",
+      "artifact": "step5p-formal-20261010-r3/latest_live.json"
+    }
+  ],
+  "analysis_plan": "../../../bench/aci/studies/prelive-v1/analysis-plan-2026-10-10.json",
+  "note": "Dry-run frozen 2026-10-10. Artifacts do not exist until the three real collections complete; do not treat this plan as evidence."
+}

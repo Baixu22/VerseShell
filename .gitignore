@@ -92,3 +92,8 @@ audit-r12-scratch/
 !audit-r12-scratch/r12-reference/*.json
 !audit-r12-scratch/r12-inputs/
 !audit-r12-scratch/r12-inputs/*.json
+
+# Runtime status/lock files and intermediate task candidates
+*.status.json
+*.status.json.lock.guard
+bench/aci/candidates/
