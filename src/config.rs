@@ -134,9 +134,15 @@ impl Default for HistoryConfig {
 
 impl ShellConfig {
     pub fn load() -> Result<Self> {
-        let path = Self::config_path()?;
+        Self::load_from(&Self::config_path()?)
+    }
+
+    /// Read a config from an explicit path. Split out from [`Self::load`] so a
+    /// test can round-trip a temp file without touching `AE_CONFIG`, which
+    /// parallel tests share.
+    pub fn load_from(path: &std::path::Path) -> Result<Self> {
         if path.exists() {
-            let content = fs::read_to_string(&path)
+            let content = fs::read_to_string(path)
                 .with_context(|| format!("failed to read config at {}", path.display()))?;
             let config: ShellConfig = toml::from_str(&content)
                 .with_context(|| format!("failed to parse config at {}", path.display()))?;
@@ -147,12 +153,16 @@ impl ShellConfig {
     }
 
     pub fn save(&self) -> Result<()> {
-        let path = Self::config_path()?;
+        self.save_to(&Self::config_path()?)
+    }
+
+    /// Write a config to an explicit path (see [`Self::load_from`]).
+    pub fn save_to(&self, path: &std::path::Path) -> Result<()> {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).ok();
         }
         let content = toml::to_string_pretty(self).context("failed to serialize config")?;
-        fs::write(&path, content)
+        fs::write(path, content)
             .with_context(|| format!("failed to write config to {}", path.display()))?;
         Ok(())
     }
@@ -221,5 +231,31 @@ impl ShellConfig {
             return Ok(home.join(".aerc"));
         }
         Ok(PathBuf::from(".aerc"))
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn save_to_then_load_from_roundtrips() {
+        let dir = std::env::temp_dir().join(format!(
+            "verseshell-config-test-{}",
+            std::process::id()
+        ));
+        let dir = dir.join(format!("{}", line!()));
+        let path = dir.join("config.toml");
+
+        let mut config = ShellConfig::default();
+        config.shell.show_banner = false;
+        config.shell.auto_cd = false;
+        config.save_to(&path).expect("save_to writes the file");
+        assert!(path.exists(), "save_to must create the file");
+
+        let loaded = ShellConfig::load_from(&path).expect("load_from reads it back");
+        assert!(!loaded.shell.show_banner);
+        assert!(!loaded.shell.auto_cd);
+
+        let _ = fs::remove_dir_all(dir);
     }
 }

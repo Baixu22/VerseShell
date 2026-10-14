@@ -4967,6 +4967,33 @@ fn bi_config_get(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
     }
 }
 
+/// Apply one `config_set` mutation to `config_path` and persist it.
+///
+/// Split out from the builtin so a test can drive the round-trip against a temp
+/// file instead of `AE_CONFIG`, which parallel tests share. `bi_config_set` used
+/// to load the config, mutate it and then return "Config saved" **without**
+/// calling `ShellConfig::save()`, so it reported success while writing nothing.
+fn apply_config_set(
+    config_path: &std::path::Path,
+    key: &str,
+    value: &Value,
+) -> Result<()> {
+    let mut config = ShellConfig::load_from(config_path)?;
+    let parts: Vec<&str> = key.split('.').collect();
+    match (parts.as_slice(), value) {
+        // Shell settings
+        (["shell", "show_banner"], Value::Bool(v)) => config.shell.show_banner = *v,
+        (["shell", "auto_cd"], Value::Bool(v)) => config.shell.auto_cd = *v,
+        _ => {
+            return Err(anyhow!(
+                "config_set: cannot set path '{}' or invalid value type",
+                key
+            ))
+        }
+    }
+    config.save_to(config_path)
+}
+
 /// Set a config value (saves to config file)
 /// Note: This modifies the config file but changes only take effect after reload
 fn bi_config_set(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
@@ -4981,24 +5008,7 @@ fn bi_config_set(args: Vec<Value>, _input: Option<Value>) -> Result<Value> {
         _ => return Err(anyhow!("config_set: path must be a string")),
     };
 
-    // Load current config, modify it, and save
-    let mut config = ShellConfig::load()?;
-    let parts: Vec<&str> = path.split('.').collect();
-
-    match (parts.as_slice(), &args[1]) {
-        // Shell settings
-        (["shell", "show_banner"], Value::Bool(v)) => config.shell.show_banner = *v,
-        (["shell", "auto_cd"], Value::Bool(v)) => config.shell.auto_cd = *v,
-
-        _ => {
-            return Err(anyhow!(
-                "config_set: cannot set path '{}' or invalid value type",
-                path
-            ))
-        }
-    }
-
-    // FIXME: method removed -> return error:     config.save()?;
+    apply_config_set(&ShellConfig::config_file(), &path, &args[1])?;
     Ok(Value::Str(format!(
         "Config saved: {} = {:?}",
         path, args[1]
@@ -43834,5 +43844,30 @@ mod phase4_tests {
             "expected ~60s, got {}",
             restored
         );
+    }
+
+    #[test]
+    fn config_set_persists_instead_of_reporting_a_fake_success() {
+        let dir = std::env::temp_dir().join(format!(
+            "verseshell-configset-{}-{}",
+            std::process::id(),
+            line!()
+        ));
+        std::fs::create_dir_all(&dir).expect("temp dir");
+        let path = dir.join("config.toml");
+
+        apply_config_set(&path, "shell.show_banner", &Value::Bool(false))
+            .expect("config_set applies and persists");
+        assert!(
+            path.exists(),
+            "config_set must actually write the config file"
+        );
+        let reloaded = ShellConfig::load_from(&path).expect("reload");
+        assert!(!reloaded.shell.show_banner, "value survives a reload");
+
+        // Unknown keys stay an honest error, never a silent success.
+        assert!(apply_config_set(&path, "shell.nope", &Value::Bool(true)).is_err());
+
+        let _ = std::fs::remove_dir_all(dir);
     }
 }
