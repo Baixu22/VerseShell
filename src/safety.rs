@@ -379,6 +379,34 @@ pub fn workspace_root() -> PathBuf {
     }
 }
 
+/// Root for the runtime's own bookkeeping: artifacts, audit log, transaction
+/// journals, trash, process registry and the default RBAC file.
+///
+/// Defaults to `<workspace>/.ae`, which is what every existing deployment
+/// expects. A host that mounts the workspace into an agent's environment can
+/// point `AETHER_STATE_DIR` at a private directory instead, so the runtime's
+/// own state does not appear in the agent's `ls`/`find` and invite it to
+/// explore the implementation instead of the task.
+pub fn state_root() -> PathBuf {
+    state_root_with(
+        std::env::var("AETHER_STATE_DIR").ok().as_deref(),
+        &workspace_root(),
+    )
+}
+
+/// [`state_root`] for callers that already resolved a workspace (tests pass a
+/// temp dir), so an unset override preserves the previous behaviour exactly.
+pub fn state_root_for(workspace: &std::path::Path) -> PathBuf {
+    state_root_with(std::env::var("AETHER_STATE_DIR").ok().as_deref(), workspace)
+}
+
+fn state_root_with(override_dir: Option<&str>, workspace: &std::path::Path) -> PathBuf {
+    match override_dir {
+        Some(dir) if !dir.trim().is_empty() => PathBuf::from(dir),
+        _ => workspace.join(".ae"),
+    }
+}
+
 /// Whether the jail is enforced. Enforced in agent mode, or whenever the
 /// workspace root is set explicitly (humans opting into reproducible jails).
 fn jail_enforced(mode: Mode) -> bool {
@@ -556,7 +584,7 @@ pub fn init_rbac_from_env() {
     let path = match std::env::var("AETHER_RBAC_CONFIG") {
         Ok(p) => PathBuf::from(p),
         Err(_) => {
-            let default = workspace_root().join(".ae").join("rbac.toml");
+            let default = state_root().join("rbac.toml");
             if !default.exists() {
                 return;
             }
@@ -631,7 +659,7 @@ pub fn audit_path() -> Option<PathBuf> {
         return Some(PathBuf::from(p));
     }
     if current_mode() == Mode::Agent {
-        return Some(workspace_root().join(".ae").join("audit.log"));
+        return Some(state_root().join("audit.log"));
     }
     None
 }
@@ -1552,6 +1580,20 @@ mod tests {
         assert_eq!(guard(mk()).unwrap_err().code, ErrorCode::NeedsApproval);
 
         clear_env();
+    }
+
+    #[test]
+    fn state_dir_override_moves_runtime_state_off_the_workspace() {
+        let ws = PathBuf::from("/tmp/ws");
+        // Default keeps the historical layout.
+        assert_eq!(state_root_with(None, &ws), ws.join(".ae"));
+        assert_eq!(state_root_with(Some("   "), &ws), ws.join(".ae"));
+        // An explicit host override wins verbatim, keeping runtime state out of
+        // the agent-visible workspace.
+        assert_eq!(
+            state_root_with(Some("/var/ae"), &ws),
+            PathBuf::from("/var/ae")
+        );
     }
 
     #[test]

@@ -168,10 +168,7 @@ pub fn begin() -> Result<String> {
             });
         }
         None => {
-            let dir = crate::safety::workspace_root()
-                .join(".ae")
-                .join("tx")
-                .join(&id);
+            let dir = crate::safety::state_root().join("tx").join(&id);
             std::fs::create_dir_all(&dir)
                 .map_err(|e| anyhow!("tx_begin: cannot create journal dir: {}", e))?;
             *g = Some(TxState {

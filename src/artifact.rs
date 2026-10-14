@@ -52,7 +52,9 @@ impl ArtifactStore {
         fs::create_dir_all(&workspace)
             .with_context(|| format!("cannot create workspace {}", workspace.display()))?;
         let workspace = workspace.canonicalize().unwrap_or(workspace);
-        let root = workspace.join(".ae").join("results");
+        // Runtime state may live outside the workspace when the host sets
+        // `AETHER_STATE_DIR`; the default stays `<workspace>/.ae`.
+        let root = crate::safety::state_root_for(&workspace).join("results");
         fs::create_dir_all(&root)
             .with_context(|| format!("cannot create artifact store {}", root.display()))?;
         let store = Self {

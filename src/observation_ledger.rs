@@ -183,6 +183,10 @@ mod tests {
             id: id.into(),
             op: "exec.run".into(),
             ok,
+            status: if ok { "ok" } else { "failed" },
+            substitutions: Vec::new(),
+            blocked_operation: None,
+            blocked_target: None,
             data: Some(json!({"path": path, "paths": [path], "stdout": {"summary": "x"}})),
             error: None,
             diagnostics: if ok {

@@ -15,7 +15,7 @@ struct TrashMeta {
 }
 
 fn trash_root() -> PathBuf {
-    safety::workspace_root().join(".ae").join("trash")
+    safety::state_root().join("trash")
 }
 
 fn now_secs() -> u64 {

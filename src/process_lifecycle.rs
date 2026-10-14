@@ -428,7 +428,7 @@ struct LifecycleManager {
 impl LifecycleManager {
     fn new(workspace: PathBuf) -> Result<Arc<Self>> {
         let workspace = workspace.canonicalize().unwrap_or(workspace);
-        let root = workspace.join(".ae").join("process-lifecycle");
+        let root = crate::safety::state_root_for(&workspace).join("process-lifecycle");
         fs::create_dir_all(&root)?;
         let normalized = if cfg!(windows) {
             display_path(&workspace).to_ascii_lowercase()

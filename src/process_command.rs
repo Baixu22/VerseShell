@@ -40,7 +40,19 @@ pub fn resolve_process_command(
         .first()
         .filter(|value| !value.is_empty())
         .ok_or_else(|| anyhow!("E_EXEC_BAD_ARG: argv must contain a program"))?;
-    if program.contains('\0') || argv.iter().any(|arg| arg.contains(['\r', '\n', '\0'])) {
+    // A NUL byte can never reach an OS argv. Newlines, by contrast, are legal
+    // inside a single argv element and are how agents write heredocs / inline
+    // scripts. Raw shells accept them, so rejecting them here only made
+    // VerseShell strictly less capable than the raw arm.
+    if argv.iter().any(|arg| arg.contains('\0')) {
+        return Err(anyhow!(
+            "E_EXEC_BAD_ARG: argv contains a forbidden NUL character"
+        ));
+    }
+    #[cfg(windows)]
+    if argv.iter().any(|arg| arg.contains(['\r', '\n'])) {
+        // cmd.exe re-parses its /C tail, so an embedded newline cannot be
+        // passed through safely. Keep the guard on Windows only.
         return Err(anyhow!(
             "E_EXEC_BAD_ARG: argv contains a forbidden control character"
         ));

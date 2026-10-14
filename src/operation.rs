@@ -68,6 +68,51 @@ fn default_max_tokens() -> usize {
     DEFAULT_MAX_TOKENS
 }
 
+/// A concrete alternative the agent can run instead (absorbed from agentsh
+/// `Suggestion`): `action` is machine-readable, `command` is directly runnable,
+/// `reason` explains why.
+#[derive(Debug, Clone, Serialize)]
+pub struct Suggestion {
+    pub action: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub command: Option<String>,
+    pub reason: String,
+}
+
+/// A2: known-good tool/command substitutions for common failures.
+fn substitutions_for_failure(stderr_text: &str) -> Vec<Suggestion> {
+    let low = stderr_text.to_lowercase();
+    let mut out = Vec::new();
+    if low.contains("xxd") && (low.contains("not found") || low.contains("not recognized")) {
+        out.push(Suggestion {
+            action: "substitute".into(),
+            command: Some("od -c <file>".into()),
+            reason: "xxd is unavailable; od is a portable hex/byte dump".into(),
+        });
+    }
+    if low.contains("curl") && (low.contains("not found") || low.contains("not recognized")) {
+        out.push(Suggestion {
+            action: "substitute".into(),
+            command: Some("wget -qO- <url>".into()),
+            reason: "curl is unavailable; wget can fetch the same URL".into(),
+        });
+    }
+    if low.contains("python") && (low.contains("not found") || low.contains("not recognized")) {
+        out.push(Suggestion {
+            action: "substitute".into(),
+            command: Some("python3 <script>".into()),
+            reason: "try python3 (or an absolute interpreter path)".into(),
+        });
+    }
+    if low.contains("permission denied") {
+        out.push(Suggestion {
+            action: "substitute".into(),
+            command: Some("chmod +x <file> && ./<file>".into()),
+            reason: "the file may lack the executable bit".into(),
+        });
+    }
+    out
+}
 #[derive(Debug, Clone, Serialize)]
 pub struct OperationError {
     pub code: String,
@@ -143,6 +188,18 @@ pub struct Observation {
     pub id: String,
     pub op: String,
     pub ok: bool,
+    /// A4: agent-friendly classification (absorbed from agentsh ExecGuidance):
+    /// "ok" | "failed" | "blocked". Derived from `ok` + the error code.
+    pub status: &'static str,
+    /// A2: ordered "do this instead" options when a known failure has a fix.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub substitutions: Vec<Suggestion>,
+    /// A5: what was blocked, so the agent can pick another route
+    /// (absorbed from agentsh ExecGuidance: blocked_operation/blocked_target).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocked_operation: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocked_target: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -168,6 +225,10 @@ impl Observation {
             id: id.into(),
             op: op.into(),
             ok: false,
+            status: classify_status(false, Some(code)),
+            substitutions: Vec::new(),
+            blocked_operation: None,
+            blocked_target: None,
             data: None,
             error: Some(OperationError {
                 code: code.into(),
@@ -187,6 +248,32 @@ impl Observation {
         }
     }
 
+    /// A5: a blocked refusal that names what was blocked and what to do next.
+    /// Mirrors agentsh `ExecGuidance` for the policy/capability path.
+    #[allow(clippy::too_many_arguments)]
+    pub fn blocked(
+        id: &str,
+        op: &str,
+        profile: &str,
+        code: &str,
+        message: impl Into<String>,
+        blocked_operation: Option<String>,
+        blocked_target: Option<String>,
+        substitutions: Vec<Suggestion>,
+        suggested_next: Vec<SuggestedAction>,
+        hint: Option<String>,
+    ) -> Observation {
+        let mut obs = Self::failure(id, op, profile, code, message, true);
+        obs.status = "blocked";
+        obs.substitutions = substitutions;
+        obs.suggested_next = suggested_next;
+        obs.blocked_operation = blocked_operation;
+        obs.blocked_target = blocked_target;
+        if let Some(err) = obs.error.as_mut() {
+            err.hint = hint;
+        }
+        obs
+    }
     pub fn success(
         id: &str,
         op: &str,
@@ -204,6 +291,10 @@ impl Observation {
             id: id.into(),
             op: op.into(),
             ok: true,
+            status: "ok",
+            substitutions: Vec::new(),
+            blocked_operation: None,
+            blocked_target: None,
             data: Some(data),
             error: None,
             diagnostics,
@@ -236,6 +327,7 @@ impl Observation {
         obs.diagnostics = diagnostics;
         obs.suggested_next = suggested_next;
         obs.meta.elapsed_ms = elapsed_ms;
+        obs.status = classify_status(false, Some(code));
         if let Some(h) = hint {
             if let Some(err) = obs.error.as_mut() {
                 err.hint = Some(h);
@@ -247,6 +339,19 @@ impl Observation {
 
 /// Map a [`safety::SafetyError`] into an Observation, preserving `hint` and
 /// optional approval token so agents can complete the approve/retry loop.
+/// A4: map (ok, error code) to the agent-friendly status classification.
+fn classify_status(ok: bool, code: Option<&str>) -> &'static str {
+    if ok {
+        return "ok";
+    }
+    match code {
+        Some(c) if c.contains("DENY") || c.contains("CAPABILITY") || c.contains("OUTSIDE") => {
+            "blocked"
+        }
+        _ => "failed",
+    }
+}
+
 pub fn safety_error_to_observation(
     req: &OperationRequest,
     profile: &str,
@@ -269,7 +374,42 @@ pub fn safety_error_to_observation(
         err.code,
         safety::ErrorCode::PolicyDeny | safety::ErrorCode::BudgetExceeded
     );
-    Observation::fail_with(
+    // A5: blocked runs must say what was blocked and what to do instead.
+    let mut blocked_operation = Some(err.builtin.clone());
+    let mut blocked_target: Option<String> = req
+        .args
+        .get("argv")
+        .and_then(|v| v.as_array())
+        .and_then(|a| a.first())
+        .and_then(|v| v.as_str())
+        .map(|s| s.to_string())
+        .or_else(|| {
+            req.args
+                .get("path")
+                .and_then(|v| v.as_str())
+                .map(|s| s.to_string())
+        });
+    let mut suggested_next: Vec<SuggestedAction> = Vec::new();
+    let mut substitutions: Vec<Suggestion> = Vec::new();
+    if err.code == safety::ErrorCode::NeedsApproval {
+        // Approval-gated: the agent can proceed once approval is granted.
+        if let Some(a) = &err.approval {
+            suggested_next.push(SuggestedAction {
+                op: "exec.run".into(),
+                args: json!({"note": "approval required", "approval_token": a.token}),
+            });
+        }
+        blocked_operation = Some(format!("{}.needs_approval", err.builtin));
+    } else if err.code == safety::ErrorCode::OutsideWorkspace {
+        // Blocked by the workspace jail: point at the legal alternative.
+        substitutions.push(Suggestion {
+            action: "substitute".into(),
+            command: Some("move or copy the input under the workspace root".into()),
+            reason: "this path is outside the workspace jail".into(),
+        });
+        blocked_operation = Some(format!("{}.outside_workspace", err.builtin));
+    }
+    let mut observation = Observation::fail_with(
         &req.id,
         &req.op,
         profile,
@@ -278,10 +418,14 @@ pub fn safety_error_to_observation(
         recoverable,
         data,
         Vec::new(),
-        Vec::new(),
+        suggested_next,
         hint,
         0,
-    )
+    );
+    observation.substitutions = substitutions;
+    observation.blocked_operation = blocked_operation;
+    observation.blocked_target = blocked_target;
+    observation
 }
 
 #[derive(Clone)]
@@ -514,16 +658,87 @@ struct StreamObservation {
     summary: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     text: Option<String>,
-    raw_bytes: u64,
-    returned_bytes: u64,
-    omitted_bytes: u64,
-    raw_complete: bool,
-    encoding: String,
-    decoding_lossy: bool,
+    // Size/encoding metadata is only serialized when it carries information.
+    // A successful stream that lost nothing and decoded losslessly is fully
+    // described by status + text; emitting zeros/booleans/"utf-8" on every call
+    // is pure payload the raw arm does not pay for.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    raw_bytes: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    returned_bytes: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    omitted_bytes: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    raw_complete: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    encoding: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    decoding_lossy: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     artifact: Option<String>,
 }
 
+/// Map a failed command into an actionable next step (absorbed from agentsh
+/// `guidanceForResponse`: every failure branch must yield recourse, not just a code).
+/// Map a failed command into an actionable next step (absorbed from agentsh
+/// `guidanceForResponse`: a failure should carry recourse, not just a code).
+/// Returns `None` when we have no honest, tailored advice — in that case the
+/// caller already exposes `result.query` over the real stderr artifact.
+/// Map a failed command into an actionable next step (absorbed from agentsh
+/// `guidanceForResponse`: a failure should carry recourse, not just a code).
+/// Returns `None` when we have no honest, tailored advice.
+fn recourse_for_failure(
+    argv: &[String],
+    exit_code: i32,
+    stderr_text: &str,
+    stdout_bytes: u64,
+    timeout_ms: u64,
+    timed_out: bool,
+) -> Option<SuggestedAction> {
+    // A suggestion is only actionable if the agent can actually re-issue it.
+    // Fabricated placeholders (`echo retry-with-larger-timeout`, a bare `ls -l`)
+    // were never once executed in the L4 corpus, so every branch now carries the
+    // real argv that failed plus the one thing that should change.
+    let retry = |note: &str, new_timeout: Option<u64>| {
+        let mut args = serde_json::Map::new();
+        args.insert("argv".into(), json!(argv));
+        if let Some(t) = new_timeout {
+            args.insert("timeout_ms".into(), json!(t));
+        }
+        args.insert("note".into(), json!(note));
+        SuggestedAction {
+            op: "exec.run".into(),
+            args: Value::Object(args),
+        }
+    };
+    if timed_out {
+        return Some(retry(
+            "previous command timed out; re-issue it with this larger timeout_ms or narrow the command",
+            Some(timeout_ms.saturating_mul(2).max(1000)),
+        ));
+    }
+    let low = stderr_text.to_lowercase();
+    if low.contains("permission denied") || low.contains("access is denied") {
+        return Some(retry(
+            "permission denied; make the target writable/executable (e.g. chmod +x) and re-issue",
+            None,
+        ));
+    }
+    // Missing command/tool: no stdout, non-zero exit, only stderr. Text match
+    // is unreliable (Windows emits OEM-encoded messages), so use the shape.
+    let looks_missing = low.contains("not found")
+        || low.contains("not recognized")
+        || low.contains("no such file")
+        || exit_code == 127
+        || (stdout_bytes == 0 && !stderr_text.trim().is_empty());
+    if looks_missing {
+        return Some(retry(
+            "the command failed with no stdout; resolve the executable (absolute path or install it) and re-issue",
+            None,
+        ));
+    }
+    None
+}
 fn execute_run(req: &OperationRequest) -> Observation {
     let args: ExecArgs = match serde_json::from_value(req.args.clone()) {
         Ok(args) => args,
@@ -562,7 +777,25 @@ fn execute_run(req: &OperationRequest) -> Observation {
     if let crate::capability::CapabilityResult::Deny(reason) =
         crate::capability::check_capability("sh")
     {
-        return Observation::failure(&req.id, &req.op, "none", "E_CAPABILITY_DENY", reason, true);
+        return Observation::blocked(
+            &req.id,
+            &req.op,
+            "none",
+            "E_CAPABILITY_DENY",
+            reason,
+            Some("sh".into()),
+            args.argv.first().cloned(),
+            vec![Suggestion {
+                action: "grant_capability".into(),
+                command: None,
+                reason: "exec requires the shell.exec capability".into(),
+            }],
+            vec![SuggestedAction {
+                op: "runtime.handshake".into(),
+                args: json!({"note": "inspect which capabilities are granted"}),
+            }],
+            Some("grant shell.exec capability, or use a permitted operation".into()),
+        );
     }
 
     let cwd = match resolve_cwd(&args.cwd) {
@@ -691,13 +924,14 @@ fn execute_run(req: &OperationRequest) -> Observation {
             "exit_code": output.exit_code,
             "timed_out": output.timed_out,
             "elapsed_ms": output.elapsed_ms,
-            "stdout": {"handle": stdout.artifact.clone(), "raw_bytes": stdout.raw_bytes, "status": stdout.status},
-            "stderr": {"handle": stderr.artifact.clone(), "raw_bytes": stderr.raw_bytes, "status": stderr.status}
+            "stdout": {"handle": stdout.artifact.clone(), "raw_bytes": stdout.raw_bytes.unwrap_or(0), "status": stdout.status},
+            "stderr": {"handle": stderr.artifact.clone(), "raw_bytes": stderr.raw_bytes.unwrap_or(0), "status": stderr.status}
         }),
     );
+    // Do NOT echo argv/cwd: the agent just sent them, and repeating them on
+    // every call is pure redundancy the raw arm does not pay for. The full
+    // argv is still recorded in the audit log below.
     let mut data = json!({
-        "argv": args.argv,
-        "cwd": display_path(&cwd),
         "exit_code": output.exit_code,
         "timed_out": output.timed_out,
         "stdout": stdout,
@@ -713,6 +947,8 @@ fn execute_run(req: &OperationRequest) -> Observation {
     }
     let serialized = serde_json::to_string(&data).unwrap_or_default();
     let token_estimate = crate::builtins::est_token_count(&serialized);
+    // `recoverable` is derived from evidence, not hardcoded: a timeout or a
+    // normal non-zero exit has a recourse path, so it is recoverable.
     let error = if output.timed_out {
         Some(OperationError {
             code: "E_TIMEOUT".into(),
@@ -725,14 +961,41 @@ fn execute_run(req: &OperationRequest) -> Observation {
             code: "E_PROCESS_EXIT".into(),
             message: format!("process exited with code {}", output.exit_code),
             recoverable: true,
-            hint: diagnostics.first().map(|d| d.message.clone()),
+            hint: diagnostics.first().map(|d| d.message.clone()).or_else(|| {
+                Some(format!(
+                    "exit code {}; see suggested_next for recourse",
+                    output.exit_code
+                ))
+            }),
         })
     } else {
         None
     };
     let mut suggested_next = Vec::new();
+    let mut substitutions = Vec::new();
+    // A5: on a blocked/failed run, name what was attempted and against what.
+    let mut blocked_operation: Option<String> = None;
+    let mut blocked_target: Option<String> = None;
     if !success {
         suggested_next.extend(reducers::suggested_from_diagnostics(&profile, &diagnostics));
+        // Absorbed from agentsh: never return a failure without a next step.
+        // Always append a concrete recourse action derived from the failure.
+        let stderr_text = stderr
+            .text
+            .clone()
+            .or_else(|| stderr.summary.clone())
+            .unwrap_or_default();
+        if let Some(action) = recourse_for_failure(
+            &args.argv,
+            output.exit_code,
+            &stderr_text,
+            stdout.raw_bytes.unwrap_or(0),
+            limits.timeout_ms,
+            output.timed_out,
+        ) {
+            suggested_next.push(action);
+        }
+        substitutions.extend(substitutions_for_failure(&stderr_text));
         let pattern = failure_grep_pattern(&profile);
         for stream in [&stdout, &stderr] {
             if let Some(handle) = &stream.artifact {
@@ -749,11 +1012,19 @@ fn execute_run(req: &OperationRequest) -> Observation {
         }
     }
 
+    if !success {
+        blocked_operation = args.argv.first().cloned();
+        blocked_target = Some(args.cwd.clone());
+    }
     Observation {
         schema: OBSERVATION_SCHEMA,
         id: req.id.clone(),
         op: req.op.clone(),
         ok: success,
+        status: classify_status(success, error.as_ref().map(|e| e.code.as_str())),
+        substitutions,
+        blocked_operation,
+        blocked_target,
         data: Some(data),
         error,
         diagnostics,
@@ -848,6 +1119,10 @@ fn execute_result_query(req: &OperationRequest) -> Observation {
         id: req.id.clone(),
         op: req.op.clone(),
         ok: true,
+        status: "ok",
+        substitutions: Vec::new(),
+        blocked_operation: None,
+        blocked_target: None,
         data: Some(data),
         error: None,
         diagnostics: Vec::new(),
@@ -886,21 +1161,20 @@ fn observe_stream(
     agent: &str,
 ) -> StreamObservation {
     if stream.raw_bytes == 0 {
-        let summary = if success {
-            Some("completed successfully with no output".into())
-        } else {
-            Some("command produced no output".into())
-        };
+        // Minimal empty observation: the agent already sees the exit code, so a
+        // one-line summary per stream is enough.
+        // An empty stream carries no body and no body size: status alone is the
+        // complete description, so emit nothing else.
         return StreamObservation {
             status: "empty",
-            summary,
+            summary: None,
             text: None,
-            raw_bytes: 0,
-            returned_bytes: 0,
-            omitted_bytes: 0,
-            raw_complete: true,
-            encoding: stream.encoding.clone(),
-            decoding_lossy: stream.encoding.ends_with("-lossy"),
+            raw_bytes: None,
+            returned_bytes: None,
+            omitted_bytes: None,
+            raw_complete: None,
+            encoding: Some(stream.encoding.clone()),
+            decoding_lossy: Some(stream.encoding.ends_with("-lossy")),
             artifact: None,
         };
     }
@@ -963,11 +1237,15 @@ fn observe_stream(
         .or_else(|| summary.as_ref().map(|s| s.len() as u64))
         .unwrap_or(0);
     let omitted_bytes = stream.raw_bytes.saturating_sub(returned_bytes);
+    // A result handle is only worth its characters when something material is
+    // actually omitted. A trailing-newline trim reports omitted_bytes == 1;
+    // emitting a handle for that is pure noise.
+    const MATERIAL_OMISSION_BYTES: u64 = 64;
     let needs_artifact = artifact_mode == "always"
         || (artifact_mode == "auto"
             && (matches!(status, "reduced" | "truncated" | "binary")
-                || (!success && stream.raw_bytes > 0)
-                || omitted_bytes > 0));
+                || (!success && stream.raw_bytes > MATERIAL_OMISSION_BYTES)
+                || omitted_bytes > MATERIAL_OMISSION_BYTES));
     let artifact = if needs_artifact {
         store.and_then(|store| {
             store
@@ -985,16 +1263,40 @@ fn observe_stream(
         None
     };
 
+    // Metadata is emitted only when it can change the reader's interpretation:
+    //   * omitted_bytes is meaningless when nothing material was dropped;
+    //   * raw_complete == true is the documented default;
+    //   * a clean utf-8, lossless decode is the documented default.
+    let lossy = stream.encoding.ends_with("-lossy");
+    let meaningful_omission = omitted_bytes > MATERIAL_OMISSION_BYTES;
     StreamObservation {
         status,
         summary,
         text,
-        raw_bytes: stream.raw_bytes,
-        returned_bytes,
-        omitted_bytes,
-        raw_complete: stream.raw_complete,
-        encoding: stream.encoding.clone(),
-        decoding_lossy: stream.encoding.ends_with("-lossy"),
+        // raw_bytes stays whenever the stream produced bytes: the capture
+        // path uses it to decide whether an artifact must be read back.
+        raw_bytes: if stream.raw_bytes > 0 {
+            Some(stream.raw_bytes)
+        } else {
+            None
+        },
+        returned_bytes: if meaningful_omission {
+            Some(returned_bytes)
+        } else {
+            None
+        },
+        omitted_bytes: if meaningful_omission {
+            Some(omitted_bytes)
+        } else {
+            None
+        },
+        raw_complete: if stream.raw_complete {
+            None
+        } else {
+            Some(false)
+        },
+        encoding: Some(stream.encoding.clone()),
+        decoding_lossy: Some(lossy),
         artifact,
     }
 }
@@ -1279,23 +1581,23 @@ fn detect_profile(argv: &[String], requested: &str) -> String {
 /// Keeps artifact handles so agents can still recover full logs via result.query.
 fn collapse_stream_to_summary(stream: &mut StreamObservation, summary: Option<&str>) {
     // Leave truly empty streams alone (no raw bytes and no body).
-    if stream.raw_bytes == 0 && stream.text.is_none() && stream.status == "empty" {
+    if stream.raw_bytes.unwrap_or(0) == 0 && stream.text.is_none() && stream.status == "empty" {
         return;
     }
     // Prefer semantic summary over needle/window summaries already attached.
     if let Some(s) = summary {
         stream.summary = Some(s.to_string());
     }
-    if stream.raw_bytes == 0 && stream.text.is_none() {
-        if stream.summary.is_some() {
-            stream.returned_bytes = stream.summary.as_ref().map(|s| s.len() as u64).unwrap_or(0);
-        }
+    if stream.raw_bytes.unwrap_or(0) == 0 && stream.text.is_none() {
         return;
     }
     stream.status = "reduced";
     stream.text = None;
-    stream.returned_bytes = stream.summary.as_ref().map(|s| s.len() as u64).unwrap_or(0);
-    stream.omitted_bytes = stream.raw_bytes.saturating_sub(stream.returned_bytes);
+    let returned = stream.summary.as_ref().map(|s| s.len() as u64).unwrap_or(0);
+    let raw = stream.raw_bytes.unwrap_or(0);
+    stream.returned_bytes = Some(returned);
+    stream.omitted_bytes = Some(raw.saturating_sub(returned));
+    stream.raw_bytes = Some(raw);
 }
 
 fn is_summary_profile(profile: &str) -> bool {
@@ -1534,6 +1836,21 @@ fn clamp_to_tokens(text: String, max_tokens: usize) -> String {
     }
 }
 
+/// Diagnostic messages are one line of tool output. A tool that emits an
+/// arbitrarily long line (e.g. `strings` over a binary) must not turn a single
+/// warning into kilobytes of payload; keep an informative head and say so.
+const MAX_DIAGNOSTIC_MESSAGE_CHARS: usize = 240;
+
+fn clamp_diagnostic_message(raw: &str) -> String {
+    let trimmed = raw.trim();
+    let total = trimmed.chars().count();
+    if total <= MAX_DIAGNOSTIC_MESSAGE_CHARS {
+        return trimmed.to_string();
+    }
+    let head: String = trimmed.chars().take(MAX_DIAGNOSTIC_MESSAGE_CHARS).collect();
+    format!("{head}...(+{} chars)", total - MAX_DIAGNOSTIC_MESSAGE_CHARS)
+}
+
 fn extract_warnings(text: &str, profile: &str) -> Vec<Diagnostic> {
     let cleaned = strip_ansi(text);
     cleaned
@@ -1543,7 +1860,7 @@ fn extract_warnings(text: &str, profile: &str) -> Vec<Diagnostic> {
         .map(|line| Diagnostic {
             tool: profile.into(),
             severity: "warning".into(),
-            message: line.trim().into(),
+            message: clamp_diagnostic_message(line),
             path: None,
             line: None,
             column: None,
@@ -1576,12 +1893,9 @@ fn extract_diagnostics(text: &str, profile: &str) -> Vec<Diagnostic> {
                     .map(|v| v.as_str())
                     .unwrap_or("error")
                     .into(),
-                message: caps
-                    .name("message")
-                    .map(|v| v.as_str())
-                    .unwrap_or(line)
-                    .trim()
-                    .into(),
+                message: clamp_diagnostic_message(
+                    caps.name("message").map(|v| v.as_str()).unwrap_or(line),
+                ),
                 path: caps.name("path").map(|v| v.as_str().replace('\\', "/")),
                 line: caps.name("line").and_then(|v| v.as_str().parse().ok()),
                 column: caps.name("column").and_then(|v| v.as_str().parse().ok()),
@@ -1594,7 +1908,7 @@ fn extract_diagnostics(text: &str, profile: &str) -> Vec<Diagnostic> {
             diagnostics.push(Diagnostic {
                 tool: profile.into(),
                 severity: "error".into(),
-                message: line.trim().into(),
+                message: clamp_diagnostic_message(line),
                 path: None,
                 line: None,
                 column: None,
@@ -1767,5 +2081,127 @@ mod tests {
         assert!(text.to_ascii_lowercase().contains("npm error") || text.contains("E404"));
         assert!(!text.contains("\u{1b}["));
         assert!(text.len() < body.len());
+    }
+
+    #[test]
+    fn successful_stream_omits_default_metadata() {
+        let stream = CapturedStream {
+            bytes: b"home\n".to_vec(),
+            raw_bytes: 5,
+            raw_complete: true,
+            encoding: "utf-8".into(),
+            binary: false,
+            text: Some("home\n".into()),
+        };
+        let obs = observe_stream(
+            &stream, "stdout", "generic", true, 2000, "auto", None, "test",
+        );
+        let v = serde_json::to_value(&obs).unwrap();
+        assert_eq!(v["status"], "full");
+        assert_eq!(v["text"], "home\n");
+        // Defaults must not be re-sent on every call.
+        assert!(
+            v.get("raw_complete").is_none(),
+            "raw_complete=true is the default"
+        );
+        assert!(v.get("omitted_bytes").is_none(), "no material omission");
+        assert!(v.get("returned_bytes").is_none(), "no material omission");
+        // raw_bytes is retained: the capture path uses it as the "there are bytes"
+        // signal, and it tells the reader how much the command produced.
+        assert_eq!(v["raw_bytes"], 5);
+        // Contract fields the tool-contract tests assert must stay present.
+        assert_eq!(v["encoding"], "utf-8");
+        assert_eq!(v["decoding_lossy"], false);
+    }
+
+    #[test]
+    fn truncated_stream_keeps_size_metadata() {
+        let body = "x".repeat(9_000);
+        let stream = CapturedStream {
+            bytes: body.as_bytes().to_vec(),
+            raw_bytes: body.len() as u64,
+            raw_complete: true,
+            encoding: "utf-8".into(),
+            binary: false,
+            text: Some(body.clone()),
+        };
+        let obs = observe_stream(
+            &stream, "stdout", "generic", true, 200, "auto", None, "test",
+        );
+        assert_eq!(obs.status, "truncated");
+        let v = serde_json::to_value(&obs).unwrap();
+        assert_eq!(v["raw_bytes"].as_u64().unwrap(), body.len() as u64);
+        assert!(v["omitted_bytes"].as_u64().unwrap() > 0);
+    }
+
+    #[test]
+    fn empty_stream_serializes_to_status_only() {
+        let stream = CapturedStream {
+            bytes: Vec::new(),
+            raw_bytes: 0,
+            raw_complete: true,
+            encoding: "utf-8".into(),
+            binary: false,
+            text: None,
+        };
+        let obs = observe_stream(
+            &stream, "stderr", "generic", true, 2000, "auto", None, "test",
+        );
+        let v = serde_json::to_value(&obs).unwrap();
+        assert_eq!(v["status"], "empty");
+        assert!(
+            v.get("summary").is_none(),
+            "the empty case needs no summary line"
+        );
+        assert!(v.get("raw_bytes").is_none());
+        assert!(v.get("text").is_none());
+    }
+
+    #[test]
+    fn diagnostic_message_is_clamped() {
+        let blob = "ShellC++GoWarning".repeat(2_000);
+        let d = clamp_diagnostic_message(&blob);
+        assert!(d.chars().count() < 300, "clamped message stays small");
+        assert!(d.contains("+"), "clamp reports how much was dropped");
+        assert!(d.starts_with("Shell"));
+        let short = clamp_diagnostic_message("  warning: unused variable  ");
+        assert_eq!(short, "warning: unused variable");
+    }
+
+    #[test]
+    fn failure_recourse_replays_the_real_command() {
+        let argv = vec!["sh".to_string(), "-c".to_string(), "sleep 30".to_string()];
+        let action =
+            recourse_for_failure(&argv, 124, "", 0, 1_000, true).expect("timeout yields recourse");
+        assert_eq!(action.op, "exec.run");
+        assert_eq!(action.args["argv"], json!(["sh", "-c", "sleep 30"]));
+        assert_eq!(
+            action.args["timeout_ms"], 2_000,
+            "timeout is actually doubled"
+        );
+        // Fabricated placeholders must not come back.
+        let rendered = action.args.to_string();
+        assert!(!rendered.contains("echo retry-with-larger-timeout"));
+    }
+
+    #[test]
+    fn failure_recourse_has_no_fabricated_commands() {
+        let argv = vec!["sh".to_string(), "-c".to_string(), "./run.sh".to_string()];
+        let perm = recourse_for_failure(
+            &argv,
+            126,
+            "sh: 1: ./run.sh: Permission denied",
+            0,
+            5_000,
+            false,
+        )
+        .expect("permission failure yields recourse");
+        assert_eq!(perm.args["argv"], json!(["sh", "-c", "./run.sh"]));
+        assert!(!perm.args.to_string().contains("ls -l"));
+
+        let missing = recourse_for_failure(&argv, 127, "xxd: not found", 0, 5_000, false)
+            .expect("missing tool yields recourse");
+        assert_eq!(missing.args["argv"], json!(["sh", "-c", "./run.sh"]));
+        assert!(!missing.args.to_string().contains("check-missing-tool"));
     }
 }

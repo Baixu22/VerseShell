@@ -82,6 +82,10 @@ fn fixture_observation(case: &Fixture, out: &ReduceOutput) -> Observation {
         id: format!("compact-ratio-{}", case.name),
         op: "exec.run".into(),
         ok: true,
+        status: "ok",
+        substitutions: Vec::new(),
+        blocked_operation: None,
+        blocked_target: None,
         data: Some(json!({
             "profile": case.profile,
             "fixture": case.fixture,
