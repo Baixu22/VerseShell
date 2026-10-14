@@ -76,9 +76,13 @@ pub fn resolve_process_command(
     // cmd parses its /C or /K tail itself, not with the Windows CRT argv rules.
     // Preserve an explicitly supplied command string, including its inner quotes.
     #[cfg(windows)]
-    if resolved.file_name().is_some_and(|name| name.eq_ignore_ascii_case("cmd.exe")) {
-        if let Some(index) = argv.iter().position(|arg|
-            arg.eq_ignore_ascii_case("/c") || arg.eq_ignore_ascii_case("/k"))
+    if resolved
+        .file_name()
+        .is_some_and(|name| name.eq_ignore_ascii_case("cmd.exe"))
+    {
+        if let Some(index) = argv
+            .iter()
+            .position(|arg| arg.eq_ignore_ascii_case("/c") || arg.eq_ignore_ascii_case("/k"))
         {
             if argv.len() == index + 2 {
                 let mut switches = argv[1..=index].to_vec();
@@ -118,6 +122,19 @@ pub(crate) fn windows_process_path(path: &Path) -> PathBuf {
     }
 }
 
+/// Environment variables ae reads for its own control plane (capabilities,
+/// policy, approvals, workspace, state dir, timeouts). They are configuration
+/// for the runtime, not data for the task, and a command spawned on the agent's
+/// behalf must not see them: in one L4 cell the model read `AETHER_STATE_DIR`
+/// out of `env`, opened our audit log, and spent 26 of its 40 calls inspecting
+/// the runtime instead of the task.
+fn is_runtime_control_var(key: &OsStr) -> bool {
+    match key.to_str() {
+        Some(k) => k.starts_with("AETHER_") || k.starts_with("AE_"),
+        None => false,
+    }
+}
+
 pub fn configure_command_environment(
     command: &mut Command,
     env: Option<&BTreeMap<String, String>>,
@@ -125,7 +142,22 @@ pub fn configure_command_environment(
     if let Some(env) = env {
         command.env_clear();
         command.envs(env);
+        return;
     }
+    // No explicit env: inherit the host environment, minus the runtime's own
+    // control plane.
+    let inherited = filtered_inherited_environment(std::env::vars_os());
+    command.env_clear();
+    command.envs(inherited);
+}
+
+/// The inherited environment a task command is allowed to see.
+fn filtered_inherited_environment(
+    vars: impl IntoIterator<Item = (OsString, OsString)>,
+) -> Vec<(OsString, OsString)> {
+    vars.into_iter()
+        .filter(|(key, _)| !is_runtime_control_var(key))
+        .collect()
 }
 
 fn resolve_executable(
@@ -313,8 +345,7 @@ mod tests {
     #[cfg(windows)]
     #[test]
     fn prefers_a_pathext_candidate_over_an_extensionless_shim() {
-        let root =
-            std::env::temp_dir().join(format!("verseshell-shadow-{}", uuid::Uuid::new_v4()));
+        let root = std::env::temp_dir().join(format!("verseshell-shadow-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&root).unwrap();
         std::fs::write(root.join("npm"), b"#!/bin/sh\nexec npm.cmd \"$@\"\n").unwrap();
         std::fs::write(root.join("npm.cmd"), b"@echo off\r\n").unwrap();
@@ -340,8 +371,7 @@ mod tests {
     #[cfg(windows)]
     #[test]
     fn falls_back_to_an_extensionless_candidate() {
-        let root =
-            std::env::temp_dir().join(format!("verseshell-bare-{}", uuid::Uuid::new_v4()));
+        let root = std::env::temp_dir().join(format!("verseshell-bare-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&root).unwrap();
         std::fs::write(root.join("tool"), b"not a real executable").unwrap();
         let env = BTreeMap::from([
@@ -365,8 +395,7 @@ mod tests {
     #[cfg(windows)]
     #[test]
     fn keeps_a_dispatching_symlink_name_for_launch_but_audits_the_real_path() {
-        let root =
-            std::env::temp_dir().join(format!("verseshell-shim-{}", uuid::Uuid::new_v4()));
+        let root = std::env::temp_dir().join(format!("verseshell-shim-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&root).unwrap();
         let real = root.join("real.exe");
         std::fs::write(&real, b"not a real executable").unwrap();
@@ -379,8 +408,7 @@ mod tests {
             ("Path".into(), root.to_string_lossy().to_string()),
             ("PathExt".into(), ".EXE".into()),
         ]);
-        let resolved =
-            resolve_process_command(&["dispatcher".into()], &root, Some(&env)).unwrap();
+        let resolved = resolve_process_command(&["dispatcher".into()], &root, Some(&env)).unwrap();
 
         // Launch path keeps the name the caller asked for ...
         assert_eq!(resolved.executable, shim);
@@ -389,10 +417,7 @@ mod tests {
             "dispatcher.exe"
         );
         // ... while the audit identity is the real binary.
-        assert_eq!(
-            resolved.audited_executable,
-            real.canonicalize().unwrap()
-        );
+        assert_eq!(resolved.audited_executable, real.canonicalize().unwrap());
         let _ = std::fs::remove_dir_all(root);
     }
 
@@ -400,8 +425,7 @@ mod tests {
     #[cfg(windows)]
     #[test]
     fn launches_a_plain_executable_by_its_resolved_path() {
-        let root =
-            std::env::temp_dir().join(format!("verseshell-plain-{}", uuid::Uuid::new_v4()));
+        let root = std::env::temp_dir().join(format!("verseshell-plain-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&root).unwrap();
         let exe = root.join("plain.exe");
         std::fs::write(&exe, b"not a real executable").unwrap();
@@ -413,5 +437,51 @@ mod tests {
         assert_eq!(resolved.executable, exe);
         assert_eq!(resolved.audited_executable, exe.canonicalize().unwrap());
         let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn runtime_control_plane_vars_are_recognised() {
+        for key in [
+            "AETHER_WORKSPACE",
+            "AETHER_STATE_DIR",
+            "AETHER_APPROVE_ALL",
+            "AETHER_CAPS",
+            "AE_MAX_CONCURRENCY",
+        ] {
+            assert!(
+                is_runtime_control_var(OsStr::new(key)),
+                "{key} is runtime config"
+            );
+        }
+        for key in ["PATH", "HOME", "AETHEL_X", "XAETHER_X"] {
+            assert!(
+                !is_runtime_control_var(OsStr::new(key)),
+                "{key} is task env"
+            );
+        }
+    }
+
+    #[test]
+    fn inherited_environment_drops_the_runtime_control_plane() {
+        let input = vec![
+            (OsString::from("PATH"), OsString::from("/usr/bin")),
+            (OsString::from("HOME"), OsString::from("/root")),
+            (
+                OsString::from("AETHER_WORKSPACE"),
+                OsString::from("/workspace"),
+            ),
+            (
+                OsString::from("AETHER_STATE_DIR"),
+                OsString::from("/var/ae-state"),
+            ),
+            (OsString::from("AETHER_APPROVE_ALL"), OsString::from("1")),
+            (OsString::from("AE_MAX_CONCURRENCY"), OsString::from("4")),
+            (OsString::from("AETHEL_NOT_OURS"), OsString::from("keep")),
+        ];
+        let kept: Vec<String> = filtered_inherited_environment(input)
+            .into_iter()
+            .map(|(k, _)| k.to_string_lossy().into_owned())
+            .collect();
+        assert_eq!(kept, vec!["PATH", "HOME", "AETHEL_NOT_OURS"]);
     }
 }
