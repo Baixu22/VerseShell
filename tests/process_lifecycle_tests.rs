@@ -149,16 +149,22 @@ fn await_output_contains(
     let mut cursor = start["output"]["cursor"].as_u64().unwrap_or(0);
     let deadline = Instant::now() + timeout;
     while !collected.contains(required) {
+        // Check the deadline BEFORE polling, never after appending the poll result.
+        // The old order asserted `Instant::now() < deadline` at the bottom of the
+        // body, so a poll that had just delivered `required` still panicked whenever
+        // the deadline had passed during that poll - which is exactly how this helper
+        // reported `timed out waiting for "two"` while printing an output that
+        // already contained "two".
+        assert!(
+            Instant::now() < deadline,
+            "timed out waiting for {required:?}: output={collected:?}"
+        );
         let next = poll(server, start, cursor, 1_000);
         assert_eq!(next["ok"], true, "poll response={next}");
         let next_cursor = next["data"]["output"]["cursor"].as_u64().unwrap_or(cursor);
         assert!(next_cursor >= cursor, "cursor rewound: response={next}");
         cursor = next_cursor;
         collected.push_str(&output_text(&next["data"]));
-        assert!(
-            Instant::now() < deadline,
-            "timed out waiting for {required:?}: output={collected:?}"
-        );
     }
     collected
 }
