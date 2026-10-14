@@ -77,5 +77,5 @@ pytest 失败信封 376 字符里，各字段贡献（leave-one-out）：
 
 - 速度数字是**单机诊断**，不是可移植保证；对 cmd 无优势。
 - ACI live A/B（93.3% vs 90.5% 成功率、0.61x 观察 token）是**单次历史采集、单模型**，不是跨模型结论。
-- 未做过任何「同系 agent shell」竞品的直接对照，因此**不能宣称优于它们**。
+- 2026-10-12 已完成 Step 5P 驱动的 3 产品 × 6 任务（18 格）agent shell 诊断级直接对照；结论见 [agent-shell-step5p-experiment-2026-10-12](agent-shell-step5p-experiment-2026-10-12.md)，候选池见 [agent-shell-products-comparison-2026-10-12](agent-shell-products-comparison-2026-10-12.md)。它仍**不能支持「全面优于竞品」**的宣称。
 - 信息层收益的方向清晰且可复现；绝对幅度需要更多样本才能定论（但那属于发表级，默认不做）。
