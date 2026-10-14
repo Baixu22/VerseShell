@@ -10,7 +10,7 @@
 
 - **成功率：未证明正收益。** 5 轮 L4 合并 100 组配对，配对差 +2.0pp、95% CI [-6.3, +10.3]、p=0.815。
   该区间跨过 0，**结论已冻结，不再为它跑长周期采集**（理由见 §A）。
-- **信息质量：8 项可复现正收益**，全部是确定性不变量，每项都有一条秒级检查命令（见 §B）。
+- **信息质量：9 项可复现正收益**，全部是确定性不变量，每项都有一条秒级检查命令（见 §B）。
 
 ## A. 成功率宣称：未证明正收益（为何不再跑）
 
@@ -48,6 +48,7 @@ paired diff = +2.0 pp     95% CI = [-6.3, +10.3] pp     exact two-sided p = 0.81
 | 6 | 运行时状态不落在 agent 可见工作区 | `cargo test --lib state_dir_override` + microVM 探针 | 设 `AETHER_STATE_DIR` 后 `ls -A /workspace` 为空；默认路径不变 |
 | 7 | 控制面变量不泄漏给任务命令 | `cargo test --lib control_plane` | 同一 microVM A/B：改前 6 个 `AETHER_*`/`AE_*`，改后 **0**，PATH/HOME 完好 |
 | 8 | 观察体积：成功路径瘦身 | 见 §C 的前后对照 | 成功观察组成：正文 57.8% / stream 元数据 25.6% / meta 9.3% / envelope 7.3% |
+| 9 | ae 二进制不在沙箱 PATH 上 | microVM 探针：`command -v ae` 与 `ls /usr/local/bin` 均查不到 | 安装到 `/opt/verseshell/ae` 并绝对路径调用；contract 校验仍通过 |
 
 契约回归（全绿，均为秒级）：
 
@@ -84,4 +85,4 @@ cargo test --test aci_1_0_closed_loop_acceptance  # 4 passed
   不是"证明无收益"。
 - §B 的 8 项都是确定性不变量或单次探针结果，不依赖模型随机性，因此单次即可复现。
 - 成功率之外的成本结论：D 的 observation token 仍是 raw 臂的 1.7-2.3 倍，效率门槛（-20%）未达标。
-- 未验证项：`/usr/local/bin/ae` 仍在 PATH 上（同类泄漏的另一处，未修）。
+- `/usr/local/bin/ae` 的同类泄漏已修（见 §B 第 9 项），本轮仅用确定性探针验证，未跑 L4 r8。

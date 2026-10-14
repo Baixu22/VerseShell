@@ -53,13 +53,31 @@ T420/D 同样在 `#1 env` 里拿到控制面变量，并在 `#3 ls /usr/local/bi
 
 `cargo test --lib`：165 -> **167 passed / 0 failed**。
 
-## 5. 尚未处理（候选，未实现）
+## 5. 同类泄漏的第二处：ae 二进制在 PATH 上（已修）
 
-- `/usr/local/bin/ae` 仍在 PATH 上：`ls /usr/local/bin` 就能发现它（T420/D 的 #3 -> #4 触发点）。
-  可改到非 PATH 目录（如 /opt/verseshell/ae）并按绝对路径调用；代价是 adapter 需先建目录，属执行层约定变更。
+`/usr/local/bin/ae` 位于沙箱 PATH 上，`ls /usr/local/bin` 即可发现——这正是 T420/D 的 #3 -> #4
+触发点（发现 ae 后接连跑 `ae --help`、`ae -c ...`、`strings /usr/local/bin/ae`）。
+
+adapter 现改为安装到 `/opt/verseshell/ae`（不在 PATH）并按绝对路径调用。
+产品侧确认无自旋/按裸名调用 `ae` 的代码，故该改动不影响执行。
+
+microVM 实测（同一 sandbox）：
+
+```
+ae guest path          : /opt/verseshell/ae
+contract validation    : ok | verseshell.observation/v1 | ae 1.0.0
+command -v ae          -> NOT_ON_PATH
+ls /usr/local/bin|grep ae -> NOT_IN_USRBIN
+PATH contains /opt?    -> NO
+runtime works          -> hi
+```
+
+## 6. 尚未处理
+
 - **未跑 L4 r8**：单轮 60 格、预计约 3 小时，超出 AGENTS.md 的约 2 小时默认上限，需用户逐次授权。
+  本轮按"轻量化"原则只做了确定性探针，未启动任何大面积运行。
 
-## 6. 诚实边界
+## 7. 诚实边界
 
 - 归因来自 r6/r7 已存产物（离线），本文件不新增模型调用。
 - 环境泄漏修复的直接证据是 microVM 内的 A/B 探针，不是 L4 疗效证据；对成功率/成本的影响尚未测。
