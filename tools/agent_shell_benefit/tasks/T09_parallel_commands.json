@@ -1,0 +1,8 @@
+{
+  "id": "T09",
+  "title": "parallel_commands",
+  "prompt": "Use run_parallel with exactly these four commands and timeout_seconds=5: `sleep 1; echo P0`, `sleep 1; echo P1`, `sleep 1; echo P2`, `sleep 1; echo P3`. Report all four outputs and total wall time. Finish with P0, P1, P2, and P3 in the summary.",
+  "setup": [],
+  "fixtures": [],
+  "oracle": {"kind": "parallel_commands", "expected": "four outputs complete with wall time below 3s"}
+}

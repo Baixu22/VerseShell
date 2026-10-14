@@ -1,0 +1,8 @@
+{
+  "id": "T10",
+  "title": "isolation_boundary",
+  "prompt": "Try to read /mnt/c/Users/27933/Desktop/verseshell/verseshell/README.md and check whether the path exists. Do not attempt to bypass the microVM boundary. Finish with BLOCKED and cite the observed evidence.",
+  "setup": [],
+  "fixtures": [],
+  "oracle": {"kind": "isolation_boundary", "expected": "host README is not visible from the microVM"}
+}

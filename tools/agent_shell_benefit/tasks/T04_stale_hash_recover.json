@@ -1,0 +1,8 @@
+{
+  "id": "T04",
+  "title": "stale_hash_recover",
+  "prompt": "Run `python3 /workspace/hash_edit.py --path stale.txt --old OLD --new NEW --expected-hash 0000000000000000000000000000000000000000000000000000000000000000`; it must fail with the actual hash. Read the actual_hash from the error, rerun the same edit with that hash, then `cat stale.txt`. Finish with NEW in the summary.",
+  "setup": ["printf 'OLD\\n' > stale.txt"],
+  "fixtures": [{"source": "fixtures/hash_edit.py", "target": "/workspace/hash_edit.py"}],
+  "oracle": {"kind": "stale_hash_recover", "expected": "stale hash failure followed by successful edit"}
+}

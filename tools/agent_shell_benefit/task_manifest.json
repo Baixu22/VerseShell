@@ -1,0 +1,21 @@
+{
+  "schema": "agent-shell-benefit.task-manifest/v1",
+  "version": "p1-20261012",
+  "execution_layer": "microsandbox 0.7.8",
+  "model": "step-5-preview",
+  "arms": ["A", "A_prime", "D"],
+  "seed": 42,
+  "expected_cells": 30,
+  "tasks": [
+    {"id": "T01", "file": "tasks/T01_persist_write_read.json"},
+    {"id": "T02", "file": "tasks/T02_missing_file_recover.json"},
+    {"id": "T03", "file": "tasks/T03_exit_stream_contract.json"},
+    {"id": "T04", "file": "tasks/T04_stale_hash_recover.json"},
+    {"id": "T05", "file": "tasks/T05_ambiguous_edit_recover.json"},
+    {"id": "T06", "file": "tasks/T06_large_output_artifact.json"},
+    {"id": "T07", "file": "tasks/T07_timeout_cleanup.json"},
+    {"id": "T08", "file": "tasks/T08_process_lifecycle.json"},
+    {"id": "T09", "file": "tasks/T09_parallel_commands.json"},
+    {"id": "T10", "file": "tasks/T10_isolation_boundary.json"}
+  ]
+}

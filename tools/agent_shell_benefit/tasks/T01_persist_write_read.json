@@ -1,0 +1,8 @@
+{
+  "id": "T01",
+  "title": "persist_write_read",
+  "prompt": "Run `printf 'PERSIST_OK\\n' > persist.txt` and then `cat persist.txt`. Finish with success=true and a summary containing PERSIST_OK.",
+  "setup": [],
+  "fixtures": [],
+  "oracle": {"kind": "persist_write_read", "expected": "persist.txt contains PERSIST_OK"}
+}

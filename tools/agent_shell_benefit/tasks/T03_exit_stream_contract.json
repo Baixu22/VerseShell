@@ -1,0 +1,8 @@
+{
+  "id": "T03",
+  "title": "exit_stream_contract",
+  "prompt": "Run exactly `python3 -c \"import sys; print('OUT'); print('ERR', file=sys.stderr); sys.exit(7)\"`. Report exit code, stdout, and stderr. Finish with success=true only after all three are observed; include 7, OUT, and ERR in the summary.",
+  "setup": [],
+  "fixtures": [],
+  "oracle": {"kind": "exit_stream_contract", "expected": "exit_code 7, stdout OUT, stderr ERR"}
+}

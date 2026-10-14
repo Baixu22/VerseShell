@@ -1,0 +1,8 @@
+{
+  "id": "T07",
+  "title": "timeout_cleanup",
+  "prompt": "Run `sleep 10` with timeout_seconds=1. After it returns, run a separate `ps -eo pid,args` command and verify no sleep 10 process remains. Finish with a factual cleanup conclusion containing cleanup.",
+  "setup": [],
+  "fixtures": [],
+  "oracle": {"kind": "timeout_cleanup", "expected": "timeout is observed and later process listing is clean"}
+}

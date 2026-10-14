@@ -1,0 +1,8 @@
+{
+  "id": "T02",
+  "title": "missing_file_recover",
+  "prompt": "First run `cat missing.txt`; it must fail. Then run `printf 'RECOVERED\\n' > missing.txt` and `cat missing.txt`. Finish with a summary containing RECOVERED and state that the first read failed.",
+  "setup": ["rm -f missing.txt"],
+  "fixtures": [],
+  "oracle": {"kind": "missing_file_recover", "expected": "one failed read followed by RECOVERED content"}
+}

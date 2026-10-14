@@ -1,0 +1,8 @@
+{
+  "id": "T05",
+  "title": "ambiguous_edit_recover",
+  "prompt": "Run `python3 /workspace/ambiguous_edit.py --path ambiguous.txt --old foo --new bar`; it must fail with two matches. Use the reported index by rerunning with `--index 0`, then `cat ambiguous.txt`. Finish with the exact file text in the summary.",
+  "setup": ["printf 'foo foo\\n' > ambiguous.txt"],
+  "fixtures": [{"source": "fixtures/ambiguous_edit.py", "target": "/workspace/ambiguous_edit.py"}],
+  "oracle": {"kind": "ambiguous_edit_recover", "expected": "ambiguous failure followed by indexed edit"}
+}

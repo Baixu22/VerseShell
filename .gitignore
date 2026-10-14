@@ -23,6 +23,8 @@ Thumbs.db
 *.py
 # ...except the repo's own evidence gates: claim_gate / jev_obs_judge / validate_manifest
 !tools/*.py
+# ...and the agent-shell benefit harness: the contract test and the runner invoke it.
+!tools/agent_shell_benefit/**/*.py
 # Offline regression checks must travel with the tools they verify.
 !tests/test_*.py
 # Four historical audit entrypoints and their shared pinned-input loader only.

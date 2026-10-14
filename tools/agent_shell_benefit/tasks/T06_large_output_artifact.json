@@ -1,0 +1,8 @@
+{
+  "id": "T06",
+  "title": "large_output_artifact",
+  "prompt": "Run `python3 -c \"from pathlib import Path; s='A'*200000+'TAIL_MARKER_42'; Path('big.txt').write_text(s); print(s, end='')\"`. If the observation is truncated, run `tail -c 64 big.txt` to recover the final marker. Finish with TAIL_MARKER_42 in the summary.",
+  "setup": ["rm -f big.txt"],
+  "fixtures": [],
+  "oracle": {"kind": "large_output_artifact", "expected": "200000 bytes written and tail marker recovered"}
+}

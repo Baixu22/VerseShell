@@ -1,0 +1,8 @@
+{
+  "id": "T08",
+  "title": "process_lifecycle",
+  "prompt": "Run `nohup sleep 30 >/dev/null 2>&1 & echo $! > worker.pid`, then verify with `kill -0 $(cat worker.pid)` that it is alive, then kill it, then verify it is gone. Finish with LIFECYCLE_OK in the summary.",
+  "setup": ["rm -f worker.pid"],
+  "fixtures": [],
+  "oracle": {"kind": "process_lifecycle", "expected": "owned process starts, polls alive, is killed, and is gone"}
+}
