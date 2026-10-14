@@ -15,6 +15,12 @@ from typing import Any, Sequence
 from ..common import OBSERVATION_SCHEMA, elapsed_ms_since, estimate_tokens, validate_observation
 
 
+# The runtime binary must not sit on the sandbox PATH: `ls /usr/local/bin`
+# revealed it, and one L4 cell then spent four calls on `ae --help`, a trial
+# `ae -c ...` run and `strings /usr/local/bin/ae` instead of the task.
+AE_GUEST_DIR = "/opt/verseshell"
+AE_GUEST_PATH = AE_GUEST_DIR + "/ae"
+
 @dataclass
 class AdapterRun:
     observation: dict[str, Any]
@@ -88,12 +94,17 @@ class MicrosandboxAdapter:
             if not self.ae_linux_path or not Path(self.ae_linux_path).is_file():
                 raise MicrosandboxError("Linux ae binary is required for provider D")
             proc = self._run_cli(
-                ["copy", "--quiet", str(Path(self.ae_linux_path).resolve()), f"{self.name}:/usr/local/bin/ae"],
+                ["exec", "-q", "--no-tty", "--no-stdin", self.name, "--", "mkdir", "-p", AE_GUEST_DIR],
+                timeout_seconds=60,
+            )
+            self._require_ok(proc, "ae directory create")
+            proc = self._run_cli(
+                ["copy", "--quiet", str(Path(self.ae_linux_path).resolve()), f"{self.name}:{AE_GUEST_PATH}"],
                 timeout_seconds=120,
             )
             self._require_ok(proc, "copy ae into sandbox")
             proc = self._run_cli(
-                ["exec", "-q", "--no-tty", "--no-stdin", self.name, "--", "chmod", "+x", "/usr/local/bin/ae"],
+                ["exec", "-q", "--no-tty", "--no-stdin", self.name, "--", "chmod", "+x", AE_GUEST_PATH],
                 timeout_seconds=60,
             )
             self._require_ok(proc, "chmod ae")
@@ -188,7 +199,7 @@ class MicrosandboxAdapter:
         argv = [
             "exec", "-q", "--no-tty", "-w", self.workspace, "-e", "AETHER_APPROVE_ALL=1",
             *(["-e", f"AETHER_STATE_DIR={self.state_dir}"] if self.state_dir else []),
-            "-e", f"AETHER_WORKSPACE={self.workspace}", self.name, "--", "/usr/local/bin/ae",
+            "-e", f"AETHER_WORKSPACE={self.workspace}", self.name, "--", AE_GUEST_PATH,
             "--serve", "--cap", "shell.exec", "--agent", "--workspace", self.workspace,
         ]
         started = time.perf_counter()
@@ -272,7 +283,7 @@ class MicrosandboxAdapter:
 
     def check_ae_contract(self) -> dict[str, Any]:
         version = self._run_cli(
-            ["exec", "-q", "--no-tty", "--no-stdin", self.name, "--", "/usr/local/bin/ae", "--version"],
+            ["exec", "-q", "--no-tty", "--no-stdin", self.name, "--", AE_GUEST_PATH, "--version"],
             timeout_seconds=60,
         )
         self._require_ok(version, "ae --version")
